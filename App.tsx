@@ -16,10 +16,6 @@ const App: React.FC = () => {
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
   const [isAdminViewOpen, setAdminViewOpen] = useState(false);
 
-<<<<<<< HEAD
-  // Comando secreto: Pressione "A + D + M" juntos para abrir a área administrativa
-=======
->>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
   useEffect(() => {
     const keys: Record<string, boolean> = {};
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,26 +38,20 @@ const App: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-white text-gray-900 font-sans selection:bg-brand-orange selection:text-white">
-<<<<<<< HEAD
-      
-=======
->>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
       <Hero />
       <About />
       <Features />
       <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
       <Recap />
-      <GetInvolved 
-        setSponsorModalOpen={setSponsorModalOpen}
-        setSupporterModalOpen={setSupporterModalOpen}
-      />
+      <div id="registration-section">
+        <GetInvolved 
+          setSponsorModalOpen={setSponsorModalOpen}
+          setSupporterModalOpen={setSupporterModalOpen}
+        />
+      </div>
       <FAQ />
       <Footer />
 
-<<<<<<< HEAD
-      {/* Admin Toggle Button (Discreto no rodapé) */}
-=======
->>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
       <button 
         onClick={() => setAdminViewOpen(true)}
         className="fixed bottom-4 left-4 p-2 text-gray-300 hover:text-brand-blue transition-colors z-40 opacity-20 hover:opacity-100"
@@ -70,15 +60,8 @@ const App: React.FC = () => {
         <Settings className="w-5 h-5" />
       </button>
 
-<<<<<<< HEAD
-      {/* Admin Dashboard */}
       {isAdminViewOpen && <AdminView onClose={() => setAdminViewOpen(false)} />}
 
-      {/* Popups de Formulários Nativos */}
-=======
-      {isAdminViewOpen && <AdminView onClose={() => setAdminViewOpen(false)} />}
-
->>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
       <Modal 
         isOpen={isSponsorModalOpen} 
         onClose={() => setSponsorModalOpen(false)}
@@ -94,16 +77,8 @@ const App: React.FC = () => {
       >
         <SupporterForm onClose={() => setSupporterModalOpen(false)} />
       </Modal>
-<<<<<<< HEAD
-
-=======
->>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
     </main>
   );
 };
 
-<<<<<<< HEAD
 export default App;
-=======
-export default App;
->>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)

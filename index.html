@@ -43,6 +43,7 @@
         margin: 0;
         padding: 0;
         overflow-x: hidden;
+        background-color: #ffffff;
       }
       .bg-geometric {
         background-color: #ffffff;
@@ -50,9 +51,21 @@
         background-size: 20px 20px;
         background-position: 0 0, 10px 10px;
       }
-      /* Fallback para garantir que o Hero tenha altura mínima caso o Tailwind demore a carregar */
-      #hero {
+      #root {
         min-height: 100vh;
+      }
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #009FDA;
+        border-radius: 5px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #003F59;
       }
     </style>
   <script type="importmap">
@@ -67,6 +80,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>

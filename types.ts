@@ -1,4 +1,3 @@
-
 export interface CountdownTime {
   days: number;
   hours: number;
