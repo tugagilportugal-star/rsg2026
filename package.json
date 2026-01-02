@@ -24,4 +24,8 @@
     "typescript": "^5.7.2",
     "vite": "^6.0.3"
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)

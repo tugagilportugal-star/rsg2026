@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
 import React, { useState } from 'react';
 import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
 import { FormType, InterestFormData, SponsorFormData, SupporterFormData } from '../types';
@@ -31,12 +34,16 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
     setStatus('loading');
     
     try {
+<<<<<<< HEAD
       // 1. Salva no Banco de Dados (Supabase)
       await saveSubmission(FormType.INTEREST, formData);
       
       // 2. Dispara e-mail via EmailJS (Cenário Wix)
       // await sendEmailConfirmation(formData);
 
+=======
+      await saveSubmission(FormType.INTEREST, formData);
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
       setStatus('success');
     } catch (err) {
       console.error(err);
@@ -47,6 +54,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 
   return (
     <Section id="get-involved" className="bg-gray-50">
+<<<<<<< HEAD
       <h2 className="text-3xl md:text-5xl font-black text-center text-brand-darkBlue mb-4">
         Queres fazer parte do RSG 2026?
       </h2>
@@ -55,27 +63,52 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       {/* Cards Row */}
       <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-5xl mx-auto">
         {/* Sponsors */}
+=======
+      <div className="text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-4">
+          Queres fazer parte do RSG 2026?
+        </h2>
+        <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+          Existem várias formas de construir este futuro connosco. Escolha a que melhor se adapta ao seu perfil.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-5xl mx-auto">
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
         <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 flex flex-col items-center text-center shadow-lg hover:shadow-2xl hover:border-brand-orange transition-all duration-300 group">
             <div className="bg-brand-orange/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform">
                 <Handshake className="w-12 h-12 text-brand-orange" />
             </div>
             <h3 className="text-2xl font-bold text-brand-darkBlue mb-4">Patrocínios e Parcerias</h3>
             <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
+<<<<<<< HEAD
                 Conecte a <span className="font-bold text-brand-darkBlue">SUA EMPRESA</span> a centenas de <span className="font-bold text-brand-darkBlue">PROFISSIONAIS</span> agilistas. Torne-se um patrocinador e tenha destaque no RSG Lisbon 2026.
             </p>
             <Button onClick={() => setSponsorModalOpen(true)} variant="secondary" className="w-full text-lg font-bold group-hover:bg-brand-orange group-hover:text-white">
+=======
+                Conecte a sua marca a centenas de líderes e praticantes de agilidade em Portugal.
+            </p>
+            <Button onClick={() => setSponsorModalOpen(true)} variant="secondary" className="w-full text-lg font-bold">
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
                 Quero Patrocinar
             </Button>
         </div>
 
+<<<<<<< HEAD
         {/* Supporters */}
+=======
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
         <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 flex flex-col items-center text-center shadow-lg hover:shadow-2xl hover:border-brand-blue transition-all duration-300 group">
             <div className="bg-brand-blue/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform">
                 <Camera className="w-12 h-12 text-brand-blue" />
             </div>
             <h3 className="text-2xl font-bold text-brand-darkBlue mb-4">Apoiadores</h3>
             <p className="text-gray-600 mb-8 flex-grow leading-relaxed">
+<<<<<<< HEAD
                 Trabalhas com fotografia, vídeo, som, catering ou social media, e queres nos apoiar a construir uma experiência incrível?
+=======
+                Trabalhas com fotografia, vídeo, som ou design e queres apoiar o evento?
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
             </p>
             <Button onClick={() => setSupporterModalOpen(true)} className="w-full text-lg font-bold bg-brand-blue hover:bg-blue-700 text-white">
                 Quero Apoiar
@@ -83,9 +116,14 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Interest List Form Area */}
       <div className="max-w-2xl mx-auto">
         <div className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden transition-all">
+=======
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden">
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-orange to-brand-blue"></div>
             
             {status === 'success' ? (
@@ -99,8 +137,13 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                         <div className="bg-gray-100 p-3 rounded-full mb-4">
                             <BellRing className="w-6 h-6 text-gray-700" />
                         </div>
+<<<<<<< HEAD
                         <h3 className="text-3xl font-bold text-gray-900 mb-2">Inscreva-se na Waitlist</h3>
                         <p className="text-gray-500">Garanta o seu lugar na fila da frente. Seja o primeiro a saber das novidades.</p>
+=======
+                        <h3 className="text-3xl font-bold text-gray-900 mb-2">Waitlist Oficial</h3>
+                        <p className="text-gray-500">Seja o primeiro a saber das novidades e bilhetes.</p>
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,21 +164,32 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                         </div>
                         <div className="grid md:grid-cols-2 gap-4">
                             <Input 
+<<<<<<< HEAD
                                 label="Telemóvel / WhatsApp" 
                                 placeholder="+351 9xx xxx xxx" 
+=======
+                                label="WhatsApp" 
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
                                 required
                                 value={formData.phone}
                                 onChange={e => setFormData({...formData, phone: e.target.value})}
                             />
                             <Input 
+<<<<<<< HEAD
                                 label="Empresa (Opcional)"
+=======
+                                label="Empresa"
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
                                 value={formData.company}
                                 onChange={e => setFormData({...formData, company: e.target.value})}
                             />
                         </div>
                         <Textarea 
                             label="O que mais espera encontrar no RSG 2026?" 
+<<<<<<< HEAD
                             placeholder="Diga-nos os temas ou speakers que gostaria de ver..."
+=======
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
                             value={formData.expectations}
                             onChange={e => setFormData({...formData, expectations: e.target.value})}
                         />
@@ -147,6 +201,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                                 required 
                                 checked={formData.gdpr}
                                 onChange={e => setFormData({...formData, gdpr: e.target.checked})}
+<<<<<<< HEAD
                                 className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange" 
                             />
                             <label htmlFor="gdpr" className="ml-3 text-sm text-gray-600 leading-tight">
@@ -156,6 +211,17 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 
                         <Button type="submit" isLoading={status === 'loading'} className="w-full py-4 text-lg font-bold shadow-brand-orange/20">
                             Garantir meu lugar na Waitlist
+=======
+                                className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded" 
+                            />
+                            <label htmlFor="gdpr" className="ml-3 text-sm text-gray-600">
+                                Aceito a <a href="#" className="text-brand-blue font-bold">Política de Privacidade</a>.
+                            </label>
+                        </div>
+
+                        <Button type="submit" isLoading={status === 'loading'} className="w-full py-4 text-lg font-bold">
+                            Entrar na Waitlist
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
                             <ArrowRight className="ml-2 w-5 h-5" />
                         </Button>
                     </form>
@@ -167,8 +233,11 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
   );
 };
 
+<<<<<<< HEAD
 // --- Form Components for Modals ---
 
+=======
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
 export const SponsorForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
     const [formData, setFormData] = useState<SponsorFormData>({
@@ -182,11 +251,16 @@ export const SponsorForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setStatus('success');
     };
 
+<<<<<<< HEAD
     if (status === 'success') return <SuccessState message="Recebemos o seu interesse em patrocinar! A nossa equipa entrará em contacto muito em breve." />;
+=======
+    if (status === 'success') return <SuccessState message="Recebemos o seu interesse em patrocinar!" />;
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <Input label="Seu Nome" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+<<<<<<< HEAD
             <div className="grid grid-cols-2 gap-4">
                 <Input label="E-mail Corporativo" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                 <Input label="Telefone / WhatsApp" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
@@ -212,6 +286,12 @@ export const SponsorForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
             <Textarea label="Mensagem Adicional (Opcional)" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} />
             <Button type="submit" isLoading={status === 'loading'} className="w-full" variant="secondary">Enviar Solicitação de Patrocínio</Button>
+=======
+            <Input label="E-mail Corporativo" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+            <Input label="Empresa" required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} />
+            <Textarea label="Mensagem" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} />
+            <Button type="submit" isLoading={status === 'loading'} className="w-full" variant="secondary">Enviar Solicitação</Button>
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
         </form>
     );
 };
@@ -229,11 +309,16 @@ export const SupporterForm: React.FC<{ onClose: () => void }> = ({ onClose }) =>
         setStatus('success');
     };
 
+<<<<<<< HEAD
     if (status === 'success') return <SuccessState message="Obrigado por querer apoiar o RSG! Vamos analisar o seu perfil e entraremos em contacto." />;
+=======
+    if (status === 'success') return <SuccessState message="Obrigado por querer apoiar o RSG!" />;
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <Input label="Nome Completo" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+<<<<<<< HEAD
             <div className="grid grid-cols-2 gap-4">
                 <Input label="E-mail" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                 <Input label="Telefone / WhatsApp" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
@@ -261,3 +346,12 @@ export const SupporterForm: React.FC<{ onClose: () => void }> = ({ onClose }) =>
         </form>
     );
 };
+=======
+            <Input label="E-mail" type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+            <Input label="Portfólio (Link)" required value={formData.portfolio} onChange={e => setFormData({...formData, portfolio: e.target.value})} />
+            <Textarea label="Como gostaria de colaborar?" required value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} />
+            <Button type="submit" isLoading={status === 'loading'} className="w-full">Candidatar-me</Button>
+        </form>
+    );
+};
+>>>>>>> 80a3747 (Design final e limpeza de módulos para RSG Lisbon 2026)

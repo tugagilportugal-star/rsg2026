@@ -7,35 +7,48 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                blue: '#009FDA',
+                darkBlue: '#003F59',
+                orange: '#F47A20',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
     <style>
       body {
         font-family: 'Inter', sans-serif;
         scroll-behavior: smooth;
         margin: 0;
         padding: 0;
-      }
-      /* Previne scroll horizontal acidental */
-      html, body {
-        max-width: 100%;
         overflow-x: hidden;
-      }
-      .bg-hero-pattern {
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-      }
-      .bg-lisbon-pattern {
-        background-image: linear-gradient(rgba(0, 63, 89, 0.85), rgba(0, 30, 50, 0.9)), url('https://images.unsplash.com/photo-1585208798174-6ced31f251ab?q=80&w=2070&auto=format&fit=crop');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
       }
       .bg-geometric {
         background-color: #ffffff;
         background-image: radial-gradient(#009FDA 0.5px, transparent 0.5px), radial-gradient(#009FDA 0.5px, #ffffff 0.5px);
         background-size: 20px 20px;
         background-position: 0 0, 10px 10px;
-        opacity: 1;
       }
     </style>
   <script type="importmap">
@@ -46,8 +59,7 @@
     "react/": "https://esm.sh/react@^19.2.3/",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
