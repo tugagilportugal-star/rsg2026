@@ -19,6 +19,6 @@ export const ASSETS = {
   SERVICES: {
     RESEND_API_KEY: "re_Bgc4Jtod_E2atqN7x22QEkeVyFkYjqApP",
     FROM_EMAIL: "RSG Lisbon 2026 <onboarding@resend.dev>", 
-    ADMIN_EMAIL: "tuga@tugagil.com" 
+    ADMIN_EMAIL: "tugagilportugal@gmail.com" 
   }
 };
