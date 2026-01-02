@@ -1,5 +1,4 @@
 import React from 'react';
-import { Section } from '../components/UIComponents';
 import { Compass, Sun, Users, Zap, ExternalLink } from 'lucide-react';
 import { ASSETS } from '../config';
 
@@ -19,7 +18,7 @@ export const About: React.FC = () => {
             </div>
             <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-blue-100">
                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
-                 O Regional Scrum Gathering é um evento oficial da <span className="font-bold text-brand-blue">Scrum Alliance®</span>, presente em dezenas cidades pelo mundo.
+                 O Regional Scrum Gathering é um evento oficial da <span className="font-bold text-brand-blue">Scrum Alliance®</span>, presente em dezenas de cidades pelo mundo.
                </p>
                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
                  É um espaço para aprender, partilhar práticas e inspirar quem trabalha com agilidade.
@@ -48,8 +47,22 @@ export const About: React.FC = () => {
               <div className="grid sm:grid-cols-2 gap-6">
                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
                     <Zap className="w-8 h-8 text-brand-orange flex-shrink-0" />
-                    <div><h3 className="font-bold text-lg text-white">Inovação</h3><p className="text-sm text-gray-300">Hub tecnológico em crescimento.</p></div>
+                    <div>
+                      <h3 className="font-bold text-lg text-white">Inovação</h3>
+                      <p className="text-sm text-gray-300">Hub tecnológico em crescimento.</p>
+                    </div>
                  </div>
                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
                     <Sun className="w-8 h-8 text-brand-blue flex-shrink-0" />
-                    <div><h3 className="font-bold text-lg text-white">Vibrante</h3><p className="text-
+                    <div>
+                      <h3 className="font-bold text-lg text-white">Vibe Única</h3>
+                      <p className="text-sm text-gray-300">Cultura, sol e hospitalidade.</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+    </>
+  );
+};
