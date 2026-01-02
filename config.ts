@@ -1,4 +1,3 @@
-
 export const ASSETS = {
   HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
   LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
@@ -17,11 +16,8 @@ export const ASSETS = {
     "https://i.postimg.cc/qvcwJTXW/Tugagil-610.jpg",
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
   ],
-  
   SERVICES: {
-    // Em produção (Vercel), estas chaves serão lidas das Environment Variables.
-    // O valor aqui serve apenas como fallback para o ambiente local.
-    RESEND_API_KEY: process.env.RESEND_API_KEY || "re_Bgc4Jtod_E2atqN7x22QEkeVyFkYjqApP",
+    RESEND_API_KEY: "re_Bgc4Jtod_E2atqN7x22QEkeVyFkYjqApP",
     FROM_EMAIL: "RSG Lisbon 2026 <onboarding@resend.dev>", 
     ADMIN_EMAIL: "tuga@tugagil.com" 
   }
