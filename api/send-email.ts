@@ -3,19 +3,26 @@
 // Ele corre em ambiente Node.js, não no browser.
 
 export default async function handler(req: any, res: any) {
-  // Apenas permite pedidos POST
+  console.log("[API] Pedido recebido no endpoint de e-mail");
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Método não permitido' });
+    return res.status(405).json({ message: 'Apenas POST é permitido' });
   }
 
   const { to, subject, html, apiKey, from } = req.body;
 
+  if (!apiKey) {
+    return res.status(400).json({ message: 'API Key do Resend não fornecida' });
+  }
+
   try {
-    const response = await fetch('https://api.resend.com/emails', {
+    console.log(`[API] A chamar Resend para: ${to}`);
+    
+    const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`, // Aqui a Key estaria protegida se usássemos process.env.RESEND_KEY
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         from: from || 'onboarding@resend.dev',
@@ -25,14 +32,17 @@ export default async function handler(req: any, res: any) {
       }),
     });
 
-    const data = await response.json();
+    const data = await resendResponse.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json(data);
+    if (!resendResponse.ok) {
+      console.error("[API] Erro retornado pelo Resend:", data);
+      return res.status(resendResponse.status).json(data);
     }
 
+    console.log("[API] Resposta positiva do Resend:", data);
     return res.status(200).json(data);
   } catch (error: any) {
+    console.error("[API] Erro catastrófico na função:", error.message);
     return res.status(500).json({ message: error.message });
   }
 }
