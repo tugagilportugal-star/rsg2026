@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar } from './components/Navbar.tsx';
-import { Hero } from './sections/Hero.tsx';
-import { About } from './sections/About.tsx';
-import { Features } from './sections/Features.tsx';
-import { Speakers } from './sections/Speakers.tsx';
-import { Sponsors } from './sections/Sponsors.tsx';
-import { Recap } from './sections/Recap.tsx';
-import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved.tsx';
-import { FAQ } from './sections/FAQ.tsx';
-import { Footer } from './sections/Footer.tsx';
-import { Modal } from './components/UIComponents.tsx';
-import { AdminView } from './components/AdminView.tsx';
+import { Navbar } from './components/Navbar';
+import { Hero } from './sections/Hero';
+import { About } from './sections/About';
+import { Features } from './sections/Features';
+import { Speakers } from './sections/Speakers';
+import { Sponsors } from './sections/Sponsors';
+import { Recap } from './sections/Recap';
+import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
+import { FAQ } from './sections/FAQ';
+import { Footer } from './sections/Footer';
+import { Modal } from './components/UIComponents';
+import { AdminView } from './components/AdminView';
 import { Settings, ArrowUp, Send } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -25,7 +25,6 @@ const App: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
 
-    // Atalho secreto para Admin: Pressionar A + D + M
     const keys: Record<string, boolean> = {};
     const handleKeyDown = (e: KeyboardEvent) => {
       keys[e.key.toLowerCase()] = true;
@@ -75,7 +74,6 @@ const App: React.FC = () => {
       <FAQ />
       <Footer />
 
-      {/* Botão discreto para Admin no fundo da página */}
       <button 
         onClick={() => setAdminViewOpen(true)}
         className="fixed bottom-4 left-4 p-3 text-gray-200 hover:text-brand-blue transition-all z-[60] opacity-5 hover:opacity-100 focus:outline-none"
@@ -84,7 +82,6 @@ const App: React.FC = () => {
         <Settings className="w-5 h-5" />
       </button>
 
-      {/* Floating Action Buttons */}
       <div className={`fixed bottom-8 right-8 flex flex-col gap-4 z-[80] transition-all duration-700 ease-in-out transform ${showFab ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -102,10 +99,8 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      {/* Admin Dashboard Overlays */}
       {isAdminViewOpen && <AdminView onClose={() => setAdminViewOpen(false)} />}
 
-      {/* Forms Modals */}
       <Modal 
         isOpen={isSponsorModalOpen} 
         onClose={() => setSponsorModalOpen(false)}
