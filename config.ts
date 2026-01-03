@@ -1,4 +1,3 @@
-
 export const ASSETS = {
   HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
   LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
@@ -21,6 +20,8 @@ export const ASSETS = {
     RESEND_API_KEY: "re_Bgc4Jtod_E2atqN7x22QEkeVyFkYjqApP",
     FROM_EMAIL: "RSG Lisbon 2026 <onboarding@resend.dev>", 
     ADMIN_EMAIL: "tugagilportugal@gmail.com",
-    ADMIN_PASSWORD: "tugagiladmin" // Senha padrão solicitada pelo usuário
+    ADMIN_PASSWORD: "tugagiladmin", // Senha de acesso ao dashboard
+    SUPABASE_URL: "", 
+    SUPABASE_ANON_KEY: ""
   }
 };
