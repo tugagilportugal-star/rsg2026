@@ -21,12 +21,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // FAB aparece após 500px de scroll
       setShowFab(window.scrollY > 500);
     };
     window.addEventListener('scroll', handleScroll);
 
-    // Atalho Secreto TugÁgil: A + D + M
+    // Atalho secreto para Admin: Pressionar A + D + M
     const keys: Record<string, boolean> = {};
     const handleKeyDown = (e: KeyboardEvent) => {
       keys[e.key.toLowerCase()] = true;
@@ -76,7 +75,7 @@ const App: React.FC = () => {
       <FAQ />
       <Footer />
 
-      {/* Admin Stealth Entry */}
+      {/* Botão discreto para Admin no fundo da página */}
       <button 
         onClick={() => setAdminViewOpen(true)}
         className="fixed bottom-4 left-4 p-3 text-gray-200 hover:text-brand-blue transition-all z-[60] opacity-5 hover:opacity-100 focus:outline-none"
@@ -85,7 +84,7 @@ const App: React.FC = () => {
         <Settings className="w-5 h-5" />
       </button>
 
-      {/* Floating Action Button (FAB) */}
+      {/* Floating Action Buttons */}
       <div className={`fixed bottom-8 right-8 flex flex-col gap-4 z-[80] transition-all duration-700 ease-in-out transform ${showFab ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -103,8 +102,10 @@ const App: React.FC = () => {
         </button>
       </div>
 
+      {/* Admin Dashboard Overlays */}
       {isAdminViewOpen && <AdminView onClose={() => setAdminViewOpen(false)} />}
 
+      {/* Forms Modals */}
       <Modal 
         isOpen={isSponsorModalOpen} 
         onClose={() => setSponsorModalOpen(false)}
