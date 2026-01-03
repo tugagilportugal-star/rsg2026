@@ -1,8 +1,11 @@
-
 import React, { useEffect, useState } from 'react';
-import { getSubmissions } from '../services/db';
-import { X, Download, Trash2, Mail, Lock, Key, ChevronRight, AlertCircle } from 'lucide-react';
+import { getSubmissions, deleteSubmission } from '../services/db';
+import { 
+  X, Download, Trash2, Lock, Key, 
+  Globe, Database, Copy, Check
+} from 'lucide-react';
 import { ASSETS } from '../config';
+import { FormType } from '../types';
 
 export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [data, setData] = useState<any[]>([]);
@@ -10,8 +13,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'ALL' | FormType>('ALL');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [allEmailsCopied, setAllEmailsCopied] = useState(false);
 
-  // Verificar se já existe sessão ativa
+  const isCloudEnabled = !!(ASSETS.SERVICES.SUPABASE_URL && ASSETS.SERVICES.SUPABASE_ANON_KEY);
+
   useEffect(() => {
     const sessionAuth = sessionStorage.getItem('rsg_admin_auth');
     if (sessionAuth === 'true') {
@@ -22,9 +29,14 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const loadData = async () => {
     setLoading(true);
-    const res = await getSubmissions();
-    setData(res);
-    setLoading(false);
+    try {
+      const res = await getSubmissions();
+      setData(res);
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -40,180 +52,213 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   };
 
-  const clearLeads = () => {
-    if(confirm("Tem certeza que deseja apagar todos os leads locais?")) {
-        localStorage.removeItem('rsg_lisbon_leads');
-        loadData();
+  const handleDelete = async (id: any) => {
+    if (confirm("Desejas remover este lead permanentemente?")) {
+      await deleteSubmission(id);
+      loadData();
     }
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const copyAllEmails = () => {
+    const emails = filteredData.map(item => item.email).join(', ');
+    navigator.clipboard.writeText(emails);
+    setAllEmailsCopied(true);
+    setTimeout(() => setAllEmailsCopied(false), 3000);
   };
 
   const exportCSV = () => {
     if (data.length === 0) return;
-    const headers = ["Data", "Tipo", "Nome", "Email", "Telefone", "Empresa"];
-    const rows = data.map(i => [i.date, i.type, i.name, i.email, i.phone || '', i.company || '']);
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n" 
-      + rows.map(e => e.join(",")).join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
+    const headers = ["Data", "Tipo", "Nome", "Email", "Telefone", "Empresa", "Cargo", "Mensagem"];
+    const rows = data.map(i => [
+      i.date || new Date(i.created_at).toLocaleString('pt-PT'), 
+      i.type, 
+      i.name, 
+      i.email, 
+      i.phone, 
+      i.company || 'N/A', 
+      i.role || 'N/A', 
+      (i.message || '').replace(/,/g, ';').replace(/\n/g, ' ')
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "leads_rsg_2026.csv");
-    document.body.appendChild(link);
+    link.href = encodeURI(csvContent);
+    link.download = `leads_rsg_2026_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 z-[110] bg-brand-darkBlue/95 backdrop-blur-xl flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[110] bg-brand-darkBlue/98 backdrop-blur-xl flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
-          <div className="bg-brand-blue p-8 text-center text-white relative">
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
-              <X className="w-6 h-6" />
-            </button>
-            <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8" />
+          <div className="bg-brand-blue p-10 text-center text-white">
+            <div className="bg-white/20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold">Área Restrita</h2>
-            <p className="text-blue-100 text-sm mt-2">Introduza a chave de acesso TugÁgil</p>
+            <h2 className="text-3xl font-black tracking-tight uppercase">Portal Admin</h2>
+            <p className="text-blue-100 text-sm mt-2 opacity-80 font-bold tracking-widest uppercase">Restrito TugÁgil</p>
           </div>
-          
-          <form onSubmit={handleLogin} className="p-8">
-            <div className="mb-6">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Key className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Senha Administrativa"
-                  autoFocus
-                  className={`block w-full pl-10 pr-3 py-4 border ${error ? 'border-red-500 bg-red-50' : 'border-gray-200'} rounded-xl focus:ring-2 focus:ring-brand-blue focus:border-transparent outline-none transition-all`}
-                />
-              </div>
-              {error && (
-                <div className="flex items-center gap-2 mt-2 text-red-600 text-sm font-medium animate-pulse">
-                  <AlertCircle className="w-4 h-4" />
-                  Senha incorreta. Tente novamente.
-                </div>
-              )}
+          <form onSubmit={handleLogin} className="p-10">
+            <div className="relative mb-6">
+              <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Introduzir Senha"
+                className={`w-full pl-12 pr-4 py-4 border rounded-2xl outline-none transition-all ${error ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:ring-2 focus:ring-brand-blue'}`}
+                autoFocus
+              />
             </div>
-            
-            <button 
-              type="submit"
-              className="w-full bg-brand-darkBlue text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-lg active:scale-95"
-            >
-              Aceder ao Painel
-              <ChevronRight className="w-5 h-5" />
+            <button type="submit" className="w-full bg-brand-darkBlue text-white py-5 rounded-2xl font-black text-lg hover:bg-black transition-all shadow-xl active:scale-95">
+              Aceder ao Dashboard
             </button>
+            <button onClick={onClose} type="button" className="w-full mt-6 text-gray-400 text-xs font-bold hover:text-gray-600 uppercase tracking-widest">Sair</button>
           </form>
-          
-          <div className="px-8 pb-8 text-center">
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Acesso Monitorizado</p>
-          </div>
         </div>
       </div>
     );
   }
 
+  const filteredData = activeFilter === 'ALL' ? data : data.filter(d => d.type === activeFilter);
+
   return (
-    <div className="fixed inset-0 z-[100] bg-gray-100 flex flex-col p-4 md:p-8 overflow-hidden">
-      <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="text-3xl font-black text-brand-darkBlue">Gestão RSG 2026</h2>
-            <p className="text-gray-500">Captura de leads e administração do evento.</p>
-          </div>
-          <div className="flex gap-2">
+    <div className="fixed inset-0 z-[110] bg-[#F8FAFC] flex flex-col overflow-hidden font-sans">
+      <header className="bg-white border-b border-gray-200 p-5 flex flex-col md:flex-row justify-between items-center px-10 gap-6">
+        <div className="flex items-center gap-5">
+            <div className="bg-brand-darkBlue p-3 rounded-2xl shadow-lg">
+              <img src={ASSETS.TUGAGIL_LOGO} className="h-6 w-auto" alt="TugÁgil" />
+            </div>
+            <div>
+              <h1 className="font-black text-brand-darkBlue text-xl leading-none uppercase">Gestão de Leads</h1>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">RSG Lisbon 2026</span>
+                {isCloudEnabled ? (
+                    <span className="flex items-center gap-1.5 text-[9px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black border border-emerald-100">
+                        <Globe className="w-3 h-3"/> SUPABASE ATIVO
+                    </span>
+                ) : (
+                    <span className="flex items-center gap-1.5 text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-black border border-amber-100">
+                        <Database className="w-3 h-3"/> LOCAL STORAGE
+                    </span>
+                )}
+              </div>
+            </div>
+        </div>
+
+        <div className="flex items-center gap-3">
             <button 
-                onClick={() => {
-                    sessionStorage.removeItem('rsg_admin_auth');
-                    setIsAuthenticated(false);
-                }} 
-                className="px-4 py-2 text-xs font-bold text-gray-400 hover:text-brand-orange transition-colors"
+              onClick={copyAllEmails}
+              disabled={filteredData.length === 0}
+              className={`px-5 py-3 rounded-2xl text-xs font-black flex items-center gap-2 shadow-sm transition-all border ${
+                allEmailsCopied ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-white text-brand-blue border-brand-blue/20 hover:bg-brand-blue/5'
+              } disabled:opacity-30`}
             >
-                Sair
+                {allEmailsCopied ? <Check className="w-4 h-4"/> : <Copy className="w-4 h-4"/>}
+                {allEmailsCopied ? 'LISTA COPIADA!' : 'COPIAR EMAILS'}
             </button>
-            <button onClick={onClose} className="p-2 bg-white rounded-full shadow-lg hover:bg-red-50 text-red-500 transition-colors">
-                <X className="w-6 h-6" />
+            <button 
+              onClick={exportCSV} 
+              disabled={data.length === 0}
+              className="bg-brand-darkBlue hover:bg-black text-white px-5 py-3 rounded-2xl text-xs font-black flex items-center gap-2 shadow-lg transition-all disabled:opacity-30 active:scale-95"
+            >
+                <Download className="w-4 h-4"/> DESCARREGAR CSV
             </button>
-          </div>
+            <button onClick={onClose} className="ml-2 p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500 transition-all">
+              <X className="w-8 h-8"/>
+            </button>
+        </div>
+      </header>
+
+      <main className="p-6 md:p-8 flex-grow overflow-hidden flex flex-col max-w-[1900px] mx-auto w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total de Contactos</p>
+                <p className="text-4xl font-black text-brand-darkBlue tracking-tighter">{data.length}</p>
+            </div>
+            <div className="col-span-1 lg:col-span-3 flex items-center gap-2 bg-white p-2 rounded-3xl border border-gray-100 shadow-sm overflow-x-auto">
+                <button onClick={() => setActiveFilter('ALL')} className={`flex-grow whitespace-nowrap px-6 py-4 rounded-2xl text-[10px] font-black tracking-widest transition-all ${activeFilter === 'ALL' ? 'bg-brand-darkBlue text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>TODOS OS LEADS</button>
+                <button onClick={() => setActiveFilter(FormType.INTEREST)} className={`flex-grow whitespace-nowrap px-6 py-4 rounded-2xl text-[10px] font-black tracking-widest transition-all ${activeFilter === FormType.INTEREST ? 'bg-brand-blue text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>WAITLIST</button>
+                <button onClick={() => setActiveFilter(FormType.SPONSOR)} className={`flex-grow whitespace-nowrap px-6 py-4 rounded-2xl text-[10px] font-black tracking-widest transition-all ${activeFilter === FormType.SPONSOR ? 'bg-brand-orange text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>PATROCÍNIOS</button>
+                <button onClick={() => setActiveFilter(FormType.SUPPORTER)} className={`flex-grow whitespace-nowrap px-6 py-4 rounded-2xl text-[10px] font-black tracking-widest transition-all ${activeFilter === FormType.SUPPORTER ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>APOIADORES</button>
+            </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-brand-orange">
-            <span className="text-xs uppercase font-bold text-gray-400">Total Leads</span>
-            <div className="text-3xl font-black text-brand-darkBlue">{data.length}</div>
-          </div>
-          
-          <button 
-            onClick={exportCSV}
-            className="bg-brand-blue text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-md active:scale-95"
-          >
-            <Download className="w-5 h-5" /> Exportar CSV
-          </button>
-
-          <button 
-            onClick={clearLeads}
-            className="bg-white text-red-500 border border-red-100 px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-50 transition-all shadow-md active:scale-95"
-          >
-            <Trash2 className="w-5 h-5" /> Limpar Base Local
-          </button>
+        <div className="bg-white rounded-[2rem] shadow-xl border border-gray-200 overflow-hidden flex-grow flex flex-col">
+            <div className="overflow-auto flex-grow">
+                <table className="w-full text-left border-collapse min-w-[1000px]">
+                    <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-100">
+                        <tr className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                            <th className="p-6 w-40">Data</th>
+                            <th className="p-6 w-32">Categoria</th>
+                            <th className="p-6">Nome Completo</th>
+                            <th className="p-6">Contacto</th>
+                            <th className="p-6">Empresa / Cargo</th>
+                            <th className="p-6 text-right">Acções</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                        {loading ? (
+                            <tr><td colSpan={6} className="p-24 text-center text-gray-400 font-bold uppercase text-xs animate-pulse">A carregar base de dados...</td></tr>
+                        ) : filteredData.length === 0 ? (
+                            <tr><td colSpan={6} className="p-24 text-center text-gray-300 italic">Nenhum registo encontrado para este filtro.</td></tr>
+                        ) : filteredData.map((item) => (
+                            <tr key={item.id || item.created_at} className="hover:bg-blue-50/40 transition-all group">
+                                <td className="p-6">
+                                  <span className="text-gray-900 text-[11px] font-black block">
+                                    {item.date || new Date(item.created_at).toLocaleDateString('pt-PT')}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 font-medium">
+                                    {new Date(item.created_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}
+                                  </span>
+                                </td>
+                                <td className="p-6">
+                                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border tracking-wider ${
+                                        item.type === FormType.SPONSOR ? 'bg-orange-50 text-brand-orange border-orange-100' :
+                                        item.type === FormType.SUPPORTER ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                                        'bg-blue-50 text-brand-blue border-blue-100'
+                                    }`}>
+                                        {item.type.split(' ')[0].toUpperCase()}
+                                    </span>
+                                </td>
+                                <td className="p-6 font-black text-brand-darkBlue text-sm">
+                                  {item.name}
+                                </td>
+                                <td className="p-6">
+                                    <button 
+                                      onClick={() => copyToClipboard(item.email, `e-${item.id}`)}
+                                      className="flex items-center gap-2 text-xs font-bold text-gray-700 hover:text-brand-blue transition-colors group/copy"
+                                    >
+                                      {item.email}
+                                      {copiedId === `e-${item.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500"/> : <Copy className="w-3.5 h-3.5 opacity-0 group-hover/copy:opacity-100 text-gray-300"/>}
+                                    </button>
+                                    <span className="text-[10px] text-gray-400 font-bold block mt-1">{item.phone}</span>
+                                </td>
+                                <td className="p-6">
+                                    <span className="text-xs font-black text-gray-800 block uppercase tracking-tight">{item.company || 'PARTICULAR'}</span>
+                                    <span className="text-[10px] text-gray-400 font-bold">{item.role || 'Geral'}</span>
+                                </td>
+                                <td className="p-6 text-right">
+                                    <button 
+                                      onClick={() => handleDelete(item.id || item.created_at)} 
+                                      className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                      title="Apagar Lead"
+                                    >
+                                        <Trash2 className="w-5 h-5"/>
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex-grow border border-gray-200 flex flex-col">
-          <div className="overflow-x-auto flex-grow">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Data</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nome</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contacto</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Info Extra</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {loading ? (
-                  <tr><td colSpan={5} className="px-6 py-10 text-center text-gray-400">Carregando dados...</td></tr>
-                ) : data.length === 0 ? (
-                  <tr><td colSpan={5} className="px-6 py-20 text-center text-gray-400">Nenhum lead capturado ainda. Teste o formulário na página!</td></tr>
-                ) : data.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{item.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-[10px] font-bold rounded-full bg-blue-50 text-brand-blue border border-blue-100">
-                        {item.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-brand-darkBlue">
-                        {item.name}
-                        {item.company && <div className="text-[10px] text-gray-400 font-normal">{item.company}</div>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        <div className="flex flex-col">
-                            <span className="flex items-center gap-1"><Mail className="w-3 h-3"/> {item.email}</span>
-                            <span className="text-[10px]">{item.phone}</span>
-                        </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                        <div className="max-w-xs truncate" title={item.expectations || item.message}>
-                            {item.expectations || item.message || '-'}
-                        </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <div className="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100 text-yellow-800 text-xs text-center">
-            <strong>Segurança Local:</strong> Os dados são armazenados no seu browser. Ao limpar a base local, os registros desaparecem deste dispositivo.
-        </div>
-      </div>
+      </main>
     </div>
   );
 };
