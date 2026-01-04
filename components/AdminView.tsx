@@ -88,7 +88,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const exportCSV = () => {
     if (data.length === 0) return;
-    const headers = ["Data", "Tipo", "Nome", "Email", "Telefone", "Empresa", "Cargo", "Mensagem"];
+    const headers = ["Data", "Tipo", "Nome", "Email", "Telefone", "Empresa", "Cargo", "Área", "Portfólio", "Mensagem/Expectations"];
     const rows = data.map(i => [
       i.date || new Date(i.created_at).toLocaleString('pt-PT'), 
       i.type, 
@@ -96,8 +96,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       i.email, 
       i.phone, 
       i.company || 'N/A', 
-      i.role || 'N/A', 
-      (i.message || '').replace(/,/g, ';').replace(/\n/g, ' ')
+      i.role || 'N/A',
+      i.area || 'N/A',
+      i.portfolio || 'N/A',
+      (i.message || i.expectations || '').replace(/,/g, ';').replace(/\n/g, ' ')
     ]);
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
     const link = document.createElement("a");
@@ -217,67 +219,93 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="bg-white rounded-[2rem] shadow-xl border border-gray-200 overflow-hidden flex-grow flex flex-col">
             <div className="overflow-auto flex-grow">
                 <table className="w-full text-left border-collapse min-w-[1000px]">
-                    <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-100">
-                        <tr className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
-                            <th className="p-6 w-40">Data</th>
-                            <th className="p-6 w-32">Categoria</th>
-                            <th className="p-6">Nome Completo</th>
-                            <th className="p-6">Contacto</th>
-                            <th className="p-6">Empresa / Cargo</th>
-                            <th className="p-6 text-right">Acções</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {loading ? (
-                            <tr><td colSpan={6} className="p-24 text-center text-gray-400 font-bold uppercase text-xs animate-pulse">A carregar base de dados...</td></tr>
-                        ) : filteredData.length === 0 ? (
-                            <tr><td colSpan={6} className="p-24 text-center text-gray-300 italic">Nenhum registo encontrado para este filtro.</td></tr>
-                        ) : filteredData.map((item) => (
-                            <tr key={item.id || item.created_at} className="hover:bg-blue-50/40 transition-all group">
-                                <td className="p-6">
-                                  <span className="text-gray-900 text-[11px] font-black block">
-                                    {item.date || new Date(item.created_at).toLocaleDateString('pt-PT')}
-                                  </span>
-                                  <span className="text-[10px] text-gray-400 font-medium">
-                                    {new Date(item.created_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}
-                                  </span>
-                                </td>
-                                <td className="p-6">
-                                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border tracking-wider ${
-                                        item.type === FormType.SPONSOR ? 'bg-orange-50 text-brand-orange border-orange-100' :
-                                        item.type === FormType.SUPPORTER ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
-                                        'bg-blue-50 text-brand-blue border-blue-100'
-                                    }`}>
-                                        {item.type.split(' ')[0].toUpperCase()}
-                                    </span>
-                                </td>
-                                <td className="p-6 font-black text-brand-darkBlue text-sm">
-                                  {item.name}
-                                </td>
-                                <td className="p-6">
-                                    <button 
-                                      onClick={() => copyToClipboard(item.email, `e-${item.id}`)}
-                                      className="flex items-center gap-2 text-xs font-bold text-gray-700 hover:text-brand-blue transition-colors group/copy"
-                                    >
-                                      {item.email}
-                                      {copiedId === `e-${item.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500"/> : <Copy className="w-3.5 h-3.5 opacity-0 group-hover/copy:opacity-100 text-gray-300"/>}
-                                    </button>
-                                    <span className="text-[10px] text-gray-400 font-bold block mt-1">{item.phone}</span>
-                                </td>
-                                <td className="p-6">
-                                    <span className="text-xs font-black text-gray-800 block uppercase tracking-tight">{item.company || 'PARTICULAR'}</span>
-                                    <span className="text-[10px] text-gray-400 font-bold">{item.role || 'Geral'}</span>
-                                </td>
-                                <td className="p-6 text-right">
-                                    <button 
-                                      onClick={() => handleDelete(item.id || item.created_at)} 
-                                      className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                      title="Apagar Lead"
-                                    >
-                                        <Trash2 className="w-5 h-5"/>
-                                    </button>
-                                </td>
-                            </tr>
+                  <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-100">
+                    <tr className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                      <th className="p-6 w-40">Data</th>
+                      <th className="p-6 w-32">Tipo</th>
+                      <th className="p-6">Nome</th>
+                      <th className="p-6">Email</th>
+                      <th className="p-6">Telefone</th>
+                      <th className="p-6">Empresa</th>
+                      <th className="p-6">Cargo</th>
+                      <th className="p-6">Portfólio</th>
+                      <th className="p-6">Área</th>
+                      <th className="p-6">Mensagem</th>
+                      <th className="p-6 text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {loading ? (
+                      <tr><td colSpan={12} className="p-24 text-center text-gray-400 font-bold uppercase text-xs animate-pulse">A carregar base de dados...</td></tr>
+                    ) : filteredData.length === 0 ? (
+                      <tr><td colSpan={12} className="p-24 text-center text-gray-300 italic">Nenhum registo encontrado para este filtro.</td></tr>
+                    ) : filteredData.map((item) => (
+                      <tr key={item.id || item.created_at} className="hover:bg-blue-50/40 transition-all group">
+                      <td className="p-6">
+                        <span className="text-gray-900 text-[11px] font-black block">
+                          {item.date || new Date(item.created_at).toLocaleDateString('pt-PT')}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          {new Date(item.created_at).toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'})}
+                        </span>
+                      </td>
+                      <td className="p-6">
+                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border tracking-wider ${
+                              item.type === FormType.SPONSOR ? 'bg-orange-50 text-brand-orange border-orange-100' :
+                              item.type === FormType.SUPPORTER ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                              'bg-blue-50 text-brand-blue border-blue-100'
+                          }`}>
+                              {item.type.split(' ')[0].toUpperCase()}
+                          </span>
+                      </td>
+                      <td className="p-6 font-black text-brand-darkBlue text-sm">
+                        {item.name}
+                      </td>
+                      <td className="p-6">
+                          <button 
+                            onClick={() => copyToClipboard(item.email, `e-${item.id}`)}
+                            className="flex items-center gap-2 text-xs font-bold text-gray-700 hover:text-brand-blue transition-colors group/copy"
+                          >
+                            {item.email}
+                            {copiedId === `e-${item.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500"/> : <Copy className="w-3.5 h-3.5 opacity-0 group-hover/copy:opacity-100 text-gray-300"/>}
+                          </button>
+                          <span className="text-[10px] text-gray-400 font-bold block mt-1">{item.phone}</span>
+                      </td>
+                      <td className="p-6">
+                          <span className="text-xs font-black text-gray-800 block uppercase tracking-tight">{item.company || 'PARTICULAR'}</span>
+                          <span className="text-[10px] text-gray-400 font-bold">{item.role || item.area || 'Geral'}</span>
+                      </td>
+                      <td className="p-6">
+                          {item.portfolio ? (
+                            <a 
+                              href={item.portfolio} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs font-bold text-brand-blue hover:text-brand-darkBlue hover:underline break-all"
+                            >
+                              {item.portfolio.length > 40 ? `${item.portfolio.substring(0, 40)}...` : item.portfolio}
+                            </a>
+                          ) : item.area ? (
+                            <span className="text-xs font-bold text-gray-600">{item.area}</span>
+                          ) : (
+                            <span className="text-[10px] text-gray-400 italic">N/A</span>
+                          )}
+                      </td>
+                      <td className="p-6">
+                          <span className="text-[10px] text-gray-600 block line-clamp-2 max-w-xs">
+                            {item.message || item.expectations || 'N/A'}
+                          </span>
+                      </td>
+                      <td className="p-6 text-right">
+                          <button 
+                            onClick={() => handleDelete(item.id || item.created_at)} 
+                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                            title="Apagar Lead"
+                          >
+                              <Trash2 className="w-5 h-5"/>
+                          </button>
+                      </td>
+                  </tr>                     
                         ))}
                     </tbody>
                 </table>
