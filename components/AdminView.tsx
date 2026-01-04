@@ -54,16 +54,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ASSETS.SERVICES.ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('rsg_admin_auth', 'true');
-      setError(false);
-      loadData();
-      checkSupabaseConnection();
-    } else {
-      setError(true);
-      setPassword('');
-    }
+    // Admin está a ser migrado para autenticação server-side.
+    // Por enquanto, desativamos o login no client para remover segredos do bundle.
+    setError(true);
+    setPassword('');
   };
 
   const handleDelete = async (id: any) => {
