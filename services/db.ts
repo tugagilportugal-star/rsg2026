@@ -20,25 +20,20 @@ export const getSubmissions = async () => {
   return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
 };
 
-const sendEmailViaAPI = async (to: string, subject: string, html: string) => {
-  console.log(`[Email Service] Enviando para: ${to}`);
-  try {
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to,
-        subject,
-        html,
-        apiKey: ASSETS.SERVICES.RESEND_API_KEY,
-        from: 'onboarding@resend.dev'
-      }),
-    });
-
-    const result = await response.json();
-    if (!response.ok) {
-      console.error("[Email Service] Falha:", result);
-      return { success: false, error: result };
+export const deleteSubmission = async (id: any): Promise<void> => {
+  if (hasSupabase) {
+    try {
+      console.log("[DB] Tentando deletar na Cloud id:", id);
+      const response = await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': supabaseKey!,
+          'Authorization': `Bearer ${supabaseKey}`
+        }
+      });
+      console.log("[DB] Resposta delete Cloud:", response.status);
+    } catch (e) {
+      console.error("[DB] Erro ao apagar na Cloud:", e);
     }
     return { success: true, data: result };
   } catch (error) {
@@ -116,3 +111,6 @@ export const saveSubmission = async (type: FormType, data: any) => {
 
   return { success: true };
 };
+
+// Exportações explícitas para garantir compatibilidade TypeScript
+export { getSubmissions, deleteSubmission, saveSubmission };

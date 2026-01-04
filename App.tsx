@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Navbar } from './components/Navbar';
+
+import React, { useState } from 'react';
+import { Navbar } from './components/NavBar';
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
