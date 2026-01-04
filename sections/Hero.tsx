@@ -15,7 +15,7 @@ export const Hero: React.FC = () => {
         }}
     >
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center">
-        <div className="bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-4">
+        <div className="bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-6">
            <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
              Official Scrum Alliance Event
            </span>
