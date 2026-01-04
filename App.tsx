@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar } from './components/Navbar.tsx';
-import { Hero } from './sections/Hero.tsx';
-import { About } from './sections/About.tsx';
-import { Features } from './sections/Features.tsx';
-import { Speakers } from './sections/Speakers.tsx';
-import { Sponsors } from './sections/Sponsors.tsx';
-import { Recap } from './sections/Recap.tsx';
-import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved.tsx';
-import { FAQ } from './sections/FAQ.tsx';
-import { Footer } from './sections/Footer.tsx';
-import { Modal } from './components/UIComponents.tsx';
-import { AdminView } from './components/AdminView.tsx';
+import { Navbar } from './components/Navbar';
+import { Hero } from './sections/Hero';
+import { About } from './sections/About';
+import { Features } from './sections/Features';
+import { Speakers } from './sections/Speakers';
+import { Sponsors } from './sections/Sponsors';
+import { Recap } from './sections/Recap';
+import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
+import { FAQ } from './sections/FAQ';
+import { Footer } from './sections/Footer';
+import { Modal } from './components/UIComponents';
+import { AdminView } from './components/AdminView';
 import { Settings, ArrowUp, Send } from 'lucide-react';
 
 const App: React.FC = () => {
