@@ -70,10 +70,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     phone: payload.phone ?? null,
     company: payload.company ?? null,
     role: payload.role ?? null,
-    area: payload.area ?? null,
     portfolio: payload.portfolio ?? null,
     message: payload.message ?? null,
-    expectations: payload.expectations ?? null,
   };
 
   // Inserir no Supabase via REST (sem depender de SDK)
