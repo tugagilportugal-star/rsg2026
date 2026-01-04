@@ -16,12 +16,4 @@ export const ASSETS = {
     "https://i.postimg.cc/qvcwJTXW/Tugagil-610.jpg",
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
   ],
-  SERVICES: {
-    RESEND_API_KEY: "re_Bgc4Jtod_E2atqN7x22QEkeVyFkYjqApP",
-    FROM_EMAIL: "RSG Lisbon 2026 <onboarding@resend.dev>", 
-    ADMIN_EMAIL: "tugagilportugal@gmail.com",
-    ADMIN_PASSWORD: "tugagiladmin", // Senha de acesso ao dashboard
-    SUPABASE_URL: "https://zapfliivlijdcuuqhvej.supabase.co", 
-    SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphcGZsaWl2bGlqZGN1dXFodmVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTMxMTYsImV4cCI6MjA4MzAyOTExNn0.B79DYfETrL2So9FnsZV1jZqRndRSBP8gGuFEU2Io3ew"
-  }
 };
