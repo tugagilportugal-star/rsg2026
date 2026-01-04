@@ -53,7 +53,7 @@ export const getSubmissions = async () => {
   return localData;
 };
 
-export const deleteSubmission = async (id: any) => {
+export const deleteSubmission = async (id: any): Promise<void> => {
   if (hasSupabase) {
     try {
       console.log("[DB] Tentando deletar na Cloud id:", id);
@@ -128,3 +128,6 @@ export const saveSubmission = async (type: FormType, data: any) => {
 
   return { success: true };
 };
+
+// Exportações explícitas para garantir compatibilidade TypeScript
+export { getSubmissions, deleteSubmission, saveSubmission };
