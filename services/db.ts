@@ -1,7 +1,7 @@
 import { FormType } from '../types';
 
-const supabaseUrl = ASSETS.SERVICES.SUPABASE_URL?.trim().replace(/\/$/, "");
-const supabaseKey = ASSETS.SERVICES.SUPABASE_ANON_KEY?.trim();
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
+const supabaseKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
 
 const isSupabaseKey = supabaseKey?.startsWith("eyJ");
 const hasSupabase = !!(supabaseUrl && supabaseKey && supabaseUrl.startsWith("http") && isSupabaseKey);
