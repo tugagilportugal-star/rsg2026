@@ -1,5 +1,4 @@
 import { FormType } from '../types';
-import { ASSETS } from '../config';
 
 const supabaseUrl = ASSETS.SERVICES.SUPABASE_URL?.trim().replace(/\/$/, "");
 const supabaseKey = ASSETS.SERVICES.SUPABASE_ANON_KEY?.trim();
