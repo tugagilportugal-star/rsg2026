@@ -4,9 +4,14 @@ import { ASSETS } from '../config';
 const supabaseUrl = ASSETS.SERVICES.SUPABASE_URL?.trim().replace(/\/$/, "");
 const supabaseKey = ASSETS.SERVICES.SUPABASE_ANON_KEY?.trim();
 
-// Verifica se a chave parece válida para o Supabase (começa com eyJ)
+// Verificação diagnóstica da chave
 const isSupabaseKey = supabaseKey?.startsWith("eyJ");
 const hasSupabase = !!(supabaseUrl && supabaseKey && supabaseUrl.startsWith("http") && isSupabaseKey);
+
+console.log("[DB Setup] URL:", supabaseUrl);
+console.log("[DB Setup] Key presente:", !!supabaseKey);
+console.log("[DB Setup] Key formato válido (Supabase):", isSupabaseKey);
+console.log("[DB Setup] Supabase Habilitado:", hasSupabase);
 
 const LOCAL_STORAGE_KEY = 'rsg_lisbon_leads';
 
@@ -15,6 +20,7 @@ export const getSubmissions = async () => {
   
   if (hasSupabase) {
     try {
+      console.log("[DB] Tentando ler dados da Cloud...");
       const response = await fetch(`${supabaseUrl}/rest/v1/leads?select=*&order=created_at.desc`, {
         headers: {
           'apikey': supabaseKey!,
@@ -22,8 +28,13 @@ export const getSubmissions = async () => {
         }
       });
       
+      console.log("[DB] Resposta leitura Cloud:", response.status);
+      
       if (response.ok) {
         cloudData = await response.json();
+      } else {
+        const errorText = await response.text();
+        console.error("[DB] Falha na resposta da Cloud:", errorText);
       }
     } catch (e) {
       console.error("[DB] Supabase Indisponível (Cloud):", e);
@@ -45,13 +56,15 @@ export const getSubmissions = async () => {
 export const deleteSubmission = async (id: any) => {
   if (hasSupabase) {
     try {
-      await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${id}`, {
+      console.log("[DB] Tentando deletar na Cloud id:", id);
+      const response = await fetch(`${supabaseUrl}/rest/v1/leads?id=eq.${id}`, {
         method: 'DELETE',
         headers: {
           'apikey': supabaseKey!,
           'Authorization': `Bearer ${supabaseKey}`
         }
       });
+      console.log("[DB] Resposta delete Cloud:", response.status);
     } catch (e) {
       console.error("[DB] Erro ao apagar na Cloud:", e);
     }
@@ -74,9 +87,13 @@ export const saveSubmission = async (type: FormType, data: any) => {
     created_at: new Date().toISOString()
   };
 
+  console.log("[DB] Iniciando saveSubmission:", type);
+  console.log("[DB] Payload preparado:", payload);
+
   if (hasSupabase) {
     try {
-      await fetch(`${supabaseUrl}/rest/v1/leads`, {
+      console.log("[DB] Tentando POST para Supabase...");
+      const response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
         method: 'POST',
         headers: {
           'apikey': supabaseKey!,
@@ -86,12 +103,22 @@ export const saveSubmission = async (type: FormType, data: any) => {
         },
         body: JSON.stringify(payload)
       });
+      
+      console.log("[DB] Status da Resposta Supabase:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error("[DB] Erro detalhado do Supabase:", errBody);
+      } else {
+        console.log("[DB] Sucesso ao gravar na Cloud.");
+      }
     } catch (e) {
-      console.error("[DB] Erro ao gravar na Cloud:", e);
+      console.error("[DB] Erro de rede/fetch ao gravar na Cloud:", e);
     }
+  } else {
+    console.warn("[DB] Supabase não configurado ou chave inválida. Gravando apenas localmente.");
   }
 
-  // Grava localmente sempre para redundância
   const currentLeads = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([{ 
     id: Date.now(), 
