@@ -127,3 +127,27 @@ export const saveSubmission = async (type: FormType, data: any) => {
 
   return { success: true };
 };
+
+export const testSupabaseConnection = async (): Promise<{ connected: boolean; error?: string }> => {
+  if (!hasSupabase) {
+    return { connected: false, error: 'Credenciais não configuradas' };
+  }
+
+  try {
+    const response = await fetch(`${supabaseUrl}/rest/v1/leads?select=id&limit=1`, {
+      headers: {
+        'apikey': supabaseKey!,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
+    });
+
+    if (response.ok || response.status === 200 || response.status === 206) {
+      return { connected: true };
+    } else {
+      const errorText = await response.text();
+      return { connected: false, error: `Erro ${response.status}: ${errorText.substring(0, 100)}` };
+    }
+  } catch (e: any) {
+    return { connected: false, error: e.message || 'Erro de conexão' };
+  }
+};

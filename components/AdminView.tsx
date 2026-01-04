@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getSubmissions } from '../services/db';
-import { deleteSubmission } from '../services/db';
+import { getSubmissions, deleteSubmission, testSupabaseConnection } from '../services/db';
 
 import { 
   X, Download, Trash2, Lock, Key, 
-  Globe, Database, Copy, Check
+  Globe, Database, Copy, Check, AlertTriangle
 } from 'lucide-react';
 import { ASSETS } from '../config';
 import { FormType } from '../types';
@@ -18,14 +17,26 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [activeFilter, setActiveFilter] = useState<'ALL' | FormType>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [allEmailsCopied, setAllEmailsCopied] = useState(false);
-
-  const isCloudEnabled = !!(ASSETS.SERVICES.SUPABASE_URL && ASSETS.SERVICES.SUPABASE_ANON_KEY);
+  const [supabaseStatus, setSupabaseStatus] = useState<'checking' | 'connected' | 'error' | 'not-configured'>('checking');
+  const [supabaseError, setSupabaseError] = useState<string>('');
+  // Remover a linha isCloudEnabled pois não é mais usada
+  const checkSupabaseConnection = async () => {
+    const result = await testSupabaseConnection();
+    if (result.connected) {
+      setSupabaseStatus('connected');
+      setSupabaseError('');
+    } else {
+      setSupabaseStatus('error');
+      setSupabaseError(result.error || 'Erro desconhecido');
+    }
+  };
 
   useEffect(() => {
     const sessionAuth = sessionStorage.getItem('rsg_admin_auth');
     if (sessionAuth === 'true') {
       setIsAuthenticated(true);
       loadData();
+      checkSupabaseConnection();
     }
   }, []);
 
@@ -48,6 +59,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       sessionStorage.setItem('rsg_admin_auth', 'true');
       setError(false);
       loadData();
+      checkSupabaseConnection();
     } else {
       setError(true);
       setPassword('');
@@ -140,14 +152,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <h1 className="font-black text-brand-darkBlue text-xl leading-none uppercase">Gestão de Leads</h1>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">RSG Lisbon 2026</span>
-                {isCloudEnabled ? (
-                    <span className="flex items-center gap-1.5 text-[9px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black border border-emerald-100">
-                        <Globe className="w-3 h-3"/> SUPABASE ATIVO
-                    </span>
+                {supabaseStatus === 'checking' ? (
+                  <span className="flex items-center gap-1.5 text-[9px] bg-gray-50 text-gray-600 px-2 py-0.5 rounded-full font-black border border-gray-100">
+                    <Database className="w-3 h-3 animate-pulse" /> VERIFICANDO...
+                  </span>
+                ) : supabaseStatus === 'connected' ? (
+                  <span className="flex items-center gap-1.5 text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-black border border-emerald-200 shadow-sm">
+                    <Globe className="w-3 h-3 animate-pulse" /> SUPABASE CONECTADO
+                  </span>
+                ) : supabaseStatus === 'error' ? (
+                  <span
+                    className="flex items-center gap-1.5 text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-black border border-red-200 shadow-sm cursor-help"
+                    title={supabaseError}
+                  >
+                    <AlertTriangle className="w-3 h-3" /> ERRO DE CONEXÃO
+                  </span>
                 ) : (
-                    <span className="flex items-center gap-1.5 text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-black border border-amber-100">
-                        <Database className="w-3 h-3"/> LOCAL STORAGE
-                    </span>
+                  <span className="flex items-center gap-1.5 text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-black border border-amber-200 shadow-sm">
+                    <Database className="w-3 h-3" /> LOCAL STORAGE APENAS
+                  </span>
                 )}
               </div>
             </div>
