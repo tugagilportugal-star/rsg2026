@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/NavBar';
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';

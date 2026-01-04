@@ -127,5 +127,3 @@ export const saveSubmission = async (type: FormType, data: any) => {
 
   return { success: true };
 };
-
-export { getSubmissions, deleteSubmission, saveSubmission };
