@@ -78,7 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Inserir no Supabase via REST (sem depender de SDK)
   // Isso evita instalar @supabase/supabase-js agora e mantém simples.
-  const url = `${SUPABASE_URL}/rest/v1/submissions`;
+  const url = `${SUPABASE_URL}/rest/v1/leads`;
   const supabaseRes = await fetch(url, {
     method: "POST",
     headers: {
