@@ -2,7 +2,12 @@
 // Este ficheiro deve estar na pasta /api/ do seu projeto (Vercel/Netlify/Next.js)
 // Ele corre em ambiente Node.js, não no browser.
 
-export default async function handler(req: any, res: any) {
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
   console.log("[API] Pedido recebido no endpoint de e-mail");
 
   if (req.method !== 'POST') {
