@@ -83,6 +83,7 @@ export const saveSubmission = async (type: FormType, data: any) => {
     company: data.company || '',
     role: data.role || data.area || '',
     message: data.message || data.expectations || '',
+    portfolio: data.portfolio || '',
     created_at: new Date().toISOString()
   };
 
