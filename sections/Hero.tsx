@@ -9,7 +9,7 @@ export const Hero: React.FC = () => {
   return (
     <section 
     id="hero" 
-    className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
+    className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-24"
         style={{
             backgroundImage: `linear-gradient(rgba(0, 20, 40, 0.8), rgba(0, 10, 20, 0.95)), url('${ASSETS.HERO_BG}')`
         }}
