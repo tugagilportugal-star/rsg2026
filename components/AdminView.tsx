@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getSubmissions, deleteSubmission } from '../services/db';
 import { 
   X, Download, Trash2, Lock, Key, 
-  Globe, Database, Copy, Check, AlertTriangle
+  Globe, Database, Copy, Check
 } from 'lucide-react';
 import { ASSETS } from '../config';
 import { FormType } from '../types';
@@ -17,8 +17,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [allEmailsCopied, setAllEmailsCopied] = useState(false);
 
-  // Verificação em tempo real
-  const isCloudConfigured = !!(ASSETS.SERVICES.SUPABASE_URL?.trim() && ASSETS.SERVICES.SUPABASE_ANON_KEY?.trim());
+  const isCloudEnabled = !!(ASSETS.SERVICES.SUPABASE_URL && ASSETS.SERVICES.SUPABASE_ANON_KEY);
 
   useEffect(() => {
     const sessionAuth = sessionStorage.getItem('rsg_admin_auth');
@@ -139,13 +138,13 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <h1 className="font-black text-brand-darkBlue text-xl leading-none uppercase">Gestão de Leads</h1>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">RSG Lisbon 2026</span>
-                {isCloudConfigured ? (
-                    <span className="flex items-center gap-1.5 text-[10px] bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-black border border-emerald-200 shadow-sm">
-                        <Globe className="w-3.5 h-3.5 animate-pulse"/> SUPABASE ATIVO
+                {isCloudEnabled ? (
+                    <span className="flex items-center gap-1.5 text-[9px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black border border-emerald-100">
+                        <Globe className="w-3 h-3"/> SUPABASE ATIVO
                     </span>
                 ) : (
-                    <span className="flex items-center gap-1.5 text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black border border-amber-200 shadow-sm">
-                        <AlertTriangle className="w-3.5 h-3.5"/> LOCAL STORAGE APENAS
+                    <span className="flex items-center gap-1.5 text-[9px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-black border border-amber-100">
+                        <Database className="w-3 h-3"/> LOCAL STORAGE
                     </span>
                 )}
               </div>
