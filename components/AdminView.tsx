@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getSubmissions, deleteSubmission } from '../services/db';
+import { getSubmissions } from '../services/db';
+import { deleteSubmission } from '../services/db';
+
 import { 
   X, Download, Trash2, Lock, Key, 
   Globe, Database, Copy, Check, AlertTriangle
