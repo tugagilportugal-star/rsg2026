@@ -9,13 +9,13 @@ export const Hero: React.FC = () => {
   return (
     <section 
     id="hero" 
-    className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-24"
+    className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
         style={{
             backgroundImage: `linear-gradient(rgba(0, 20, 40, 0.8), rgba(0, 10, 20, 0.95)), url('${ASSETS.HERO_BG}')`
         }}
     >
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center">
-        <div className="bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-6">
+        <div className="bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-8">
            <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
              Official Scrum Alliance Event
            </span>
