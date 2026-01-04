@@ -93,13 +93,10 @@ export const saveSubmission = async (type: FormType, data: any) => {
   if (hasSupabase) {
     try {
       console.log("[DB] Tentando POST para Supabase...");
-      const response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
+      const response = await fetch(`/api/submit`, {
         method: 'POST',
         headers: {
-          'apikey': supabaseKey!,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       });
