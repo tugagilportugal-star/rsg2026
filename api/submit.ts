@@ -132,11 +132,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     phone: payload.phone ?? null,
     company: payload.company ?? null,
     role: payload.role ?? null,
-    area: payload.area ?? null,
-    portfolio: payload.portfolio ?? null,
     message: payload.message ?? null,
-    expectations: payload.expectations ?? null,
-    status, // Pending
+    portfolio: payload.portfolio ?? null,
+    status: "Pending",
   };
 
   const supabaseRes = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/leads`, {
