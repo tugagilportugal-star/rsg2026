@@ -16,4 +16,11 @@ export const ASSETS = {
     "https://i.postimg.cc/qvcwJTXW/Tugagil-610.jpg",
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
   ],
+  // Services config (read from Vite env when available)
+  SERVICES: {
+    SUPABASE_URL: (import.meta.env?.VITE_SUPABASE_URL as string) || "",
+    SUPABASE_ANON_KEY: (import.meta.env?.VITE_SUPABASE_ANON_KEY as string) || "",
+    RESEND_API_KEY: (import.meta.env?.VITE_RESEND_API_KEY as string) || "",
+    FROM_EMAIL: (import.meta.env?.VITE_FROM_EMAIL as string) || "",
+  },
 };
