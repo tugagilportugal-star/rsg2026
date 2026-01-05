@@ -89,31 +89,29 @@ export const saveSubmission = async (type: FormType, data: any) => {
   console.log("[DB] Iniciando saveSubmission:", type);
   console.log("[DB] Payload preparado:", payload);
 
-  if (hasSupabase) {
-    try {
-      console.log("[DB] Tentando POST para Supabase...");
-      const response = await fetch(`/api/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      console.log("[DB] Status da Resposta Supabase:", response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errBody = await response.text();
-        console.error("[DB] Erro detalhado do Supabase:", errBody);
-      } else {
-        console.log("[DB] Sucesso ao gravar na Cloud.");
-      }
-    } catch (e) {
-      console.error("[DB] Erro de rede/fetch ao gravar na Cloud:", e);
+  try {
+    console.log("[DB] Tentando POST para /api/submit...");
+    const response = await fetch(`/api/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    console.log("[DB] Status /api/submit:", response.status, response.statusText);
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error("[DB] Erro /api/submit:", errBody);
+      // fallback local só se a API falhar
+      throw new Error(errBody || `API error ${response.status}`);
+    } else {
+      console.log("[DB] Sucesso via API. Não vou gravar localmente.");
+      return { success: true };
     }
-  } else {
-    console.warn("[DB] Supabase não configurado ou chave inválida. Gravando apenas localmente.");
+  } catch (e) {
+    console.error("[DB] Falha ao gravar via API, usando fallback local:", e);
   }
+
 
   const currentLeads = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([{ 
