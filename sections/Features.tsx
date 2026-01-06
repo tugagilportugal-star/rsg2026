@@ -49,7 +49,7 @@ export const Features: React.FC = () => {
   ];
 
   return (
-    <Section className="bg-gray-50 relative">
+    <Section id="features" className="bg-gray-50 relative">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
       
       <div className="text-center mb-20">
