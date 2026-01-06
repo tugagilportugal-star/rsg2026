@@ -8,7 +8,7 @@ interface SponsorsProps {
 
 export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   return (
-    <Section className="bg-white border-t border-gray-100">
+    <Section id="sponsors" className="bg-white border-t border-gray-100">
       <div className="text-center">
         <span className="text-sm font-bold tracking-[0.3em] text-gray-400 uppercase mb-8 block">Patrocinador Oficial</span>
         
