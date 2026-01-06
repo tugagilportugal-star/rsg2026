@@ -37,7 +37,7 @@ export const FAQ: React.FC = () => {
     };
 
     return (
-        <Section className="bg-white border-t border-gray-100">
+        <Section id="faq" className="bg-white border-t border-gray-100">
             <h2 className="text-3xl font-bold text-center text-brand-darkBlue mb-12">Perguntas Frequentes</h2>
             <div className="max-w-3xl mx-auto space-y-4">
                 {faqData.map((item, index) => (
