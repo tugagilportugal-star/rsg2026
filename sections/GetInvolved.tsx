@@ -103,6 +103,15 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
               }}
             />
           ) : (
+            <>
+              <div className="flex flex-col items-center text-center mb-10">
+                <div className="bg-gray-100 p-3 rounded-full mb-4">
+                  <BellRing className="w-6 h-6 text-gray-700" />
+                </div>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">Waitlist Oficial</h3>
+                <p className="text-gray-500">Seja o primeiro a saber das novidades e bilhetes.</p>
+              </div>
+      
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Nome Completo"
@@ -162,6 +171,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                 Entrar na Waitlist <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </form>
+            </>
           )}
         </div>
       </div>
