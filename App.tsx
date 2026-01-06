@@ -17,7 +17,6 @@ import { Settings, ArrowUp, Send } from 'lucide-react';
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
-  const [isAdminViewOpen, setAdminViewOpen] = useState(false);
   const [showFab, setShowFab] = useState(false);
 
   useEffect(() => {
@@ -106,8 +105,6 @@ const App: React.FC = () => {
           <span>Garantir Vaga</span>
         </button>
       </div>
-
-      {isAdminViewOpen && <AdminView onClose={() => setAdminViewOpen(false)} />}
 
       <Modal 
         isOpen={isSponsorModalOpen} 
