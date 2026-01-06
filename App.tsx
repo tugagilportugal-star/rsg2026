@@ -56,6 +56,9 @@ const App: React.FC = () => {
     }
   };
 
+  const isAdminRoute = window.location.pathname === '/admin';
+  if (isAdminRoute) return <AdminView />;
+
   return (
     <main className="min-h-screen bg-white text-gray-900 font-sans selection:bg-brand-orange selection:text-white">
       <Navbar />
