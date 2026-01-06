@@ -40,7 +40,7 @@ export default async function handler(
 
   try {
     const supabaseRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/submissions?id=eq.${id}`,
+      `${process.env.SUPABASE_URL}/rest/v1/leads?id=eq.${id}`,
       {
         method: 'DELETE',
         headers: {
