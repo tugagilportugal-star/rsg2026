@@ -34,7 +34,7 @@ export default async function handler(
 
   try {
     const supabaseRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/submissions?order=created_at.desc`,
+      `${process.env.SUPABASE_URL}/rest/v1/leads?order=created_at.desc`,
       {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY as string,
