@@ -20,7 +20,7 @@ function withTimeout<T>(promise: Promise<T>, ms = TIMEOUT_MS): Promise<T> {
 async function saveToSupabase(payload: any): Promise<boolean> {
   try {
     const res = await withTimeout(
-      fetch(`${process.env.SUPABASE_URL}/rest/v1/submissions`, {
+      fetch(`${process.env.SUPABASE_URL}/rest/v1/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,10 +41,7 @@ async function saveToSupabase(payload: any): Promise<boolean> {
 /* =========================
    Resend
 ========================= */
-async function sendEmail(payload: {
-  subject: string;
-  html: string;
-}): Promise<boolean> {
+async function sendEmail(payload: { subject: string; html: string }): Promise<boolean> {
   try {
     const res = await withTimeout(
       fetch('https://api.resend.com/emails', {
@@ -71,17 +68,13 @@ async function sendEmail(payload: {
 /* =========================
    API Handler
 ========================= */
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false });
   }
 
   try {
-    const body =
-      typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
     const {
       type,
@@ -90,32 +83,30 @@ export default async function handler(
       phone,
       company,
       role,
-      expectations,
       message,
       portfolio,
-      area,
     } = body || {};
 
     if (!type || !name || !email) {
       return res.status(400).json({ ok: false });
     }
 
-    const submission = {
+    // Enviar APENAS colunas que existem na tabela `leads`
+    const leadRow = {
       type,
       name,
       email,
       phone: phone || null,
       company: company || null,
       role: role || null,
-      expectations: expectations || null,
       message: message || null,
       portfolio: portfolio || null,
-      area: area || null,
-      created_at: new Date().toISOString(),
+      // created_at tem default now() no Supabase
+      // status tem default 'Pending'
     };
 
     const [supabaseResult, emailResult] = await Promise.allSettled([
-      saveToSupabase(submission),
+      saveToSupabase(leadRow),
       sendEmail({
         subject: `Novo contacto (${type}) – RSG Lisbon 2026`,
         html: `
@@ -125,6 +116,8 @@ export default async function handler(
           ${phone ? `<p><b>Telefone:</b> ${phone}</p>` : ''}
           ${company ? `<p><b>Empresa:</b> ${company}</p>` : ''}
           ${role ? `<p><b>Cargo:</b> ${role}</p>` : ''}
+          ${portfolio ? `<p><b>Portfólio:</b> ${portfolio}</p>` : ''}
+          ${message ? `<p><b>Mensagem:</b> ${message}</p>` : ''}
         `,
       }),
     ]);
