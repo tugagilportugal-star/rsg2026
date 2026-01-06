@@ -51,7 +51,7 @@ const App: React.FC = () => {
       <About />
       <Features />
       <Speakers />
-      <Sponsors />
+      <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
       <Recap />
 
       <GetInvolved
@@ -103,7 +103,7 @@ const App: React.FC = () => {
         onClose={() => setSponsorModalOpen(false)}
         title="Torne-se um Patrocinador"
       >
-        <SponsorForm onClose={() => setSponsorModalOpen(false)} />
+        <SponsorForm />
       </Modal>
 
       <Modal
@@ -111,7 +111,7 @@ const App: React.FC = () => {
         onClose={() => setSupporterModalOpen(false)}
         title="Torne-se um Apoiador"
       >
-        <SupporterForm onClose={() => setSupporterModalOpen(false)} />
+        <SupporterForm />
       </Modal>
     </div>
   );
