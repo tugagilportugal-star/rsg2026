@@ -10,19 +10,13 @@ function isAuthorized(req: VercelRequest): boolean {
   const decoded = Buffer.from(auth.split(' ')[1], 'base64').toString();
   const [user, pass] = decoded.split(':');
 
-  return (
-    user === process.env.ADMIN_USER &&
-    pass === process.env.ADMIN_PASS
-  );
+  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
 }
 
 /* =========================
    Handler
 ========================= */
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ ok: false });
   }
@@ -34,7 +28,7 @@ export default async function handler(
 
   try {
     const supabaseRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/submissions?order=created_at.desc`,
+      `${process.env.SUPABASE_URL}/rest/v1/leads?order=created_at.desc`,
       {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY as string,
