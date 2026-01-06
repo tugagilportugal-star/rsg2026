@@ -27,18 +27,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const supabaseRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/leads?order=created_at.desc`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY as string,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-      }
-    );
+    // ✅ não listar Deleted
+    const url =
+      `${process.env.SUPABASE_URL}/rest/v1/leads` +
+      `?select=*` +
+      `&status=neq.Deleted` +
+      `&order=created_at.desc`;
+
+    const supabaseRes = await fetch(url, {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY as string,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    });
 
     if (!supabaseRes.ok) {
-      return res.status(500).json({ ok: false });
+      const text = await supabaseRes.text().catch(() => '');
+      return res.status(500).json({ ok: false, details: text });
     }
 
     const data = await supabaseRes.json();
