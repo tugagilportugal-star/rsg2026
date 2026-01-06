@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
   const [showFab, setShowFab] = useState(false);
+  console.log('APP VERSION ADMIN CHECK', window.location.pathname);
 
   useEffect(() => {
     const handleScroll = () => {
