@@ -232,10 +232,20 @@ export const Recap: React.FC = () => {
       )}
       
       <div className="text-center mt-20 relative z-10">
-         <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 rounded-full backdrop-blur-md border border-white/20">
-            <span className="font-bold text-white">Reviva a experiência. Junte-se a nós em 2026.</span>
-         </div>
-      </div>
+  <a
+    href="#get-involved"
+    className="inline-flex items-center gap-2 px-6 py-3
+               bg-white/10 rounded-full backdrop-blur-md
+               border border-white/20
+               hover:bg-white/20
+               transition-all duration-300
+               cursor-pointer"
+  >
+    <span className="font-bold text-white">
+      Reviva a experiência. Junte-se a nós em 2026.
+    </span>
+  </a>
+</div>
     </Section>
   );
 };
