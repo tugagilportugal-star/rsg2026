@@ -31,6 +31,14 @@ export const Navbar: React.FC = () => {
             <a href="#faq" className="text-gray-700 hover:text-brand-blue transition-colors">
               FAQ
             </a>
+            <a
+              href="https://www.scrumalliance.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-brand-orange transition"
+            >
+              Scrum Alliance
+            </a>
           </div>
         </div>
       </div>
