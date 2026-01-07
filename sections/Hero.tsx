@@ -11,7 +11,8 @@ export const Hero: React.FC = () => {
     id="hero" 
     className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
         style={{
-            backgroundImage: `linear-gradient(rgba(0, 20, 40, 0.8), rgba(0, 10, 20, 0.95)), url('${ASSETS.HERO_BG}')`
+          // Gradiente mais suave no topo (0.6) e mais escuro embaixo (0.9) para ler o texto
+          backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
         }}
     >
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center">
@@ -69,7 +70,7 @@ export const Hero: React.FC = () => {
 
         <button 
           onClick={() => document.getElementById('registration-section')?.scrollIntoView({ behavior: 'smooth' })}
-          className="px-12 py-5 bg-brand-orange text-white font-black text-xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all duration-300"
+          className="px-12 py-5 bg-brand-orange text-white font-black text-xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding"
         >
           Garante o teu Lugar
         </button>
