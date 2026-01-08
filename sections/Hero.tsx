@@ -11,11 +11,11 @@ export const Hero: React.FC = () => {
     id="hero" 
     className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
         style={{
-          // Gradiente mais suave no topo (0.6) e mais escuro embaixo (0.9) para ler o texto
+          // Gradiente ajustado
           backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
         }}
     >
-      {/* Badge Flutuante no Topo (Agora clicável e posicionado abaixo da navbar) */}
+      {/* Badge Flutuante */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
         <a 
            href="https://www.scrumalliance.org/"
@@ -30,7 +30,13 @@ export const Hero: React.FC = () => {
         </a>
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-10">
+      {/* 
+         ALTERAÇÃO AQUI: 
+         Mudei de 'pt-20' para 'pt-48'. 
+         Isso empurra todo o bloco (Logo, Título, Datas) para baixo,
+         abrindo espaço para o Badge não ficar por cima.
+      */}
+      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-48">
         <div className="flex flex-col items-center mb-10 animate-fade-in-up">
             <img 
                 src={ASSETS.TUGAGIL_LOGO} 
