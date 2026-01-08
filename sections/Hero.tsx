@@ -18,7 +18,7 @@ export const Hero: React.FC = () => {
       {/* Badge Flutuante */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
         <a 
-           href="https://www.scrumalliance.org/"
+           href="https://www.scrumalliance.org/events/regional"
            target="_blank"
            rel="noopener noreferrer"
            className="pointer-events-auto bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-24 hover:bg-brand-blue transition-colors cursor-pointer group flex items-center gap-2"
