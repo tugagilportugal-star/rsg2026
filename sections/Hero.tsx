@@ -32,11 +32,11 @@ export const Hero: React.FC = () => {
 
       {/* 
          ALTERAÇÃO AQUI: 
-         Mudei de 'pt-20' para 'pt-48'. 
+         Mudei de 'pt-20' para 'pt-40'. 
          Isso empurra todo o bloco (Logo, Título, Datas) para baixo,
          abrindo espaço para o Badge não ficar por cima.
       */}
-      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-48">
+      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-40">
         <div className="flex flex-col items-center mb-10 animate-fade-in-up">
             <img 
                 src={ASSETS.TUGAGIL_LOGO} 
