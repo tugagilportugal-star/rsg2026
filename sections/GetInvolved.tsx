@@ -58,8 +58,9 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-5xl mx-auto">
-        <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 flex flex-col items-center text-center shadow-lg">
-          <div className="bg-brand-orange/10 p-5 rounded-2xl mb-6">
+        {/* Box Patrocínios - Hover Laranja */}
+        <div className="bg-white p-8 md:p-10 rounded-3xl border-2 border-gray-100 hover:border-brand-orange transition-all duration-300 hover:shadow-2xl flex flex-col items-center text-center shadow-lg group">
+          <div className="bg-brand-orange/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
             <Handshake className="w-12 h-12 text-brand-orange" />
           </div>
           <h3 className="text-2xl font-bold text-brand-darkBlue mb-4">Patrocínios e Parcerias</h3>
@@ -75,8 +76,9 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
           </Button>
         </div>
 
-        <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-100 flex flex-col items-center text-center shadow-lg">
-          <div className="bg-brand-blue/10 p-5 rounded-2xl mb-6">
+        {/* Box Apoiadores - Hover Azul */}
+        <div className="bg-white p-8 md:p-10 rounded-3xl border-2 border-gray-100 hover:border-brand-blue transition-all duration-300 hover:shadow-2xl flex flex-col items-center text-center shadow-lg group">
+          <div className="bg-brand-blue/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
             <Camera className="w-12 h-12 text-brand-blue" />
           </div>
           <h3 className="text-2xl font-bold text-brand-darkBlue mb-4">Apoiadores</h3>
@@ -93,7 +95,11 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100">
+        {/* Box Waitlist - Barra Multicolorida */}
+        <div className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden">
+          {/* Barra Decorativa Topo */}
+          <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
+
           {status === 'success' ? (
             <SuccessState
               message="Obrigado pelo seu interesse! Você será notificado assim que as inscrições abrirem."
@@ -104,7 +110,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
             />
           ) : (
             <>
-              <div className="flex flex-col items-center text-center mb-10">
+              <div className="flex flex-col items-center text-center mb-10 pt-2">
                 <div className="bg-gray-100 p-3 rounded-full mb-4">
                   <BellRing className="w-6 h-6 text-gray-700" />
                 </div>
