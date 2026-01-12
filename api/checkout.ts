@@ -17,14 +17,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // 1. Receber os dados do formulário junto com o ID do bilhete
+    // Recebemos ticketTypeId, quantity E o formData
     const { ticketTypeId, quantity = 1, formData } = req.body;
 
     if (!ticketTypeId) {
       return res.status(400).json({ message: 'Ticket Type ID obrigatório' });
     }
 
-    // Buscar preço no DB
+    // 1. Validar e Buscar Preço
     const { data: ticketType, error } = await supabase
       .from('ticket_types')
       .select('*')
@@ -32,10 +32,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (error || !ticketType || !ticketType.active) {
-      return res.status(404).json({ message: 'Bilhete indisponível.' });
+      return res.status(404).json({ message: 'Bilhete indisponível ou esgotado.' });
     }
 
-    // 2. Criar Sessão no Stripe com METADATA
+    // 2. Criar Sessão no Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -53,20 +53,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ],
       mode: 'payment',
       
-      // PRE-FILL: Já preenche o e-mail no checkout do Stripe
+      // ✅ O Pulo do Gato: Preenchemos o email automaticamente para o usuário
       customer_email: formData?.email, 
 
-      tax_id_collection: { enabled: true },
-      billing_address_collection: 'required',
+      tax_id_collection: { enabled: true }, // Pede NIF
+      billing_address_collection: 'required', // Pede Morada (necessário para fatura correta)
       
-      // METADATA: Aqui guardamos os dados do participante para usar depois que pagar
+      // ✅ Guardamos os dados do participante nos metadados para usar depois
       metadata: {
         ticket_type_id: ticketType.id,
         attendee_name: formData?.name || '',
         attendee_phone: formData?.phone || '',
         attendee_company: formData?.company || '',
-        attendee_role: formData?.role || '',
-        // O Stripe tem limite de caracteres nos metadados, então enviamos apenas o essencial
+        // O Stripe tem limite de keys e tamanho, evite textos longos aqui
       },
 
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,

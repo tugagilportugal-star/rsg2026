@@ -9,11 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.90.1",
     "@vercel/node": "^3.0.0",
     "lucide-react": "^0.460.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "stripe": "^14.10.0" 
+    "stripe": "^14.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
