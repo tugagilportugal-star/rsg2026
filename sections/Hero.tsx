@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCountdown } from '../hooks/useCountdown';
-import { MapPin, Calendar, ArrowDown } from 'lucide-react';
+import { MapPin, Calendar, ArrowDown, ExternalLink } from 'lucide-react';
 import { ASSETS } from '../config';
 
 export const Hero: React.FC = () => {
@@ -11,19 +11,32 @@ export const Hero: React.FC = () => {
     id="hero" 
     className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
         style={{
-          // Gradiente mais suave no topo (0.6) e mais escuro embaixo (0.9) para ler o texto
+          // Gradiente ajustado
           backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
         }}
     >
-      <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center">
-        <div className="bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-12">
-           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
+      {/* Badge Flutuante */}
+      <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
+        <a 
+           href="https://www.scrumalliance.org/events/regional"
+           target="_blank"
+           rel="noopener noreferrer"
+           className="pointer-events-auto bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-24 hover:bg-brand-blue transition-colors cursor-pointer group flex items-center gap-2"
+        >
+           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs group-hover:text-white transition-colors">
              Official Scrum Alliance Event
            </span>
-        </div>
+           <ExternalLink className="w-3 h-3 text-brand-orange group-hover:text-white transition-colors" />
+        </a>
       </div>
 
-      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-20">
+      {/* 
+         ALTERAÇÃO AQUI: 
+         Mudei de 'pt-20' para 'pt-36'. 
+         Isso empurra todo o bloco (Logo, Título, Datas) para baixo,
+         abrindo espaço para o Badge não ficar por cima.
+      */}
+      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-36">
         <div className="flex flex-col items-center mb-10 animate-fade-in-up">
             <img 
                 src={ASSETS.TUGAGIL_LOGO} 
@@ -69,7 +82,7 @@ export const Hero: React.FC = () => {
         </div>
 
         <button 
-          onClick={() => document.getElementById('registration-section')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => document.getElementById('get-involved')?.scrollIntoView({ behavior: 'smooth' })}
           className="px-12 py-5 bg-brand-orange text-white font-black text-xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding"
         >
           Garante o teu Lugar
