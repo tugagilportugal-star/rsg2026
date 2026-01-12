@@ -3,6 +3,7 @@ import { Section, Button, Input, Textarea, SuccessState } from '../components/UI
 import { FormType, InterestFormData, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
 import { Handshake, Camera, BellRing, ArrowRight } from 'lucide-react';
+import { BuyTicketButton } from '../components/BuyTicket';
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
