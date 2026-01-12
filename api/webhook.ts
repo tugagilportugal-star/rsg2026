@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import QRCode from 'qrcode';
-import { generateTicketEmail } from '../utils/email-template';
+import { generateTicketEmail } from './_utils/email-template';
 
 export const config = {
   api: {
