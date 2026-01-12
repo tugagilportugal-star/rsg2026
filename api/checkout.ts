@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2023-10-16', // Versão estável recente
+  apiVersion: '2023-10-16',
 });
 
 const supabase = createClient(
@@ -17,28 +17,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { ticketTypeId, quantity = 1 } = req.body;
+    // 1. Receber os dados do formulário junto com o ID do bilhete
+    const { ticketTypeId, quantity = 1, formData } = req.body;
 
     if (!ticketTypeId) {
       return res.status(400).json({ message: 'Ticket Type ID obrigatório' });
     }
 
-    // 1. Validar Preço no Banco
+    // Buscar preço no DB
     const { data: ticketType, error } = await supabase
       .from('ticket_types')
       .select('*')
       .eq('id', ticketTypeId)
       .single();
 
-    if (error || !ticketType) {
-      return res.status(404).json({ message: 'Bilhete não encontrado' });
+    if (error || !ticketType || !ticketType.active) {
+      return res.status(404).json({ message: 'Bilhete indisponível.' });
     }
 
-    if (!ticketType.active) {
-      return res.status(400).json({ message: 'Lote esgotado ou inativo' });
-    }
-
-    // 2. Criar Sessão no Stripe
+    // 2. Criar Sessão no Stripe com METADATA
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -47,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             currency: 'eur',
             product_data: {
               name: `RSG Lisbon 2026 - ${ticketType.name}`,
-              description: 'Entrada completa para os 2 dias.',
+              description: 'Acesso completo aos 2 dias de evento.',
             },
             unit_amount: ticketType.price,
           },
@@ -55,11 +52,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       ],
       mode: 'payment',
-      tax_id_collection: { enabled: true }, // Pede o NIF
+      
+      // PRE-FILL: Já preenche o e-mail no checkout do Stripe
+      customer_email: formData?.email, 
+
+      tax_id_collection: { enabled: true },
       billing_address_collection: 'required',
+      
+      // METADATA: Aqui guardamos os dados do participante para usar depois que pagar
       metadata: {
-        ticket_type_id: ticketType.id, // Para usarmos depois na fatura
+        ticket_type_id: ticketType.id,
+        attendee_name: formData?.name || '',
+        attendee_phone: formData?.phone || '',
+        attendee_company: formData?.company || '',
+        attendee_role: formData?.role || '',
+        // O Stripe tem limite de caracteres nos metadados, então enviamos apenas o essencial
       },
+
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#get-involved`,
     });
