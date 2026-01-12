@@ -43,47 +43,26 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* LINKS DESKTOP */}
-          <div className="hidden md:flex items-center gap-2">
-            {navLinks.map((link) => {
-              // Estilo especial para o botão externo (Scrum Alliance)
-              if (link.external) {
-                return (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="
-                      bg-brand-blue text-white font-bold px-6 py-2.5 rounded-full 
-                      shadow-md hover:shadow-lg hover:bg-brand-darkBlue 
-                      transition-all duration-300 transform hover:-translate-y-0.5
-                      focus:outline-none
-                    "
-                  >
-                    {link.label}
-                  </a>
-                );
-              }
-
-              // Estilo para os links normais da página
-              return (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className={`
-                    text-sm font-bold px-4 py-2 rounded-full transition-all duration-300
-                    focus:outline-none
-                    ${
-                      isScrolled
-                        ? 'text-gray-300 hover:text-white hover:bg-white/10' 
-                        : 'text-white/90 hover:text-white hover:bg-white/10'
-                    }
-                  `}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noopener noreferrer' : undefined}
+                className={`
+                  text-sm font-bold px-4 py-2 rounded-full transition-all duration-300
+                  focus:outline-none
+                  ${
+                    isScrolled
+                      ? 'text-gray-300 hover:text-white hover:bg-white/10' 
+                      : 'text-white/90 hover:text-white hover:bg-white/10'
+                  }
+                `}
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
 
           {/* MENU MOBILE (Placeholder) */}
