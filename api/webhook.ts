@@ -103,3 +103,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Retorna 200 OK para o Stripe saber que recebemos
   res.json({ received: true });
 }
+// End of file api/webhook.ts
