@@ -28,30 +28,40 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Tenta inicializar o Resend (se falhar, loga erro mas não quebra o app todo)
+let resend: Resend | null = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.error("⚠️ RESEND_API_KEY não encontrada!");
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  const buf = await buffer(req);
-  const sig = req.headers['stripe-signature'] as string;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
   let event: Stripe.Event;
 
   try {
-    if (!sig || !webhookSecret) throw new Error('Missing Stripe signature or secret');
+    const buf = await buffer(req);
+    const sig = req.headers['stripe-signature'] as string;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!sig || !webhookSecret) {
+      console.error("❌ Faltam credenciais do Stripe (Signature ou Secret)");
+      return res.status(400).send('Webhook Credentials Error');
+    }
+
     event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
   } catch (err: any) {
-    console.error(`❌ Webhook signature verification failed: ${err.message}`);
+    console.error(`❌ Erro de assinatura do Webhook: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log(`💰 Pagamento recebido! Session ID: ${session.id}`);
+    console.log(`💰 Processando sessão: ${session.id}`);
 
     try {
       // 1. Salvar Order
@@ -67,7 +77,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("❌ Erro ao criar Order:", orderError);
+        throw orderError;
+      }
 
       // 2. Salvar Ticket
       const metadata = session.metadata || {};
@@ -86,38 +99,61 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
 
-      if (ticketError) throw ticketError;
+      if (ticketError) {
+        console.error("❌ Erro ao criar Ticket:", ticketError);
+        throw ticketError;
+      }
+
       console.log(`✅ Ticket criado: ${ticketData.id}`);
 
-      // 3. Gerar QR Code e Enviar E-mail
-      const qrCodeDataUrl = await QRCode.toDataURL(ticketData.qr_code_secret);
-      
-      // Buscar nome do bilhete para o email
-      const { data: typeData } = await supabase
-        .from('ticket_types')
-        .select('name')
-        .eq('id', metadata.ticket_type_id)
-        .single();
-        
-      const ticketName = typeData?.name || 'Ingresso RSG 2026';
+      // 3. Enviar E-mail (se Resend estiver configurado)
+      if (resend) {
+        try {
+          const qrCodeDataUrl = await QRCode.toDataURL(ticketData.qr_code_secret);
+          
+          // Busca nome do bilhete
+          const { data: typeData } = await supabase
+            .from('ticket_types')
+            .select('name')
+            .eq('id', metadata.ticket_type_id)
+            .single();
+            
+          const ticketName = typeData?.name || 'Ingresso';
+          const emailDestino = session.customer_details?.email;
 
-      await resend.emails.send({
-        from: 'RSG Lisbon <onboarding@resend.dev>', // Em PROD, mude para seu dominio verificado
-        to: session.customer_details?.email as string,
-        subject: `Seu bilhete para o RSG Lisbon 2026 chegou! 🎟️`,
-        html: generateTicketEmail(
-          metadata.attendee_name, 
-          ticketName, 
-          qrCodeDataUrl, 
-          ticketData.id
-        ),
-      });
+          console.log(`📧 Tentando enviar email para: ${emailDestino}`);
 
-      console.log(`📧 E-mail enviado para: ${session.customer_details?.email}`);
+          const emailResponse = await resend.emails.send({
+            // IMPORTANTE: Em teste, use SEMPRE onboarding@resend.dev
+            from: 'RSG Lisbon <onboarding@resend.dev>', 
+            to: emailDestino as string,
+            subject: `O teu bilhete para o RSG Lisbon 2026 🎟️`,
+            html: generateTicketEmail(
+              metadata.attendee_name, 
+              ticketName, 
+              qrCodeDataUrl, 
+              ticketData.id
+            ),
+          });
+
+          if (emailResponse.error) {
+             console.error("❌ Erro retornado pelo Resend:", emailResponse.error);
+             // Não damos throw aqui para não cancelar a gravação do banco
+             // O webhook retorna 200 OK mesmo se o email falhar, pois o dinheiro já entrou
+          } else {
+             console.log("✅ Email enviado com sucesso ID:", emailResponse.data?.id);
+          }
+
+        } catch (emailErr) {
+          console.error("❌ Erro ao tentar enviar email:", emailErr);
+          // Engolimos o erro do email para não dar 500 no webhook
+        }
+      }
 
     } catch (err: any) {
-      console.error('❌ Erro no processamento:', err);
-      return res.status(500).send('Processing Error');
+      console.error('❌ Erro CRÍTICO no processamento:', err);
+      // Aqui sim retornamos 500 para o Stripe tentar de novo
+      return res.status(500).send('Database/Processing Error');
     }
   }
 
