@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCountdown } from '../hooks/useCountdown';
-import { MapPin, Calendar, ArrowDown } from 'lucide-react'; // ExternalLink removido
+import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
 
 export const Hero: React.FC = () => {
@@ -8,11 +8,11 @@ export const Hero: React.FC = () => {
 
   return (
     <section 
-    id="hero" 
-    className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
-        }}
+      id="hero" 
+      className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
+      }}
     >
       {/* Badge Flutuante (Apenas Texto, sem Link) */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
@@ -77,7 +77,6 @@ export const Hero: React.FC = () => {
           Garante o teu Lugar
         </button>
       </div>
-      </div>      
       
       <div className="absolute bottom-10 animate-bounce text-white/30 hidden md:block">
         <ArrowDown className="w-10 h-10" />
