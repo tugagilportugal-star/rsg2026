@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCountdown } from '../hooks/useCountdown';
-import { MapPin, Calendar, ArrowDown, ExternalLink } from 'lucide-react';
+import { MapPin, Calendar, ArrowDown } from 'lucide-react'; // ExternalLink removido
 import { ASSETS } from '../config';
 
 export const Hero: React.FC = () => {
@@ -11,31 +11,20 @@ export const Hero: React.FC = () => {
     id="hero" 
     className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
         style={{
-          // Gradiente ajustado
           backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
         }}
     >
-      {/* Badge Flutuante */}
+      {/* Badge Flutuante (Apenas Texto, sem Link) */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
-        <a 
-           href="https://www.scrumalliance.org/events/regional"
-           target="_blank"
-           rel="noopener noreferrer"
-           className="pointer-events-auto bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg mt-24 hover:bg-brand-blue transition-colors cursor-pointer group flex items-center gap-2"
+        <div 
+           className="mt-24 bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg flex items-center gap-2"
         >
-           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs group-hover:text-white transition-colors">
+           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
              Official Scrum Alliance Event
            </span>
-           <ExternalLink className="w-3 h-3 text-brand-orange group-hover:text-white transition-colors" />
-        </a>
+        </div>
       </div>
 
-      {/* 
-         ALTERAÇÃO AQUI: 
-         Mudei de 'pt-20' para 'pt-36'. 
-         Isso empurra todo o bloco (Logo, Título, Datas) para baixo,
-         abrindo espaço para o Badge não ficar por cima.
-      */}
       <div className="relative z-10 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center flex-grow pt-36">
         <div className="flex flex-col items-center mb-10 animate-fade-in-up">
             <img 
@@ -88,6 +77,7 @@ export const Hero: React.FC = () => {
           Garante o teu Lugar
         </button>
       </div>
+      </div>      
       
       <div className="absolute bottom-10 animate-bounce text-white/30 hidden md:block">
         <ArrowDown className="w-10 h-10" />
