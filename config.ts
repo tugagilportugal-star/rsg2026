@@ -8,7 +8,7 @@ export const ASSETS = {
   // --- NOVOS LOGOS ---
   SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   // E esta também:
-  RSG_LOGO_2026: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png", 
+  RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png", 
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
