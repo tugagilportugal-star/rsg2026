@@ -14,7 +14,7 @@ export const Hero: React.FC = () => {
         backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.5), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
       }}
     >
-      {/* Badge Flutuante (Apenas Texto, sem Link) */}
+      {/* Badge Flutuante */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
         <div 
            className="mt-24 bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg flex items-center gap-2"
@@ -35,13 +35,18 @@ export const Hero: React.FC = () => {
             <span className="text-[10px] uppercase tracking-[0.4em] text-gray-400 font-bold">Apresenta</span>
         </div>
 
-        <h1 className="text-5xl md:text-8xl lg:text-9xl font-black mb-8 leading-tight tracking-tighter drop-shadow-2xl">
-          Regional Scrum Gathering <br/>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-blue-200 to-white">Lisbon 2026</span>
+        {/* TÍTULO PRINCIPAL */}
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight tracking-tighter drop-shadow-2xl text-white mb-2">
+          Regional Scrum Gathering
         </h1>
 
+        {/* LISBOA 2026 - Estilo Espaçado (Igual ao Print) */}
+        <div className="text-3xl md:text-5xl lg:text-6xl text-white font-normal uppercase tracking-[0.3em] md:tracking-[0.5em] mb-12 drop-shadow-lg">
+          Lisboa 2026
+        </div>
+
         <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-medium drop-shadow-md">
-          A maior celebração da agilidade em Portugal. Reserve a data.
+          A maior celebração da agilidade em Portugal regressa às margens do Tejo para uma experiência inesquecível.
         </p>
 
         <div className="grid grid-cols-4 gap-4 md:gap-8 mb-16 w-full md:w-auto">
@@ -72,7 +77,7 @@ export const Hero: React.FC = () => {
 
         <button 
           onClick={() => document.getElementById('get-involved')?.scrollIntoView({ behavior: 'smooth' })}
-          className="px-12 py-5 bg-brand-orange text-white font-black text-xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding"
+          className="px-12 py-5 bg-brand-orange text-white font-black text-xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-32"
         >
           Garante o teu Lugar
         </button>
