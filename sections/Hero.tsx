@@ -40,13 +40,13 @@ export const Hero: React.FC = () => {
           Regional Scrum Gathering
         </h1>
 
-        {/* LISBOA 2026 - Estilo Espaçado (Igual ao Print) */}
-        <div className="text-3xl md:text-5xl lg:text-6xl text-white font-normal uppercase tracking-[0.3em] md:tracking-[0.5em] mb-12 drop-shadow-lg">
+        {/* LISBOA 2026 - Fonte Fina (Light) */}
+        <div className="text-3xl md:text-5xl lg:text-6xl text-white font-light uppercase tracking-[0.3em] md:tracking-[0.5em] mb-12 drop-shadow-lg">
           Lisboa 2026
         </div>
 
         <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-medium drop-shadow-md">
-          A maior celebração da agilidade em Portugal. Reserve a data.
+          A maior celebração da agilidade em Portugal regressa às margens do Tejo para uma experiência inesquecível.
         </p>
 
         <div className="grid grid-cols-4 gap-4 md:gap-8 mb-16 w-full md:w-auto">
