@@ -1,9 +1,11 @@
 export const ASSETS = {
   HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
   LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
-  SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
+  SPONSOR_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   TUGAGIL_LOGO: "https://i.postimg.cc/BZ1vPQL9/logo-Branca.png",
-  RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png"
+  // Novo Logo RSG Lisbon 2026 (Quadrado Branco para o menu da esquerda)
+  RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png", 
+
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
   GALLERY_IMAGES: [
@@ -17,7 +19,7 @@ export const ASSETS = {
     "https://i.postimg.cc/qvcwJTXW/Tugagil-610.jpg",
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
   ],
-  // Services config (read from Vite env when available)
+  // Services config
   SERVICES: {
     SUPABASE_URL: (import.meta.env?.VITE_SUPABASE_URL as string) || "",
     SUPABASE_ANON_KEY: (import.meta.env?.VITE_SUPABASE_ANON_KEY as string) || "",
