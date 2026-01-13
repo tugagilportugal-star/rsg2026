@@ -3,24 +3,34 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-// --- TEMPLATE DE EMAIL (Embutido) ---
+// --- TEMPLATE DE EMAIL ---
 const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ticketId: string) => `
 <!DOCTYPE html>
 <html>
   <body style="font-family: sans-serif; background: #f4f4f5; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; text-align: center;">
-      <h1 style="color: #003F59;">Olá, ${name}!</h1>
-      <p style="color: #666;">O teu bilhete para o <strong>RSG Lisbon 2026</strong> está aqui.</p>
+    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h1 style="color: #003F59; font-size: 24px; margin-bottom: 10px;">Olá, ${name}!</h1>
+      <p style="color: #666; font-size: 16px; line-height: 1.5;">O teu lugar no <strong>Regional Scrum Gathering Lisbon 2026</strong> está garantido.</p>
       
-      <div style="border: 2px dashed #e5e7eb; padding: 20px; margin: 20px 0;">
-        <p style="font-weight: bold; color: #003F59; margin: 0;">${ticketName}</p>
-        <p style="color: #888; font-size: 12px; margin: 5px 0;">ID: ${ticketId}</p>
+      <div style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin: 30px 0; background: #fafafa;">
+        <p style="font-weight: bold; color: #003F59; margin: 0; font-size: 18px;">${ticketName}</p>
+        <p style="color: #888; font-size: 12px; margin: 5px 0 15px 0;">ID: ${ticketId}</p>
         
-        <!-- Imagem Direta da QuickChart -->
-        <img src="${qrUrl}" alt="QR Code" width="250" height="250" style="display:block; margin: 20px auto;" />
+        <img src="${qrUrl}" alt="QR Code" width="200" height="200" style="display:block; margin: 0 auto;" />
+        
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+          Apresenta este código na entrada do evento.
+        </p>
       </div>
 
-      <p style="color: #999; font-size: 12px;">Enviado por TugÁgil</p>
+      <p style="color: #666; font-size: 14px;">
+        Estamos ansiosos para te ver em Lisboa!
+        <br/>Se precisares de fatura, ela será enviada num e-mail separado.
+      </p>
+
+      <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+        <p style="color: #999; font-size: 12px; margin: 0;">Enviado por TugÁgil • RSG Lisbon 2026</p>
+      </div>
     </div>
   </body>
 </html>
@@ -45,8 +55,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
-  console.log("🔵 [WEBHOOK] Iniciado");
-
   let event: Stripe.Event;
 
   try {
@@ -54,16 +62,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const sig = req.headers['stripe-signature'] as string;
     event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
   } catch (err: any) {
-    console.error(`🔴 [ERRO] Assinatura inválida: ${err.message}`);
+    console.error(`❌ Webhook Signature Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log(`🔵 [PASSO 1] Sessão Stripe recebida: ${session.id}`);
+    console.log(`Processing Order for Session: ${session.id}`);
 
     try {
-      // 1. Order
+      // 1. Salvar Order
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
@@ -75,10 +83,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         })
         .select().single();
 
-      if (orderErr) throw new Error(`Erro DB Order: ${orderErr.message}`);
-      console.log(`🔵 [PASSO 2] Order salva: ${order.id}`);
+      if (orderErr) throw new Error(`Database Order Error: ${orderErr.message}`);
 
-      // 2. Ticket
+      // 2. Salvar Ticket
       const meta = session.metadata || {};
       const { data: ticket, error: ticketErr } = await supabase
         .from('tickets')
@@ -93,38 +100,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         })
         .select().single();
 
-      if (ticketErr) throw new Error(`Erro DB Ticket: ${ticketErr.message}`);
-      console.log(`🔵 [PASSO 3] Ticket salvo: ${ticket.id}`);
+      if (ticketErr) throw new Error(`Database Ticket Error: ${ticketErr.message}`);
 
-      // 3. Email
-      console.log(`🔵 [PASSO 4] A preparar envio de email...`);
-      
+      console.log(`✅ Ticket created: ${ticket.id}`);
+
+      // 3. Enviar E-mail
       const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticket.qr_code_secret)}&dark=003F59&size=300&margin=1`;
       
-      // Buscar nome do bilhete (Fallback se falhar)
       let ticketName = 'Ingresso';
       if (meta.ticket_type_id) {
          const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
          if (type) ticketName = type.name;
       }
 
-      // Envio explícito com await
       const emailRes = await resend.emails.send({
-        from: 'onboarding@resend.dev',
+        from: 'RSG Lisbon <onboarding@resend.dev>', // Lembre-se: em PROD, altere para seu domínio
         to: session.customer_details?.email as string,
         subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
         html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id)
       });
 
       if (emailRes.error) {
-        console.error("🔴 [ERRO RESEND API]:", emailRes.error);
+        console.error("⚠️ Resend Error:", emailRes.error);
       } else {
-        console.log("🟢 [SUCESSO] Email enviado! ID:", emailRes.data?.id);
+        console.log("📧 Email sent successfully.");
       }
 
     } catch (err: any) {
-      console.error('🔴 [ERRO CRÍTICO]:', err.message);
-      return res.status(500).send(err.message);
+      console.error('❌ Critical Process Error:', err.message);
+      return res.status(500).send('Internal Server Error');
     }
   }
 
