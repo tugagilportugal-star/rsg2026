@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
 // ==================================================================
-// 1. TEMPLATE DE EMAIL (QR Code)
+// 1. TEMPLATE DE EMAIL
 // ==================================================================
 const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ticketId: string) => `
 <!DOCTYPE html>
@@ -39,9 +39,9 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 `;
 
 // ==================================================================
-// 2. FUNÇÃO VENDUS (Cria e Envia)
+// 2. FUNÇÃO VENDUS (Agora aceita País Dinâmico)
 // ==================================================================
-async function createVendusInvoice(orderData: any, ticketName: string, nif?: string) {
+async function createVendusInvoice(orderData: any, ticketName: string, nif?: string, countryCode?: string) {
   const apiKey = process.env.VENDUS_API_KEY;
   const isStripeTest = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_');
 
@@ -50,19 +50,23 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     return null;
   }
 
+  // Lógica de NIF e País
   const finalNif = nif || '999999990';
+  
+  // Se não vier país do Stripe, assume PT. Se vier, usa o do Stripe (ex: ES, BR, US)
+  const finalCountry = countryCode || 'PT';
+
   const clientName = orderData.customer_name || 'Participante RSG';
   const amountEuro = orderData.total_amount / 100;
 
-  // 1. Payload de CRIAÇÃO
   const payload = {
     mode: isStripeTest ? 'tests' : 'normal',
-    type: 'FR', // Fatura-Recibo
+    type: 'FR', 
     client: {
       name: clientName,
       fiscal_id: finalNif,
-      email: orderData.customer_email, // Importante associar email ao cliente
-      country: "PT"
+      email: orderData.customer_email,
+      country: finalCountry // ✅ Agora é dinâmico
     },
     items: [
       {
@@ -74,13 +78,11 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
       }
     ],
     payments: [{ id: process.env.VENDUS_PAYMENT_ID || null, amount: amountEuro }],
-    // output: "pdf" -> REMOVIDO para recebermos JSON com o ID
   };
 
   try {
-    console.log(`🧾 Vendus: A criar fatura para NIF ${finalNif}...`);
+    console.log(`🧾 Vendus: Criando fatura (NIF: ${finalNif}, País: ${finalCountry})...`);
     
-    // Chamada 1: Criar Documento
     const response = await fetch('https://www.vendus.pt/ws/v1.1/documents/', {
       method: 'POST',
       headers: {
@@ -100,18 +102,14 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     const invoiceId = result.id;
     console.log(`✅ Fatura criada: #${invoiceId}`);
 
-    // Chamada 2: Enviar por E-mail (Disparar envio do Vendus)
-    console.log(`📨 Vendus: A enviar PDF para ${orderData.customer_email}...`);
-    
+    // Enviar Email via Vendus
     await fetch(`https://www.vendus.pt/ws/v1.1/documents/${invoiceId}/email/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Basic ' + Buffer.from(apiKey).toString('base64')
         },
-        body: JSON.stringify({
-            email: orderData.customer_email 
-        })
+        body: JSON.stringify({ email: orderData.customer_email })
     });
 
     return String(invoiceId);
@@ -161,7 +159,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`💰 Processando Order: ${session.id}`);
 
     try {
-      // 1. Order
+      // 1. Salvar Order
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
@@ -175,7 +173,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (orderErr) throw new Error(`DB Order Error: ${orderErr.message}`);
 
-      // 2. Ticket
+      // 2. Salvar Ticket
       const meta = session.metadata || {};
       const { data: ticket, error: ticketErr } = await supabase
         .from('tickets')
@@ -192,25 +190,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
 
-      // 3. Bilhete
+      // 3. Buscar nome do Bilhete
       let ticketName = 'Ingresso RSG 2026';
       if (meta.ticket_type_id) {
          const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
          if (type) ticketName = type.name;
       }
 
-      // 4. Fatura (Agora envia email automaticamente)
+      // 4. Gerar Fatura (Vendus)
       let customerNif = '';
-      if (session.customer_details?.tax_ids && session.customer_details.tax_ids.length > 0) {
-          customerNif = session.customer_details.tax_ids[0].value || '';
+      let customerCountry = 'PT'; // Default para PT se falhar
+
+      // Extrair NIF e País do Stripe
+      if (session.customer_details) {
+          // País
+          if (session.customer_details.address?.country) {
+              customerCountry = session.customer_details.address.country;
+          }
+          // NIF
+          if (session.customer_details.tax_ids && session.customer_details.tax_ids.length > 0) {
+              customerNif = session.customer_details.tax_ids[0].value || '';
+          }
       }
       
-      const invoiceId = await createVendusInvoice(order, ticketName, customerNif);
+      const invoiceId = await createVendusInvoice(order, ticketName, customerNif, customerCountry);
       if (invoiceId) {
           await supabase.from('orders').update({ invoice_id: invoiceId }).eq('id', order.id);
       }
 
-      // 5. Email do Bilhete
+      // 5. Enviar Email com Bilhete
       const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticket.qr_code_secret)}&dark=003F59&size=300&margin=1`;
       
       const emailRes = await resend.emails.send({
