@@ -125,7 +125,7 @@ export const Recap: React.FC = () => {
   };
 
   return (
-    <Section className="bg-brand-darkBlue text-white overflow-hidden relative">
+    <Section id="recap" className="bg-brand-darkBlue text-white overflow-hidden relative">
       <div className="text-center mb-16 relative z-10">
         <h2 className="text-4xl md:text-5xl font-black mb-6">Como foi o RSG Lisbon 2025?</h2>
         <div className="inline-block relative">
