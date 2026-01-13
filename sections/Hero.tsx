@@ -46,7 +46,7 @@ export const Hero: React.FC = () => {
         </div>
 
         <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-medium drop-shadow-md">
-          A maior celebração da agilidade em Portugal regressa às margens do Tejo para uma experiência inesquecível.
+          A maior celebração da agilidade em Portugal. Reserve a data.
         </p>
 
         <div className="grid grid-cols-4 gap-4 md:gap-8 mb-16 w-full md:w-auto">
