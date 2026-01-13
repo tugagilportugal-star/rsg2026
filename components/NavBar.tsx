@@ -43,15 +43,13 @@ export const Navbar: React.FC = () => {
 
             <div className="h-10 w-px bg-white/20 hidden sm:block"></div>
 
-            {/* Logo RSG 2026 */}
+            {/* Logo RSG 2026 (Sem fundo branco agora) */}
             <a href="#hero" className="hidden sm:block hover:scale-105 transition-transform" title="Voltar ao início">
-               <div className="bg-white rounded-lg p-1 h-14 w-14 flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={ASSETS.RSG_LOGO_2026} 
-                    alt="RSG Lisbon 2026" 
-                    className="w-full h-full object-contain"
-                  />
-               </div>
+               <img 
+                 src={ASSETS.RSG_LOGO_2026} 
+                 alt="RSG Lisbon 2026" 
+                 className="h-14 w-auto object-contain"
+               />
             </a>
           </div>
 
@@ -69,10 +67,10 @@ export const Navbar: React.FC = () => {
               ))}
             </div>
 
-            {/* Botão WAITLIST - Agora aponta para #waitlist */}
+            {/* Botão WAITLIST (Aponta para #waitlist) */}
             <div className="hidden md:flex items-center">
                 <a
-                href="#waitlist" 
+                href="#waitlist"
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5"
                 >
                 Waitlist
