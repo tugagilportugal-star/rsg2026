@@ -2,15 +2,15 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import QRCode from 'qrcode';
+// Removido: import QRCode from 'qrcode'; (Não é mais necessário)
 
 // ==================================================================
-// CONFIGURAÇÕES DO EMAIL (Inlined para evitar erro de import no Vercel)
+// CONFIGURAÇÕES DO EMAIL
 // ==================================================================
 const generateTicketEmail = (
   name: string,
   ticketName: string,
-  qrCodeDataUrl: string,
+  qrCodeUrl: string, // Agora é uma URL https, não base64
   ticketId: string
 ) => {
   return `
@@ -20,13 +20,11 @@ const generateTicketEmail = (
         <style>
           body { font-family: sans-serif; background-color: #f4f4f5; padding: 20px; }
           .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-          .logo { height: 50px; margin-bottom: 20px; }
           .h1 { color: #003F59; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
           .p { color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px; }
           .ticket-box { border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin: 20px 0; background: #fafafa; }
-          .qr-code { width: 200px; height: 200px; margin: 10px auto; }
+          .qr-code { width: 200px; height: 200px; margin: 10px auto; display: block; }
           .footer { margin-top: 30px; font-size: 12px; color: #999; }
-          .highlight { color: #F47A20; font-weight: bold; }
         </style>
       </head>
       <body>
@@ -38,7 +36,8 @@ const generateTicketEmail = (
             <p style="margin: 0; font-weight: bold; color: #003F59;">${ticketName}</p>
             <p style="margin: 5px 0 15px 0; color: #888; font-size: 12px;">ID: ${ticketId}</p>
             
-            <img src="${qrCodeDataUrl}" alt="QR Code" class="qr-code" />
+            <!-- Imagem via URL HTTPS segura -->
+            <img src="${qrCodeUrl}" alt="QR Code" class="qr-code" width="200" height="200" />
             
             <p style="font-size: 12px; color: #666; margin-top: 10px;">
               Apresente este código na entrada do evento.
@@ -47,7 +46,6 @@ const generateTicketEmail = (
 
           <p class="p">
             Estamos ansiosos para te ver em Lisboa!
-            <br/>Se precisares de fatura, ela será enviada num e-mail separado.
           </p>
 
           <div class="footer">
@@ -85,16 +83,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
-// Inicializa Resend com verificação
 let resend: Resend | null = null;
 if (process.env.RESEND_API_KEY) {
   resend = new Resend(process.env.RESEND_API_KEY);
-} else {
-  console.error("⚠️ RESEND_API_KEY não encontrada!");
 }
 
 // ==================================================================
-// HANDLER PRINCIPAL
+// HANDLER
 // ==================================================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -109,23 +104,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     if (!sig || !webhookSecret) {
-      console.error("❌ Faltam credenciais do Stripe (Signature ou Secret)");
-      return res.status(400).send('Webhook Credentials Error');
+      return res.status(400).send('Credentials Error');
     }
 
     event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
   } catch (err: any) {
-    console.error(`❌ Erro de assinatura do Webhook: ${err.message}`);
+    console.error(`❌ Webhook Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Lógica de Sucesso
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log(`💰 Processando sessão: ${session.id}`);
+    console.log(`💰 Processando: ${session.id}`);
 
     try {
-      // 1. Salvar Order
+      // 1. Order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -138,14 +131,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
 
-      if (orderError) {
-        console.error("❌ Erro ao criar Order:", orderError);
-        throw orderError;
-      }
+      if (orderError) throw orderError;
 
-      // 2. Salvar Ticket
+      // 2. Ticket
       const metadata = session.metadata || {};
-      
       const { data: ticketData, error: ticketError } = await supabase
         .from('tickets')
         .insert({
@@ -160,56 +149,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
 
-      if (ticketError) {
-        console.error("❌ Erro ao criar Ticket:", ticketError);
-        throw ticketError;
-      }
+      if (ticketError) throw ticketError;
 
-      console.log(`✅ Ticket criado: ${ticketData.id}`);
-
-      // 3. Enviar E-mail (se Resend estiver configurado)
+      // 3. Email com QR Code (API QuickChart)
       if (resend) {
-        try {
-          const qrCodeDataUrl = await QRCode.toDataURL(ticketData.qr_code_secret);
+        // Gera URL pública do QR Code (Cor azul escura para combinar com a marca)
+        // O secret do ticket é passado como texto
+        const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticketData.qr_code_secret)}&dark=003F59&size=300&margin=1`;
+        
+        const { data: typeData } = await supabase
+          .from('ticket_types')
+          .select('name')
+          .eq('id', metadata.ticket_type_id)
+          .single();
           
-          // Busca nome do bilhete
-          const { data: typeData } = await supabase
-            .from('ticket_types')
-            .select('name')
-            .eq('id', metadata.ticket_type_id)
-            .single();
-            
-          const ticketName = typeData?.name || 'Ingresso';
-          const emailDestino = session.customer_details?.email;
+        const ticketName = typeData?.name || 'Ingresso';
 
-          console.log(`📧 Tentando enviar email para: ${emailDestino}`);
-
-          const emailResponse = await resend.emails.send({
-            from: 'RSG Lisbon <onboarding@resend.dev>', 
-            to: emailDestino as string,
-            subject: `O teu bilhete para o RSG Lisbon 2026 🎟️`,
-            html: generateTicketEmail(
-              metadata.attendee_name, 
-              ticketName, 
-              qrCodeDataUrl, 
-              ticketData.id
-            ),
-          });
-
-          if (emailResponse.error) {
-             console.error("❌ Erro retornado pelo Resend:", emailResponse.error);
-          } else {
-             console.log("✅ Email enviado com sucesso ID:", emailResponse.data?.id);
-          }
-
-        } catch (emailErr) {
-          console.error("❌ Erro ao tentar enviar email:", emailErr);
-        }
+        await resend.emails.send({
+          from: 'RSG Lisbon <onboarding@resend.dev>',
+          to: session.customer_details?.email as string,
+          subject: `O teu bilhete chegou! 🎟️`,
+          html: generateTicketEmail(
+            metadata.attendee_name, 
+            ticketName, 
+            qrCodeUrl, 
+            ticketData.id
+          ),
+        });
       }
 
-    } catch (err: any) {
-      console.error('❌ Erro CRÍTICO no processamento:', err);
-      return res.status(500).send('Database/Processing Error');
+    } catch (err) {
+      console.error('❌ Erro processamento:', err);
+      return res.status(500).send('Error');
     }
   }
 
