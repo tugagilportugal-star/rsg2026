@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, Sun, Users, Zap, ExternalLink } from 'lucide-react';
+import { Sun, Zap } from 'lucide-react';
 import { ASSETS } from '../config';
 
 export const About: React.FC = () => {
@@ -8,15 +8,23 @@ export const About: React.FC = () => {
       <section id="about" className="py-20 md:py-32 relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-geometric opacity-30 pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          
+          {/* 
+             ALTERAÇÃO: items-center alinha verticalmente o Título com o Box.
+             text-center lg:text-left garante que no mobile fique centralizado e no desktop alinhado à esquerda.
+          */}
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center text-center lg:text-left">
+            
             <div className="relative">
-               <h2 className="text-4xl md:text-6xl font-black mb-8 text-brand-darkBlue leading-tight">
+               <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-brand-darkBlue leading-tight">
                  O que é o <br/>
                  <span className="text-brand-blue">Regional Scrum Gathering?</span>
                </h2>
-               <div className="w-24 h-2 bg-brand-orange mb-8 rounded-full"></div>
+               {/* A barra laranja também centraliza no mobile (mx-auto) e esquerda no desktop (lg:mx-0) */}
+               <div className="w-24 h-2 bg-brand-orange mb-8 rounded-full mx-auto lg:mx-0"></div>
             </div>
-            <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-blue-100">
+
+            <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-blue-100 text-left">
                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
                  O Regional Scrum Gathering é um evento oficial da <span className="font-bold text-brand-blue">Scrum Alliance®</span>, presente em dezenas de cidades pelo mundo.
                </p>
@@ -31,6 +39,7 @@ export const About: React.FC = () => {
                   <div className="italic text-brand-darkBlue font-bold text-right text-lg">"Conectar comunidades."</div>
                </div>
             </div>
+
           </div>
         </div>
       </section>
