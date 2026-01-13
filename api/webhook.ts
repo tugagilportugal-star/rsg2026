@@ -39,7 +39,7 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 `;
 
 // ==================================================================
-// 2. FUNÇÃO VENDUS (Agora aceita País Dinâmico)
+// 2. FUNÇÃO VENDUS (Corrigida para Consumidor Final)
 // ==================================================================
 async function createVendusInvoice(orderData: any, ticketName: string, nif?: string, countryCode?: string) {
   const apiKey = process.env.VENDUS_API_KEY;
@@ -50,13 +50,19 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     return null;
   }
 
-  // Lógica de NIF e País
-  const finalNif = nif || '999999990';
-  
-  // Se não vier país do Stripe, assume PT. Se vier, usa o do Stripe (ex: ES, BR, US)
-  const finalCountry = countryCode || 'PT';
+  // Lógica de Cliente:
+  // Se tem NIF -> Usa os dados do cliente.
+  // Se NÃO tem NIF -> Usa dados genéricos de Consumidor Final (para não dar erro A001)
+  let finalNif = nif;
+  let clientName = orderData.customer_name;
+  let finalCountry = countryCode || 'PT';
 
-  const clientName = orderData.customer_name || 'Participante RSG';
+  if (!finalNif) {
+      finalNif = '999999990';
+      clientName = 'Consumidor Final'; // Força este nome para evitar erro de validação
+      finalCountry = 'PT'; // Consumidor final 999999990 é sempre PT
+  }
+
   const amountEuro = orderData.total_amount / 100;
 
   const payload = {
@@ -65,8 +71,8 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     client: {
       name: clientName,
       fiscal_id: finalNif,
-      email: orderData.customer_email,
-      country: finalCountry // ✅ Agora é dinâmico
+      email: orderData.customer_email, // O email continua o do cliente para ele receber!
+      country: finalCountry
     },
     items: [
       {
@@ -81,7 +87,7 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
   };
 
   try {
-    console.log(`🧾 Vendus: Criando fatura (NIF: ${finalNif}, País: ${finalCountry})...`);
+    console.log(`🧾 Vendus: Criando para ${clientName} (NIF: ${finalNif})...`);
     
     const response = await fetch('https://www.vendus.pt/ws/v1.1/documents/', {
       method: 'POST',
@@ -119,6 +125,7 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     return null;
   }
 }
+
 
 // ==================================================================
 // 3. CONFIGURAÇÃO GERAL
