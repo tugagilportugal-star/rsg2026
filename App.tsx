@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Navbar } from './components/NavBar';
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';
@@ -9,14 +9,16 @@ import { Recap } from './sections/Recap';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
-import { Modal } from './components/UIComponents';
+import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
-import { ArrowUp, Send, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
-  const [showFab, setShowFab] = useState(false);
+  
+  // Modal de Sucesso de Compra
+  const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   // ✅ Admin só por rota
   const isAdminRoute = window.location.pathname === '/admin';
@@ -30,18 +32,17 @@ const App: React.FC = () => {
     );
   }
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowFab(window.scrollY > 500);
-    };
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+  // Verificar retorno do Stripe ao carregar
+  React.useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('success')) {
+      setSuccessModalOpen(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (query.get('canceled')) {
+      alert('A compra foi cancelada.');
+    }
   }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
     <div className="bg-white">
@@ -62,39 +63,17 @@ const App: React.FC = () => {
       <FAQ />
       <Footer />
 
-      {/* FABs */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
-        {/* Admin shortcut -> /admin */}
+      {/* FABs: Ícones de "Topo" e "Contato" removidos. */}
+      {/* Mantive apenas o Admin escondido. Se quiser remover tudo, apague esta div. */}
+      <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => (window.location.href = '/admin')}
-          className="w-12 h-12 rounded-full bg-gray-900 text-white shadow-lg flex items-center justify-center hover:bg-gray-800 transition"
+          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white transition flex items-center justify-center opacity-50 hover:opacity-100 shadow-sm"
           aria-label="Admin"
-          title="Admin"
+          title="Admin Area"
         >
-          <Settings className="w-5 h-5" />
+          <Settings className="w-4 h-4" />
         </button>
-
-        {/* Scroll to top */}
-        {showFab && (
-          <button
-            onClick={scrollToTop}
-            className="w-12 h-12 rounded-full bg-gray-900 text-white shadow-lg flex items-center justify-center hover:bg-gray-800 transition"
-            aria-label="Voltar ao topo"
-            title="Voltar ao topo"
-          >
-            <ArrowUp className="w-5 h-5" />
-          </button>
-        )}
-
-        {/* Quick contact (exemplo) */}
-        <a
-          href="#get-involved"
-          className="w-12 h-12 rounded-full bg-brand-orange text-white shadow-lg flex items-center justify-center hover:opacity-90 transition"
-          aria-label="Contato"
-          title="Contato"
-        >
-          <Send className="w-5 h-5" />
-        </a>
       </div>
 
       {/* Modals */}
@@ -112,6 +91,16 @@ const App: React.FC = () => {
         title="Torne-se um Apoiador"
       >
         <SupporterForm />
+      </Modal>
+
+      <Modal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setSuccessModalOpen(false)}
+        title="Pagamento Confirmado!"
+      >
+        <SuccessState 
+          message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." 
+        />
       </Modal>
     </div>
   );
