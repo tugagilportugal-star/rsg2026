@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
 // ==================================================================
-// 1. TEMPLATE DE EMAIL (QR Code e Aviso de Fatura)
+// 1. TEMPLATE DE EMAIL (QR Code)
 // ==================================================================
 const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ticketId: string) => `
 <!DOCTYPE html>
@@ -27,7 +27,7 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 
       <p style="color: #666; font-size: 14px;">
         Estamos ansiosos para te ver em Lisboa!
-        <br/>A tua fatura foi emitida e segue em anexo (ou num e-mail separado).
+        <br/>A tua fatura foi emitida e enviada num e-mail separado (via Vendus).
       </p>
 
       <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
@@ -39,7 +39,7 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 `;
 
 // ==================================================================
-// 2. FUNÇÃO VENDUS (Integração Simplificada)
+// 2. FUNÇÃO VENDUS (Cria e Envia)
 // ==================================================================
 async function createVendusInvoice(orderData: any, ticketName: string, nif?: string) {
   const apiKey = process.env.VENDUS_API_KEY;
@@ -50,19 +50,18 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     return null;
   }
 
-  // Dados do Cliente
-  const finalNif = nif || '999999990'; // Consumidor Final
+  const finalNif = nif || '999999990';
   const clientName = orderData.customer_name || 'Participante RSG';
   const amountEuro = orderData.total_amount / 100;
 
-  // Payload para criar Fatura-Recibo (FR)
+  // 1. Payload de CRIAÇÃO
   const payload = {
-    mode: isStripeTest ? 'tests' : 'normal', // Automático baseado no Stripe
-    type: 'FR', // Fatura-Recibo (Pagamento imediato)
+    mode: isStripeTest ? 'tests' : 'normal',
+    type: 'FR', // Fatura-Recibo
     client: {
       name: clientName,
       fiscal_id: finalNif,
-      email: orderData.customer_email,
+      email: orderData.customer_email, // Importante associar email ao cliente
       country: "PT"
     },
     items: [
@@ -70,22 +69,18 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
         reference: "RSG-TICKET",
         title: ticketName,
         qty: 1,
-        gross_price: amountEuro, // Preço com IVA incluído
-        tax_id: "NOR" // Código para IVA Normal (23%). Se der erro, verifique no painel do Vendus.
+        gross_price: amountEuro,
+        tax_id: "NOR"
       }
     ],
-    payments: [
-      {
-        id: process.env.VENDUS_PAYMENT_ID || null, // Se não tiver ID, o Vendus usa o padrão
-        amount: amountEuro
-      }
-    ],
-    output: "pdf" // Pede para retornar o link do PDF
+    payments: [{ id: process.env.VENDUS_PAYMENT_ID || null, amount: amountEuro }],
+    // output: "pdf" -> REMOVIDO para recebermos JSON com o ID
   };
 
   try {
-    console.log(`🧾 Vendus: A criar fatura (${isStripeTest ? 'TESTE' : 'REAL'}) para NIF ${finalNif}...`);
+    console.log(`🧾 Vendus: A criar fatura para NIF ${finalNif}...`);
     
+    // Chamada 1: Criar Documento
     const response = await fetch('https://www.vendus.pt/ws/v1.1/documents/', {
       method: 'POST',
       headers: {
@@ -103,10 +98,22 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
     }
 
     const invoiceId = result.id;
-    console.log(`✅ Fatura Vendus criada: #${invoiceId}`);
+    console.log(`✅ Fatura criada: #${invoiceId}`);
+
+    // Chamada 2: Enviar por E-mail (Disparar envio do Vendus)
+    console.log(`📨 Vendus: A enviar PDF para ${orderData.customer_email}...`);
     
-    // O Vendus envia por email automaticamente se configurado no painel deles,
-    // mas o documento foi criado com sucesso.
+    await fetch(`https://www.vendus.pt/ws/v1.1/documents/${invoiceId}/email/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + Buffer.from(apiKey).toString('base64')
+        },
+        body: JSON.stringify({
+            email: orderData.customer_email 
+        })
+    });
+
     return String(invoiceId);
 
   } catch (error) {
@@ -145,7 +152,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const sig = req.headers['stripe-signature'] as string;
     event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
   } catch (err: any) {
-    console.error(`❌ Webhook Signature Error: ${err.message}`);
+    console.error(`❌ Signature Error: ${err.message}`);
     return res.status(400).send(`Webhook Error`);
   }
 
@@ -154,7 +161,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`💰 Processando Order: ${session.id}`);
 
     try {
-      // 1. Salvar Order
+      // 1. Order
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
@@ -168,7 +175,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (orderErr) throw new Error(`DB Order Error: ${orderErr.message}`);
 
-      // 2. Salvar Ticket
+      // 2. Ticket
       const meta = session.metadata || {};
       const { data: ticket, error: ticketErr } = await supabase
         .from('tickets')
@@ -185,30 +192,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
 
-      // 3. Buscar nome do Bilhete
+      // 3. Bilhete
       let ticketName = 'Ingresso RSG 2026';
       if (meta.ticket_type_id) {
          const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
          if (type) ticketName = type.name;
       }
 
-      // 4. Gerar Fatura (Vendus)
+      // 4. Fatura (Agora envia email automaticamente)
       let customerNif = '';
       if (session.customer_details?.tax_ids && session.customer_details.tax_ids.length > 0) {
           customerNif = session.customer_details.tax_ids[0].value || '';
       }
       
       const invoiceId = await createVendusInvoice(order, ticketName, customerNif);
-      
       if (invoiceId) {
           await supabase.from('orders').update({ invoice_id: invoiceId }).eq('id', order.id);
       }
 
-      // 5. Enviar Email com Bilhete
+      // 5. Email do Bilhete
       const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticket.qr_code_secret)}&dark=003F59&size=300&margin=1`;
       
       const emailRes = await resend.emails.send({
-        from: 'RSG Lisbon <onboarding@resend.dev>', // Em PROD, mude para seu domínio
+        from: 'RSG Lisbon <onboarding@resend.dev>', 
         to: session.customer_details?.email as string,
         subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
         html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id)
