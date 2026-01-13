@@ -12,12 +12,11 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Menu atualizado (Sem Scrum Alliance, Recap e Waitlist tratados via botão/link direto)
   const navLinks = [
     { label: 'O EVENTO', href: '#about' },
     { label: 'EXPERIÊNCIA', href: '#features' },
     { label: 'SPEAKERS', href: '#speakers' },
-    { label: 'RECAP 2025', href: '#recap' }, // Direciona para a sessão de recap
+    { label: 'RECAP 2025', href: '#recap' }, // Aponta para a secção de vídeo/números
     { label: 'FAQ', href: '#faq' },
   ];
 
@@ -32,9 +31,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          {/* =========================================
-              LADO ESQUERDO: TUGÁGIL + RSG 2026
-             ========================================= */}
+          {/* --- ESQUERDA: LOGOS --- */}
           <div className="flex items-center gap-6">
             {/* Logo TugÁgil */}
             <a href="#hero" className="hover:opacity-80 transition-opacity">
@@ -48,24 +45,22 @@ export const Navbar: React.FC = () => {
             {/* Divisor Vertical */}
             <div className="h-10 w-px bg-white/20 hidden sm:block"></div>
 
-            {/* Logo RSG 2026 (Com fundo esbranquiçado) */}
-            <a href="#hero" className="hidden sm:block hover:scale-105 transition-transform">
-               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl p-2 h-14 w-14 flex items-center justify-center">
+            {/* Logo RSG 2026 */}
+            <a href="#hero" className="hidden sm:block hover:scale-105 transition-transform" title="Voltar ao início">
+               <div className="bg-white rounded-lg p-1 h-14 w-14 flex items-center justify-center overflow-hidden">
                   <img 
-                    src={ASSETS.RSG_LOGO_2026 || ASSETS.TUGAGIL_LOGO} // Fallback se não tiver configurado
+                    src={ASSETS.RSG_LOGO_2026} 
                     alt="RSG Lisbon 2026" 
-                    className="max-h-full max-w-full object-contain"
+                    className="w-full h-full object-contain"
                   />
                </div>
             </a>
           </div>
 
-          {/* =========================================
-              LADO DIREITO: MENU + WAITLIST + SA LOGO
-             ========================================= */}
+          {/* --- DIREITA: MENU + WAITLIST + SA LOGO --- */}
           <div className="flex items-center gap-8">
             
-            {/* Links de Texto (Alinhados à direita junto com o resto) */}
+            {/* Links de Texto */}
             <div className="hidden xl:flex items-center gap-6">
               {navLinks.map((link) => (
                 <a
@@ -78,7 +73,7 @@ export const Navbar: React.FC = () => {
               ))}
             </div>
 
-            {/* Botão WAITLIST (Laranja) */}
+            {/* Botão WAITLIST (Aponta para o formulário) */}
             <div className="hidden md:flex items-center">
                 <a
                 href="#get-involved"
@@ -91,27 +86,24 @@ export const Navbar: React.FC = () => {
             {/* Divisor Vertical */}
             <div className="h-10 w-px bg-white/20 hidden md:block"></div>
 
-            {/* Logo Scrum Alliance (Com fundo esbranquiçado) */}
+            {/* Logo Scrum Alliance (Mais pequeno e com tooltip) */}
             <a 
                 href="https://www.scrumalliance.org/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:block hover:scale-105 transition-transform"
-                title="Visitar Scrum Alliance"
+                className="hidden md:block hover:scale-105 transition-transform group"
+                title="Scrum Alliance" // Tooltip nativo do navegador
             >
-               {/* Container com fundo translúcido para garantir contraste */}
-               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-2 h-14 flex items-center justify-center min-w-[140px]">
+               <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl px-3 py-2 h-12 flex items-center justify-center min-w-[120px]">
                   <img 
                     src={ASSETS.SCRUM_ALLIANCE_LOGO} 
                     alt="Scrum Alliance" 
-                    className="h-8 w-auto object-contain brightness-0 invert opacity-90" 
-                    // Nota: Adicionei "brightness-0 invert" para deixar o logo branco se ele for preto original.
-                    // Se o seu logo já for colorido/branco, remova essas classes.
+                    className="h-6 w-auto object-contain brightness-0 invert opacity-90" 
                   />
                </div>
             </a>
 
-            {/* Menu Mobile Hambúrguer */}
+            {/* Menu Mobile */}
             <div className="xl:hidden flex items-center">
                 <button className="text-white p-2">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
