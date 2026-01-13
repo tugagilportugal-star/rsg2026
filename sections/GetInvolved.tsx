@@ -5,7 +5,7 @@ import { saveSubmission } from '../services/db';
 import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 // ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE
-const TICKET_TYPE_ID = 'COLE_SEU_UUID_AQUI'; 
+const TICKET_TYPE_ID = '{"idx":0,"id":"f14c53d4-5377-49b9-b87c-980b7b0aad0f","name":"Early Bird","price":3500,"currency":"eur","quantity_total":40,"quantity_sold":0,"active":true,"created_at":"2026-01-12 16:05:26.932602+00"}'; 
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
