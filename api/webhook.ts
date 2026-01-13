@@ -71,7 +71,7 @@ async function createVendusInvoice(orderData: any, ticketName: string, nif?: str
 
   const payload = {
     mode: isStripeTest ? 'tests' : 'normal',
-    type: 'FR',
+    type: isStripeTest ? 'PF' : 'FR',
     client: clientPayload,
     items: [
       {
