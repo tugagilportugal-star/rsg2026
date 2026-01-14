@@ -29,6 +29,7 @@ const getStyledEmail = (title: string, bodyContent: string, showButton: boolean 
         .btn { background-color: #F47A20; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block; }
         .footer { background-color: #fafafa; padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee; }
         strong { color: #003F59; }
+        a.social-link { text-decoration: none; font-weight: bold; }
       </style>
     </head>
     <body>
@@ -47,7 +48,7 @@ const getStyledEmail = (title: string, bodyContent: string, showButton: boolean 
           ` : ''}
         </div>
         <div class="footer">
-          <p>Enviado por TugÁgil • Regional Scrum Gathering Portugal</p>
+          <p>Enviado por TugÁgil • Regional Scrum Gathering Lisbon 2026</p>
         </div>
       </div>
     </body>
@@ -101,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         <p>Obrigado pelo interesse em patrocinar o evento. A nossa equipa está a analisar o seu pedido e vamos entrar em contacto muito em breve.</p>
         <p>Enquanto aguarda, pode consultar o nosso Media Kit com todos os detalhes:</p>
       `;
-      userHtml = getStyledEmail('Parceria em Análise', content, true); // true = mostra botão
+      userHtml = getStyledEmail('Parceria em Análise', content, true);
 
     } else if (type === 'Apoiadores') {
       userSubject = 'Obrigado pelo interesse em apoiar o RSG Lisbon 2026!';
@@ -113,12 +114,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       userHtml = getStyledEmail('Candidatura Recebida', content, false);
 
     } else {
-      // Waitlist
+      // --- WAITLIST (Com redes sociais) ---
       userSubject = 'Está na lista! RSG Lisbon 2026 🚀';
       const content = `
         <p>Olá, <strong>${name}</strong>.</p>
         <p>Confirmamos a sua inscrição na <strong>Waitlist Oficial</strong>.</p>
-        <p>Serás o primeiro a saber quando os bilhetes "Early Bird" estiverem disponíveis com condições especiais. Aguarde!</p>
+        <p>Será o primeiro a saber quando os primeiros bilhetes estiverem disponíveis com condições especiais.</p>
+        
+        <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;" />
+        
+        <p>Acompanhe-nos nas redes sociais e fique atento(a) às novidades:</p>
+        <p style="font-size: 15px;">
+          👉 <a href="https://www.linkedin.com/showcase/scrum-gathering-regional-lisboa-2026/" class="social-link" style="color: #0077b5;">LinkedIn</a>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          👉 <a href="https://www.instagram.com/rsglisbon/" class="social-link" style="color: #E1306C;">Instagram</a>
+        </p>
       `;
       userHtml = getStyledEmail('Inscrição Confirmada', content, false);
     }
@@ -135,7 +145,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // --- B. EMAIL PARA O ADMIN (NOTIFICAÇÃO SIMPLES) ---
     if (type !== 'Lista de Interessados') {
-      // ✅ ASSUNTO LIMPO (Sem [NOVO LEAD])
       const adminSubject = `${type}: ${name}`; 
       
       const adminHtml = `
