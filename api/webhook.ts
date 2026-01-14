@@ -27,7 +27,7 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 
       <p style="color: #666; font-size: 14px;">
         Estamos ansiosos para te ver em Lisboa!
-        <br/>A tua fatura foi emitida e enviada num e-mail separado (via Vendus).
+        <br/>A tua fatura/recibo foi emitida e enviada num e-mail separado (via Bill.pt).
       </p>
 
       <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
@@ -39,116 +39,148 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 `;
 
 // ==================================================================
-// 2. FUNÇÃO VENDUS (Corrigida: NIF Opcional + LOGS DE DEBUG)
+// 2. FUNÇÃO BILL.PT (DEV no Stripe Test / PROD no Stripe Live)
 // ==================================================================
-async function createVendusInvoice(orderData: any, ticketName: string, nif?: string, countryCode?: string) {
-  const apiKey = process.env.VENDUS_API_KEY;
+async function createBillPtDocument(orderData: any, ticketName: string, nif?: string, countryCode?: string) {
+  const billToken = process.env.BILL_API_TOKEN;
 
-  // ✅ DEBUG: confirmar se a Stripe key é test ou live (sem expor a chave inteira)
   const stripeKeyPrefix = (process.env.STRIPE_SECRET_KEY || '').slice(0, 8);
   const isStripeTest = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test_');
 
-  if (!apiKey) {
-    console.error('⚠️ Vendus: API Key não configurada.');
+  if (!billToken) {
+    console.error('⚠️ Bill.pt: BILL_API_TOKEN não configurado.');
     return null;
   }
 
+  const baseUrl = 'https://app.bill.pt';
+
   const amountEuro = orderData.total_amount / 100;
 
-  // Constrói o objeto do cliente dinamicamente
-  const clientPayload: any = {
-    name: orderData.customer_name || 'Participante RSG',
+  // Tipificação:
+  // - A doc do Bill mostra tipos como FT (Fatura), FR (Fatura Recibo), etc.
+  // - Por default usamos FR (faz sentido para pagamento imediato).
+  const tipificacao = (process.env.BILL_DOC_TIPIFICACAO || 'FR').toUpperCase();
+
+  // IVA: se não definires, uso 23
+  const taxPercent = Number(process.env.BILL_TAX_PERCENT ?? '23');
+  const safeTaxPercent = Number.isFinite(taxPercent) ? taxPercent : 23;
+
+  // Contato (cliente) - se não enviares nif/codigo, pode ficar “Consumidor Final”,
+  // mas aqui vamos enviar pelo menos nome/email e opcionalmente nif.
+  const contato: any = {
+    nome: orderData.customer_name || 'Participante RSG',
     email: orderData.customer_email,
-    country: countryCode || 'PT',
+    pais: (countryCode || 'PT').toUpperCase(),
   };
 
-  // SÓ adiciona o NIF se ele realmente existir e não for vazio
   if (nif && nif.trim() !== '') {
-    clientPayload.fiscal_id = nif;
+    contato.nif = nif.trim();
   }
-  // Se não tiver NIF, não enviamos a chave 'fiscal_id'.
-  // O Vendus assume automaticamente que é Consumidor Final.
 
-  const payload = {
-    mode: isStripeTest ? 'tests' : 'normal',
-    type: isStripeTest ? 'PF' : 'FR',
-    client: clientPayload,
-    items: [
+  // Payload do Bill.pt (Create Document)
+  // Doc: POST api/1.0/documentos, campos principais:
+  // - tipificacao
+  // - contato (array)
+  // - produtos (linhas)
+  // - terminado (finalizar)
+  const payload: any = {
+    // redundância “segura”: alguns endpoints aceitam api_token no body
+    api_token: billToken,
+
+    tipificacao,
+    contato,
+
+    produtos: [
       {
-        reference: 'RSG-TICKET',
-        title: ticketName,
-        qty: 1,
-        gross_price: amountEuro,
-        tax_id: 'NOR',
+        nome: ticketName,
+        quantidade: 1,
+        preco_unitario: amountEuro,
+        imposto: safeTaxPercent, // 23 => IVA 23%
+        servico: 1, // ticket é mais “serviço” do que produto físico
       },
     ],
-    payments: [{ id: process.env.VENDUS_PAYMENT_ID || null, amount: amountEuro }],
+
+    terminado: 1,
+
+    observacoes: `Stripe session: ${orderData.stripe_session_id || 'N/A'}`,
+    lingua: 'pt',
   };
 
   try {
-    console.log(
-      `🧾 Vendus: Criando fatura para ${clientPayload.name} (NIF: ${clientPayload.fiscal_id || 'N/A'})...`
-    );
+    console.log(`🧾 Bill.pt: Criando documento para ${contato.nome} (NIF: ${contato.nif || 'N/A'})...`);
 
-    // ✅ DEBUG: logs importantes para identificar porque está indo como "normal"
-    console.log('🔎 DEBUG Vendus/Stripe:', {
+    console.log('🔎 DEBUG Bill/Stripe:', {
       stripeKeyPrefix,
       isStripeTest,
-      vendusMode: payload.mode,
-      docType: payload.type,
-      clientCountry: clientPayload.country,
-      hasFiscalId: !!clientPayload.fiscal_id,
+      baseUrl,
+      tipificacao,
+      clientCountry: contato.pais,
+      hasFiscalId: !!contato.nif,
       amountEuro,
-      vendusPaymentIdIsSet: !!process.env.VENDUS_PAYMENT_ID,
+      taxPercent: safeTaxPercent,
     });
 
-    const response = await fetch('https://www.vendus.pt/ws/v1.1/documents/', {
+    const response = await fetch(`${baseUrl}/api/1.0/documentos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Basic ' + Buffer.from(apiKey).toString('base64'),
+        Authorization: `Bearer ${billToken}`, // recomendado pela doc (header)
       },
       body: JSON.stringify(payload),
     });
 
-    // ✅ DEBUG: status code e headers básicos (sem dados sensíveis)
-    console.log('🔎 DEBUG Vendus response:', {
+    console.log('🔎 DEBUG Bill.pt response:', {
       ok: response.ok,
       status: response.status,
       statusText: response.statusText,
     });
 
-    const result = await response.json();
+    const result = await response.json().catch(() => null);
 
     if (!response.ok) {
-      console.error('❌ Vendus Error:', JSON.stringify(result));
+      console.error('❌ Bill.pt Error:', JSON.stringify(result));
       return null;
     }
 
-    const invoiceId = result.id;
+    const docId = result?.id;
+    if (!docId) {
+      console.error('❌ Bill.pt: resposta sem "id":', JSON.stringify(result));
+      return null;
+    }
 
-    console.log(`✅ Fatura criada: #${invoiceId}`);
+    console.log(`✅ Bill.pt documento criado: #${docId}`);
 
-    // Enviar Email via Vendus
-    const emailResponse = await fetch(`https://www.vendus.pt/ws/v1.1/documents/${invoiceId}/email/`, {
+    // Enviar por email (Bill.pt)
+    const emailResp = await fetch(`${baseUrl}/api/1.0/documentos/enviar-por-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Basic ' + Buffer.from(apiKey).toString('base64'),
+        Authorization: `Bearer ${billToken}`,
       },
-      body: JSON.stringify({ email: orderData.customer_email }),
+      body: JSON.stringify({
+        api_token: billToken,
+        id: docId,
+        email: orderData.customer_email,
+      }),
     });
 
-    // ✅ DEBUG: status do email
-    console.log('🔎 DEBUG Vendus email response:', {
-      ok: emailResponse.ok,
-      status: emailResponse.status,
-      statusText: emailResponse.statusText,
+    console.log('🔎 DEBUG Bill.pt email response:', {
+      ok: emailResp.ok,
+      status: emailResp.status,
+      statusText: emailResp.statusText,
     });
 
-    return String(invoiceId);
+    const emailResult = await emailResp.json().catch(() => null);
+    if (!emailResp.ok) {
+      console.error('⚠️ Bill.pt email error:', JSON.stringify(emailResult));
+      // Não bloqueia: documento foi criado, só falhou o envio
+    } else {
+      console.log('📨 Bill.pt: documento enviado por e-mail.');
+    }
+
+    return String(docId);
   } catch (error) {
-    console.error('❌ Vendus Exception:', error);
+    console.error('❌ Bill.pt Exception:', error);
     return null;
   }
 }
@@ -171,14 +203,13 @@ const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SU
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ==================================================================
-// 4. HANDLER PRINCIPAL (com log no início para confirmar invocação)
+// 4. HANDLER PRINCIPAL
 // ==================================================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // ✅ DEBUG: confirmar que a function foi chamada
   console.log('🔔 Webhook hit', {
     ts: new Date().toISOString(),
     method: req.method,
-    url: (req as any).url, // em alguns runtimes pode vir vazio, mas ajuda quando vem
+    url: (req as any).url,
   });
 
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
@@ -235,41 +266,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // 3. Buscar nome do Bilhete
       let ticketName = 'Ingresso RSG 2026';
       if (meta.ticket_type_id) {
-        const { data: type } = await supabase
-          .from('ticket_types')
-          .select('name')
-          .eq('id', meta.ticket_type_id)
-          .single();
+        const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
         if (type) ticketName = type.name;
       }
 
-      // 4. Gerar Fatura (Vendus)
+      // 4. Criar Documento Bill.pt
       let customerNif = '';
-      let customerCountry = 'PT'; // Default para PT se falhar
+      let customerCountry = 'PT';
 
-      // Extrair NIF e País do Stripe
       if (session.customer_details) {
-        // País
         if (session.customer_details.address?.country) {
           customerCountry = session.customer_details.address.country;
         }
-        // NIF
-        // ⚠️ Observação: dependendo da versão/tipo de objeto, tax_ids pode não vir aqui.
-        // Mas mantive como está no teu código.
+        // dependendo do teu setup do Stripe, tax_ids pode não vir aqui
         if ((session.customer_details as any).tax_ids && (session.customer_details as any).tax_ids.length > 0) {
           customerNif = (session.customer_details as any).tax_ids[0].value || '';
         }
       }
 
-      const invoiceId = await createVendusInvoice(order, ticketName, customerNif, customerCountry);
-      if (invoiceId) {
-        await supabase.from('orders').update({ invoice_id: invoiceId }).eq('id', order.id);
+      // reforço: a função precisa do stripe_session_id no orderData (pra observações)
+      const orderDataForBill = { ...order, stripe_session_id: session.id };
+
+      const billDocId = await createBillPtDocument(orderDataForBill, ticketName, customerNif, customerCountry);
+      if (billDocId) {
+        await supabase.from('orders').update({ invoice_id: billDocId }).eq('id', order.id);
       }
 
       // 5. Enviar Email com Bilhete
-      const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
-        ticket.qr_code_secret
-      )}&dark=003F59&size=300&margin=1`;
+      const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticket.qr_code_secret)}&dark=003F59&size=300&margin=1`;
 
       const emailRes = await resend.emails.send({
         from: 'RSG Lisbon <onboarding@resend.dev>',
