@@ -6,7 +6,7 @@ import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText } from '
 
 // ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
 // (Assumindo que já está configurado das conversas anteriores)
-const TICKET_TYPE_ID = 'COLE_SEU_UUID_AQUI'; 
+const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f'; 
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
