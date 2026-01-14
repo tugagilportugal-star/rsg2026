@@ -13,8 +13,49 @@ const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseA
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const resend = new Resend(RESEND_API_KEY);
 
+// --- FUNÇÃO PARA GERAR O LAYOUT BONITO (HTML) ---
+const getStyledEmail = (title: string, bodyContent: string, showButton: boolean = false) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; background-color: #f4f4f5; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .header { background-color: #003F59; padding: 30px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .content { padding: 40px 30px; color: #333333; line-height: 1.6; font-size: 16px; }
+        .button-container { text-align: center; margin-top: 30px; }
+        .btn { background-color: #F47A20; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block; }
+        .footer { background-color: #fafafa; padding: 20px; text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #eeeeee; }
+        strong { color: #003F59; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>RSG Lisbon 2026</h1>
+        </div>
+        <div class="content">
+          <h2 style="color: #F47A20; margin-top: 0;">${title}</h2>
+          ${bodyContent}
+          
+          ${showButton ? `
+            <div class="button-container">
+              <a href="${MEDIA_KIT_URL}" class="btn">Descarregar Media Kit</a>
+            </div>
+          ` : ''}
+        </div>
+        <div class="footer">
+          <p>Enviado por TugÁgil • Regional Scrum Gathering Portugal</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Apenas POST
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, message: 'Method not allowed' });
   }
@@ -27,17 +68,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ ok: false, message: 'Missing required fields' });
     }
 
-    // 1. SALVAR NO SUPABASE (Tabela leads)
+    // 1. SALVAR NO SUPABASE
     const { error: dbError } = await supabase
       .from('leads')
       .insert({
-        type, // "Patrocínios e Parcerias", "Apoiadores" ou "Lista de Interessados"
+        type,
         name,
         email,
         phone: phone || null,
         company: company || null,
         role: role || null,
-        message: message || expectations || null, // Mapeia expectations da waitlist para message
+        message: message || expectations || null,
         portfolio: portfolio || null,
       });
 
@@ -46,73 +87,72 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw dbError;
     }
 
-    // 2. ENVIAR EMAILS (Lógica condicional)
+    // 2. PREPARAR EMAILS
     const emailPromises = [];
 
-    // --- A. EMAIL PARA O UTILIZADOR (Confirmação) ---
+    // --- A. EMAIL PARA O UTILIZADOR (DESIGN BONITO) ---
     let userSubject = '';
     let userHtml = '';
 
     if (type === 'Patrocínios e Parcerias') {
-      userSubject = 'Patrocínio | RSG Lisbon 2026!';
-      userHtml = `
+      userSubject = 'Recebemos o seu interesse em patrocinar o RSG Lisbon 2026!';
+      const content = `
         <p>Olá, <strong>${name}</strong>.</p>
-        <p>Obrigado pelo interesse em patrocinar o Regional Scrum Gathering Lisbon 2026.</p>
-        <p>A nossa equipa está a analisar o seu pedido e vamos entrar em contacto em breve para falarmos.</p>
-        <p>Enquanto aguarda, aproveite para consultar o nosso <strong>Media Kit</strong> com todos os detalhes e níveis de parceria:</p>
-        <p>
-          <a href="${MEDIA_KIT_URL}" style="background-color: #F47A20; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-            Descarregar Media Kit
-          </a>
-        </p>
-        <p>Cumprimentos,<br/>Equipa TugÁgil</p>
+        <p>Obrigado pelo interesse em patrocinar o evento. A nossa equipa irá analisar o seu pedido e entrará em contacto muito em breve.</p>
+        <p>Enquanto aguarda, pode consultar o nosso Media Kit com todos os detalhes:</p>
       `;
+      userHtml = getStyledEmail('Parceria em Análise', content, true); // true = mostra botão
+
     } else if (type === 'Apoiadores') {
-      userSubject = 'Apoio | RSG Lisbon 2026!';
-      userHtml = `
+      userSubject = 'Obrigado por querer apoiar o RSG Lisbon 2026!';
+      const content = `
         <p>Olá, <strong>${name}</strong>.</p>
-        <p>Ficamos muito felizes com a sua vontade de contribuir com a comunidade e estar connosco no RSG Lisbon 2026.</p>
-        <p>Recebemos os seus dados e o link do seu portfólio. Vamos analisar as necessidades do evento e entraremos em contacto se houver um "match"!</p>
-        <p>Cumprimentos,<br/>Equipa TugÁgil</p>
+        <p>Ficamos muito felizes com a sua vontade de contribuir com a comunidade.</p>
+        <p>Recebemos os seus dados e o portfólio. Vamos analisar as necessidades do evento e falaremos consigo se houver um "match"!</p>
       `;
+      userHtml = getStyledEmail('Candidatura Recebida', content, false);
+
     } else {
-      // Default: Waitlist (Lista de Interessados)
+      // Waitlist
       userSubject = 'Está na lista! RSG Lisbon 2026 🚀';
-      userHtml = `
+      const content = `
         <p>Olá, <strong>${name}</strong>.</p>
-        <p>Confirmamos a sua inscrição na <strong>Waitlist Oficial</strong> do Regional Scrum Gathering Lisbon 2026.</p>
-        <p>Serás o primeiro a saber quando os bilhetes "Early Bird" estiverem disponíveis com condições especiais.</p>
-        <p>Até breve!<br/>Equipa TugÁgil</p>
+        <p>Confirmamos a sua inscrição na <strong>Waitlist Oficial</strong>.</p>
+        <p>Será o primeiro a saber quando os bilhetes "Early Bird" estiverem disponíveis.</p>
       `;
+      userHtml = getStyledEmail('Inscrição Confirmada', content, false);
     }
 
-    // Enviar para o Utilizador
+    // Envio Usuario
     emailPromises.push(
       resend.emails.send({
-        from: 'RSG Lisbon <onboarding@resend.dev>', // Em PROD: usar 'no-reply@seudominio.com'
+        from: 'RSG Lisbon <onboarding@resend.dev>',
         to: email,
         subject: userSubject,
         html: userHtml,
       })
     );
 
-    // --- B. EMAIL PARA O ADMIN (Apenas para Patrocínios e Apoiadores) ---
-    // Não enviamos alerta de Waitlist para não encher a caixa de entrada
+    // --- B. EMAIL PARA O ADMIN (NOTIFICAÇÃO SIMPLES) ---
     if (type !== 'Lista de Interessados') {
-      const adminSubject = `[NOVO LEAD] ${type}: ${name} - ${company || ''}`;
+      // ✅ ASSUNTO LIMPO (Sem [NOVO LEAD])
+      const adminSubject = `${type}: ${name}`; 
+      
       const adminHtml = `
-        <h2>Nova submissão recebida</h2>
-        <ul>
-          <li><strong>Tipo:</strong> ${type}</li>
-          <li><strong>Nome:</strong> ${name}</li>
-          <li><strong>Email:</strong> ${email}</li>
-          <li><strong>Telefone:</strong> ${phone}</li>
-          <li><strong>Empresa:</strong> ${company || '-'}</li>
-          <li><strong>Cargo:</strong> ${role || '-'}</li>
-          <li><strong>Portfólio:</strong> ${portfolio || '-'}</li>
-        </ul>
-        <h3>Mensagem:</h3>
-        <p>${message || expectations || '-'}</p>
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2 style="color: #003F59;">Nova submissão: ${type}</h2>
+          <hr/>
+          <p><strong>Nome:</strong> ${name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          <p><strong>Telefone:</strong> ${phone}</p>
+          <p><strong>Empresa:</strong> ${company || '-'}</p>
+          <p><strong>Cargo:</strong> ${role || '-'}</p>
+          <p><strong>Portfólio:</strong> ${portfolio || '-'}</p>
+          <div style="background: #f4f4f5; padding: 15px; margin-top: 10px; border-radius: 5px;">
+            <strong>Mensagem:</strong><br/>
+            ${message || expectations || '-'}
+          </div>
+        </div>
       `;
 
       emailPromises.push(
@@ -125,9 +165,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
     }
 
-    // Aguarda todos os envios
     await Promise.allSettled(emailPromises);
-
     return res.status(200).json({ ok: true });
 
   } catch (error) {
