@@ -104,10 +104,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       userHtml = getStyledEmail('Parceria em Análise', content, true); // true = mostra botão
 
     } else if (type === 'Apoiadores') {
-      userSubject = 'Obrigado por querer apoiar o RSG Lisbon 2026!';
+      userSubject = 'Obrigado pelo interesse em apoiar o RSG Lisbon 2026!';
       const content = `
         <p>Olá, <strong>${name}</strong>.</p>
-        <p>Ficamos muito felizes com a sua vontade de contribuir com a comunidade.</p>
+        <p>Ficamos muito felizes com a sua vontade de contribuir com a comunidade e estar connosco no RSG Lisbon 2026.</p>
         <p>Recebemos os seus dados e o portfólio. Vamos analisar as necessidades do evento e falaremos consigo se houver um "match"!</p>
       `;
       userHtml = getStyledEmail('Candidatura Recebida', content, false);
@@ -118,7 +118,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const content = `
         <p>Olá, <strong>${name}</strong>.</p>
         <p>Confirmamos a sua inscrição na <strong>Waitlist Oficial</strong>.</p>
-        <p>Será o primeiro a saber quando os bilhetes "Early Bird" estiverem disponíveis.</p>
+        <p>Serás o primeiro a saber quando os bilhetes "Early Bird" estiverem disponíveis com condições especiais. Aguarde!</p>
       `;
       userHtml = getStyledEmail('Inscrição Confirmada', content, false);
     }
