@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
-import { FormType, InterestFormData, SponsorFormData, SupporterFormData } from '../types';
+import { FormType, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
-import { Handshake, Camera, BellRing, ArrowRight } from 'lucide-react';
+import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText } from 'lucide-react';
+
+// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
+// (Assumindo que já está configurado das conversas anteriores)
+const TICKET_TYPE_ID = 'COLE_SEU_UUID_AQUI'; 
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
@@ -10,14 +14,16 @@ interface GetInvolvedProps {
 }
 
 /* =========================
-   WAITLIST FORM (Lista de Interessados - Sem Pagamento)
+   MAIN SECTION (WAITLIST FORM RESTORED)
 ========================= */
 export const GetInvolved: React.FC<GetInvolvedProps> = ({
   setSponsorModalOpen,
   setSupporterModalOpen
 }) => {
-  // Estado para o formulário de Waitlist
-  const [formData, setFormData] = useState<InterestFormData>({
+  // ... (Mantendo o código da Waitlist que recuperamos anteriormente) ...
+  // Vou usar a versão "Waitlist" que você pediu para restaurar na mensagem anterior
+  
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
@@ -35,16 +41,14 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
     setStatus('loading');
     setError(null);
 
-    // Salva como "Lista de Interessados" no Supabase
+    // Usa FormType.INTEREST para salvar na tabela como Waitlist
     const ok = await saveSubmission(FormType.INTEREST, formData);
 
     if (ok) {
       setStatus('success');
     } else {
       setStatus('idle');
-      setError(
-        'Ocorreu um erro ao salvar. Tente novamente mais tarde ou contacte-nos.'
-      );
+      setError('Ocorreu um erro ao salvar. Tente novamente mais tarde.');
     }
   };
 
@@ -97,12 +101,11 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       </div>
 
       <div className="max-w-2xl mx-auto">
-        {/* Box WAITLIST (ID waitlist para âncora do menu) */}
+        {/* Box WAITLIST (Restaurado conforme pedido) */}
         <div 
             id="waitlist" 
             className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden scroll-mt-32"
         >
-          {/* Barra Decorativa Topo */}
           <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
 
           {status === 'success' ? (
@@ -111,7 +114,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
               onReset={() => {
                 setStatus('idle');
                 setError(null);
-                setFormData({ ...formData, name: '', email: '', phone: '', expectations: '', gdpr: false });
+                setFormData({ name: '', email: '', phone: '', company: '', role: '', expectations: '', gdpr: false });
               }}
             />
           ) : (
@@ -155,7 +158,6 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                   onChange={e => setFormData({ ...formData, expectations: e.target.value })}
                 />
 
-                {/* GDPR */}
                 <div className="flex items-start pt-2">
                   <input
                     id="gdpr"
@@ -192,11 +194,12 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 };
 
 /* =========================
-   SPONSOR FORM
+   SPONSOR FORM (ATUALIZADO COM LINK DO PDF)
 ========================= */
 export const SponsorForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
   const [formData, setFormData] = useState<SponsorFormData>({
     name: '',
@@ -255,6 +258,18 @@ export const SponsorForm: React.FC = () => {
         value={formData.message}
         onChange={e => setFormData({ ...formData, message: e.target.value })}
       />
+
+      {/* --- LINK DO PDF NO FORMULÁRIO --- */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+         <FileText className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
+         <p className="text-sm text-gray-600">
+            Ainda não viu as opções? <br/>
+            <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
+               Aceda ao nosso Media Kit aqui
+            </a> 
+            {' '}e descubra como potenciar a sua marca.
+         </p>
+      </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
