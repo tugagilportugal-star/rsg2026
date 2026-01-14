@@ -65,7 +65,7 @@ export const Speakers: React.FC = () => {
            </h3>
            
            <p className="text-gray-500 mb-8 max-w-md mx-auto leading-relaxed">
-             Estamos a preparar uma seleção incrível de oradores e keynotes para celebrar esta edição histórica.
+             Estamos a preparar uma seleção incrível de keynotes e speakers para celebrar esta edição de 2026.
            </p>
 
            <span className="inline-block bg-blue-50 text-brand-blue px-6 py-2 rounded-full text-sm font-bold tracking-wider uppercase">
