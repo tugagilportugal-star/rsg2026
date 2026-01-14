@@ -98,7 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       userSubject = 'Recebemos o seu interesse em patrocinar o RSG Lisbon 2026!';
       const content = `
         <p>Olá, <strong>${name}</strong>.</p>
-        <p>Obrigado pelo interesse em patrocinar o evento. A nossa equipa irá analisar o seu pedido e entrará em contacto muito em breve.</p>
+        <p>Obrigado pelo interesse em patrocinar o evento. A nossa equipa está a analisar o seu pedido e vamos entrar em contacto muito em breve.</p>
         <p>Enquanto aguarda, pode consultar o nosso Media Kit com todos os detalhes:</p>
       `;
       userHtml = getStyledEmail('Parceria em Análise', content, true); // true = mostra botão
