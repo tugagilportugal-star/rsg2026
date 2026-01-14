@@ -1,17 +1,21 @@
 import React from 'react';
 import { Section } from '../components/UIComponents';
 import { ASSETS } from '../config';
+import { Download } from 'lucide-react';
 
 interface SponsorsProps {
     onOpenSponsorModal: () => void;
 }
 
 export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
+
   return (
     <Section id="sponsors" className="bg-white border-t border-gray-100">
       <div className="text-center">
         <span className="text-sm font-bold tracking-[0.3em] text-gray-400 uppercase mb-8 block">Patrocinador Oficial</span>
         
+        {/* LOGO SCRUM ALLIANCE */}
         <div className="flex justify-center mb-10 transform hover:scale-105 transition-transform duration-500">
             <a 
                 href="https://www.scrumalliance.org/" 
@@ -26,15 +30,12 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                     className="w-full h-auto drop-shadow-lg"
                     onError={(e) => {
                         e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}
                 />
-                <div className="hidden text-5xl font-black text-brand-darkBlue tracking-tighter">
-                    ScrumAlliance<span className="text-brand-orange text-6xl">.</span>
-                </div>
             </a>
         </div>
 
+        {/* SEPARADOR */}
         <div className="mt-16 relative">
             <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-gray-200"></div>
@@ -44,15 +45,29 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </div>
         </div>
 
+        {/* CARTÃO "QUER A SUA EMPRESA AQUI?" */}
         <div className="mt-12 p-8 md:p-12 bg-gradient-to-br from-brand-darkBlue to-brand-blue rounded-3xl shadow-2xl text-white max-w-5xl mx-auto overflow-hidden relative">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
             
-            <div className="relative z-10">
+            <div className="relative z-10 flex flex-col items-center">
                 <h3 className="text-3xl md:text-4xl font-black mb-6">Quer a sua empresa aqui?</h3>
-                <p className="text-xl md:text-2xl text-blue-100 mb-10 font-light max-w-3xl mx-auto">
+                
+                <p className="text-xl md:text-2xl text-blue-100 mb-8 font-light max-w-3xl mx-auto">
                     Junte-se a nós e conecte a sua empresa a <span className="font-bold text-white">líderes e praticantes de agilidade</span> em Portugal.
                 </p>
+
+                {/* LINK DO MEDIA KIT (NOVO) */}
+                <a 
+                    href={MEDIA_KIT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors mb-10 border-b border-blue-200/30 hover:border-white pb-1 group"
+                >
+                    <Download className="w-5 h-5 group-hover:animate-bounce" />
+                    <span className="font-medium">Acede as vantagens exclusivas e os níveis de parceria no nosso Media Kit Oficial.</span>
+                </a>
+
                 <button 
                     onClick={onOpenSponsorModal}
                     className="px-10 py-4 bg-brand-orange hover:bg-white hover:text-brand-orange text-white text-lg md:text-xl font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:-translate-y-1"
