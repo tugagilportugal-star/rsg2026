@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
 import { FormType, InterestFormData, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
-import { Handshake, Camera, BellRing, ArrowRight } from 'lucide-react';
+import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText, BellRing } from 'lucide-react';
+
+// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
+const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f'; 
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
@@ -10,14 +13,13 @@ interface GetInvolvedProps {
 }
 
 /* =========================
-   WAITLIST FORM (Lista de Interessados - Sem Pagamento)
+   MAIN SECTION (WAITLIST FORM RESTORED)
 ========================= */
 export const GetInvolved: React.FC<GetInvolvedProps> = ({
   setSponsorModalOpen,
   setSupporterModalOpen
 }) => {
-  // Estado para o formulário de Waitlist
-  const [formData, setFormData] = useState<InterestFormData>({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
@@ -35,16 +37,13 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
     setStatus('loading');
     setError(null);
 
-    // Salva como "Lista de Interessados" no Supabase
     const ok = await saveSubmission(FormType.INTEREST, formData);
 
     if (ok) {
       setStatus('success');
     } else {
       setStatus('idle');
-      setError(
-        'Ocorreu um erro ao salvar. Tente novamente mais tarde ou contacte-nos.'
-      );
+      setError('Ocorreu um erro ao salvar. Tente novamente mais tarde.');
     }
   };
 
@@ -97,12 +96,11 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       </div>
 
       <div className="max-w-2xl mx-auto">
-        {/* Box WAITLIST (ID waitlist para âncora do menu) */}
+        {/* Box WAITLIST */}
         <div 
             id="waitlist" 
             className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden scroll-mt-32"
         >
-          {/* Barra Decorativa Topo */}
           <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
 
           {status === 'success' ? (
@@ -111,7 +109,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
               onReset={() => {
                 setStatus('idle');
                 setError(null);
-                setFormData({ ...formData, name: '', email: '', phone: '', expectations: '', gdpr: false });
+                setFormData({ name: '', email: '', phone: '', company: '', role: '', expectations: '', gdpr: false });
               }}
             />
           ) : (
@@ -155,7 +153,6 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                   onChange={e => setFormData({ ...formData, expectations: e.target.value })}
                 />
 
-                {/* GDPR */}
                 <div className="flex items-start pt-2">
                   <input
                     id="gdpr"
@@ -197,6 +194,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 export const SponsorForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
   const [formData, setFormData] = useState<SponsorFormData>({
     name: '',
@@ -256,6 +254,17 @@ export const SponsorForm: React.FC = () => {
         onChange={e => setFormData({ ...formData, message: e.target.value })}
       />
 
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+         <FileText className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
+         <p className="text-sm text-gray-600">
+            Ainda não viu as opções? <br/>
+            <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
+               Aceda ao nosso Media Kit aqui
+            </a> 
+            {' '}e descubra como a sua organização pode ser parte do RSG Lisbon 2026.
+         </p>
+      </div>
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
           {error}
@@ -297,13 +306,13 @@ export const SupporterForm: React.FC = () => {
     } else {
       setStatus('idle');
       setError(
-        'Ocorreu um erro. Tente novamente mais tarde ou contacte tugagilportugal@gmail.com'
+        'Ocorreu um erro. Tente novamente mais tarde ou contacte tuga@tugagil.com'
       );
     }
   };
 
   if (status === 'success') {
-    return <SuccessState message="Obrigado por querer apoiar o RSG!" />;
+    return <SuccessState message="Obrigado pelo interesse em apoiar o RSG Lisbon 2026!" />;
   }
 
   return (
