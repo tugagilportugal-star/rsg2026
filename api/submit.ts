@@ -113,22 +113,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `;
       userHtml = getStyledEmail('Candidatura Recebida', content, false);
 
-    } else {
-      // --- WAITLIST (Com redes sociais) ---
+ } else {
+      // --- WAITLIST (Com Ícones Sociais) ---
       userSubject = 'Está na lista! RSG Lisbon 2026 🚀';
       const content = `
         <p>Olá, <strong>${name}</strong>.</p>
         <p>Confirmamos a sua inscrição na <strong>Waitlist Oficial</strong>.</p>
-        <p>Será o primeiro a saber quando os primeiros bilhetes estiverem disponíveis com condições especiais.</p>
+        <p>Será o primeiro a saber quando os bilhetes "Early Bird" estiverem disponíveis.</p>
         
         <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;" />
         
-        <p>Acompanhe-nos nas redes sociais e fique atento(a) às novidades:</p>
-        <p style="font-size: 15px;">
-          👉 <a href="https://www.linkedin.com/showcase/scrum-gathering-regional-lisboa-2026/" class="social-link" style="color: #0077b5;">LinkedIn</a>
-          &nbsp;&nbsp;&nbsp;&nbsp;
-          👉 <a href="https://www.instagram.com/rsglisbon/" class="social-link" style="color: #E1306C;">Instagram</a>
-        </p>
+        <p style="text-align: center; color: #666;">Acompanhe-nos nas redes sociais e fique atento(a) às novidades do evento:</p>
+        
+        <div class="social-icons">
+          <a href="https://www.linkedin.com/showcase/scrum-gathering-regional-lisboa-2026/" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/145/145807.png" alt="LinkedIn" title="LinkedIn" style="width: 36px; height: 36px;" />
+          </a>
+          
+          <a href="https://www.instagram.com/rsglisbon/" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" title="Instagram" style="width: 36px; height: 36px;" />
+          </a>
+        </div>
       `;
       userHtml = getStyledEmail('Inscrição Confirmada', content, false);
     }
