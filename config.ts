@@ -10,10 +10,10 @@ export const ASSETS = {
   SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   
   // Mantenha o link do seu logo branco do RSG aqui
-  RSG_LOGO_2026: "LINK_DA_IMAGEM_DO_RSG_2026_BRANCO.png", 
+  RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png", 
 
-  RECAP_VIDEO: "",
-  RECAP_VIDEO_POSTER: "https://img..jpg",
+  RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
+  RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
   
   GALLERY_IMAGES: [
     "https://i.postimg.cc/CxX1nH6r/Tugagil-18.jpg",
