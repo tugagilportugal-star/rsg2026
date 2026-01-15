@@ -1,13 +1,15 @@
 export const ASSETS = {
   HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
   LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
-  // Logos Antigos (Mantidos para compatibilidade)
+  
   SPONSOR_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
-  // Logo TugÁgil
-  TUGAGIL_LOGO: "https://i.postimg.cc/BZ1vPQL9/logo-Branca.png",
-  // --- NOVOS LOGOS ---
+  
+  // ATUALIZADO: Novo Logo TugÁgil
+  TUGAGIL_LOGO: "https://i.postimg.cc/VvvVTxmP/Group-23.png",
+  
   SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
-  // E esta também:
+  
+  // Mantenha o link do seu logo branco do RSG aqui
   RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png", 
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
@@ -25,7 +27,6 @@ export const ASSETS = {
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
   ],
   
-  // Services config
   SERVICES: {
     SUPABASE_URL: (import.meta.env?.VITE_SUPABASE_URL as string) || "",
     SUPABASE_ANON_KEY: (import.meta.env?.VITE_SUPABASE_ANON_KEY as string) || "",
