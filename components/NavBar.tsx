@@ -42,14 +42,15 @@ export const Navbar: React.FC = () => {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
-            {/* --- ESQUERDA --- */}
-            <div className="flex items-center gap-4 sm:gap-6">
-              <a href="#hero" className="hover:opacity-80 transition-opacity">
-                <img src={ASSETS.TUGAGIL_LOGO} alt="TugÁgil" className="h-8 sm:h-10 w-auto" />
-              </a>
-              <div className="h-8 sm:h-10 w-px bg-white/20 hidden sm:block"></div>
-              <a href="#hero" className="hidden sm:block hover:scale-105 transition-transform" title="Voltar ao início">
-                 <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon 2026" className="h-12 sm:h-14 w-auto object-contain" />
+            {/* --- ESQUERDA: APENAS LOGO RSG (Aumentado e visível no mobile) --- */}
+            <div className="flex items-center">
+              <a href="#hero" className="hover:scale-105 transition-transform" title="Voltar ao início">
+                 {/* Aumentado de h-14 para h-16 (mobile) e h-20 (desktop) */}
+                 <img 
+                   src={ASSETS.RSG_LOGO_2026} 
+                   alt="RSG Lisbon 2026" 
+                   className="h-16 sm:h-20 w-auto object-contain"
+                 />
               </a>
             </div>
 
@@ -112,7 +113,7 @@ export const Navbar: React.FC = () => {
       >
         {/* Header Mobile */}
         <div className="flex justify-between items-center p-6 border-b border-white/10">
-             <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-10 w-auto" />
+             <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-12 w-auto" />
              <button 
                onClick={() => setIsMobileMenuOpen(false)}
                className="text-white p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -135,7 +136,6 @@ export const Navbar: React.FC = () => {
               </a>
             ))}
 
-            {/* Botão de Destaque no Mobile */}
             <a
               href="#waitlist"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -145,11 +145,13 @@ export const Navbar: React.FC = () => {
             </a>
         </div>
 
-        {/* Footer Mobile (Bem separado) */}
+        {/* Footer Mobile */}
         <div className="p-8 bg-black/20 flex flex-col items-center gap-4 border-t border-white/10">
              <span className="text-white/40 text-xs font-bold uppercase tracking-widest">Organização</span>
              <div className="flex items-center gap-6">
-                <img src={ASSETS.TUGAGIL_LOGO} alt="TugÁgil" className="h-6 opacity-60" />
+                <a href="https://www.tugagil.com/" target="_blank" rel="noopener noreferrer">
+                    <img src={ASSETS.TUGAGIL_LOGO} alt="TugÁgil" className="h-8 object-contain hover:opacity-80 transition-opacity" />
+                </a>
                 <div className="h-6 w-px bg-white/20"></div>
                 <a 
                     href="https://www.scrumalliance.org/"
