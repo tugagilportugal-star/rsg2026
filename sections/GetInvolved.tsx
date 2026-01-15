@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
 import { FormType, InterestFormData, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
-import { Handshake, Camera, BellRing, ArrowRight } from 'lucide-react';
+import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText, BellRing } from 'lucide-react';
+
+// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
+const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f'; 
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
@@ -10,13 +13,13 @@ interface GetInvolvedProps {
 }
 
 /* =========================
-   WAITLIST FORM
+   MAIN SECTION (WAITLIST FORM RESTORED)
 ========================= */
 export const GetInvolved: React.FC<GetInvolvedProps> = ({
   setSponsorModalOpen,
   setSupporterModalOpen
 }) => {
-  const [formData, setFormData] = useState<InterestFormData>({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
@@ -40,9 +43,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       setStatus('success');
     } else {
       setStatus('idle');
-      setError(
-        'Ocorreu um erro. Tente novamente mais tarde ou contacte tugagilportugal@gmail.com'
-      );
+      setError('Ocorreu um erro ao salvar. Tente novamente mais tarde.');
     }
   };
 
@@ -58,7 +59,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-5xl mx-auto">
-        {/* Box Patrocínios - Hover Laranja */}
+        {/* Box Patrocínios */}
         <div className="bg-white p-8 md:p-10 rounded-3xl border-2 border-gray-100 hover:border-brand-orange transition-all duration-300 hover:shadow-2xl flex flex-col items-center text-center shadow-lg group">
           <div className="bg-brand-orange/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
             <Handshake className="w-12 h-12 text-brand-orange" />
@@ -76,7 +77,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
           </Button>
         </div>
 
-        {/* Box Apoiadores - Hover Azul */}
+        {/* Box Apoiadores */}
         <div className="bg-white p-8 md:p-10 rounded-3xl border-2 border-gray-100 hover:border-brand-blue transition-all duration-300 hover:shadow-2xl flex flex-col items-center text-center shadow-lg group">
           <div className="bg-brand-blue/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
             <Camera className="w-12 h-12 text-brand-blue" />
@@ -95,9 +96,11 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       </div>
 
       <div className="max-w-2xl mx-auto">
-        {/* Box Waitlist - Barra Multicolorida */}
-        <div className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden">
-          {/* Barra Decorativa Topo */}
+        {/* Box WAITLIST */}
+        <div 
+            id="waitlist" 
+            className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden scroll-mt-32"
+        >
           <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
 
           {status === 'success' ? (
@@ -106,11 +109,12 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
               onReset={() => {
                 setStatus('idle');
                 setError(null);
+                setFormData({ name: '', email: '', phone: '', company: '', role: '', expectations: '', gdpr: false });
               }}
             />
           ) : (
             <>
-              <div className="flex flex-col items-center text-center mb-10 pt-2">
+              <div className="flex flex-col items-center text-center mb-10 pt-4">
                 <div className="bg-gray-100 p-3 rounded-full mb-4">
                   <BellRing className="w-6 h-6 text-gray-700" />
                 </div>
@@ -118,65 +122,64 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                 <p className="text-gray-500">Seja o primeiro a saber das novidades e bilhetes.</p>
               </div>
       
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                label="Nome Completo"
-                required
-                value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-              />
-              <Input
-                label="E-mail"
-                type="email"
-                required
-                value={formData.email}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-              />
-              <Input
-                label="WhatsApp"
-                required
-                value={formData.phone}
-                onChange={e => setFormData({ ...formData, phone: e.target.value })}
-              />
-              <Input
-                label="Empresa"
-                value={formData.company}
-                onChange={e => setFormData({ ...formData, company: e.target.value })}
-              />
-              <Textarea
-                label="O que mais espera encontrar no RSG 2026?"
-                value={formData.expectations}
-                onChange={e => setFormData({ ...formData, expectations: e.target.value })}
-              />
-
-              {/* GDPR */}
-              <div className="flex items-start">
-                <input
-                  id="gdpr"
-                  type="checkbox"
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  label="Nome Completo"
                   required
-                  checked={formData.gdpr}
-                  onChange={e => setFormData({ ...formData, gdpr: e.target.checked })}
-                  className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
                 />
-                <label htmlFor="gdpr" className="ml-3 text-sm text-gray-600">
-                  Aceito a{' '}
-                  <a href="#" className="text-brand-blue font-bold">
-                    Política de Privacidade
-                  </a>.
-                </label>
-              </div>
+                <Input
+                  label="E-mail"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                />
+                <Input
+                  label="WhatsApp"
+                  required
+                  value={formData.phone}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                />
+                <Input
+                  label="Empresa"
+                  value={formData.company}
+                  onChange={e => setFormData({ ...formData, company: e.target.value })}
+                />
+                <Textarea
+                  label="O que mais espera encontrar no RSG 2026?"
+                  value={formData.expectations}
+                  onChange={e => setFormData({ ...formData, expectations: e.target.value })}
+                />
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
-                  {error}
+                <div className="flex items-start pt-2">
+                  <input
+                    id="gdpr"
+                    type="checkbox"
+                    required
+                    checked={formData.gdpr}
+                    onChange={e => setFormData({ ...formData, gdpr: e.target.checked })}
+                    className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
+                  />
+                  <label htmlFor="gdpr" className="ml-3 text-sm text-gray-600">
+                    Aceito a{' '}
+                    <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
+                      Política de Privacidade
+                    </a>.
+                  </label>
                 </div>
-              )}
 
-              <Button type="submit" isLoading={status === 'loading'} className="w-full">
-                Entrar na Waitlist <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </form>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
+                    {error}
+                  </div>
+                )}
+
+                <Button type="submit" isLoading={status === 'loading'} className="w-full">
+                  Entrar na Waitlist <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </form>
             </>
           )}
         </div>
@@ -191,6 +194,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 export const SponsorForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
   const [formData, setFormData] = useState<SponsorFormData>({
     name: '',
@@ -250,6 +254,17 @@ export const SponsorForm: React.FC = () => {
         onChange={e => setFormData({ ...formData, message: e.target.value })}
       />
 
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+         <FileText className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
+         <p className="text-sm text-gray-600">
+            Ainda não viu as opções? <br/>
+            <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
+               Aceda ao nosso Media Kit aqui
+            </a> 
+            {' '}e descubra como a sua organização pode ser parte do RSG Lisbon 2026.
+         </p>
+      </div>
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
           {error}
@@ -291,13 +306,13 @@ export const SupporterForm: React.FC = () => {
     } else {
       setStatus('idle');
       setError(
-        'Ocorreu um erro. Tente novamente mais tarde ou contacte tugagilportugal@gmail.com'
+        'Ocorreu um erro. Tente novamente mais tarde ou contacte tuga@tugagil.com'
       );
     }
   };
 
   if (status === 'success') {
-    return <SuccessState message="Obrigado por querer apoiar o RSG!" />;
+    return <SuccessState message="Obrigado pelo interesse em apoiar o RSG Lisbon 2026!" />;
   }
 
   return (
