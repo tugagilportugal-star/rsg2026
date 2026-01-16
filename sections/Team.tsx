@@ -2,7 +2,7 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Linkedin } from 'lucide-react';
 
-// ✅ Interface atualizada (sem 'role')
+// Interface sem 'role', conforme ajustamos antes
 interface TeamMember {
   name: string;
   image: string;
@@ -57,18 +57,27 @@ export const Team: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 max-w-6xl mx-auto">
+      {/* 
+         LAYOUT FLEXBOX:
+         - justify-center: Centraliza tudo.
+         - flex-wrap: Permite quebrar linha.
+         - gap: Espaçamento.
+         - max-w-5xl: Controla a largura para forçar a quebra correta no Desktop (4 por linha).
+      */}
+      <div className="flex flex-wrap justify-center gap-x-8 gap-y-12 max-w-5xl mx-auto">
         {team.map((member, idx) => (
-          <div key={idx} className="group text-center">
-            {/* Foto com efeito hover */}
-            <div className="relative mb-4 mx-auto w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2 border-2 border-transparent group-hover:border-brand-orange">
+          // Largura fixa no item para garantir alinhamento (w-36 mobile, w-48 desktop)
+          <div key={idx} className="group text-center w-36 md:w-48">
+            
+            {/* FOTO REDONDA (rounded-full) */}
+            <div className="relative mb-4 mx-auto w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-2 border-4 border-white group-hover:border-brand-orange">
               <img 
                 src={member.image} 
                 alt={member.name} 
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
               />
               
-              {/* Overlay LinkedIn (Aparece no hover) */}
+              {/* Overlay LinkedIn (Redondo também) */}
               <a 
                 href={member.linkedin} 
                 target="_blank" 
@@ -79,7 +88,7 @@ export const Team: React.FC = () => {
               </a>
             </div>
 
-            <h3 className="text-sm md:text-base font-bold text-brand-darkBlue mb-1">
+            <h3 className="text-sm md:text-base font-bold text-brand-darkBlue mb-1 leading-tight px-2">
               {member.name}
             </h3>
           </div>
