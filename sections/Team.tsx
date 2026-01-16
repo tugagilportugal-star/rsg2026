@@ -2,9 +2,9 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Linkedin } from 'lucide-react';
 
+// ✅ Interface atualizada (sem 'role')
 interface TeamMember {
   name: string;
-  role: string;
   image: string;
   linkedin: string;
 }
@@ -13,8 +13,8 @@ export const Team: React.FC = () => {
   const team: TeamMember[] = [
     {
       name: "Raquel Bartz Alves",
-      image: "https://ui-avatars.com/api/?name=Raquel+Bartz&background=003F59&color=fff&size=400", // Substitua pela foto real
-      linkedin: "https://www.linkedin.com/in/raquelbartz/" // Verifique se o link está correto
+      image: "https://ui-avatars.com/api/?name=Raquel+Bartz&background=003F59&color=fff&size=400", 
+      linkedin: "https://www.linkedin.com/in/raquelbartz/" 
     },
     {
       name: "Sylvia Grec",
@@ -82,8 +82,6 @@ export const Team: React.FC = () => {
             <h3 className="text-sm md:text-base font-bold text-brand-darkBlue mb-1">
               {member.name}
             </h3>
-            {/* Opcional: Se não quiser mostrar "Core Team" para todos, pode remover esta linha */}
-            {/* <p className="text-xs text-gray-500 uppercase tracking-wide">{member.role}</p> */}
           </div>
         ))}
       </div>
