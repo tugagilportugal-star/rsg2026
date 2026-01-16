@@ -339,7 +339,12 @@ async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string 
         // pode ser JSON em string
         try {
           const parsed = JSON.parse(output);
-          fromOutput = parsed?.pdf?.url || parsed?.url || parsed?.output || null;
+          fromOutput =
+            parsed?.pdfUrl ||
+            parsed?.pdf?.url ||
+            parsed?.url ||
+            parsed?.output ||
+            null;
         } catch {
           // ignora
         }
@@ -348,8 +353,13 @@ async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string 
 
     // Caso 2: output é objeto
     if (!fromOutput && output && typeof output === 'object') {
-      fromOutput = (output as any)?.pdf?.url || (output as any)?.url || null;
+      fromOutput =
+        (output as any)?.pdfUrl ||
+        (output as any)?.pdf?.url ||
+        (output as any)?.url ||
+        null;
     }
+
 
     const signedUrl = fromPdf || fromOutput;
 
