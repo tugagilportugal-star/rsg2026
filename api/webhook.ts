@@ -41,51 +41,31 @@ async function safeReadJson(resp: Response): Promise<any> {
   }
 }
 
-async function getInvoiceXpressPdfUrl(documentId: string, tries = 8, delayMs = 1200): Promise<string | null> {
-  const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
-  const apiKey = process.env.INVOICEXPRESS_API_KEY;
-  if (!account || !apiKey) return null;
+async function downloadInvoiceXpressDraftPdf(params: {
+  invoiceId: string;
+  accountId: string; // ex: 165325
+  locale?: string;   // ex: 'pt'
+}): Promise<Buffer | null> {
+  const { invoiceId, accountId, locale = 'pt' } = params;
 
   const url =
-    `https://${account}.app.invoicexpress.com/api/pdf/${encodeURIComponent(documentId)}.json` +
-    `?second_copy=false&api_key=${encodeURIComponent(apiKey)}`;
+    `https://invoicexpress-documents-pdfs.s3.eu-west-1.amazonaws.com/production/` +
+    `${accountId}/${invoiceId}/` +
+    `production-${accountId}-Invoice-${invoiceId}-false-draft-${locale}-1.pdf`;
 
-  for (let i = 1; i <= tries; i++) {
-    const resp = await fetch(url, { method: 'GET', headers: { Accept: 'application/json' } });
-    const data = await safeReadJson(resp);
-
-    if (!resp.ok) {
-      console.error('❌ InvoiceXpress PDF Error:', JSON.stringify(data));
-      return null;
-    }
-
-    const pdfUrl = data?.pdf?.url || data?.url || null;
-
-    console.log('🔎 DEBUG InvoiceXpress generate-pdf poll:', {
-      attempt: i,
-      hasUrl: !!pdfUrl,
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    console.error('❌ InvoiceXpress S3 PDF download error:', {
+      status: resp.status,
+      statusText: resp.statusText,
     });
-
-    if (pdfUrl) return pdfUrl;
-
-    await new Promise((res) => setTimeout(res, delayMs));
+    return null;
   }
 
-  return null;
+  const arr = await resp.arrayBuffer();
+  return Buffer.from(arr);
 }
 
-
-async function fetchPdfWithRetry(pdfUrl: string, tries = 6, delayMs = 1200): Promise<Buffer | null> {
-  for (let i = 0; i < tries; i++) {
-    const r = await fetch(pdfUrl);
-    if (r.ok) {
-      const arr = await r.arrayBuffer();
-      return Buffer.from(arr);
-    }
-    await new Promise((res) => setTimeout(res, delayMs));
-  }
-  return null;
-}
 
 async function sendInvoicePdfByEmailResend(
   to: string,
@@ -437,48 +417,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!isTest && autoFinalize) {
           await finalizeInvoiceXpressInvoice(ix.invoiceId);
         }
-  // ✅ 2) Em TESTE, gerar PDF e enviar por email (end-to-end)
+ 
+        // ✅ 2) Em TESTE, gerar PDF e enviar por email (end-to-end)
         if (isTest) {
-          const pdfUrl = await getInvoiceXpressPdfUrl(ix.invoiceId);
-          console.log('🔎 DEBUG InvoiceXpress pdfUrl:', pdfUrl);
+          const accountId = process.env.INVOICEXPRESS_ACCOUNT_ID;
 
-          if (pdfUrl) {
-            const pdfBytes = await fetchPdfWithRetry(pdfUrl);
+          if (!accountId) {
+            console.warn('⚠️ INVOICEXPRESS_ACCOUNT_ID não configurado. Não vou tentar descarregar PDF.');
+          } else {
+            const pdfBytes = await downloadInvoiceXpressDraftPdf({
+            invoiceId: ix.invoiceId,
+            accountId,
+            locale: 'pt',
+            });
+
             if (pdfBytes) {
               const sendRes = await sendInvoicePdfByEmailResend(
-                order.customer_email,
-                pdfBytes,
-                ix.invoiceId,
-                order.customer_name || meta.attendee_name || 'Participante',
-                ticketName,
-                String(ix.raw?.invoice?.total ?? amountEuro.toFixed(2))
+              order.customer_email,
+              pdfBytes,
+              ix.invoiceId,
+              order.customer_name || meta.attendee_name || 'Participante',
+              ticketName,
+              String(ix.raw?.invoice?.total ?? amountEuro.toFixed(2))
               );
+
               if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
               else console.log('📩 Email com PDF da fatura (teste) enviado.');
             } else {
-            console.warn('⚠️ PDF ainda não ficou pronto a tempo (teste).');
+            console.warn('⚠️ Não consegui descarregar o PDF do InvoiceXpress (S3).');
             }
-          } else {
-            console.warn('⚠️ Não consegui obter a URL do PDF (teste).');
           }
         }
-      }
-
-      // 5) Enviar Email com Bilhete
-      const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
+        
+        // 5) Enviar Email com Bilhete
+        const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
         ticket.qr_code_secret
-      )}&dark=003F59&size=300&margin=1`;
+        )}&dark=003F59&size=300&margin=1`;
 
-      const emailRes = await resend.emails.send({
-        from: 'RSG Lisbon <onboarding@resend.dev>',
-        to: session.customer_details?.email as string,
-        subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
-        html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id),
-      });
+        const emailRes = await resend.emails.send({
+          from: 'RSG Lisbon <onboarding@resend.dev>',
+          to: session.customer_details?.email as string,
+          subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
+          html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id),
+        });
 
-      if (emailRes.error) console.error('⚠️ Resend Error:', emailRes.error);
-      else console.log('📧 Email enviado.');
-    } catch (err: any) {
+        if (emailRes.error) console.error('⚠️ Resend Error:', emailRes.error);
+        else console.log('📧 Email enviado.');
+      } catch (err: any) {
       console.error('❌ Critical Error:', err.message);
       return res.status(500).send('Internal Server Error');
     }
