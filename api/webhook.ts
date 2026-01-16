@@ -320,24 +320,56 @@ async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string 
     `https://${account}.app.invoicexpress.com/api/pdf/${encodeURIComponent(documentId)}.json` +
     `?second_copy=false&api_key=${encodeURIComponent(apiKey)}`;
 
-  // tenta várias vezes porque é async
   for (let attempt = 1; attempt <= 12; attempt++) {
     const resp = await fetch(endpoint, { headers: { Accept: 'application/json' } });
     const data = await safeReadJson(resp);
+
+    // ✅ Tenta extrair URL de vários formatos possíveis
+    const fromPdf = data?.pdf?.url || data?.url || null;
+
+    let fromOutput: string | null = null;
+    const output = data?.output;
+
+    // Caso 1: output já é uma string (muito comum)
+    if (typeof output === 'string') {
+      // pode ser diretamente a URL
+      if (output.startsWith('http')) {
+        fromOutput = output;
+      } else {
+        // pode ser JSON em string
+        try {
+          const parsed = JSON.parse(output);
+          fromOutput = parsed?.pdf?.url || parsed?.url || parsed?.output || null;
+        } catch {
+          // ignora
+        }
+      }
+    }
+
+    // Caso 2: output é objeto
+    if (!fromOutput && output && typeof output === 'object') {
+      fromOutput = (output as any)?.pdf?.url || (output as any)?.url || null;
+    }
+
+    const signedUrl = fromPdf || fromOutput;
 
     console.log('🔎 DEBUG InvoiceXpress generate-pdf:', {
       attempt,
       status: resp.status,
       ok: resp.ok,
       bodyKeys: Object.keys(data || {}),
-      url: data?.pdf?.url || data?.url || null,
+      outputType: typeof output,
+      outputPreview:
+        typeof output === 'string'
+          ? output.slice(0, 120)
+          : output
+          ? JSON.stringify(output).slice(0, 120)
+          : null,
+      signedUrlFound: !!signedUrl,
     });
 
-    // 202 = ainda a gerar; 200 = pronto (normalmente)
-    const signedUrl = data?.pdf?.url || data?.url || null;
     if (resp.ok && signedUrl) return signedUrl;
 
-    // se deu erro "real", para já
     if (!resp.ok && resp.status !== 202) {
       console.error('❌ InvoiceXpress generate-pdf error:', JSON.stringify(data));
       return null;
