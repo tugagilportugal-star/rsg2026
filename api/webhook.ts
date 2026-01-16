@@ -293,6 +293,62 @@ async function finalizeInvoiceXpressInvoice(invoiceId: string): Promise<boolean>
   return true;
 }
 
+// ------------------------------------------------------------------
+// INVOICEXPRESS – OBTENÇÃO DE PDF (URL ASSINADA)
+// ------------------------------------------------------------------
+// Em modo de testes / rascunho (draft), o InvoiceXpress NÃO expõe
+// diretamente o PDF via API nem permite download público no S3.
+// O backoffice gera o PDF de forma assíncrona e devolve uma URL
+// temporária (pré-assinada) através do endpoint /api/pdf/:id.
+//
+// Esta função:
+// - Pede ao InvoiceXpress a geração do PDF
+// - Faz polling (várias tentativas) até a URL estar disponível
+// - Devolve a URL assinada para download seguro do PDF
+//
+// Uso típico:
+// - Apenas em ambiente de testes
+// - Para permitir testes end-to-end (Stripe → Invoice → PDF → Email)
+// - Sem finalizar a fatura nem comunicar com a Autoridade Tributária
+// ------------------------------------------------------------------
+async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string | null> {
+  const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
+  const apiKey = process.env.INVOICEXPRESS_API_KEY;
+  if (!account || !apiKey) return null;
+
+  const endpoint =
+    `https://${account}.app.invoicexpress.com/api/pdf/${encodeURIComponent(documentId)}.json` +
+    `?second_copy=false&api_key=${encodeURIComponent(apiKey)}`;
+
+  // tenta várias vezes porque é async
+  for (let attempt = 1; attempt <= 12; attempt++) {
+    const resp = await fetch(endpoint, { headers: { Accept: 'application/json' } });
+    const data = await safeReadJson(resp);
+
+    console.log('🔎 DEBUG InvoiceXpress generate-pdf:', {
+      attempt,
+      status: resp.status,
+      ok: resp.ok,
+      bodyKeys: Object.keys(data || {}),
+      url: data?.pdf?.url || data?.url || null,
+    });
+
+    // 202 = ainda a gerar; 200 = pronto (normalmente)
+    const signedUrl = data?.pdf?.url || data?.url || null;
+    if (resp.ok && signedUrl) return signedUrl;
+
+    // se deu erro "real", para já
+    if (!resp.ok && resp.status !== 202) {
+      console.error('❌ InvoiceXpress generate-pdf error:', JSON.stringify(data));
+      return null;
+    }
+
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+
+  return null;
+}
+
 // ==================================================================
 // 3. CONFIGURAÇÃO GERAL
 // ==================================================================
@@ -405,20 +461,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await finalizeInvoiceXpressInvoice(ix.invoiceId);
       }
 
-      // teste: baixa PDF via S3 e envia por email
+      // ------------------------------------------------------------------
+      // INVOICEXPRESS – TESTES END-TO-END (PDF + EMAIL)
+      // ------------------------------------------------------------------
+      // Este bloco é executado APENAS em ambiente de testes (Stripe test).
+      // Objetivo:.
+      // - Gerar o PDF da fatura em estado "draft" (rascunho)
+      // - Obter uma URL assinada temporária para o PDF (InvoiceXpress)
+      // - Fazer download do PDF no backend
+      // - Enviar o PDF por email ao cliente (via Resend)
+      //
+      // Importante:
+      // - Não finaliza a fatura
+      // - Não comunica com a Autoridade Tributária
+      // - O documento NÃO tem validade fiscal
+      //
+      // Em produção:
+      // - Este bloco não é executado
+      // - A fatura pode ser finalizada automaticamente
+      // - O envio de email pode ser feito pelo próprio InvoiceXpress
+      // ------------------------------------------------------------------
       if (isTest) {
-        const accountId = process.env.INVOICEXPRESS_ACCOUNT_ID;
+        const signedPdfUrl = await getInvoiceXpressSignedPdfUrl(ix.invoiceId);
 
-        if (!accountId) {
-          console.warn('⚠️ INVOICEXPRESS_ACCOUNT_ID não configurado. Não vou tentar descarregar PDF.');
+        if (!signedPdfUrl) {
+          console.warn('⚠️ Não consegui obter URL assinada do PDF (InvoiceXpress).');
         } else {
-          const pdfBytes = await downloadInvoiceXpressDraftPdf({
-            invoiceId: ix.invoiceId,
-            accountId,
-            locale: 'pt',
-          });
+          const resp = await fetch(signedPdfUrl);
+          if (!resp.ok) {
+            console.error('❌ Falha ao baixar PDF assinado:', { status: resp.status, statusText: resp.statusText });
+          } else {
+            const pdfBytes = Buffer.from(await resp.arrayBuffer());
 
-          if (pdfBytes) {
             const sendRes = await sendInvoicePdfByEmailResend(
               order.customer_email,
               pdfBytes,
@@ -430,11 +504,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
             if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
             else console.log('📩 Email com PDF da fatura (teste) enviado.');
-          } else {
-            console.warn('⚠️ Não consegui descarregar o PDF do InvoiceXpress (S3).');
           }
         }
       }
+
     }
 
     // 5) Enviar Email com Bilhete
