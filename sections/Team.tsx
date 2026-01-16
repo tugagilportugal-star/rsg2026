@@ -2,7 +2,7 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Linkedin } from 'lucide-react';
 
-// Interface sem 'role', conforme ajustamos antes
+// Interface
 interface TeamMember {
   name: string;
   image: string;
@@ -10,6 +10,8 @@ interface TeamMember {
 }
 
 export const Team: React.FC = () => {
+  // Atualizei os links dos avatares para terem fundo branco e letras azuis
+  // para simular o visual "clean" que pediu.
   const team: TeamMember[] = [
     {
       name: "Raquel Bartz Alves",
@@ -52,8 +54,9 @@ export const Team: React.FC = () => {
         <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4">
           Equipa Organizadora
         </h2>
+        {/* Frase Atualizada */}
         <p className="text-gray-500 max-w-2xl mx-auto">
-          Voluntários apaixonados dedicados a trazer a melhor experiência de agilidade para Lisboa.
+          Voluntários apaixonados dedicados a trazer a melhor experiência de agilidade e inovação para Lisboa.
         </p>
       </div>
 
@@ -61,9 +64,13 @@ export const Team: React.FC = () => {
         {team.map((member, idx) => (
           <div key={idx} className="group text-center w-36 md:w-48">
             
-            {/* FOTO REDONDA COLORIDA */}
-            <div className="relative mb-4 mx-auto w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-2 border-4 border-white group-hover:border-brand-orange">
-              {/* Removi a classe 'grayscale' daqui */}
+            {/* 
+               FOTO REDONDA 
+               - bg-white: Fundo branco
+               - border-brand-blue: Borda Azul da marca
+            */}
+            <div className="relative mb-4 mx-auto w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 transform group-hover:-translate-y-2 border-[3px] border-brand-blue bg-white">
+              
               <img 
                 src={member.image} 
                 alt={member.name} 
@@ -75,7 +82,7 @@ export const Team: React.FC = () => {
                 href={member.linkedin} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="absolute inset-0 bg-brand-darkBlue/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                className="absolute inset-0 bg-brand-darkBlue/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               >
                 <Linkedin className="w-8 h-8 text-white" />
               </a>
