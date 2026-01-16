@@ -12,8 +12,6 @@ function stripeIsTestMode(): boolean {
 }
 
 function isoCountryToInvoiceXpressCountryName(iso?: string): string {
-  // InvoiceXpress usa nome do país, não ISO ("PT" dá erro). Mantemos mapping mínimo.
-  // Se vier algo inesperado, caímos para "Portugal" para não bloquear.
   const cc = (iso || '').toUpperCase().trim();
   const map: Record<string, string> = {
     PT: 'Portugal',
@@ -44,7 +42,7 @@ async function safeReadJson(resp: Response): Promise<any> {
 async function downloadInvoiceXpressDraftPdf(params: {
   invoiceId: string;
   accountId: string; // ex: 165325
-  locale?: string;   // ex: 'pt'
+  locale?: string; // ex: 'pt'
 }): Promise<Buffer | null> {
   const { invoiceId, accountId, locale = 'pt' } = params;
 
@@ -58,6 +56,7 @@ async function downloadInvoiceXpressDraftPdf(params: {
     console.error('❌ InvoiceXpress S3 PDF download error:', {
       status: resp.status,
       statusText: resp.statusText,
+      url,
     });
     return null;
   }
@@ -65,30 +64,6 @@ async function downloadInvoiceXpressDraftPdf(params: {
   const arr = await resp.arrayBuffer();
   return Buffer.from(arr);
 }
-
-
-async function sendInvoicePdfByEmailResend(
-  to: string,
-  pdfBytes: Buffer,
-  invoiceId: string,
-  name: string,
-  ticketName: string,
-  total: string
-) {
-  return resend.emails.send({
-    from: 'RSG Lisbon <onboarding@resend.dev>',
-    to,
-    subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
-    html: generateInvoiceEmail(name, ticketName, invoiceId, total),
-    attachments: [
-      {
-        filename: `invoice-${invoiceId}.pdf`,
-        content: pdfBytes.toString('base64'),
-      },
-    ],
-  });
-}
-
 
 // ==================================================================
 // 1. TEMPLATE DE EMAIL
@@ -128,12 +103,7 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 // ==================================================================
 // TEMPLATE EMAIL – FATURA (TESTE / DRAFT)
 // ==================================================================
-const generateInvoiceEmail = (
-  name: string,
-  ticketName: string,
-  invoiceId: string,
-  total: string
-) => `
+const generateInvoiceEmail = (name: string, ticketName: string, invoiceId: string, total: string) => `
 <!DOCTYPE html>
 <html lang="pt-PT">
   <body style="margin:0; padding:0; background:#f4f4f5; font-family: Arial, Helvetica, sans-serif;">
@@ -184,9 +154,31 @@ const generateInvoiceEmail = (
 </html>
 `;
 
+// precisa estar abaixo de `resend`, então deixamos como function (hoisted) mas usa `resend` global
+async function sendInvoicePdfByEmailResend(
+  to: string,
+  pdfBytes: Buffer,
+  invoiceId: string,
+  name: string,
+  ticketName: string,
+  total: string
+) {
+  return resend.emails.send({
+    from: 'RSG Lisbon <onboarding@resend.dev>',
+    to,
+    subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
+    html: generateInvoiceEmail(name, ticketName, invoiceId, total),
+    attachments: [
+      {
+        filename: `invoice-${invoiceId}.pdf`,
+        content: pdfBytes.toString('base64'),
+      },
+    ],
+  });
+}
 
 // ==================================================================
-// 2. INVOICEXPRESS (cria invoice em DRAFT em teste; em produção pode finalizar)
+// 2. INVOICEXPRESS
 // ==================================================================
 type InvoiceXpressCreateResult = {
   invoiceId: string | null;
@@ -201,7 +193,7 @@ async function createInvoiceXpressInvoice(params: {
   countryIso?: string;
   ticketName: string;
   amountEuro: number;
-  taxName?: string; // ex: "IVA23"
+  taxName?: string;
 }): Promise<InvoiceXpressCreateResult> {
   const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
   const apiKey = process.env.INVOICEXPRESS_API_KEY;
@@ -217,10 +209,9 @@ async function createInvoiceXpressInvoice(params: {
   const countryName = isoCountryToInvoiceXpressCountryName(params.countryIso);
   const taxName = params.taxName || 'IVA23';
 
-  // InvoiceXpress costuma aceitar strings para valores monetários/quantidades
   const body = {
     invoice: {
-      date: new Date().toLocaleDateString('pt-PT'), // dd/mm/aaaa
+      date: new Date().toLocaleDateString('pt-PT'),
       due_date: new Date().toLocaleDateString('pt-PT'),
       client: {
         name: params.customerName || 'Participante RSG',
@@ -257,7 +248,6 @@ async function createInvoiceXpressInvoice(params: {
   });
 
   const data = await safeReadJson(resp);
-
   console.log('🔎 DEBUG InvoiceXpress response:', { ok: resp.ok, status: resp.status, statusText: resp.statusText });
 
   if (!resp.ok) {
@@ -270,14 +260,12 @@ async function createInvoiceXpressInvoice(params: {
   const permalink = data?.invoice?.permalink || null;
 
   console.log('✅ InvoiceXpress: invoice criada', { invoiceId, status });
-
   return { invoiceId, status, permalink, raw: data };
 }
 
 async function finalizeInvoiceXpressInvoice(invoiceId: string): Promise<boolean> {
   const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
   const apiKey = process.env.INVOICEXPRESS_API_KEY;
-
   if (!account || !apiKey) return false;
 
   const url = `https://${account}.app.invoicexpress.com/invoices/${encodeURIComponent(
@@ -294,7 +282,6 @@ async function finalizeInvoiceXpressInvoice(invoiceId: string): Promise<boolean>
   });
 
   const data = await safeReadJson(resp);
-
   console.log('🔎 DEBUG InvoiceXpress finalize:', { ok: resp.ok, status: resp.status, statusText: resp.statusText });
 
   if (!resp.ok) {
@@ -321,7 +308,7 @@ async function buffer(readable: any) {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: '2023-10-16' });
 const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string);
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY as string);
 
 // ==================================================================
 // 4. HANDLER PRINCIPAL
@@ -342,132 +329,132 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).send(`Webhook Error`);
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
-    console.log(`💰 Processando Order: ${session.id}`);
+  if (event.type !== 'checkout.session.completed') {
+    return res.json({ received: true });
+  }
 
-    try {
-      // 1) Salvar Order
-      const { data: order, error: orderErr } = await supabase
-        .from('orders')
-        .insert({
-          stripe_session_id: session.id,
-          customer_email: session.customer_details?.email,
-          customer_name: session.customer_details?.name,
-          total_amount: session.amount_total,
-          status: 'paid',
-        })
-        .select()
+  const session = event.data.object as Stripe.Checkout.Session;
+  console.log(`💰 Processando Order: ${session.id}`);
+
+  try {
+    // 1) Salvar Order
+    const { data: order, error: orderErr } = await supabase
+      .from('orders')
+      .insert({
+        stripe_session_id: session.id,
+        customer_email: session.customer_details?.email,
+        customer_name: session.customer_details?.name,
+        total_amount: session.amount_total,
+        status: 'paid',
+      })
+      .select()
+      .single();
+
+    if (orderErr) throw new Error(`DB Order Error: ${orderErr.message}`);
+
+    // 2) Salvar Ticket
+    const meta = session.metadata || {};
+    const { data: ticket, error: ticketErr } = await supabase
+      .from('tickets')
+      .insert({
+        order_id: order.id,
+        ticket_type_id: meta.ticket_type_id,
+        attendee_name: meta.attendee_name,
+        attendee_email: session.customer_details?.email,
+        attendee_phone: meta.attendee_phone,
+        attendee_company: meta.attendee_company,
+        checked_in: false,
+      })
+      .select()
+      .single();
+
+    if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+
+    // 3) Buscar nome do Bilhete
+    let ticketName = 'Ingresso RSG 2026';
+    if (meta.ticket_type_id) {
+      const { data: type } = await supabase
+        .from('ticket_types')
+        .select('name')
+        .eq('id', meta.ticket_type_id)
         .single();
+      if (type) ticketName = type.name;
+    }
 
-      if (orderErr) throw new Error(`DB Order Error: ${orderErr.message}`);
+    // 4) Criar documento no InvoiceXpress
+    const amountEuro = (order.total_amount || 0) / 100;
+    const customerCountryIso = session.customer_details?.address?.country || 'PT';
 
-      // 2) Salvar Ticket
-      const meta = session.metadata || {};
-      const { data: ticket, error: ticketErr } = await supabase
-        .from('tickets')
-        .insert({
-          order_id: order.id,
-          ticket_type_id: meta.ticket_type_id,
-          attendee_name: meta.attendee_name,
-          attendee_email: session.customer_details?.email,
-          attendee_phone: meta.attendee_phone,
-          attendee_company: meta.attendee_company,
-          checked_in: false,
-        })
-        .select()
-        .single();
+    const ix = await createInvoiceXpressInvoice({
+      customerName: order.customer_name || 'Participante RSG',
+      customerEmail: order.customer_email,
+      countryIso: customerCountryIso,
+      ticketName,
+      amountEuro,
+      taxName: process.env.INVOICEXPRESS_TAX_NAME || 'IVA23',
+    });
 
-      if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+    if (ix.invoiceId) {
+      await supabase.from('orders').update({ invoice_id: ix.invoiceId }).eq('id', order.id);
 
-      // 3) Buscar nome do Bilhete
-      let ticketName = 'Ingresso RSG 2026';
-      if (meta.ticket_type_id) {
-        const { data: type } = await supabase
-          .from('ticket_types')
-          .select('name')
-          .eq('id', meta.ticket_type_id)
-          .single();
-        if (type) ticketName = type.name;
+      const isTest = stripeIsTestMode();
+      const autoFinalize = (process.env.INVOICEXPRESS_AUTO_FINALIZE || 'false').toLowerCase() === 'true';
+
+      // produção: finaliza se desejar
+      if (!isTest && autoFinalize) {
+        await finalizeInvoiceXpressInvoice(ix.invoiceId);
       }
 
-      // 4) Criar documento no InvoiceXpress
-      const amountEuro = (order.total_amount || 0) / 100;
+      // teste: baixa PDF via S3 e envia por email
+      if (isTest) {
+        const accountId = process.env.INVOICEXPRESS_ACCOUNT_ID;
 
-      const customerCountryIso =
-        session.customer_details?.address?.country ||
-        'PT'; // default
-
-      const ix = await createInvoiceXpressInvoice({
-        customerName: order.customer_name || 'Participante RSG',
-        customerEmail: order.customer_email,
-        countryIso: customerCountryIso,
-        ticketName,
-        amountEuro,
-        taxName: process.env.INVOICEXPRESS_TAX_NAME || 'IVA23',
-      });
-
-      if (ix.invoiceId) {
-        await supabase.from('orders').update({ invoice_id: ix.invoiceId }).eq('id', order.id);
-
-        const isTest = stripeIsTestMode();
-        const autoFinalize = (process.env.INVOICEXPRESS_AUTO_FINALIZE || 'false').toLowerCase() === 'true';
-
-        // ✅ 1) Em produção, opcionalmente finaliza
-        if (!isTest && autoFinalize) {
-          await finalizeInvoiceXpressInvoice(ix.invoiceId);
-        }
- 
-        // ✅ 2) Em TESTE, gerar PDF e enviar por email (end-to-end)
-        if (isTest) {
-          const accountId = process.env.INVOICEXPRESS_ACCOUNT_ID;
-
-          if (!accountId) {
-            console.warn('⚠️ INVOICEXPRESS_ACCOUNT_ID não configurado. Não vou tentar descarregar PDF.');
-          } else {
-            const pdfBytes = await downloadInvoiceXpressDraftPdf({
+        if (!accountId) {
+          console.warn('⚠️ INVOICEXPRESS_ACCOUNT_ID não configurado. Não vou tentar descarregar PDF.');
+        } else {
+          const pdfBytes = await downloadInvoiceXpressDraftPdf({
             invoiceId: ix.invoiceId,
             accountId,
             locale: 'pt',
-            });
+          });
 
-            if (pdfBytes) {
-              const sendRes = await sendInvoicePdfByEmailResend(
+          if (pdfBytes) {
+            const sendRes = await sendInvoicePdfByEmailResend(
               order.customer_email,
               pdfBytes,
               ix.invoiceId,
               order.customer_name || meta.attendee_name || 'Participante',
               ticketName,
               String(ix.raw?.invoice?.total ?? amountEuro.toFixed(2))
-              );
+            );
 
-              if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
-              else console.log('📩 Email com PDF da fatura (teste) enviado.');
-            } else {
+            if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
+            else console.log('📩 Email com PDF da fatura (teste) enviado.');
+          } else {
             console.warn('⚠️ Não consegui descarregar o PDF do InvoiceXpress (S3).');
-            }
           }
         }
-        
-        // 5) Enviar Email com Bilhete
-        const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
-        ticket.qr_code_secret
-        )}&dark=003F59&size=300&margin=1`;
-
-        const emailRes = await resend.emails.send({
-          from: 'RSG Lisbon <onboarding@resend.dev>',
-          to: session.customer_details?.email as string,
-          subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
-          html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id),
-        });
-
-        if (emailRes.error) console.error('⚠️ Resend Error:', emailRes.error);
-        else console.log('📧 Email enviado.');
-      } catch (err: any) {
-      console.error('❌ Critical Error:', err.message);
-      return res.status(500).send('Internal Server Error');
+      }
     }
-  }
 
-  res.json({ received: true });
+    // 5) Enviar Email com Bilhete
+    const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
+      ticket.qr_code_secret
+    )}&dark=003F59&size=300&margin=1`;
+
+    const emailRes = await resend.emails.send({
+      from: 'RSG Lisbon <onboarding@resend.dev>',
+      to: session.customer_details?.email as string,
+      subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
+      html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id),
+    });
+
+    if (emailRes.error) console.error('⚠️ Resend Error:', emailRes.error);
+    else console.log('📧 Email enviado.');
+
+    return res.json({ received: true });
+  } catch (err: any) {
+    console.error('❌ Critical Error:', err.message);
+    return res.status(500).send('Internal Server Error');
+  }
 }
