@@ -12,6 +12,7 @@ import { Footer } from './sections/Footer';
 import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
+import { Team } from './sections/Team';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
