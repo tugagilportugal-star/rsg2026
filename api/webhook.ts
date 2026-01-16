@@ -41,7 +41,7 @@ async function safeReadJson(resp: Response): Promise<any> {
   }
 }
 
-async function getInvoiceXpressPdfUrl(documentId: string): Promise<string | null> {
+async function getInvoiceXpressPdfUrl(documentId: string, tries = 8, delayMs = 1200): Promise<string | null> {
   const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
   const apiKey = process.env.INVOICEXPRESS_API_KEY;
   if (!account || !apiKey) return null;
@@ -50,17 +50,30 @@ async function getInvoiceXpressPdfUrl(documentId: string): Promise<string | null
     `https://${account}.app.invoicexpress.com/api/pdf/${encodeURIComponent(documentId)}.json` +
     `?second_copy=false&api_key=${encodeURIComponent(apiKey)}`;
 
-  const resp = await fetch(url, { method: 'GET', headers: { Accept: 'application/json' } });
-  const data = await safeReadJson(resp);
+  for (let i = 1; i <= tries; i++) {
+    const resp = await fetch(url, { method: 'GET', headers: { Accept: 'application/json' } });
+    const data = await safeReadJson(resp);
 
-  if (!resp.ok) {
-    console.error('❌ InvoiceXpress PDF Error:', JSON.stringify(data));
-    return null;
+    if (!resp.ok) {
+      console.error('❌ InvoiceXpress PDF Error:', JSON.stringify(data));
+      return null;
+    }
+
+    const pdfUrl = data?.pdf?.url || data?.url || null;
+
+    console.log('🔎 DEBUG InvoiceXpress generate-pdf poll:', {
+      attempt: i,
+      hasUrl: !!pdfUrl,
+    });
+
+    if (pdfUrl) return pdfUrl;
+
+    await new Promise((res) => setTimeout(res, delayMs));
   }
 
-  // normalmente vem em data.pdf.url
-  return data?.pdf?.url || data?.url || null;
+  return null;
 }
+
 
 async function fetchPdfWithRetry(pdfUrl: string, tries = 6, delayMs = 1200): Promise<Buffer | null> {
   for (let i = 0; i < tries; i++) {
