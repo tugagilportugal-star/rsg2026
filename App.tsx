@@ -9,10 +9,10 @@ import { Recap } from './sections/Recap';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
+import { Team } from './sections/Team';
 import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
-import { Team } from './sections/Team';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
@@ -62,10 +62,13 @@ const App: React.FC = () => {
       />
 
       <FAQ />
+      
+      {/* ✅ SECÇÃO DA EQUIPA AQUI */}
+      <Team />
+
       <Footer />
 
-      {/* FABs: Ícones de "Topo" e "Contato" removidos. */}
-      {/* Mantive apenas o Admin escondido. Se quiser remover tudo, apague esta div. */}
+      {/* FABs (Apenas Admin escondido) */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => (window.location.href = '/admin')}
