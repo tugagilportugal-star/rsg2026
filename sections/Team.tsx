@@ -13,33 +13,33 @@ export const Team: React.FC = () => {
   const team: TeamMember[] = [
     {
       name: "Raquel Bartz Alves",
-      image: "https://ui-avatars.com/api/?name=Raquel+Bartz&background=003F59&color=fff&size=400", 
-      linkedin: "https://www.linkedin.com/in/raquelbartz/" 
+      image: "https://media.licdn.com/dms/image/v2/D4D03AQHNYJcfE1tMgA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1723208803842?e=1770249600&v=beta&t=ypouoEs3u5GbJJbTDohtp3ncLcKgWO8DyUFKhlT8KXs", 
+      linkedin: "https://www.linkedin.com/in/raquelbartzalves/" 
     },
     {
       name: "Sylvia Grec",
-      image: "https://ui-avatars.com/api/?name=Sylvia+Grec&background=003F59&color=fff&size=400",
-      linkedin: "#"
+      image: "https://media.licdn.com/dms/image/v2/D4D03AQHywipy3ibcXw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1729957721637?e=1770249600&v=beta&t=0ONjBDVWVEl2_EbPPHHIfofu-YFyaBHdrcyT1Nom7p4",
+      linkedin: "https://www.linkedin.com/in/sylvia-grec/"
     },
     {
       name: "Marina Bittencourt",
-      image: "https://ui-avatars.com/api/?name=Marina+Bittencourt&background=003F59&color=fff&size=400",
-      linkedin: "#"
+      image: "https://media.licdn.com/dms/image/v2/D4D03AQG9oIELLf4Dbg/profile-displayphoto-shrink_800_800/B4DZbGhns9GwAc-/0/1747087425225?e=1770249600&v=beta&t=2lUnlgef_q3jHv39j4S-eNlIsTTJVY0p34pVgut4dQg",
+      linkedin: "https://www.linkedin.com/in/marinarosabittencourt/"
     },
     {
       name: "Fábio Castro",
-      image: "https://ui-avatars.com/api/?name=Fabio+Castro&background=003F59&color=fff&size=400",
-      linkedin: "#"
+      image: "https://media.licdn.com/dms/image/v2/C4D03AQE1SYdxYjYsRw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1625589311192?e=1770249600&v=beta&t=bquxs1CeiJtf-IAiMpJ44q0TwGACUnL8G2AI9grF1jE",
+      linkedin: "https://www.linkedin.com/in/frmcastro/"
     },
     {
       name: "Cristiane Alves",
-      image: "https://ui-avatars.com/api/?name=Cristiane+Alves&background=003F59&color=fff&size=400",
-      linkedin: "#"
+      image: "https://media.licdn.com/dms/image/v2/D4D03AQFZkXbThpxVNA/profile-displayphoto-crop_800_800/B4DZlYAQ2mHwAI-/0/1758118088646?e=1770249600&v=beta&t=KtcgucKB-_Wnx_OWDkaVmVAcFgynspFBjk1k_KjaVL0",
+      linkedin: "https://www.linkedin.com/in/cristiane-mendes-alves-pmp%C2%AE-psm-i-psk-i-okrcp-5a243b4/"
     },
     {
       name: "Alex Seles",
-      image: "https://ui-avatars.com/api/?name=Alex+Seles&background=003F59&color=fff&size=400",
-      linkedin: "#"
+      image: "https://media.licdn.com/dms/image/v2/D4D03AQEUBcD8_Ixbew/profile-displayphoto-crop_800_800/B4DZrL0YB9IkAI-/0/1764356097316?e=1770249600&v=beta&t=1Ce7nGhjlzFVsG3cnT5bbg7esWwiP1TSkXbZ9x6o3g8",
+      linkedin: "https://www.linkedin.com/in/alex-seles/"
     }
   ];
 
