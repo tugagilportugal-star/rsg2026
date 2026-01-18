@@ -1,5 +1,12 @@
+// ==================================================================
+// Tipos comuns para providers de faturação
+// ==================================================================
+
 export type BillingProvider = 'invoicexpress' | 'billpt';
 
+// ==================================================================
+// Input genérico para criação de fatura (novo core)
+// ==================================================================
 export type CreateInvoiceInput = {
   customerName: string;
   customerEmail: string;
@@ -10,6 +17,9 @@ export type CreateInvoiceInput = {
   autoFinalize: boolean;
 };
 
+// ==================================================================
+// Resultado genérico da criação de fatura (novo core)
+// ==================================================================
 export type CreateInvoiceResult = {
   provider: BillingProvider;
   invoiceId: string | null;
@@ -20,16 +30,9 @@ export type CreateInvoiceResult = {
   raw?: any;
 };
 
-// ================================
-// Tipos compatíveis com o webhook antigo
-// ================================
-export type InvoiceEmailData = {
-  name: string;
-  ticketName: string;
-  invoiceId: string;
-  total: string; // já formatado, ex: "43.05"
-  isTest: boolean;
-};
+// ==================================================================
+// Tipos LEGADOS (compatibilidade com o webhook atual)
+// ==================================================================
 
 export type IssueInvoiceInput = {
   customerName: string;
@@ -38,7 +41,9 @@ export type IssueInvoiceInput = {
   ticketName: string;
   amountEuro: number;
   isTest: boolean;
-  autoFinalize: boolean;
+
+  // opcional para não quebrar chamadas antigas
+  autoFinalize?: boolean;
 };
 
 export type IssueInvoiceResult = {
@@ -47,6 +52,23 @@ export type IssueInvoiceResult = {
   status: string | null;
   permalink: string | null;
   pdfBytes: Buffer | null;
+
+  // ⚠️ o webhook espera isto
+  total?: string;
+
+  // mantemos também o valor numérico
   totalEuro: number | null;
+
   raw?: any;
+};
+
+// ==================================================================
+// Tipos auxiliares para email (usado pelo webhook)
+// ==================================================================
+export type InvoiceEmailData = {
+  name: string;
+  ticketName: string;
+  invoiceId: string;
+  total: string;
+  isTest: boolean;
 };
