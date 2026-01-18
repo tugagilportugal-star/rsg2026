@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-import { createInvoice } from '../lib/invoicing';
+import { createInvoice } from '../lib/invoicing/index';
 import type { CreateInvoiceInput } from '../lib/invoicing/types';
 
 // ==================================================================
