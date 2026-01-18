@@ -1,6 +1,6 @@
-import type { CreateInvoiceInput, CreateInvoiceResult, BillingProvider } from './types';
-import { createInvoiceWithInvoiceXpress } from './invoicexpress';
-import { createInvoiceWithBillpt } from './billpt';
+import type { CreateInvoiceInput, CreateInvoiceResult, BillingProvider } from './types.js';
+import { createInvoiceWithInvoiceXpress } from './invoicexpress.js';
+import { createInvoiceWithBillpt } from './billpt.js';
 
 function normalizeProvider(p?: string): BillingProvider {
   const v = (p || '').toLowerCase().trim();

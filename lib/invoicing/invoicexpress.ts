@@ -1,4 +1,4 @@
-import type { CreateInvoiceInput, CreateInvoiceResult } from './types';
+import type { CreateInvoiceInput, CreateInvoiceResult } from './types.js';
 
 // ==================================================================
 // HELPERS (InvoiceXpress)
