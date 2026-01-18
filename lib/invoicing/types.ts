@@ -6,8 +6,6 @@ export type CreateInvoiceInput = {
   countryIso?: string;
   ticketName: string;
   amountEuro: number;
-
-  // controle do fluxo
   isTest: boolean;
   autoFinalize: boolean;
 };
@@ -16,16 +14,39 @@ export type CreateInvoiceResult = {
   provider: BillingProvider;
   invoiceId: string | null;
   status: string | null;
-
-  // opcional (depende do provider)
   permalink?: string | null;
-
-  // Para testes end-to-end (PDF para anexar e enviar pelo Resend)
   pdfBytes?: Buffer | null;
-
-  // Para preencher email (se provider devolver total)
   totalEuro?: number | null;
+  raw?: any;
+};
 
-  // debug
+// ================================
+// Tipos compatíveis com o webhook antigo
+// ================================
+export type InvoiceEmailData = {
+  name: string;
+  ticketName: string;
+  invoiceId: string;
+  total: string; // já formatado, ex: "43.05"
+  isTest: boolean;
+};
+
+export type IssueInvoiceInput = {
+  customerName: string;
+  customerEmail: string;
+  countryIso?: string;
+  ticketName: string;
+  amountEuro: number;
+  isTest: boolean;
+  autoFinalize: boolean;
+};
+
+export type IssueInvoiceResult = {
+  provider: BillingProvider;
+  invoiceId: string | null;
+  status: string | null;
+  permalink: string | null;
+  pdfBytes: Buffer | null;
+  totalEuro: number | null;
   raw?: any;
 };
