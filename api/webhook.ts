@@ -3,19 +3,11 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-import { createInvoice } from '../lib/invoicing/index.js';
-import type { CreateInvoiceInput } from '../lib/invoicing/types';
+import { issueInvoiceForOrder } from '../lib/invoicing/index.js';
+import type { InvoiceEmailData } from '../lib/invoicing/types.js';
 
 // ==================================================================
-// 0. HELPERS (Webhook-level)
-// ==================================================================
-function stripeIsTestMode(): boolean {
-  const key = process.env.STRIPE_SECRET_KEY || '';
-  return key.startsWith('sk_test_');
-}
-
-// ==================================================================
-// 1. TEMPLATE DE EMAIL – BILHETE
+// 1) EMAIL - BILHETE
 // ==================================================================
 const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ticketId: string) => `
 <!DOCTYPE html>
@@ -24,13 +16,13 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
       <h1 style="color: #003F59; font-size: 24px; margin-bottom: 10px;">Olá, ${name}!</h1>
       <p style="color: #666; font-size: 16px; line-height: 1.5;">O teu lugar no <strong>Regional Scrum Gathering Lisbon 2026</strong> está garantido.</p>
-      
+
       <div style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin: 30px 0; background: #fafafa;">
         <p style="font-weight: bold; color: #003F59; margin: 0; font-size: 18px;">${ticketName}</p>
         <p style="color: #888; font-size: 12px; margin: 5px 0 15px 0;">ID: ${ticketId}</p>
-        
+
         <img src="${qrUrl}" alt="QR Code" width="200" height="200" style="display:block; margin: 0 auto;" />
-        
+
         <p style="font-size: 12px; color: #666; margin-top: 15px;">
           Apresenta este código na entrada do evento.
         </p>
@@ -50,15 +42,15 @@ const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ti
 `;
 
 // ==================================================================
-// 2. TEMPLATE DE EMAIL – FATURA (TESTE / PDF ANEXO)
+// 2) EMAIL - FATURA (ANEXO PDF)
 // ==================================================================
-const generateInvoiceEmail = (name: string, ticketName: string, invoiceId: string, total: string) => `
+const generateInvoiceEmail = (d: InvoiceEmailData) => `
 <!DOCTYPE html>
 <html lang="pt-PT">
   <body style="margin:0; padding:0; background:#f4f4f5; font-family: Arial, Helvetica, sans-serif;">
     <div style="padding:24px;">
       <div style="max-width:640px; margin:0 auto;">
-        
+
         <div style="font-weight:700; font-size:18px; color:#003F59;">
           Regional Scrum Gathering Lisbon 2026
         </div>
@@ -69,7 +61,7 @@ const generateInvoiceEmail = (name: string, ticketName: string, invoiceId: strin
           </div>
 
           <div style="padding:22px; font-size:14px; color:#374151;">
-            <p>Olá, <strong>${name}</strong>,</p>
+            <p>Olá, <strong>${d.name}</strong>,</p>
 
             <p>
               Segue em anexo a fatura referente à tua compra do bilhete para o
@@ -78,15 +70,18 @@ const generateInvoiceEmail = (name: string, ticketName: string, invoiceId: strin
 
             <div style="background:#fafafa; border-radius:10px; padding:14px; margin:16px 0;">
               <p><strong>Resumo</strong></p>
-              <p>Bilhete: ${ticketName}</p>
-              <p>Nº do documento: #${invoiceId}</p>
-              <p>Total: ${total} €</p>
+              <p>Bilhete: ${d.ticketName}</p>
+              <p>Nº do documento: #${d.invoiceId}</p>
+              <p>Total: ${d.total} €</p>
             </div>
 
-            <div style="background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; border-radius:8px; font-size:12px;">
-              <strong>Nota:</strong> Este documento foi gerado em ambiente de testes e
-              não tem validade fiscal.
-            </div>
+            ${
+              d.isTest
+                ? `<div style="background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; border-radius:8px; font-size:12px;">
+                     <strong>Nota:</strong> Este documento foi gerado em ambiente de testes e não tem validade fiscal.
+                   </div>`
+                : ''
+            }
 
             <p style="margin-top:16px;">
               Se tiveres alguma dúvida, responde a este email.
@@ -103,8 +98,34 @@ const generateInvoiceEmail = (name: string, ticketName: string, invoiceId: strin
 </html>
 `;
 
+// precisa estar abaixo de `resend`, então deixamos como function (hoisted)
+async function sendInvoicePdfByEmailResend(params: {
+  to: string;
+  pdfBytes: Buffer;
+  invoiceId: string;
+  name: string;
+  ticketName: string;
+  total: string;
+  isTest: boolean;
+}) {
+  const { to, pdfBytes, invoiceId, name, ticketName, total, isTest } = params;
+
+  return resend.emails.send({
+    from: 'RSG Lisbon <onboarding@resend.dev>',
+    to,
+    subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
+    html: generateInvoiceEmail({ name, ticketName, invoiceId, total, isTest }),
+    attachments: [
+      {
+        filename: `invoice-${invoiceId}.pdf`,
+        content: pdfBytes.toString('base64'),
+      },
+    ],
+  });
+}
+
 // ==================================================================
-// 3. CONFIGURAÇÃO GERAL
+// 3) CONFIG GERAL
 // ==================================================================
 export const config = { api: { bodyParser: false } };
 
@@ -120,33 +141,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion:
 const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string);
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
-// ==================================================================
-// 4. EMAIL SENDER – FATURA (PDF)
-// ==================================================================
-async function sendInvoicePdfByEmailResend(
-  to: string,
-  pdfBytes: Buffer,
-  invoiceId: string,
-  name: string,
-  ticketName: string,
-  total: string
-) {
-  return resend.emails.send({
-    from: 'RSG Lisbon <onboarding@resend.dev>',
-    to,
-    subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
-    html: generateInvoiceEmail(name, ticketName, invoiceId, total),
-    attachments: [
-      {
-        filename: `invoice-${invoiceId}.pdf`,
-        content: pdfBytes.toString('base64'),
-      },
-    ],
-  });
+function stripeIsTestMode(): boolean {
+  const key = process.env.STRIPE_SECRET_KEY || '';
+  return key.startsWith('sk_test_');
 }
 
 // ==================================================================
-// 5. HANDLER PRINCIPAL
+// 4) HANDLER
 // ==================================================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('🔔 Webhook hit', { ts: new Date().toISOString(), method: req.method, url: (req as any).url });
@@ -161,7 +162,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
   } catch (err: any) {
     console.error(`❌ Signature Error: ${err.message}`);
-    return res.status(400).send(`Webhook Error`);
+    return res.status(400).send('Webhook Error');
   }
 
   if (event.type !== 'checkout.session.completed') {
@@ -208,52 +209,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 3) Buscar nome do Bilhete
     let ticketName = 'Ingresso RSG 2026';
     if (meta.ticket_type_id) {
-      const { data: type } = await supabase
-        .from('ticket_types')
-        .select('name')
-        .eq('id', meta.ticket_type_id)
-        .single();
+      const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
       if (type) ticketName = type.name;
     }
 
-    // 4) Faturação (provider selecionado por env var)
-    const isTest = stripeIsTestMode();
+    // 4) Faturação via Provider (InvoiceXpress OU Bill.pt)
     const amountEuro = (order.total_amount || 0) / 100;
     const customerCountryIso = session.customer_details?.address?.country || 'PT';
 
-    const input: CreateInvoiceInput = {
-      customerName: order.customer_name || 'Participante RSG',
+    const isTest = stripeIsTestMode();
+
+    const invoiceResult = await issueInvoiceForOrder({
+      isTest,
+      customerName: order.customer_name || meta.attendee_name || 'Participante RSG',
       customerEmail: order.customer_email,
       countryIso: customerCountryIso,
       ticketName,
       amountEuro,
-      isTest,
-      autoFinalize: (process.env.BILLING_AUTO_FINALIZE || 'false').toLowerCase() === 'true',
-    };
+    });
 
-    const billing = await createInvoice(input);
+    if (invoiceResult?.invoiceId) {
+      await supabase.from('orders').update({ invoice_id: invoiceResult.invoiceId }).eq('id', order.id);
 
-    if (billing.invoiceId) {
-      await supabase.from('orders').update({ invoice_id: billing.invoiceId }).eq('id', order.id);
+      // Se o provider devolveu PDF, enviamos por email (end-to-end)
+      if (invoiceResult.pdfBytes) {
+        const sendRes = await sendInvoicePdfByEmailResend({
+          to: order.customer_email,
+          pdfBytes: invoiceResult.pdfBytes,
+          invoiceId: invoiceResult.invoiceId,
+          name: order.customer_name || meta.attendee_name || 'Participante',
+          ticketName,
+          total: invoiceResult.total ?? amountEuro.toFixed(2),
+          isTest,
+        });
+
+        if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
+        else console.log('📩 Email com PDF da fatura enviado.');
+      }
     }
 
-    if (isTest && billing.invoiceId && billing.pdfBytes) {
-      const total = (billing.totalEuro ?? amountEuro).toFixed(2);
-
-      const sendRes = await sendInvoicePdfByEmailResend(
-        order.customer_email,
-        billing.pdfBytes,
-        billing.invoiceId,
-        order.customer_name || meta.attendee_name || 'Participante',
-        ticketName,
-        total
-      );
-
-      if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
-      else console.log('📩 Email com PDF da fatura (teste) enviado.');
-    }
-
-    // 5) Enviar Email com Bilhete
+    // 5) Email do bilhete
     const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticket.qr_code_secret)}&dark=003F59&size=300&margin=1`;
 
     const emailRes = await resend.emails.send({

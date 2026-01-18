@@ -1,8 +1,12 @@
 import type { CreateInvoiceInput, CreateInvoiceResult } from './types.js';
 
-// ==================================================================
-// HELPERS (InvoiceXpress)
-// ==================================================================
+// ------------------------------------------------------------
+// InvoiceXpress Adapter
+// - Cria invoice
+// - Em TEST (Stripe test), obtém URL assinada do PDF e devolve pdfBytes
+// - Em produção pode finalizar (autoFinalize) se desejado
+// ------------------------------------------------------------
+
 function isoCountryToInvoiceXpressCountryName(iso?: string): string {
   const cc = (iso || '').toUpperCase().trim();
   const map: Record<string, string> = {
@@ -31,25 +35,34 @@ async function safeReadJson(resp: Response): Promise<any> {
   }
 }
 
-async function createInvoiceXpressInvoice(params: {
+type InvoiceXpressCreateResultInternal = {
+  invoiceId: string | null;
+  status: string | null;
+  permalink: string | null;
+  totalEuro: number | null;
+  raw?: any;
+};
+
+async function createInvoiceXpressInvoiceInternal(params: {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
   ticketName: string;
   amountEuro: number;
-  taxName: string;
-}): Promise<{ invoiceId: string | null; status: string | null; permalink: string | null; totalEuro?: number; raw?: any }> {
+  taxName?: string;
+}): Promise<InvoiceXpressCreateResultInternal> {
   const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
   const apiKey = process.env.INVOICEXPRESS_API_KEY;
 
   if (!account || !apiKey) {
     console.error('⚠️ InvoiceXpress: INVOICEXPRESS_ACCOUNT_NAME ou INVOICEXPRESS_API_KEY não configurados.');
-    return { invoiceId: null, status: null, permalink: null };
+    return { invoiceId: null, status: null, permalink: null, totalEuro: null };
   }
 
   const url = `https://${account}.app.invoicexpress.com/invoices.json?api_key=${encodeURIComponent(apiKey)}`;
 
   const countryName = isoCountryToInvoiceXpressCountryName(params.countryIso);
+  const taxName = params.taxName || process.env.INVOICEXPRESS_TAX_NAME || 'IVA23';
 
   const body = {
     invoice: {
@@ -66,17 +79,16 @@ async function createInvoiceXpressInvoice(params: {
           description: 'Compra online (Stripe)',
           unit_price: params.amountEuro.toFixed(2),
           quantity: '1',
-          tax: { name: params.taxName },
+          tax: { name: taxName },
         },
       ],
     },
   };
 
   console.log('🧾 InvoiceXpress: criando invoice...', {
-    env: params.amountEuro,
     account,
     countryName,
-    taxName: params.taxName,
+    taxName,
     amountEuro: params.amountEuro,
   });
 
@@ -87,20 +99,24 @@ async function createInvoiceXpressInvoice(params: {
   });
 
   const data = await safeReadJson(resp);
-
   console.log('🔎 DEBUG InvoiceXpress response:', { ok: resp.ok, status: resp.status, statusText: resp.statusText });
 
   if (!resp.ok) {
     console.error('❌ InvoiceXpress Error:', JSON.stringify(data));
-    return { invoiceId: null, status: null, permalink: null, raw: data };
+    return { invoiceId: null, status: null, permalink: null, totalEuro: null, raw: data };
   }
 
-  const invoiceId = data?.invoice?.id ? String(data.invoice.id) : null;
-  const status = data?.invoice?.status || null;
-  const permalink = data?.invoice?.permalink || null;
+  const invoiceId = data?.invoice?.id != null ? String(data.invoice.id) : null;
+  const status = data?.invoice?.status ?? null;
+  const permalink = data?.invoice?.permalink ?? null;
 
-  // alguns payloads trazem total; se não trouxer, a gente ignora
-  const totalEuro = typeof data?.invoice?.total === 'number' ? data.invoice.total : undefined;
+  // total pode vir como número
+  const totalEuro =
+    typeof data?.invoice?.total === 'number'
+      ? data.invoice.total
+      : typeof data?.invoice?.sum === 'number'
+      ? data.invoice.sum
+      : null;
 
   console.log('✅ InvoiceXpress: invoice criada', { invoiceId, status });
 
@@ -112,9 +128,9 @@ async function finalizeInvoiceXpressInvoice(invoiceId: string): Promise<boolean>
   const apiKey = process.env.INVOICEXPRESS_API_KEY;
   if (!account || !apiKey) return false;
 
-  const url = `https://${account}.app.invoicexpress.com/invoices/${encodeURIComponent(
-    invoiceId
-  )}/change-state.json?api_key=${encodeURIComponent(apiKey)}`;
+  const url =
+    `https://${account}.app.invoicexpress.com/invoices/${encodeURIComponent(invoiceId)}/change-state.json` +
+    `?api_key=${encodeURIComponent(apiKey)}`;
 
   const resp = await fetch(url, {
     method: 'PUT',
@@ -135,7 +151,7 @@ async function finalizeInvoiceXpressInvoice(invoiceId: string): Promise<boolean>
 }
 
 // ------------------------------------------------------------------
-// INVOICEXPRESS – OBTENÇÃO DE PDF (URL ASSINADA)
+// INVOICEXPRESS – OBTENÇÃO DE PDF (URL ASSINADA) via /api/pdf/:id
 // ------------------------------------------------------------------
 async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string | null> {
   const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
@@ -178,8 +194,6 @@ async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string 
       attempt,
       status: resp.status,
       ok: resp.ok,
-      bodyKeys: Object.keys(data || {}),
-      outputType: typeof output,
       signedUrlFound: !!signedUrl,
     });
 
@@ -196,57 +210,65 @@ async function getInvoiceXpressSignedPdfUrl(documentId: string): Promise<string 
   return null;
 }
 
-async function downloadPdfAsBuffer(url: string): Promise<Buffer | null> {
+async function downloadPdfFromUrl(url: string): Promise<Buffer | null> {
   const resp = await fetch(url);
   if (!resp.ok) {
-    console.error('❌ InvoiceXpress PDF download failed:', { status: resp.status, statusText: resp.statusText });
+    console.error('❌ PDF download error:', { status: resp.status, statusText: resp.statusText });
     return null;
   }
   return Buffer.from(await resp.arrayBuffer());
 }
 
 // ==================================================================
-// PUBLIC ADAPTER
+// PUBLIC EXPORT (o teu index.ts chama isto)
 // ==================================================================
 export async function createInvoiceWithInvoiceXpress(input: CreateInvoiceInput): Promise<CreateInvoiceResult> {
-  const taxName = process.env.INVOICEXPRESS_TAX_NAME || 'IVA23';
-
-  const created = await createInvoiceXpressInvoice({
+  const internal = await createInvoiceXpressInvoiceInternal({
     customerName: input.customerName,
     customerEmail: input.customerEmail,
     countryIso: input.countryIso,
     ticketName: input.ticketName,
     amountEuro: input.amountEuro,
-    taxName,
+    taxName: process.env.INVOICEXPRESS_TAX_NAME || 'IVA23',
   });
 
-  const result: CreateInvoiceResult = {
-    provider: 'invoicexpress',
-    invoiceId: created.invoiceId,
-    status: created.status,
-    permalink: created.permalink,
-    totalEuro: created.totalEuro,
-    raw: created.raw,
-    pdfBytes: null,
-  };
-
-  if (!created.invoiceId) return result;
-
-  // produção: pode finalizar se desejado
-  if (!input.isTest && input.autoFinalize) {
-    await finalizeInvoiceXpressInvoice(created.invoiceId);
+  if (!internal.invoiceId) {
+    return {
+      provider: 'invoicexpress',
+      invoiceId: null,
+      status: null,
+      permalink: null,
+      pdfBytes: null,
+      totalEuro: null,
+      raw: internal.raw,
+    };
   }
 
-  // teste: tentar gerar PDF e devolver bytes (para o webhook enviar por email)
+  // produção: finaliza se autoFinalize=true
+  if (!input.isTest && input.autoFinalize) {
+    await finalizeInvoiceXpressInvoice(internal.invoiceId);
+  }
+
+  // teste: baixar PDF assinado e devolver bytes
+  let pdfBytes: Buffer | null = null;
+
   if (input.isTest) {
-    const signedUrl = await getInvoiceXpressSignedPdfUrl(created.invoiceId);
-    if (signedUrl) {
-      const pdfBytes = await downloadPdfAsBuffer(signedUrl);
-      result.pdfBytes = pdfBytes;
+    const signedUrl = await getInvoiceXpressSignedPdfUrl(internal.invoiceId);
+    if (!signedUrl) {
+      console.warn('⚠️ InvoiceXpress: não consegui obter URL assinada do PDF.');
     } else {
-      console.warn('⚠️ InvoiceXpress: não consegui obter URL assinada do PDF (teste).');
+      pdfBytes = await downloadPdfFromUrl(signedUrl);
+      if (!pdfBytes) console.warn('⚠️ InvoiceXpress: falha ao baixar PDF.');
     }
   }
 
-  return result;
+  return {
+    provider: 'invoicexpress',
+    invoiceId: internal.invoiceId,
+    status: internal.status,
+    permalink: internal.permalink,
+    pdfBytes,
+    totalEuro: internal.totalEuro,
+    raw: internal.raw,
+  };
 }
