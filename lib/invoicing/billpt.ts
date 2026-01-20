@@ -3,11 +3,11 @@ import type { CreateInvoiceInput, CreateInvoiceResult } from './types.js';
 // ==================================================================
 // BILL.PT (DEV/PROD) – Adapter
 // ==================================================================
-// Este adapter usa SOMENTE as variáveis que já tens no Vercel:
+// Variáveis usadas (já existentes no Vercel):
 // - BILL_API_TOKEN
 // - BILLING_AUTO_FINALIZE
 //
-// Base URL é definido automaticamente:
+// Base URL automático:
 // - Preview/Development  -> https://dev.bill.pt
 // - Production           -> https://app.bill.pt
 //
@@ -28,7 +28,6 @@ async function safeReadJson(resp: Response): Promise<any> {
 }
 
 function isProdEnv(): boolean {
-  // Vercel define VERCEL_ENV = "production" | "preview" | "development"
   return (process.env.VERCEL_ENV || '').toLowerCase() === 'production';
 }
 
@@ -37,7 +36,6 @@ function getBillBaseUrl(): string {
 }
 
 function withApiToken(url: string, apiToken: string): string {
-  // Bill.pt costuma aceitar api_token na query. Se for header, ajustamos depois.
   const u = new URL(url);
   u.searchParams.set('api_token', apiToken);
   return u.toString();
@@ -53,19 +51,13 @@ function money(n: number): number {
 }
 
 // ==================================================================
-// ENDPOINTS (centralizados para ajustar rápido, se necessário)
+// ENDPOINTS (ajustar apenas aqui se necessário)
 // ==================================================================
-// ⚠️ Se o Bill.pt usar paths diferentes, ajusta apenas aqui.
 function endpoints(baseUrl: string) {
   return {
-    // criar documento
     createDocument: `${baseUrl}/api/1.0/documentos`,
-    // obter detalhes (para token_download)
     getDocument: (id: string) => `${baseUrl}/api/1.0/documentos/${encodeURIComponent(id)}`,
-    // finalizar/emitar (se existir no teu Bill.pt)
-    // se o teu Bill.pt usa outro endpoint/evento, ajustamos aqui
     finalizeDocument: (id: string) => `${baseUrl}/api/1.0/documentos/${encodeURIComponent(id)}/emitir`,
-    // download PDF por token_download
     downloadPdf: (id: string, token: string) =>
       `${baseUrl}/documentos/download/${encodeURIComponent(id)}/${encodeURIComponent(token)}`,
   };
@@ -85,12 +77,13 @@ async function billCreateDocument(params: {
 }) {
   const ep = endpoints(params.baseUrl);
 
-  // Payload "mínimo" típico:
-  // - tipificacao: tipo de documento (ex: FT/FR/etc.)
-  // - contato: dados do cliente
-  // - produtos: linhas
+  // ⚠️ IMPORTANTE
+  // Erro atual: {"error":["1.terminado"]}
+  // Muitas vezes significa que o campo "terminado" no item 1:
+  // - é obrigatório, e/ou
+  // - NÃO aceita boolean true/false; aceita 0/1 (int) ou "0"/"1" (string).
   //
-  // Se no teu Bill.pt os nomes forem ligeiramente diferentes, ajustamos.
+  // Vamos mandar no formato mais compatível: 1 (int).
   const body = {
     tipificacao: 'FT',
     contato: {
@@ -104,8 +97,9 @@ async function billCreateDocument(params: {
         quantidade: 1,
         preco_unitario: money(params.amountEuro),
         imposto: 23,
-        // ✅ Bill.pt valida este campo no item 1
-        terminado: true,
+
+        // ✅ enviar como inteiro (mais compatível que boolean)
+        terminado: 1,
       },
     ],
     lingua: 'pt',
@@ -116,6 +110,9 @@ async function billCreateDocument(params: {
     baseUrl: params.baseUrl,
     amountEuro: params.amountEuro,
   });
+
+  // ✅ LOG DO PAYLOAD (NO LUGAR CERTO)
+  console.log('🔎 DEBUG Bill.pt payload:', JSON.stringify(body));
 
   const resp = await fetch(withApiToken(ep.createDocument, params.apiToken), {
     method: 'POST',
@@ -131,7 +128,6 @@ async function billCreateDocument(params: {
     return { id: null as string | null, raw: data };
   }
 
-  // tenta achar id em formatos comuns
   const id =
     (data?.id != null ? String(data.id) : null) ||
     (data?.documento?.id != null ? String(data.documento.id) : null) ||
@@ -220,7 +216,7 @@ async function billDownloadPdf(params: { baseUrl: string; id: string; tokenDownl
 }
 
 // ==================================================================
-// PUBLIC EXPORT (usado pelo lib/invoicing/index.ts)
+// PUBLIC EXPORT
 // ==================================================================
 export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promise<CreateInvoiceResult> {
   const apiToken = (process.env.BILL_API_TOKEN || '').trim();
@@ -232,7 +228,6 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
   const baseUrl = getBillBaseUrl();
   const countryIso = normalizeIso(input.countryIso);
 
-  // 1) criar documento
   const created = await billCreateDocument({
     baseUrl,
     apiToken,
@@ -257,13 +252,10 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
 
   const invoiceId = created.id;
 
-  // 2) opcional: finalizar (produção normalmente; em dev pode ser opcional)
   if (!input.isTest && input.autoFinalize) {
     await billFinalizeDocument({ baseUrl, apiToken, id: invoiceId });
   }
 
-  // 3) obter token_download e baixar PDF
-  // Para testes end-to-end, queremos sempre tentar PDF
   const doc = await billGetDocument({ baseUrl, apiToken, id: invoiceId });
 
   const tokenDownload = extractTokenDownload(doc);
@@ -279,11 +271,7 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
     console.warn('⚠️ Bill.pt: token_download não encontrado no documento. Não foi possível baixar PDF.');
   }
 
-  // permalink: se vier no payload, ótimo; senão podemos deixar null
-  const permalink =
-    doc?.permalink ||
-    doc?.documento?.permalink ||
-    null;
+  const permalink = doc?.permalink || doc?.documento?.permalink || null;
 
   return {
     provider: 'billpt',
