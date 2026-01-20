@@ -97,12 +97,11 @@ async function billCreateDocument(params: {
         quantidade: 1,
         preco_unitario: money(params.amountEuro),
         imposto: 23,
-
-        // ✅ enviar como inteiro (mais compatível que boolean)
-        terminado: 1,
       },
     ],
     lingua: 'pt',
+    // ✅ enviar como inteiro (mais compatível que boolean)
+    terminado: 1,
   };
 
   console.log('🧾 Bill.pt: criando documento...', {
