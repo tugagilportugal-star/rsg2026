@@ -104,6 +104,8 @@ async function billCreateDocument(params: {
         quantidade: 1,
         preco_unitario: money(params.amountEuro),
         imposto: 23,
+        // ✅ Bill.pt valida este campo no item 1
+        terminado: true,
       },
     ],
     lingua: 'pt',
