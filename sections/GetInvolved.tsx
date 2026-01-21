@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
 import { FormType, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
-import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText } from 'lucide-react';
 
-// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE
-const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f'; 
+// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
+const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f';
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
@@ -20,7 +20,7 @@ interface TicketTypeData {
 }
 
 /* =========================
-   MAIN SECTION (TICKET SALES & OPTIONS)
+   MAIN SECTION (TICKET SALES)
 ========================= */
 export const GetInvolved: React.FC<GetInvolvedProps> = ({
   setSponsorModalOpen,
@@ -28,13 +28,15 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 }) => {
   // Estado para o formulário de compra de bilhete
   const [ticketForm, setTicketForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    role: ''
+  firstName: '',
+  lastName: '',
+  email: '',
+  country: 'Portugal',
+  jobFunction: '',
+  jobFunctionOther: '',
   });
-  
+
+
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
@@ -78,16 +80,23 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
         body: JSON.stringify({
           ticketTypeId: TICKET_TYPE_ID,
           quantity: 1,
-          formData: ticketForm
+          formData: {
+            ...ticketForm,
+            name: `${ticketForm.firstName} ${ticketForm.lastName}`.trim(),
+            jobFunctionFinal:
+              ticketForm.jobFunction === 'Outros'
+              ? ticketForm.jobFunctionOther.trim()
+                : ticketForm.jobFunction,
+          },    
         }),
       });
 
       const data = await res.json();
 
-      if (data.url) {
+      if (data?.url) {
         window.location.href = data.url;
       } else {
-        alert('Erro ao iniciar pagamento: ' + (data.message || 'Tente novamente.'));
+        alert('Erro ao iniciar pagamento: ' + (data?.message || 'Tente novamente.'));
         setBuyStatus('idle');
       }
     } catch (err) {
@@ -160,12 +169,12 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
               <>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="bg-green-100 p-3 rounded-full">
-                      <Ticket className="w-8 h-8 text-green-600" />
+                    <Ticket className="w-8 h-8 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-brand-darkBlue">{ticketData.name}</h3>
                     <p className="text-green-600 font-bold text-lg">
-                      {formatCurrency(ticketData.price, ticketData.currency)} 
+                      {formatCurrency(ticketData.price, ticketData.currency)}
                       <span className="text-sm font-normal text-gray-500"> / pessoa</span>
                     </p>
                   </div>
@@ -174,52 +183,120 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                 <form onSubmit={handleBuyTicket} className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <Input
-                        label="Nome do Participante"
-                        required
-                        value={ticketForm.name}
-                        onChange={e => setTicketForm({ ...ticketForm, name: e.target.value })}
+                      label="Primeiro nome"
+                      required
+                      value={ticketForm.firstName}
+                      onChange={(e) => setTicketForm({ ...ticketForm, firstName: e.target.value })}
                     />
                     <Input
-                        label="E-mail"
-                        type="email"
-                        required
-                        value={ticketForm.email}
-                        onChange={e => setTicketForm({ ...ticketForm, email: e.target.value })}
+                      label="Sobrenome"
+                      required
+                      value={ticketForm.lastName}
+                      onChange={(e) => setTicketForm({ ...ticketForm, lastName: e.target.value })}
                     />
-                  </div>
+                  </div> 
+
+                  <Input
+                    label="Endereço de email"
+                    type="email"
+                    required
+                    value={ticketForm.email}
+                    onChange={(e) => setTicketForm({ ...ticketForm, email: e.target.value })}
+                  />
+
                   <div className="grid md:grid-cols-2 gap-4">
-                    <Input
-                        label="Telemóvel / WhatsApp"
+                    <div className="space-y-1">
+                      <label className="block text-sm font-medium text-gray-700">País</label>
+                      <select
                         required
-                        value={ticketForm.phone}
-                        onChange={e => setTicketForm({ ...ticketForm, phone: e.target.value })}
-                    />
-                    <Input
-                        label="Empresa (Opcional)"
-                        value={ticketForm.company}
-                        onChange={e => setTicketForm({ ...ticketForm, company: e.target.value })}
-                    />
+                        value={ticketForm.country}
+                        onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      >
+                        <option value="Portugal">Portugal</option>
+                        <option value="Spain">Espanha</option>
+                        <option value="France">França</option>
+                        <option value="Germany">Alemanha</option>
+                        <option value="United Kingdom">Reino Unido</option>
+                        <option value="Brazil">Brasil</option>
+                        <option value="United States">Estados Unidos</option>
+                        <option value="Other">Outro</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Função de trabalho
+                      </label>
+                      <select
+                        required
+                        value={ticketForm.jobFunction}
+                        onChange={(e) =>
+                          setTicketForm({
+                            ...ticketForm,
+                            jobFunction: e.target.value,
+                            jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
+                          })
+                        }
+                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+                      >
+                        <option value="" disabled>Seleciona…</option>
+                        <option value="Atendimento ao Cliente">Atendimento ao Cliente</option>
+                        <option value="Engenharia">Engenharia</option>
+                        <option value="Executivo">Executivo</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Recursos Humanos">Recursos Humanos</option>
+                        <option value="Tecnologia da Informação">Tecnologia da Informação</option>
+                        <option value="Jurídico">Jurídico</option>
+                        <option value="Marketing e Vendas">Marketing e Vendas</option>
+                        <option value="Operações">Operações</option>
+                        <option value="Gestão de Produtos">Gestão de Produtos</option>
+                        <option value="Serviços Profissionais">Serviços Profissionais</option>
+                        <option value="Gerenciamento de projetos">Gerenciamento de projetos</option>
+                        <option value="Pesquisa">Pesquisa</option>
+                        <option value="Cadeia de suprimentos e manufatura">Cadeia de suprimentos e manufatura</option>
+                        <option value="Treinamento e Educação">Treinamento e Educação</option>
+                        <option value="Indústria de trabalho">Indústria de trabalho</option>
+                        <option value="Outros">Outros</option>
+                      </select>
+                    </div>
                   </div>
 
+                  {ticketForm.jobFunction === 'Outros' && (
+                    <Input
+                      label="Qual?"
+                      required
+                      value={ticketForm.jobFunctionOther}
+                      onChange={(e) => setTicketForm({ ...ticketForm, jobFunctionOther: e.target.value })}
+                    />
+                  )}
+
                   <div className="pt-4">
-                    <Button 
-                        type="submit" 
-                        isLoading={buyStatus === 'loading'} 
-                        className="w-full text-lg py-4 bg-brand-orange hover:bg-orange-600 shadow-lg"
-                        disabled={!ticketData.active}
+                    <Button
+                      type="submit"
+                      isLoading={buyStatus === 'loading'}
+                      className="w-full text-lg py-4 bg-brand-orange hover:bg-orange-600 shadow-lg"
+                      disabled={
+                        !ticketData?.active ||
+                        (ticketForm.jobFunction === 'Outros' && !ticketForm.jobFunctionOther.trim())
+                      }
                     >
-                        {ticketData.active ? (
-                            <>Continuar para Pagamento <ArrowRight className="ml-2 w-5 h-5" /></>
-                        ) : (
-                            'Lote Indisponível'
-                        )}
+                      {ticketData?.active ? (
+                        <>
+                          Continuar para Pagamento <ArrowRight className="ml-2 w-5 h-5" />
+                        </>
+                      ) : (
+                        'Lote Indisponível'
+                      )}
                     </Button>
+
                     <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
-                        <Lock className="w-3 h-3" />
-                        Pagamento seguro via Stripe (Cartão, Multibanco, MBWay)
+                      <Lock className="w-3 h-3" />
+                      Pagamento seguro via Stripe
                     </div>
                   </div>
                 </form>
+
               </>
             ) : (
               <div className="text-center py-12 text-red-500">
@@ -239,6 +316,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 export const SponsorForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
   const [formData, setFormData] = useState<SponsorFormData>({
     name: '',
@@ -298,6 +376,22 @@ export const SponsorForm: React.FC = () => {
         onChange={e => setFormData({ ...formData, message: e.target.value })}
       />
 
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+        <FileText className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-gray-600">
+          Ainda não viu as opções? <br />
+          <a
+            href={MEDIA_KIT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-blue font-bold hover:underline"
+          >
+            Aceda ao nosso Media Kit aqui
+          </a>{' '}
+          e descubra como a sua organização pode ser parte do RSG Lisbon 2026.
+        </p>
+      </div>
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
           {error}
@@ -339,13 +433,13 @@ export const SupporterForm: React.FC = () => {
     } else {
       setStatus('idle');
       setError(
-        'Ocorreu um erro. Tente novamente mais tarde ou contacte tugagilportugal@gmail.com'
+        'Ocorreu um erro. Tente novamente mais tarde ou contacte tuga@tugagil.com'
       );
     }
   };
 
   if (status === 'success') {
-    return <SuccessState message="Obrigado por querer apoiar o RSG!" />;
+    return <SuccessState message="Obrigado pelo interesse em apoiar o RSG Lisbon 2026!" />;
   }
 
   return (
