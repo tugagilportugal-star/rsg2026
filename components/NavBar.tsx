@@ -69,7 +69,7 @@ export const Navbar: React.FC = () => {
               </div>
 
               <a
-                href="#get-involved"
+                href="#ticket-form"
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5"
               >
                 Garanta o teu lugar
@@ -138,11 +138,11 @@ export const Navbar: React.FC = () => {
             ))}
 
             <a
-              href="#get-involved"
+              href="#ticket-form"
               onClick={() => setIsMobileMenuOpen(false)}
               className="mt-4 bg-brand-orange text-white text-lg font-black uppercase tracking-widest px-10 py-4 rounded-full shadow-lg active:scale-95 transition-transform"
             >
-              Garanta a sua participação
+              Garanta a tua participação
             </a>
         </div>
 

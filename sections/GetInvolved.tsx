@@ -157,7 +157,10 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 
       <div className="max-w-3xl mx-auto">
         {/* Box VENDA DE BILHETES */}
-        <div className="bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100 relative transform hover:-translate-y-1 transition-transform duration-300">
+        <div
+          id="ticket-form"
+          className="bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100 relative transform hover:-translate-y-1 transition-transform duration-300 scroll-mt-32"
+        >
           <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
 
           <div className="p-8 md:p-12">
