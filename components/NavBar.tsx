@@ -69,11 +69,12 @@ export const Navbar: React.FC = () => {
               </div>
 
               <a
-                href="#waitlist"
+                href="#get-involved"
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5"
               >
-                Waitlist
+                Garanta o teu lugar
               </a>
+
 
               <div className="h-10 w-px bg-white/20"></div>
 
@@ -137,11 +138,11 @@ export const Navbar: React.FC = () => {
             ))}
 
             <a
-              href="#waitlist"
+              href="#get-involved"
               onClick={() => setIsMobileMenuOpen(false)}
               className="mt-4 bg-brand-orange text-white text-lg font-black uppercase tracking-widest px-10 py-4 rounded-full shadow-lg active:scale-95 transition-transform"
             >
-              Inscreva-se na Waitlist
+              Garanta a sua participação
             </a>
         </div>
 
