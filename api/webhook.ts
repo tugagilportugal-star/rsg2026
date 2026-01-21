@@ -1,3 +1,4 @@
+// api/webhook.ts
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
@@ -173,6 +174,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`💰 Processando Order: ${session.id}`);
 
   try {
+    const meta = (session.metadata || {}) as any;
+
+    // País do comprador (ISO, ex: "PT"). Preferimos o que vem do Stripe, com fallback para metadata.
+    const customerCountryIso =
+      session.customer_details?.address?.country ||
+      meta?.attendee_country ||
+      meta?.country ||
+      'PT';
+
+    // -----------------------------
+    // Normalização dos novos campos
+    // -----------------------------
+    const attendeeFirstName =
+      meta?.attendee_first_name ||
+      meta?.firstName ||
+      meta?.first_name ||
+      null;
+
+    const attendeeLastName =
+      meta?.attendee_last_name ||
+      meta?.lastName ||
+      meta?.last_name ||
+      null;
+
+    const attendeeCountry =
+      meta?.attendee_country ||
+      meta?.country ||
+      null;
+
+    const attendeeJobFunction =
+      meta?.attendee_job_function ||
+      meta?.jobFunctionFinal ||
+      meta?.jobFunction ||
+      null;
+
+    const attendeeJobFunctionOther =
+      meta?.attendee_job_function_other ||
+      meta?.jobFunctionOther ||
+      null;
+
+    // Compatibilidade (campos antigos)
+    const attendeeCompany =
+      meta?.attendee_company ||
+      meta?.company ||
+      null;
+
+    const attendeePhone =
+      meta?.attendee_phone ||
+      meta?.phone ||
+      null;
+
+    // Nome completo (compatível com UI/relatórios)
+    const attendeeName =
+      meta?.attendee_name ||
+      meta?.name ||
+      [attendeeFirstName, attendeeLastName].filter(Boolean).join(' ').trim() ||
+      session.customer_details?.name ||
+      null;
+
     // 1) Salvar Order
     const { data: order, error: orderErr } = await supabase
       .from('orders')
@@ -180,6 +240,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         stripe_session_id: session.id,
         customer_email: session.customer_details?.email,
         customer_name: session.customer_details?.name,
+        customer_country: customerCountryIso,
         total_amount: session.amount_total,
         status: 'paid',
       })
@@ -189,16 +250,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (orderErr) throw new Error(`DB Order Error: ${orderErr.message}`);
 
     // 2) Salvar Ticket
-    const meta = session.metadata || {};
     const { data: ticket, error: ticketErr } = await supabase
       .from('tickets')
       .insert({
         order_id: order.id,
         ticket_type_id: meta.ticket_type_id,
-        attendee_name: meta.attendee_name,
+
+        // antigos (mantém compatibilidade)
+        attendee_name: attendeeName,
         attendee_email: session.customer_details?.email,
-        attendee_phone: meta.attendee_phone,
-        attendee_company: meta.attendee_company,
+        attendee_company: attendeeCompany,
+        attendee_phone: attendeePhone,
+
+        // novos campos do formulário
+        attendee_first_name: attendeeFirstName,
+        attendee_last_name: attendeeLastName,
+        attendee_country: attendeeCountry,
+        attendee_job_function: attendeeJobFunction,
+        attendee_job_function_other: attendeeJobFunctionOther,
+
         checked_in: false,
       })
       .select()
@@ -215,13 +285,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 4) Faturação via Provider (InvoiceXpress OU Bill.pt)
     const amountEuro = (order.total_amount || 0) / 100;
-    const customerCountryIso = session.customer_details?.address?.country || 'PT';
-
     const isTest = stripeIsTestMode();
 
     const invoiceResult = await issueInvoiceForOrder({
       isTest,
-      customerName: order.customer_name || meta.attendee_name || 'Participante RSG',
+      customerName: order.customer_name || attendeeName || 'Participante RSG',
       customerEmail: order.customer_email,
       countryIso: customerCountryIso,
       ticketName,
@@ -237,9 +305,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           to: order.customer_email,
           pdfBytes: invoiceResult.pdfBytes,
           invoiceId: invoiceResult.invoiceId,
-          name: order.customer_name || meta.attendee_name || 'Participante',
+          name: order.customer_name || attendeeName || 'Participante',
           ticketName,
-          total: invoiceResult.total ?? amountEuro.toFixed(2),
+          total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
           isTest,
         });
 
@@ -255,7 +323,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       from: 'RSG Lisbon <onboarding@resend.dev>',
       to: session.customer_details?.email as string,
       subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
-      html: generateTicketEmail(meta.attendee_name, ticketName, qrUrl, ticket.id),
+      html: generateTicketEmail(attendeeName || 'Participante', ticketName, qrUrl, ticket.id),
     });
 
     if (emailRes.error) console.error('⚠️ Resend Error:', emailRes.error);

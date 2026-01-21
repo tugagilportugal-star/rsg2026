@@ -28,14 +28,13 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
 }) => {
   // Estado para o formulário de compra de bilhete
   const [ticketForm, setTicketForm] = useState({
-  firstName: '',
-  lastName: '',
-  email: '',
-  country: 'Portugal',
-  jobFunction: '',
-  jobFunctionOther: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    country: 'Portugal',
+    jobFunction: '',
+    jobFunctionOther: '',
   });
-
 
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
@@ -77,17 +76,19 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        // ✅ aqui é o payload certo (sem "body dentro do body")
         body: JSON.stringify({
           ticketTypeId: TICKET_TYPE_ID,
           quantity: 1,
           formData: {
-            ...ticketForm,
-            name: `${ticketForm.firstName} ${ticketForm.lastName}`.trim(),
-            jobFunctionFinal:
-              ticketForm.jobFunction === 'Outros'
-              ? ticketForm.jobFunctionOther.trim()
-                : ticketForm.jobFunction,
-          },    
+            attendee_first_name: ticketForm.firstName.trim(),
+            attendee_last_name: ticketForm.lastName.trim(),
+            attendee_email: ticketForm.email.trim(),
+            attendee_country: ticketForm.country,
+            attendee_job_function: ticketForm.jobFunction,
+            attendee_job_function_other:
+              ticketForm.jobFunction === 'Outros' ? ticketForm.jobFunctionOther.trim() : '',
+          },
         }),
       });
 
@@ -194,7 +195,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                       value={ticketForm.lastName}
                       onChange={(e) => setTicketForm({ ...ticketForm, lastName: e.target.value })}
                     />
-                  </div> 
+                  </div>
 
                   <Input
                     label="Endereço de email"
@@ -296,7 +297,6 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
                     </div>
                   </div>
                 </form>
-
               </>
             ) : (
               <div className="text-center py-12 text-red-500">
