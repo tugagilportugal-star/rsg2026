@@ -90,7 +90,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
 
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#get-involved`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#ticket-form`,
     });
 
     return res.status(200).json({ url: session.url });
