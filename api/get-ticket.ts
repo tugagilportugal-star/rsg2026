@@ -15,11 +15,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const id = String(req.query.id || '').trim();
 
-    // Se vier ID -> devolve aquele lote (comportamento antigo, mantém compatibilidade)
+    // Se vier ID -> devolve aquele lote (mantém compatibilidade)
     if (id) {
       const { data, error } = await supabase
         .from('ticket_types')
-        .select('id,name,price,currency,active,quantity_total,quantity_sold,sort')
+        .select('id,name,price,currency,active,quantity_total,quantity_sold,sort_order')
         .eq('id', id)
         .single();
 
@@ -30,12 +30,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json(data);
     }
 
-    // Se NÃO vier ID -> devolve o lote ativo com menor sort (lote atual)
+    // Se NÃO vier ID -> devolve o lote ativo com menor sort_order (lote atual)
     const { data: activeTicket, error: activeErr } = await supabase
       .from('ticket_types')
-      .select('id,name,price,currency,active,quantity_total,quantity_sold,sort')
+      .select('id,name,price,currency,active,quantity_total,quantity_sold,sort_order')
       .eq('active', true)
-      .order('sort', { ascending: true })
+      .order('sort_order', { ascending: true })
       .limit(1)
       .maybeSingle();
 
