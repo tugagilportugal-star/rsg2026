@@ -175,6 +175,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const meta = (session.metadata || {}) as any;
+    const ticketTypeId = meta?.ticket_type_id as string | undefined;
+    const qty = Number(meta?.quantity || 1); // fallback 1
 
     // País do comprador (ISO, ex: "PT"). Preferimos o que vem do Stripe, com fallback para metadata.
     const customerCountryIso =
@@ -276,9 +278,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
 
+    // 2.1) Atualizar contador do lote e ativar próximo (se esgotou)
+    if (ticketTypeId) {
+      const { data: consumeRes, error: consumeErr } = await supabase.rpc('consume_ticket_type', {
+        p_ticket_type_id: ticketTypeId,
+        p_qty: qty,
+      });
+
+      if (consumeErr) {
+        console.error('⚠️ consume_ticket_type RPC error:', consumeErr.message);
+      } else {
+        console.log('🎟️ consume_ticket_type result:', consumeRes);
+      }
+    } else {
+      console.warn('⚠️ ticket_type_id não encontrado no metadata; não atualizei quantity_sold.');
+    }
+
+
     // 3) Buscar nome do Bilhete
     let ticketName = 'Ingresso RSG 2026';
-    if (meta.ticket_type_id) {
+    if (ticketTypeId) {
       const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
       if (type) ticketName = type.name;
     }
