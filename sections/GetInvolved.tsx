@@ -5,7 +5,7 @@ import { saveSubmission } from '../services/db';
 import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText } from 'lucide-react';
 
 // ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
-const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f';
+//const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f';
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
@@ -13,11 +13,16 @@ interface GetInvolvedProps {
 }
 
 interface TicketTypeData {
+  id: string;
   name: string;
   price: number;
   currency: string;
   active: boolean;
+  quantity_total: number | null;
+  quantity_sold: number | null;
+  sort_order: number | null;
 }
+
 
 /* =========================
    MAIN SECTION (TICKET SALES)
@@ -44,7 +49,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
   useEffect(() => {
     async function fetchTicket() {
       try {
-        const res = await fetch(`/api/get-ticket?id=${TICKET_TYPE_ID}`);
+        const res = await fetch(`/api/get-ticket`);
         if (res.ok) {
           const data = await res.json();
           setTicketData(data);
@@ -58,7 +63,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
       }
     }
 
-    if (TICKET_TYPE_ID) fetchTicket();
+    fetchTicket();
   }, []);
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -73,12 +78,20 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
     setBuyStatus('loading');
 
     try {
+      
+      if (!ticketData?.id) {
+        alert('Ainda estamos a carregar o lote de bilhetes. Tenta novamente em alguns segundos.');
+        setBuyStatus('idle');
+        return;
+      }
+
+      // 2. Chamar API de Checkout
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // ✅ aqui é o payload certo (sem "body dentro do body")
         body: JSON.stringify({
-          ticketTypeId: TICKET_TYPE_ID,
+          ticketTypeId: ticketData.id,
           quantity: 1,
           formData: {
             attendee_first_name: ticketForm.firstName.trim(),
