@@ -18,8 +18,6 @@ type LeadRow = {
   status?: LeadStatus | string | null;
 };
 
-type AdminTab = 'leads' | 'ticketTypes';
-
 type TicketTypeRow = {
   id: string;
   name: string;
@@ -31,6 +29,42 @@ type TicketTypeRow = {
   sort_order: number | null;
   created_at?: string | null;
 };
+
+type OrderRow = {
+  id: string;
+  created_at?: string | null;
+  stripe_session_id?: string | null;
+  customer_email?: string | null;
+  customer_name?: string | null;
+  customer_nif?: string | null;
+  customer_country?: string | null;
+  total_amount?: number | null; // cents
+  status?: string | null; // paid/pending/failed...
+  invoice_id?: string | null;
+};
+
+type TicketRow = {
+  id: string;
+  created_at?: string | null;
+  order_id?: string | null;
+  ticket_type_id?: string | null;
+
+  attendee_name?: string | null;
+  attendee_email?: string | null;
+  attendee_company?: string | null;
+  attendee_phone?: string | null;
+
+  attendee_first_name?: string | null;
+  attendee_last_name?: string | null;
+  attendee_country?: string | null;
+  attendee_job_function?: string | null;
+  attendee_job_function_other?: string | null;
+
+  checked_in?: boolean | null;
+  check_in_at?: string | null;
+};
+
+type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets';
 
 const STATUS_OPTIONS: LeadStatus[] = ['Pending', 'InProgress', 'Completed'];
 
@@ -45,17 +79,32 @@ function safe(val: any) {
   return val === null || val === undefined ? '' : String(val);
 }
 
+function formatMoneyEURFromCents(cents?: number | null) {
+  if (cents === null || cents === undefined) return '';
+  const v = Number(cents);
+  if (Number.isNaN(v)) return safe(cents);
+  return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(v / 100);
+}
+
 export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  // Tabs
+  const [tab, setTab] = useState<AdminTab>('leads');
+
   // Leads
   const [data, setData] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Tabs
-  const [tab, setTab] = useState<AdminTab>('leads');
-
-  // Ticket types (lotes)
+  // Ticket Types
   const [ticketTypes, setTicketTypes] = useState<TicketTypeRow[]>([]);
   const [loadingTicketTypes, setLoadingTicketTypes] = useState(false);
+
+  // Orders
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Tickets
+  const [tickets, setTickets] = useState<TicketRow[]>([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   // Auth
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -74,7 +123,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   async function fetchLeads() {
     if (!authHeader) return;
-
     setLoading(true);
     try {
       const res = await fetch('/api/admin/leads', {
@@ -86,12 +134,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setError('Credenciais inválidas');
         return;
       }
-
       if (!res.ok) {
         setError('Falha ao carregar leads');
         return;
       }
-
       const rows = (await res.json()) as LeadRow[];
       setData(Array.isArray(rows) ? rows : []);
       setError(null);
@@ -104,7 +150,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   async function fetchTicketTypes() {
     if (!authHeader) return;
-
     setLoadingTicketTypes(true);
     try {
       const res = await fetch('/api/admin/ticket-types', {
@@ -116,12 +161,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setError('Credenciais inválidas / sessão expirada');
         return;
       }
-
       if (!res.ok) {
         setError('Falha ao carregar lotes');
         return;
       }
-
       const rows = (await res.json()) as TicketTypeRow[];
       setTicketTypes(Array.isArray(rows) ? rows : []);
       setError(null);
@@ -129,6 +172,60 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setError('Erro inesperado ao carregar lotes');
     } finally {
       setLoadingTicketTypes(false);
+    }
+  }
+
+  async function fetchOrders() {
+    if (!authHeader) return;
+    setLoadingOrders(true);
+    try {
+      const res = await fetch('/api/admin/orders', {
+        headers: { Authorization: authHeader },
+      });
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+      if (!res.ok) {
+        setError('Falha ao carregar pagamentos (orders)');
+        return;
+      }
+      const rows = (await res.json()) as OrderRow[];
+      setOrders(Array.isArray(rows) ? rows : []);
+      setError(null);
+    } catch {
+      setError('Erro inesperado ao carregar pagamentos (orders)');
+    } finally {
+      setLoadingOrders(false);
+    }
+  }
+
+  async function fetchTickets() {
+    if (!authHeader) return;
+    setLoadingTickets(true);
+    try {
+      const res = await fetch('/api/admin/tickets', {
+        headers: { Authorization: authHeader },
+      });
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+      if (!res.ok) {
+        setError('Falha ao carregar tickets (participantes)');
+        return;
+      }
+      const rows = (await res.json()) as TicketRow[];
+      setTickets(Array.isArray(rows) ? rows : []);
+      setError(null);
+    } catch {
+      setError('Erro inesperado ao carregar tickets (participantes)');
+    } finally {
+      setLoadingTickets(false);
     }
   }
 
@@ -151,7 +248,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setError('Sessão expirada (401)');
         return;
       }
-
       if (!res.ok) {
         setError('Falha ao atualizar status');
         return;
@@ -185,7 +281,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setError('Sessão expirada (401)');
         return;
       }
-
       if (!res.ok) {
         setError('Falha ao marcar como Deleted');
         return;
@@ -220,6 +315,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setSelected(null);
     setData([]);
     setTicketTypes([]);
+    setOrders([]);
+    setTickets([]);
     setError(null);
     setTab('leads');
   };
@@ -229,53 +326,165 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
+    if (tab === 'orders') fetchOrders();
+    if (tab === 'tickets') fetchTickets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authHeader, tab]);
 
   const downloadCsv = () => {
-    const headers = [
-      'id',
-      'created_at',
-      'type',
-      'name',
-      'email',
-      'phone',
-      'company',
-      'role',
-      'portfolio',
-      'status',
-      'message',
-    ];
+    // CSV muda conforme tab (pra não misturar colunas)
+    if (tab === 'leads') {
+      const headers = [
+        'id',
+        'created_at',
+        'type',
+        'name',
+        'email',
+        'phone',
+        'company',
+        'role',
+        'portfolio',
+        'status',
+        'message',
+      ];
 
-    const escape = (v: any) => {
-      const s = safe(v).replace(/\r?\n/g, ' ').trim();
-      if (s.includes('"') || s.includes(',') || s.includes(';')) {
-        return `"${s.replace(/"/g, '""')}"`;
-      }
-      return s;
-    };
+      const escape = (v: any) => {
+        const s = safe(v).replace(/\r?\n/g, ' ').trim();
+        if (s.includes('"') || s.includes(',') || s.includes(';')) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
 
-    const lines = [
-      headers.join(','),
-      ...data.map((r) =>
-        headers
-          .map((h) => {
-            const val = (r as any)[h];
-            return escape(val);
-          })
-          .join(',')
-      ),
-    ];
+      const lines = [
+        headers.join(','),
+        ...data.map((r) => headers.map((h) => escape((r as any)[h])).join(',')),
+      ];
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `leads-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `leads-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
+    if (tab === 'orders') {
+      const headers = [
+        'id',
+        'created_at',
+        'status',
+        'total_amount',
+        'currency',
+        'stripe_session_id',
+        'customer_name',
+        'customer_email',
+        'customer_country',
+        'customer_nif',
+        'invoice_id',
+      ];
 
-    URL.revokeObjectURL(url);
+      const escape = (v: any) => {
+        const s = safe(v).replace(/\r?\n/g, ' ').trim();
+        if (s.includes('"') || s.includes(',') || s.includes(';')) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
+
+      const lines = [
+        headers.join(','),
+        ...orders.map((o) =>
+          headers
+            .map((h) => {
+              if (h === 'currency') return 'eur';
+              return escape((o as any)[h]);
+            })
+            .join(',')
+        ),
+      ];
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if (tab === 'tickets') {
+      const headers = [
+        'id',
+        'created_at',
+        'order_id',
+        'ticket_type_id',
+        'attendee_name',
+        'attendee_email',
+        'attendee_first_name',
+        'attendee_last_name',
+        'attendee_country',
+        'attendee_job_function',
+        'attendee_job_function_other',
+        'attendee_company',
+        'attendee_phone',
+        'checked_in',
+        'check_in_at',
+      ];
+
+      const escape = (v: any) => {
+        const s = safe(v).replace(/\r?\n/g, ' ').trim();
+        if (s.includes('"') || s.includes(',') || s.includes(';')) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
+
+      const lines = [
+        headers.join(','),
+        ...tickets.map((t) => headers.map((h) => escape((t as any)[h])).join(',')),
+      ];
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tickets-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if (tab === 'ticketTypes') {
+      const headers = [
+        'id',
+        'sort_order',
+        'name',
+        'price',
+        'currency',
+        'quantity_total',
+        'quantity_sold',
+        'active',
+        'created_at',
+      ];
+
+      const escape = (v: any) => {
+        const s = safe(v).replace(/\r?\n/g, ' ').trim();
+        if (s.includes('"') || s.includes(',') || s.includes(';')) return `"${s.replace(/"/g, '""')}"`;
+        return s;
+      };
+
+      const lines = [
+        headers.join(','),
+        ...ticketTypes.map((t) => headers.map((h) => escape((t as any)[h])).join(',')),
+      ];
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-types-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
   };
 
   if (!isAuthenticated) {
@@ -316,10 +525,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">{error}</div>
             )}
 
-            <button
-              type="submit"
-              className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl hover:opacity-95 transition"
-            >
+            <button type="submit" className="w-full bg-brand-blue text-white font-bold py-3 rounded-xl hover:opacity-95 transition">
               Entrar
             </button>
 
@@ -341,12 +547,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Exportar só faz sentido nos leads */}
           <button
             onClick={downloadCsv}
             className="text-sm font-bold px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center gap-2"
             title="Exportar CSV"
-            disabled={tab !== 'leads'}
           >
             <Download className="w-4 h-4" />
             Exportar
@@ -356,6 +560,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             onClick={() => {
               if (tab === 'leads') fetchLeads();
               if (tab === 'ticketTypes') fetchTicketTypes();
+              if (tab === 'orders') fetchOrders();
+              if (tab === 'tickets') fetchTickets();
             }}
             className="text-sm font-bold px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200"
           >
@@ -378,40 +584,42 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
       {/* Tabs */}
       <div className="bg-white border-b px-6">
-        <div className="flex gap-2 py-3">
-          <button
-            onClick={() => setTab('leads')}
-            className={`px-4 py-2 rounded-xl text-sm font-black ${
-              tab === 'leads' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Leads
-          </button>
-
-          <button
-            onClick={() => setTab('ticketTypes')}
-            className={`px-4 py-2 rounded-xl text-sm font-black ${
-              tab === 'ticketTypes' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Lotes (Tickets)
-          </button>
+        <div className="flex gap-2 py-3 flex-wrap">
+          {[
+            { key: 'leads', label: 'Leads' },
+            { key: 'ticketTypes', label: 'Lotes (Tickets)' },
+            { key: 'orders', label: 'Orders (Pagamentos)' },
+            { key: 'tickets', label: 'Tickets (Participantes)' },
+          ].map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key as AdminTab)}
+              className={`px-4 py-2 rounded-xl text-sm font-black ${
+                tab === (t.key as AdminTab)
+                  ? 'bg-brand-darkBlue text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <main className="flex-grow overflow-auto p-6">
-        {tab === 'leads' ? (
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
+            {error}
+          </div>
+        )}
+
+        {/* LEADS */}
+        {tab === 'leads' && (
           <>
             {loading ? (
               <p className="text-center text-gray-400">A carregar…</p>
             ) : (
               <>
-                {error && (
-                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
-                    {error}
-                  </div>
-                )}
-
                 <div className="bg-white rounded-xl shadow border overflow-x-auto">
                   <table className="w-full min-w-[1200px]">
                     <thead>
@@ -436,19 +644,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                           onClick={() => setSelected(row)}
                         >
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{formatDatePt(row.created_at)}</td>
-
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(row.type)}</td>
-
                           <td className="p-4 text-sm font-semibold text-gray-900 whitespace-nowrap">{safe(row.name)}</td>
-
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(row.email)}</td>
-
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(row.phone)}</td>
-
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(row.company)}</td>
-
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(row.role)}</td>
-
                           <td className="p-4 text-sm text-gray-700 whitespace-nowrap">
                             {row.portfolio ? (
                               <a
@@ -609,55 +810,161 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </>
             )}
           </>
-        ) : (
+        )}
+
+        {/* LOTES */}
+        {tab === 'ticketTypes' && (
           <>
             {loadingTicketTypes ? (
               <p className="text-center text-gray-400">A carregar lotes…</p>
             ) : (
-              <>
-                {error && (
-                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
-                    {error}
-                  </div>
-                )}
-
-                <div className="bg-white rounded-xl shadow border overflow-x-auto">
-                  <table className="w-full min-w-[900px]">
-                    <thead>
-                      <tr className="text-xs text-gray-500 uppercase border-b">
-                        <th className="p-4 text-left">Ordem</th>
-                        <th className="p-4 text-left">Nome</th>
-                        <th className="p-4 text-left">Preço</th>
-                        <th className="p-4 text-left">Moeda</th>
-                        <th className="p-4 text-left">Total</th>
-                        <th className="p-4 text-left">Vendidos</th>
-                        <th className="p-4 text-left">Ativo</th>
+              <div className="bg-white rounded-xl shadow border overflow-x-auto">
+                <table className="w-full min-w-[900px]">
+                  <thead>
+                    <tr className="text-xs text-gray-500 uppercase border-b">
+                      <th className="p-4 text-left">Ordem</th>
+                      <th className="p-4 text-left">Nome</th>
+                      <th className="p-4 text-left">Preço</th>
+                      <th className="p-4 text-left">Moeda</th>
+                      <th className="p-4 text-left">Total</th>
+                      <th className="p-4 text-left">Vendidos</th>
+                      <th className="p-4 text-left">Ativo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ticketTypes.map((r) => (
+                      <tr key={r.id} className="border-b hover:bg-gray-50">
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.sort_order ?? ''}</td>
+                        <td className="p-4 text-sm font-semibold text-gray-900 whitespace-nowrap">{safe(r.name)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.price}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(r.currency)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.quantity_total ?? ''}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.quantity_sold ?? 0}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.active ? 'Sim' : 'Não'}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {ticketTypes.map((r) => (
-                        <tr key={r.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.sort_order ?? ''}</td>
-                          <td className="p-4 text-sm font-semibold text-gray-900 whitespace-nowrap">{safe(r.name)}</td>
-                          <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.price}</td>
-                          <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(r.currency)}</td>
-                          <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.quantity_total ?? ''}</td>
-                          <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.quantity_sold ?? 0}</td>
-                          <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{r.active ? 'Sim' : 'Não'}</td>
-                        </tr>
-                      ))}
+                    ))}
 
-                      {ticketTypes.length === 0 && (
-                        <tr>
-                          <td className="p-8 text-center text-gray-400" colSpan={7}>
-                            Sem lotes.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </>
+                    {ticketTypes.length === 0 && (
+                      <tr>
+                        <td className="p-8 text-center text-gray-400" colSpan={7}>
+                          Sem lotes.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ORDERS */}
+        {tab === 'orders' && (
+          <>
+            {loadingOrders ? (
+              <p className="text-center text-gray-400">A carregar pagamentos…</p>
+            ) : (
+              <div className="bg-white rounded-xl shadow border overflow-x-auto">
+                <table className="w-full min-w-[1200px]">
+                  <thead>
+                    <tr className="text-xs text-gray-500 uppercase border-b">
+                      <th className="p-4 text-left">Data</th>
+                      <th className="p-4 text-left">Status</th>
+                      <th className="p-4 text-left">Total</th>
+                      <th className="p-4 text-left">Nome</th>
+                      <th className="p-4 text-left">Email</th>
+                      <th className="p-4 text-left">País</th>
+                      <th className="p-4 text-left">NIF</th>
+                      <th className="p-4 text-left">Invoice ID</th>
+                      <th className="p-4 text-left">Stripe Session</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((o) => (
+                      <tr key={o.id} className="border-b hover:bg-gray-50">
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{formatDatePt(o.created_at)}</td>
+                        <td className="p-4 text-sm font-semibold whitespace-nowrap">
+                          {safe(o.status) || '—'}
+                        </td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">
+                          {formatMoneyEURFromCents(o.total_amount)}
+                        </td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(o.customer_name)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(o.customer_email)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(o.customer_country)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(o.customer_nif)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(o.invoice_id)}</td>
+                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{safe(o.stripe_session_id)}</td>
+                      </tr>
+                    ))}
+
+                    {orders.length === 0 && (
+                      <tr>
+                        <td className="p-8 text-center text-gray-400" colSpan={9}>
+                          Sem pagamentos.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* TICKETS */}
+        {tab === 'tickets' && (
+          <>
+            {loadingTickets ? (
+              <p className="text-center text-gray-400">A carregar participantes…</p>
+            ) : (
+              <div className="bg-white rounded-xl shadow border overflow-x-auto">
+                <table className="w-full min-w-[1400px]">
+                  <thead>
+                    <tr className="text-xs text-gray-500 uppercase border-b">
+                      <th className="p-4 text-left">Data</th>
+                      <th className="p-4 text-left">Check-in</th>
+                      <th className="p-4 text-left">Nome</th>
+                      <th className="p-4 text-left">Email</th>
+                      <th className="p-4 text-left">País</th>
+                      <th className="p-4 text-left">Função</th>
+                      <th className="p-4 text-left">Função (Outros)</th>
+                      <th className="p-4 text-left">Ticket Type ID</th>
+                      <th className="p-4 text-left">Order ID</th>
+                      <th className="p-4 text-left">Ticket ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tickets.map((t) => (
+                      <tr key={t.id} className="border-b hover:bg-gray-50">
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{formatDatePt(t.created_at)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">
+                          {t.checked_in ? `Sim (${formatDatePt(t.check_in_at)})` : 'Não'}
+                        </td>
+                        <td className="p-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                          {safe(t.attendee_name) ||
+                            [t.attendee_first_name, t.attendee_last_name].filter(Boolean).join(' ')}
+                        </td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(t.attendee_email)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(t.attendee_country)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(t.attendee_job_function)}</td>
+                        <td className="p-4 text-sm text-gray-700 whitespace-nowrap">{safe(t.attendee_job_function_other)}</td>
+                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{safe(t.ticket_type_id)}</td>
+                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{safe(t.order_id)}</td>
+                        <td className="p-4 text-xs text-gray-500 whitespace-nowrap">{safe(t.id)}</td>
+                      </tr>
+                    ))}
+
+                    {tickets.length === 0 && (
+                      <tr>
+                        <td className="p-8 text-center text-gray-400" colSpan={10}>
+                          Sem tickets.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
           </>
         )}
