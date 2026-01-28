@@ -15,7 +15,7 @@ export const Team: React.FC = () => {
   const team: TeamMember[] = [
     {
       name: "Raquel Bartz Alves",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQHNYJcfE1tMgA/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1723208803857?e=1770249600&v=beta&t=PwnNIeJY8i8Vn3py47Aqj97iqzpTuPqVGTchGbY9hls", 
+      image: "https://i.postimg.cc/Dz6jYC2r/Raquel.png", 
       linkedin: "https://www.linkedin.com/in/raquelbartzalves/" 
     },
     {
