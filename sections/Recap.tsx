@@ -85,70 +85,93 @@ export const Recap: React.FC = () => {
   };
 
   return (
-    <Section id="recap" className="bg-brand-darkBlue text-white overflow-hidden relative">
-      
-      {/* --- CABEÇALHO COM O NOVO ESTILO --- */}
-      <div className="text-center mb-20 relative z-10 flex flex-col items-center">
-        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight">
-          Como foi o RSG Lisbon 2025?
-        </h2>
-        
-        {/* Caixa Laranja Inclinada (Estilo Carimbo) */}
-        <div className="transform -rotate-3 border-4 border-brand-orange rounded-2xl px-8 py-4 md:px-12 md:py-6 shadow-[0_0_40px_rgba(244,122,32,0.15)] inline-block backdrop-blur-sm">
-             <p className="text-3xl md:text-5xl font-black text-brand-orange leading-tight uppercase tracking-wide">
-                "Foi ÉPICO.<br/>
-                Foi INTENSO."
-             </p>
-        </div>
-      </div>
+    <Section 
+        id="recap" 
+        className="relative text-white overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
+        // AQUI ESTÁ A MUDANÇA: Usamos a foto de grupo no background
+        // style={{ backgroundImage: `url('${ASSETS.GROUP_PHOTO_BG}')` }} 
+        // ⚠️ Nota: Como ASSETS.GROUP_PHOTO_BG é nova, certifique-se que o config.ts foi atualizado primeiro.
+        // Se der erro, use ASSETS.HERO_BG temporariamente ou verifique o config.ts
+    >
+      {/* Overlay Escuro para leitura (igual ao Hero) */}
+      <div 
+        className="absolute inset-0 bg-brand-darkBlue/90" 
+        style={{ backgroundImage: `url('${ASSETS.GROUP_PHOTO_BG}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundBlendMode: 'overlay' }}
+      ></div>
 
-      {/* Stats */}
-      <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-20 relative z-10">
-        {stats.map((stat, idx) => (
-          <div key={idx} className="flex flex-col items-center">
-            <div className="flex items-center text-5xl md:text-7xl font-black text-white mb-3 shadow-sm tracking-tighter">
-                {stat.value}
-            </div>
-            <div className="text-sm font-bold tracking-[0.2em] text-brand-blue uppercase">{stat.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-12 relative z-10">
-        {/* Video Player */}
-        <div className="w-full max-w-5xl mx-auto mb-8">
-             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 ring-4 ring-brand-orange/20">
-                {getVideoContent(ASSETS.RECAP_VIDEO)}
-            </div>
-        </div>
-
-        {/* Gallery */}
-        <div className="w-full max-w-5xl mx-auto">
-            <h3 className="text-2xl font-bold mb-6 flex items-center justify-center gap-2 text-white/90">
-                <Star className="text-brand-orange w-6 h-6 fill-current" />
-                Melhores Momentos
-            </h3>
+      <div className="relative z-10">
+        {/* --- CABEÇALHO --- */}
+        <div className="text-center mb-20 flex flex-col items-center">
+            <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight">
+            Como foi o RSG Lisbon 2025?
+            </h2>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {galleryImages.map((img, idx) => (
-                    <div 
-                        key={idx} 
-                        className="relative rounded-xl overflow-hidden shadow-lg cursor-zoom-in group bg-brand-darkBlue/50 aspect-[4/3]"
-                        onClick={() => openLightbox(idx)}
-                    >
-                        <img 
-                            src={img} 
-                            alt={`RSG Gallery ${idx}`} 
-                            className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" 
-                            loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/20 transition-colors duration-300"></div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                             <ZoomIn className="text-white w-8 h-8 drop-shadow-md" />
-                        </div>
-                    </div>
-                ))}
+            <div className="transform -rotate-3 border-4 border-brand-orange rounded-2xl px-8 py-4 md:px-12 md:py-6 shadow-[0_0_40px_rgba(244,122,32,0.15)] inline-block backdrop-blur-sm">
+                <p className="text-3xl md:text-5xl font-black text-brand-orange leading-tight uppercase tracking-wide">
+                    "Foi ÉPICO.<br/>
+                    Foi INTENSO."
+                </p>
             </div>
+        </div>
+
+        {/* Stats */}
+        <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-20">
+            {stats.map((stat, idx) => (
+            <div key={idx} className="flex flex-col items-center">
+                <div className="flex items-center text-5xl md:text-7xl font-black text-white mb-3 shadow-sm tracking-tighter">
+                    {stat.value}
+                </div>
+                <div className="text-sm font-bold tracking-[0.2em] text-brand-blue uppercase">{stat.label}</div>
+            </div>
+            ))}
+        </div>
+
+        <div className="flex flex-col gap-12">
+            {/* Video Player */}
+            <div className="w-full max-w-5xl mx-auto mb-8">
+                <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 ring-4 ring-brand-orange/20">
+                    {getVideoContent(ASSETS.RECAP_VIDEO)}
+                </div>
+            </div>
+
+            {/* Gallery */}
+            <div className="w-full max-w-5xl mx-auto">
+                <h3 className="text-2xl font-bold mb-6 flex items-center justify-center gap-2 text-white/90">
+                    <Star className="text-brand-orange w-6 h-6 fill-current" />
+                    Melhores Momentos
+                </h3>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {galleryImages.map((img, idx) => (
+                        <div 
+                            key={idx} 
+                            className="relative rounded-xl overflow-hidden shadow-lg cursor-zoom-in group bg-brand-darkBlue/50 aspect-[4/3]"
+                            onClick={() => openLightbox(idx)}
+                        >
+                            <img 
+                                src={img} 
+                                alt={`RSG Gallery ${idx}`} 
+                                className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" 
+                                loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/20 transition-colors duration-300"></div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <ZoomIn className="text-white w-8 h-8 drop-shadow-md" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center mt-24">
+            <a 
+                href="#get-involved"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 rounded-full backdrop-blur-md border border-white/20 hover:bg-brand-orange hover:border-brand-orange hover:text-white transition-all duration-300 cursor-pointer shadow-lg group"
+            >
+                <span className="font-bold text-white text-lg group-hover:scale-105 transition-transform">Reviva a experiência. Junte-se a nós em 2026.</span>
+            </a>
         </div>
       </div>
 
@@ -163,15 +186,6 @@ export const Recap: React.FC = () => {
             <button className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white bg-black/50 hover:bg-brand-orange rounded-full transition-all z-[70]" onClick={nextImage}><ChevronRight className="w-8 h-8" /></button>
         </div>
       )}
-      
-      <div className="text-center mt-24 relative z-10">
-        <a 
-            href="#get-involved"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 rounded-full backdrop-blur-md border border-white/20 hover:bg-brand-orange hover:border-brand-orange hover:text-white transition-all duration-300 cursor-pointer shadow-lg group"
-        >
-            <span className="font-bold text-white text-lg group-hover:scale-105 transition-transform">Reviva a experiência. Junte-se a nós em 2026.</span>
-        </a>
-      </div>
     </Section>
   );
 };
