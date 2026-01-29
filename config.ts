@@ -1,18 +1,14 @@
 export const ASSETS = {
   HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
+  GROUP_PHOTO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
   LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
   
   SPONSOR_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
-  
-  // ATUALIZADO: Novo Logo TugÁgil
   TUGAGIL_LOGO: "https://i.postimg.cc/VvvVTxmP/Group-23.png",
-  
   SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   
-  // ⚠️ IMPORTANTE: Substitua pelo link da imagem branca do RSG que você tem
   RSG_LOGO_2026: "https://i.postimg.cc/ZYXk6bjV/2026-RSG-Logo-Lisbon-Reversed-(1).png", 
 
-  // ⚠️ IMPORTANTE: Substitua pelo link da imagem do Ateliê
   ATELIE_LOGO: "https://i.postimg.cc/TwZbJ5Kw/Logo-Atelie-Software-Transparente.png", 
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
