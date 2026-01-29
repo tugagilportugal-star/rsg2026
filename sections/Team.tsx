@@ -42,8 +42,7 @@ export const Team: React.FC = () => {
       name: "Alex Seles",
       image: "https://i.postimg.cc/mkphXWqR/Alex.png",
       linkedin: "https://www.linkedin.com/in/alex-seles/"
-    }
-  ];
+    },
    {
       name: "Matheus Haddad",
       image: "https://i.postimg.cc/VLFRm4SN/Matheus.png",
