@@ -14,6 +14,10 @@ export const ASSETS = {
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
+
+  ATELIE_LOGO: "https://i.postimg.cc/TwZbJ5Kw/Logo-Atelie-Software-Transparente.png", 
+
+};
   
   GALLERY_IMAGES: [
     "https://i.postimg.cc/CxX1nH6r/Tugagil-18.jpg",
