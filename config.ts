@@ -9,15 +9,14 @@ export const ASSETS = {
   
   SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   
-  // Mantenha o link do seu logo branco do RSG aqui
-  RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png", 
+  // ⚠️ IMPORTANTE: Substitua pelo link da imagem branca do RSG que você tem
+  RSG_LOGO_2026: "https://i.postimg.cc/ZYXk6bjV/2026-RSG-Logo-Lisbon-Reversed-(1).png", 
+
+  // ⚠️ IMPORTANTE: Substitua pelo link da imagem do Ateliê
+  ATELIE_LOGO: "https://i.postimg.cc/TwZbJ5Kw/Logo-Atelie-Software-Transparente.png", 
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
-
-  ATELIE_LOGO: "https://i.postimg.cc/TwZbJ5Kw/Logo-Atelie-Software-Transparente.png", 
-
-};
   
   GALLERY_IMAGES: [
     "https://i.postimg.cc/CxX1nH6r/Tugagil-18.jpg",
@@ -29,7 +28,7 @@ export const ASSETS = {
     "https://i.postimg.cc/qq7Sn7QN/Tugagil-58.jpg",
     "https://i.postimg.cc/qvcwJTXW/Tugagil-610.jpg",
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
-  ],
+  ], // <--- A vírgula aqui é essencial!
   
   SERVICES: {
     SUPABASE_URL: (import.meta.env?.VITE_SUPABASE_URL as string) || "",
