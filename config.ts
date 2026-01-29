@@ -1,5 +1,5 @@
 export const ASSETS = {
-  HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
+  HERO_BG: "https://i.postimg.cc/3N1v5SLr/Lisbon-hero-banner.jpg",
   GROUP_PHOTO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
   LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
   
