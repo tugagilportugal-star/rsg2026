@@ -44,6 +44,12 @@ export const Team: React.FC = () => {
       linkedin: "https://www.linkedin.com/in/alex-seles/"
     }
   ];
+   {
+      name: "Matheus Haddad",
+      image: "https://i.postimg.cc/VLFRm4SN/Matheus.png",
+      linkedin: "https://www.linkedin.com/in/matheushaddad/"
+    }
+  ];
 
   return (
     <Section id="team" className="bg-gray-50 border-t border-gray-200">
