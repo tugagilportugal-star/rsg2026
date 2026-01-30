@@ -85,15 +85,15 @@ export const Recap: React.FC = () => {
   };
 
   return (
+    // VOLTAMOS AO FUNDO SÓLIDO (bg-brand-darkBlue)
     <Section id="recap" className="bg-brand-darkBlue text-white overflow-hidden relative">
       
-      {/* --- CABEÇALHO COM O NOVO ESTILO --- */}
+      {/* --- CABEÇALHO --- */}
       <div className="text-center mb-20 relative z-10 flex flex-col items-center">
         <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight">
           Como foi o RSG Lisbon 2025?
         </h2>
         
-        {/* Caixa Laranja Inclinada (Estilo Carimbo) */}
         <div className="transform -rotate-3 border-4 border-brand-orange rounded-2xl px-8 py-4 md:px-12 md:py-6 shadow-[0_0_40px_rgba(244,122,32,0.15)] inline-block backdrop-blur-sm">
              <p className="text-3xl md:text-5xl font-black text-brand-orange leading-tight uppercase tracking-wide">
                 "Foi ÉPICO.<br/>
