@@ -19,7 +19,16 @@ export const About: React.FC = () => {
             </div>
             <div className="bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-blue-100 text-left">
                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
-                 O Regional Scrum Gathering é um evento oficial da <span className="font-bold text-brand-blue">Scrum Alliance®</span>, presente em dezenas de cidades pelo mundo.
+                 O Regional Scrum Gathering é um evento oficial da {' '}
+                 <a 
+                   href="https://www.scrumalliance.org/" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   className="font-bold text-brand-blue hover:underline"
+                 >
+                   Scrum Alliance®
+                 </a>
+                 , presente em dezenas de cidades pelo mundo.
                </p>
                <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
                  É um espaço para aprender, partilhar práticas e inspirar quem trabalha com agilidade.
@@ -36,17 +45,15 @@ export const About: React.FC = () => {
         </div>
       </section>
 
-      {/* --- SEGUNDA SECÇÃO: POR QUE LISBOA? (REESTRUTURADA) --- */}
+      {/* --- SEGUNDA SECÇÃO: POR QUE LISBOA? --- */}
       <section 
         className="py-24 relative text-white bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: `url('${ASSETS.LISBON_BG}')` }}
       >
-        {/* Overlay Azul da Marca (DarkBlue) com transparência forte para leitura */}
         <div className="absolute inset-0 bg-brand-darkBlue/90"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
            
-           {/* Cabeçalho da Secção */}
            <div className="mb-12">
               <span className="inline-block border border-brand-orange text-brand-orange rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest mb-4">
                 Destino 2026
@@ -58,10 +65,8 @@ export const About: React.FC = () => {
               </p>
            </div>
 
-           {/* Grid de Conteúdo */}
            <div className="grid lg:grid-cols-2 gap-12 items-start">
               
-              {/* Coluna Esquerda: Cartão de Destaque (Citação) */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl">
                  <p className="text-2xl md:text-3xl font-medium leading-normal mb-8 text-white">
                    Lisboa é considerada uma das cidades europeias mais promissoras ao nível de ecossistema tecnológico.
@@ -77,10 +82,7 @@ export const About: React.FC = () => {
                  </a>
               </div>
 
-              {/* Coluna Direita: Grid de Características */}
               <div className="grid sm:grid-cols-2 gap-x-8 gap-y-12 pt-4">
-                 
-                 {/* Feature 1 */}
                  <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2 text-brand-orange">
                        <Zap className="w-6 h-6" />
@@ -91,7 +93,6 @@ export const About: React.FC = () => {
                     </p>
                  </div>
 
-                 {/* Feature 2 */}
                  <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2 text-brand-blue">
                        <Globe className="w-6 h-6" />
@@ -102,7 +103,6 @@ export const About: React.FC = () => {
                     </p>
                  </div>
 
-                 {/* Feature 3 */}
                  <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2 text-brand-orange">
                        <Users className="w-6 h-6" />
@@ -113,7 +113,6 @@ export const About: React.FC = () => {
                     </p>
                  </div>
 
-                 {/* Feature 4 */}
                  <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2 text-brand-blue">
                        <Sun className="w-6 h-6" />
@@ -123,7 +122,6 @@ export const About: React.FC = () => {
                       Clima incrível, gastronomia rica e uma energia contagiante.
                     </p>
                  </div>
-
               </div>
            </div>
         </div>

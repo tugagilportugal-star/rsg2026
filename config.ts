@@ -7,7 +7,7 @@ export const ASSETS = {
   TUGAGIL_LOGO: "https://i.postimg.cc/VvvVTxmP/Group-23.png",
   SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   
-  RSG_LOGO_2026: "https://i.postimg.cc/ZYXk6bjV/2026-RSG-Logo-Lisbon-Reversed-(1).png", 
+  RSG_LOGO_2026: "https://i.postimg.cc/mg7k96sS/LISBON-Navigation-bar-logo-Reversed.png", 
 
   ATELIE_LOGO: "https://i.postimg.cc/TwZbJ5Kw/Logo-Atelie-Software-Transparente.png", 
 
