@@ -8,6 +8,8 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const RESEND_API_KEY = process.env.RESEND_API_KEY!;
 const ADMIN_EMAIL = 'tugagilportugal@gmail.com'; 
 const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
+const RESEND_FROM = process.env.RESEND_FROM;
+const RESEND_FROM_ADMIN = process.env.RESEND_FROM_ADMIN || RESEND_FROM;
 
 // Inicializar Clientes
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -141,7 +143,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Envio Usuario
     emailPromises.push(
       resend.emails.send({
-        from: 'RSG Lisbon <onboarding@resend.dev>',
+        from: RESEND_FROM,
         to: email,
         subject: userSubject,
         html: userHtml,
@@ -171,7 +173,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       emailPromises.push(
         resend.emails.send({
-          from: 'RSG Bot <onboarding@resend.dev>',
+          from: RESEND_FROM_ADMIN,
           to: ADMIN_EMAIL,
           subject: adminSubject,
           html: adminHtml,
