@@ -42,38 +42,21 @@ export const Navbar: React.FC = () => {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
-            {/* --- ESQUERDA: SCRUM ALLIANCE + DIVISOR + RSG --- */}
-            <div className="flex items-center gap-4 sm:gap-6">
-              
-              {/* Logo Scrum Alliance */}
-              <a 
-                href="https://www.scrumalliance.org/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src={ASSETS.SCRUM_ALLIANCE_LOGO} 
-                  alt="Scrum Alliance" 
-                  // Reduzido para h-8 (mobile) e h-10 (desktop) para ficar elegante
-                  className="h-8 sm:h-10 w-auto object-contain brightness-0 invert" 
-                />
-              </a>
-
-              {/* Divisor Vertical */}
-              <div className="h-8 sm:h-10 w-px bg-white/20 hidden sm:block"></div>
-
-              {/* Logo RSG 2026 */}
+            {/* --- ESQUERDA: APENAS LOGO RSG --- */}
+            <div className="flex items-center">
               <a 
                 href="#hero" 
                 className="hover:scale-105 transition-transform" 
                 title="Voltar ao início"
               >
+                 {/* 
+                    Ajustei a altura para h-12 (mobile) e h-16 (desktop).
+                    Como vai ser apenas uma imagem, ela terá espaço para respirar.
+                 */}
                  <img 
                    src={ASSETS.RSG_LOGO_2026} 
-                   alt="RSG Lisbon 2026" 
-                   // Reduzido para h-10 (mobile) e h-12 (desktop)
-                   className="h-10 sm:h-12 w-auto object-contain"
+                   alt="Regional Scrum Gathering Lisbon 2026" 
+                   className="h-12 sm:h-16 w-auto object-contain"
                  />
               </a>
             </div>
@@ -121,7 +104,6 @@ export const Navbar: React.FC = () => {
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        {/* Header Mobile */}
         <div className="flex justify-between items-center p-6 border-b border-white/10">
              <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-10 w-auto" />
              <button 
@@ -133,7 +115,6 @@ export const Navbar: React.FC = () => {
              </button>
         </div>
 
-        {/* Links (Centro) */}
         <div className="flex-grow flex flex-col items-center justify-center gap-8 p-6 overflow-y-auto">
             {navLinks.map((link) => (
               <a
@@ -155,7 +136,6 @@ export const Navbar: React.FC = () => {
             </a>
         </div>
 
-        {/* Footer Mobile */}
         <div className="p-8 bg-black/20 flex flex-col items-center gap-4 border-t border-white/10">
              <span className="text-white/40 text-xs font-bold uppercase tracking-widest">Organização</span>
              <div className="flex items-center gap-6">
