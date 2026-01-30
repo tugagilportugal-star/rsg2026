@@ -42,10 +42,15 @@ export const Navbar: React.FC = () => {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
-            {/* --- ESQUERDA: APENAS LOGO RSG (Aumentado e visível no mobile) --- */}
+            {/* --- ESQUERDA: LOGO RSG (Link para Scrum Alliance) --- */}
             <div className="flex items-center">
-              <a href="#hero" className="hover:scale-105 transition-transform" title="Voltar ao início">
-                 {/* Aumentado de h-14 para h-16 (mobile) e h-20 (desktop) */}
+              <a 
+                href="https://www.scrumalliance.org/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:scale-105 transition-transform" 
+                title="Ir para Scrum Alliance"
+              >
                  <img 
                    src={ASSETS.RSG_LOGO_2026} 
                    alt="RSG Lisbon 2026" 
@@ -73,20 +78,6 @@ export const Navbar: React.FC = () => {
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5"
               >
                 Waitlist
-              </a>
-
-              <div className="h-10 w-px bg-white/20"></div>
-
-              <a 
-                  href="https://www.scrumalliance.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:scale-105 transition-transform group"
-                  title="Scrum Alliance"
-              >
-                 <div className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-xl px-3 py-2 h-12 flex items-center justify-center min-w-[120px]">
-                    <img src={ASSETS.SCRUM_ALLIANCE_LOGO} alt="Scrum Alliance" className="h-6 w-auto object-contain brightness-0 invert opacity-90" />
-                 </div>
               </a>
             </div>
 
