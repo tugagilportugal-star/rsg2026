@@ -42,19 +42,38 @@ export const Navbar: React.FC = () => {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
-            {/* --- ESQUERDA: LOGO RSG (Link para Scrum Alliance) --- */}
-            <div className="flex items-center">
+            {/* --- ESQUERDA: SCRUM ALLIANCE + DIVISOR + RSG --- */}
+            <div className="flex items-center gap-4 sm:gap-6">
+              
+              {/* Logo Scrum Alliance */}
               <a 
                 href="https://www.scrumalliance.org/" 
                 target="_blank" 
                 rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity"
+              >
+                <img 
+                  src={ASSETS.SCRUM_ALLIANCE_LOGO} 
+                  alt="Scrum Alliance" 
+                  // Reduzido para h-8 (mobile) e h-10 (desktop) para ficar elegante
+                  className="h-8 sm:h-10 w-auto object-contain brightness-0 invert" 
+                />
+              </a>
+
+              {/* Divisor Vertical */}
+              <div className="h-8 sm:h-10 w-px bg-white/20 hidden sm:block"></div>
+
+              {/* Logo RSG 2026 */}
+              <a 
+                href="#hero" 
                 className="hover:scale-105 transition-transform" 
-                title="Ir para Scrum Alliance"
+                title="Voltar ao início"
               >
                  <img 
                    src={ASSETS.RSG_LOGO_2026} 
                    alt="RSG Lisbon 2026" 
-                   className="h-16 sm:h-20 w-auto object-contain"
+                   // Reduzido para h-10 (mobile) e h-12 (desktop)
+                   className="h-10 sm:h-12 w-auto object-contain"
                  />
               </a>
             </div>
@@ -104,7 +123,7 @@ export const Navbar: React.FC = () => {
       >
         {/* Header Mobile */}
         <div className="flex justify-between items-center p-6 border-b border-white/10">
-             <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-12 w-auto" />
+             <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-10 w-auto" />
              <button 
                onClick={() => setIsMobileMenuOpen(false)}
                className="text-white p-2 hover:bg-white/10 rounded-full transition-colors"
