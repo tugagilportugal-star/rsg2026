@@ -19,47 +19,56 @@ const ALLOWED_STATUS = new Set(['Pending', 'InProgress', 'Completed', 'Deleted']
    Handler
 ========================= */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'DELETE' && req.method !== 'PATCH') {
-    return res.status(405).json({ ok: false });
+  // Alguns clientes mandam PUT para "update"
+  const method = req.method === 'PUT' ? 'PATCH' : req.method;
+
+  if (method !== 'DELETE' && method !== 'PATCH') {
+    return res.status(405).json({ ok: false, message: 'Method not allowed' });
   }
 
   if (!isAuthorized(req)) {
     res.setHeader('WWW-Authenticate', 'Basic realm="Admin Area"');
-    return res.status(401).json({ ok: false });
+    return res.status(401).json({ ok: false, message: 'Unauthorized' });
   }
 
   const { id } = req.query;
   if (!id || Array.isArray(id)) {
-    return res.status(400).json({ ok: false });
+    return res.status(400).json({ ok: false, message: 'Invalid id' });
+  }
+
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    return res.status(500).json({ ok: false, message: 'Server misconfigured' });
   }
 
   try {
     // DELETE = soft delete
-    let nextStatus: string | null = null;
+    let nextStatus: string;
 
-    if (req.method === 'DELETE') {
+    if (method === 'DELETE') {
       nextStatus = 'Deleted';
     } else {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       nextStatus = body?.status;
 
       if (!nextStatus || typeof nextStatus !== 'string' || !ALLOWED_STATUS.has(nextStatus)) {
-        return res.status(400).json({ ok: false });
+        return res.status(400).json({ ok: false, message: 'Invalid status' });
       }
-
-      // (opcional) impedir que o admin volte de Deleted
-      // se quiser permitir, remove este if
-      // if (nextStatus === 'Deleted') return res.status(400).json({ ok: false });
     }
 
+    const safeId = encodeURIComponent(id);
+
     const supabaseRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/leads?id=eq.${id}`,
+      `${SUPABASE_URL}/rest/v1/leads?id=eq.${safeId}`,
       {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY as string,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
           Prefer: 'return=minimal',
         },
         body: JSON.stringify({ status: nextStatus }),
@@ -68,11 +77,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!supabaseRes.ok) {
       const text = await supabaseRes.text().catch(() => '');
+      console.error('Supabase update failed:', supabaseRes.status, text);
       return res.status(500).json({ ok: false, details: text });
     }
 
     return res.status(200).json({ ok: true, status: nextStatus });
-  } catch {
+  } catch (err) {
+    console.error('Admin leads/[id] error:', err);
     return res.status(500).json({ ok: false });
   }
 }
