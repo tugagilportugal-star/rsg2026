@@ -10,7 +10,7 @@ export const ASSETS = {
   RSG_LOGO_2026: "/assets/LISBON-Navigation-bar-logo-Reversed.png", 
 
   ATELIE_LOGO: "/assets/Logo-Atelie-Software-Transparente.png",
-  TABAQUEIRA_LOGO: "/assets/Logo-Tabaqueira-RGB.png"
+  TABAQUEIRA_LOGO: "/assets/Logo-Tabaqueira-RGB.png",
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
