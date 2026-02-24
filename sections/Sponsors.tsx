@@ -34,6 +34,11 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
       name: "Ateliê de Software", 
       logo: ASSETS.ATELIE_LOGO, // Certifique-se de configurar no config.ts
       url: "https://atelie.software/" 
+    }
+    {
+       name: "Tabaqueira", 
+       logo: ASSETS.TABAQUEIRA_LOGO, // Certifique-se de configurar no config.ts
+       url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
   ];
 
