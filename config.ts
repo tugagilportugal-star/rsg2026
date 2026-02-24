@@ -1,15 +1,16 @@
 export const ASSETS = {
-  HERO_BG: "https://i.postimg.cc/3N1v5SLr/Lisbon-hero-banner.jpg",
+  HERO_BG: "/assets/Lisbon-hero-banner.jpg",
   GROUP_PHOTO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
-  LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
+  LISBON_BG: "/assets/lisboa.jpg",
   
-  SPONSOR_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
-  TUGAGIL_LOGO: "https://i.postimg.cc/VvvVTxmP/Group-23.png",
-  SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
+  SPONSOR_LOGO: "/assets/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
+  TUGAGIL_LOGO: "/assets/Group-23.png",
+  SCRUM_ALLIANCE_LOGO: "/assets/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   
-  RSG_LOGO_2026: "https://i.postimg.cc/mg7k96sS/LISBON-Navigation-bar-logo-Reversed.png", 
+  RSG_LOGO_2026: "/assets/LISBON-Navigation-bar-logo-Reversed.png", 
 
-  ATELIE_LOGO: "https://i.postimg.cc/TwZbJ5Kw/Logo-Atelie-Software-Transparente.png", 
+  ATELIE_LOGO: "/assets/Logo-Atelie-Software-Transparente.png",
+  TABAQUEIRA_LOGO: "/assets/Logo-Tabaqueira-RGB.png",
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
