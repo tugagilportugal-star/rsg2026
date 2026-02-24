@@ -15,37 +15,37 @@ export const Team: React.FC = () => {
   const team: TeamMember[] = [
     {
       name: "Raquel Bartz Alves",
-      image: "https://i.postimg.cc/Dz6jYC2r/Raquel.png", 
+      image: "/assets/Raquel.png", 
       linkedin: "https://www.linkedin.com/in/raquelbartzalves/" 
     },
     {
       name: "Sylvia Grec",
-      image: "https://i.postimg.cc/025pV86s/Sylvia.png",
+      image: "/assets/Sylvia.png",
       linkedin: "https://www.linkedin.com/in/sylvia-grec/"
     },
     {
       name: "Marina Bittencourt",
-      image: "https://i.postimg.cc/fyz0qKRK/Marina.png",
+      image: "/assets/Marina.png",
       linkedin: "https://www.linkedin.com/in/marinarosabittencourt/"
     },
     {
       name: "Fábio Castro",
-      image: "https://i.postimg.cc/xTdzKt7k/Fabio.png",
+      image: "/assets/Fabio.png",
       linkedin: "https://www.linkedin.com/in/frmcastro/"
     },
     {
       name: "Cristiane Alves",
-      image: "https://i.postimg.cc/1zDn9TgJ/Cristiane.png",
+      image: "/assets/Cristiane.png",
       linkedin: "https://www.linkedin.com/in/cristiane-mendes-alves-pmp%C2%AE-psm-i-psk-i-okrcp-5a243b4/"
     },
     {
       name: "Alex Seles",
-      image: "https://i.postimg.cc/mkphXWqR/Alex.png",
+      image: "/assets/Alex.png",
       linkedin: "https://www.linkedin.com/in/alex-seles/"
     },
    {
       name: "Matheus Haddad",
-      image: "https://i.postimg.cc/VLFRm4SN/Matheus.png",
+      image: "/assets/Matheus.png",
       linkedin: "https://www.linkedin.com/in/matheushaddad/"
     }
   ];
