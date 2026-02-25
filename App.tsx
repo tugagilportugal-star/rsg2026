@@ -4,7 +4,7 @@ import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Speakers } from './sections/Speakers';
-import { Program } from './sections/Program';    // <-- VERIFIQUE SE ESTA LINHA ESTÁ AQUI
+import { Program } from './sections/Program';
 import { Sponsors } from './sections/Sponsors';
 import { Recap } from './sections/Recap';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
@@ -53,6 +53,7 @@ const App: React.FC = () => {
       <Hero />
       <About />
       <Features />
+      <Program />
       <Speakers />
       <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
       <Recap />
@@ -63,8 +64,6 @@ const App: React.FC = () => {
       />
 
       <FAQ />
-      
-      {/* ✅ SECÇÃO DA EQUIPA AQUI */}
       <Team />
 
       <Footer />
