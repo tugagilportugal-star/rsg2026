@@ -4,7 +4,7 @@ import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Speakers } from './sections/Speakers';
-import { Program } from './sections/Program';
+import { Program } from './sections/Program';    // <-- VERIFIQUE SE ESTA LINHA ESTÁ AQUI
 import { Sponsors } from './sections/Sponsors';
 import { Recap } from './sections/Recap';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
