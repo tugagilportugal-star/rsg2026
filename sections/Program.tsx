@@ -95,7 +95,7 @@ export const Program: React.FC = () => {
                     {/* Texto */}
                     <div className="flex-grow text-center md:text-left">
                         <div className="text-brand-orange font-bold text-xs uppercase tracking-widest mb-2">
-                            Opening Keynote Confirmada
+                            Opening Keynote
                         </div>
                         <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
                             Liderança & Agile Coaching Global
