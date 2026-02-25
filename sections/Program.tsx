@@ -130,7 +130,7 @@ export const Program: React.FC = () => {
                             onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
                             className="group inline-flex items-center gap-3 bg-white text-brand-darkBlue px-8 py-3 rounded-full font-bold hover:bg-brand-orange hover:text-white transition-all duration-300 shadow-lg"
                         >
-                            Quero saber quem é
+                            Garanta o seu lugar na Waitlist
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
