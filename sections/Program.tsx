@@ -24,6 +24,7 @@ export const Program: React.FC = () => {
     }
   ];
 
+  return (
     <Section id="program" className="bg-white">
       <div className="text-center mb-16">
         <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">
@@ -38,6 +39,7 @@ export const Program: React.FC = () => {
         </p>
       </div>
 
+      {/* Grid de Trilhas / Temas */}
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
         {tracks.map((track, idx) => (
           <div key={idx} className="bg-gray-50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300 border border-gray-100 group hover:-translate-y-1">
@@ -57,7 +59,9 @@ export const Program: React.FC = () => {
         ))}
       </div>
 
+      {/* Teaser do Keynote */}
       <div className="max-w-4xl mx-auto bg-brand-darkBlue rounded-3xl p-8 md:p-12 text-white text-center relative overflow-hidden">
+        {/* Elementos decorativos de fundo */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute right-0 top-0 w-64 h-64 bg-brand-orange rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
             <div className="absolute left-0 bottom-0 w-64 h-64 bg-brand-blue rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
