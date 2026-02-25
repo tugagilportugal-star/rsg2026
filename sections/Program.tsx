@@ -36,16 +36,17 @@ export const Program: React.FC = () => {
         {/* Cabeçalho */}
         <div className="text-center mb-24">
           <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] mb-6 backdrop-blur-md">
-            Programação 2026
+            Pilares de Conhecimento
           </span>
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">
-            Content Tracks
+            Trilhas de Conteúdos
           </h2>
           <p className="text-blue-200/80 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
-            Três pilares fundamentais. Uma conferência desenhada para conectar 
+            A estrutura do evento foi desenhada para conectar 
             <span className="text-white font-medium"> Estratégia</span>, 
             <span className="text-white font-medium"> Liderança</span> e 
             <span className="text-white font-medium"> Engenharia</span>.
+            Perspectivas distintas, um único objetivo: <span className="text-white font-medium"> Excelência</span>.
           </p>
         </div>
 
