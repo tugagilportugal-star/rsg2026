@@ -28,7 +28,7 @@ export const Program: React.FC = () => {
     <Section id="program" className="bg-white">
       <div className="text-center mb-16">
         <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">
-          Agenda 2026
+          Programação 2026
         </span>
         <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6">
           The Program
