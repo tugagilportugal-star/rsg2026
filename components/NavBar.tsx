@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ASSETS } from '../config';
-import { Menu, X, ExternalLink, ArrowUp } from 'lucide-react';
+import { Menu, X, ExternalLink, ArrowUp, Ticket } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -152,12 +152,12 @@ export const Navbar: React.FC = () => {
             ))}
 
             <a
-              href="#waitlist"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="mt-4 bg-brand-orange text-white text-lg font-black uppercase tracking-widest px-10 py-4 rounded-full shadow-lg active:scale-95 transition-transform"
-            >
-              Inscreva-se na Waitlist
-            </a>
+                href="#tickets"
+                className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+              >
+                <Ticket className="w-4 h-4" />
+                Early Bird Tickets
+              </a>
         </div>
 
         <div className="p-8 bg-black/20 flex flex-col items-center gap-4 border-t border-white/10">
