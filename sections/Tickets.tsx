@@ -21,10 +21,10 @@ export const Tickets: React.FC = () => {
       
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
-          Garanta o seu lugar
+          Garante o teu lugar
         </h2>
         <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-          Participe na maior celebração da agilidade em Portugal. 
+          Participe de uma das maiores celebrações da agilidade em Portugal. 
           Preço exclusivo para os primeiros inscritos.
         </p>
       </div>
@@ -43,7 +43,7 @@ export const Tickets: React.FC = () => {
           <div className="p-8 md:p-10 text-center">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-brand-orange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
                 <Sparkles className="w-3 h-3" />
-                Early Bird
+                Early Bird Ticket
             </div>
 
             <div className="flex flex-col items-center justify-center mb-2">
@@ -54,18 +54,14 @@ export const Tickets: React.FC = () => {
                     + IVA (23%)
                 </span>
             </div>
-            
-            <p className="text-green-600 text-xs font-bold bg-green-50 inline-block px-2 py-1 rounded mb-8">
-                Poupança de 40% vs. Preço Final
-            </p>
 
             {/* Lista de Benefícios */}
             <ul className="space-y-4 text-left mb-10">
                 {[
-                    "Acesso completo aos 2 dias",
+                    "Acesso completo ao evento",
                     "Kit de Boas-vindas + T-Shirt Oficial",
-                    "Coffee breaks premium",
-                    "Scrum Education Units (SEUs)", // Benefício Extra 1
+                    "Coffee Break Premium",
+                    "Scrum Education Units (SEUs) by Scrum Alliance", // Benefício Extra 1
                     "Certificado de Participação Digital" // Benefício Extra 2
                 ].map((item, idx) => (
                     <li key={idx} className="flex items-start gap-3">
