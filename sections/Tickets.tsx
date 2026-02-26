@@ -81,7 +81,6 @@ export const Tickets: React.FC = () => {
                 <Tag className="w-5 h-5" />
             </button>
             
-            </p>
           </div>
         </div>
 
