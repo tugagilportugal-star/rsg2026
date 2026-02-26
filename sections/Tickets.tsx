@@ -81,8 +81,6 @@ export const Tickets: React.FC = () => {
                 <Tag className="w-5 h-5" />
             </button>
             
-            <p className="mt-4 text-xs text-gray-400">
-                *Oferta limitada ao stock do Lote 1.
             </p>
           </div>
         </div>
