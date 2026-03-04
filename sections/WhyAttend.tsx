@@ -26,8 +26,8 @@ export const WhyAttend: React.FC = () => {
   const reasons = [
     {
       icon: <Globe2 className="w-6 h-6 text-brand-blue" />,
-      title: "Global Network",
-      desc: "Não é apenas networking. É conectar-se com uma comunidade internacional que partilha os mesmos desafios complexos que você."
+      title: "Network",
+      desc: "Não é apenas networking. É conectar-se com uma comunidade que partilha os mesmos desafios complexos que você."
     },
     {
       icon: <Lightbulb className="w-6 h-6 text-brand-orange" />,
@@ -49,10 +49,6 @@ export const WhyAttend: React.FC = () => {
           
           {/* COLUNA DA ESQUERDA: QUEM DEVE IR */}
           <div>
-            <div className="inline-flex items-center gap-2 text-brand-orange font-bold uppercase tracking-widest text-xs mb-4">
-              <Target className="w-4 h-4" />
-              Target Audience
-            </div>
             <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 leading-tight">
               Este evento foi desenhado para si?
             </h2>
@@ -87,7 +83,7 @@ export const WhyAttend: React.FC = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
                 <h3 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-3">
-                   Por que participar do<span className="text-brand-orange">RSG Lisbon 2026?</span>
+                   Por que participar do RSG Lisbon 2026?
                 </h3>
 
                 <div className="space-y-8">
