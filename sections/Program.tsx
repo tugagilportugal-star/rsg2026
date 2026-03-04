@@ -36,10 +36,10 @@ export const Program: React.FC = () => {
         {/* Cabeçalho */}
         <div className="text-center mb-24">
           <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] mb-6 backdrop-blur-md">
-            Dimensões 2026
+            O Foco de 2026
           </span>
           <h2 className="text-5xl md:text-6xl font-black text-white mb-8 tracking-tight">
-            Core Dimensions
+            Dimensões Centrais
           </h2>
           
           <div className="max-w-3xl mx-auto">
@@ -47,7 +47,7 @@ export const Program: React.FC = () => {
               A estrutura do evento foi desenhada para conectar <span className="text-brand-orange">Agilidade</span>, <span className="text-brand-blue">Inovação</span> e <span className="text-purple-400">Inteligência Artificial</span>.
             </p>
             <p className="text-blue-200/60 text-lg font-light leading-relaxed">
-              Uma resposta sistémica aos desafios da era da aceleração, integrando fluxo organizacional, estratégia tecnológica e a insubstituível capacidade humana.
+              Uma resposta aos desafios da era da aceleração, integrando fluxo organizacional, estratégia tecnológica e a insubstituível capacidade humana.
             </p>
           </div>
         </div>
