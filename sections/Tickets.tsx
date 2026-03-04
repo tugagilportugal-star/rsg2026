@@ -50,9 +50,6 @@ export const Tickets: React.FC = () => {
                 <span className="text-5xl md:text-6xl font-black text-brand-darkBlue tracking-tight">
                     42,80€
                 </span>
-                <span className="text-gray-400 font-medium text-sm mt-1">
-                    + IVA (23%)
-                </span>
             </div>
 
             {/* Lista de Benefícios */}
