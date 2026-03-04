@@ -43,10 +43,9 @@ export const Program: React.FC = () => {
           </h2>
           <p className="text-blue-200/80 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
             A estrutura do evento foi desenhada para conectar 
-            <span className="text-white font-medium"> Estratégia</span>, 
-            <span className="text-white font-medium"> Liderança</span> e 
-            <span className="text-white font-medium"> Engenharia</span>.
-            Perspectivas distintas, um único objetivo: <span className="text-white font-medium"> Excelência</span>.
+            <span className="text-white font-medium"> Agilidade</span>, 
+            <span className="text-white font-medium"> Inovação</span> e 
+            <span className="text-white font-medium"> Inteligência Artificial</span>.
           </p>
         </div>
 
