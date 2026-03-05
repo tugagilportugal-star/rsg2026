@@ -11,18 +11,6 @@ export const Features: React.FC = () => {
         color: "bg-blue-500" 
     },
     { 
-        icon: <BrainCircuit className="w-8 h-8 text-white" />, 
-        title: "Workshops Práticos",
-        desc: "Mão na massa. Esqueça a teoria, venha pela prática.",
-        color: "bg-orange-500" 
-    },
-    { 
-        icon: <Users className="w-8 h-8 text-white" />, 
-        title: "Open Space",
-        desc: "A agenda é sua. Discussões orgânicas e resolução de problemas reais.",
-        color: "bg-indigo-500" 
-    },
-    { 
         icon: <Rocket className="w-8 h-8 text-white" />, 
         title: "Inovação",
         desc: "Descubra novas formas de trabalho, ferramentas e frameworks que estão a revolucionar equipas de alta performance.",
@@ -42,7 +30,7 @@ export const Features: React.FC = () => {
     },
     { 
         icon: <Heart className="w-8 h-8 text-white" />, 
-        title: "Comunidade Viva",
+        title: "Comunidade",
         desc: "Sinta a energia da comunidade TugÁgil. Um ambiente seguro, diverso e acolhedor para partilhar sucessos e vulnerabilidades.",
         color: "bg-red-500" 
     },
