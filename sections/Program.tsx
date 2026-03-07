@@ -6,19 +6,19 @@ export const Program: React.FC = () => {
   const dimensions = [
     {
       id: "01",
-      title: "Human Systems & Leadership",
+      title: "Liderança & Pessoas",
       description: "Numa era de aceleração e burnout, voltamos ao essencial: as pessoas. Ferramentas para líderes navegarem a complexidade, gerirem a carga cognitiva das equipas e construírem resiliência emocional.",
       tags: ["Cognitive Load", "Humanity", "Culture"]
     },
     {
       id: "02",
-      title: "Flow & Organizational Design",
+      title: "Fluxo & Design Organizacional",
       description: "Como estruturar organizações para o fluxo rápido? Da gestão de dependências às interações entre equipas, desenhamos sistemas para entregar valor contínuo e alinhar estratégia à execução.",
       tags: ["Fast Flow", "Systems Thinking", "Scale"]
     },
     {
       id: "03",
-      title: "AI Innovation & Quality Strategy",
+      title: "Gestão e Estratégia de Inovação & QUalidade",
       description: "O mito vs. a realidade. Como a Inteligência Artificial está a redefinir a estratégia de qualidade, automação e engenharia. Casos reais de governança e inovação tecnológica.",
       tags: ["AI Governance", "Modern QA", "Future-Fit"]
     }
@@ -44,10 +44,7 @@ export const Program: React.FC = () => {
           
           <div className="max-w-3xl mx-auto">
             <p className="text-white text-xl md:text-2xl font-medium leading-relaxed mb-4">
-              A estrutura do evento foi desenhada para conectar <span className="text-brand-orange">Agilidade</span>, <span className="text-brand-blue">Inovação</span> e <span className="text-purple-400">Inteligência Artificial</span>.
-            </p>
-            <p className="text-blue-200/60 text-lg font-light leading-relaxed">
-              Uma resposta aos desafios da era da aceleração, integrando fluxo organizacional, estratégia tecnológica e a insubstituível capacidade humana.
+              A estrutura do evento foi desenhada para conectar <span className="text-brand-orange">Agilidade</span>, <span className="text-brand-orange">Inovação</span> e <span className="text-orange-400">Inteligência Artificial</span>.
             </p>
           </div>
         </div>
@@ -126,7 +123,6 @@ export const Program: React.FC = () => {
                             Uma das figuras fundadoras do movimento ágil vem a Lisboa para nos guiar através da era da aceleração. 
                             Uma keynote sobre o impacto massivo que podemos ter num mundo em transformação exponencial.
                             <br/>
-                            <span className="italic text-white/60 block mt-2">"What if we were made for this time?"</span>
                         </p>
 
                         <button 
