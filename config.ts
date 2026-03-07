@@ -1,16 +1,16 @@
 export const ASSETS = {
-  HERO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
-  LISBON_BG: "https://i.postimg.cc/wjFytpcV/Lisboa.jpg",
+  HERO_BG: "/assets/Lisbon-hero-banner.jpg",
+  GROUP_PHOTO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
+  LISBON_BG: "/assets/lisboa.jpg",
   
-  SPONSOR_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
+  SPONSOR_LOGO: "/assets/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
+  TUGAGIL_LOGO: "/assets/Group-23.png",
+  SCRUM_ALLIANCE_LOGO: "/assets/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   
-  // ATUALIZADO: Novo Logo TugÁgil
-  TUGAGIL_LOGO: "https://i.postimg.cc/VvvVTxmP/Group-23.png",
-  
-  SCRUM_ALLIANCE_LOGO: "https://i.postimg.cc/W4kCf9HB/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
-  
-  // Mantenha o link do seu logo branco do RSG aqui
-  RSG_LOGO_2026: "https://i.postimg.cc/wMpSz32V/2026-RSG-Logo-Lisbon-Reversed.png", 
+  RSG_LOGO_2026: "/assets/LISBON-Navigation-bar-logo-Reversed.png", 
+
+  ATELIE_LOGO: "/assets/Logo-Atelie-Software-Transparente.png",
+  TABAQUEIRA_LOGO: "/assets/Logo-Tabaqueira-RGB.png",
 
   RECAP_VIDEO: "https://youtu.be/DK0RsE584S4",
   RECAP_VIDEO_POSTER: "https://img.youtube.com/vi/DK0RsE584S4/maxresdefault.jpg",
@@ -25,7 +25,7 @@ export const ASSETS = {
     "https://i.postimg.cc/qq7Sn7QN/Tugagil-58.jpg",
     "https://i.postimg.cc/qvcwJTXW/Tugagil-610.jpg",
     "https://i.postimg.cc/br20Kcwk/Tugagil-618.jpg",
-  ],
+  ], // <--- A vírgula aqui é essencial!
   
   SERVICES: {
     SUPABASE_URL: (import.meta.env?.VITE_SUPABASE_URL as string) || "",

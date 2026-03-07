@@ -15,33 +15,38 @@ export const Team: React.FC = () => {
   const team: TeamMember[] = [
     {
       name: "Raquel Bartz Alves",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQHNYJcfE1tMgA/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1723208803857?e=1770249600&v=beta&t=PwnNIeJY8i8Vn3py47Aqj97iqzpTuPqVGTchGbY9hls", 
+      image: "/assets/Raquel.png", 
       linkedin: "https://www.linkedin.com/in/raquelbartzalves/" 
     },
     {
       name: "Sylvia Grec",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQHywipy3ibcXw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1729957721637?e=1770249600&v=beta&t=0ONjBDVWVEl2_EbPPHHIfofu-YFyaBHdrcyT1Nom7p4",
+      image: "/assets/Sylvia.png",
       linkedin: "https://www.linkedin.com/in/sylvia-grec/"
     },
     {
       name: "Marina Bittencourt",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQG9oIELLf4Dbg/profile-displayphoto-shrink_200_200/B4DZbGhns9GwAY-/0/1747087425210?e=1770249600&v=beta&t=i2EpuqSl3x6syZD557WkFv1lzzGH2t4PuBL8_c6WQ74",
+      image: "/assets/Marina.png",
       linkedin: "https://www.linkedin.com/in/marinarosabittencourt/"
     },
     {
       name: "Fábio Castro",
-      image: "https://media.licdn.com/dms/image/v2/C4D03AQE1SYdxYjYsRw/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1625589311192?e=1770249600&v=beta&t=bquxs1CeiJtf-IAiMpJ44q0TwGACUnL8G2AI9grF1jE",
+      image: "/assets/Fabio.png",
       linkedin: "https://www.linkedin.com/in/frmcastro/"
     },
     {
       name: "Cristiane Alves",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQFZkXbThpxVNA/profile-displayphoto-scale_200_200/B4DZlYAQ2mHwAY-/0/1758118088750?e=1770249600&v=beta&t=aqin8h9qT6rF5BeN57Q3lK_HNK5xcw_L-TjioYSTDPA",
+      image: "/assets/Cristiane.png",
       linkedin: "https://www.linkedin.com/in/cristiane-mendes-alves-pmp%C2%AE-psm-i-psk-i-okrcp-5a243b4/"
     },
     {
       name: "Alex Seles",
-      image: "https://media.licdn.com/dms/image/v2/D4D03AQEUBcD8_Ixbew/profile-displayphoto-scale_200_200/B4DZrL0YB9IkAY-/0/1764356097405?e=1770249600&v=beta&t=t00duNRQQ4pTqNJ1o4V47AsgxxK34NLKFRYvV2FXVDo",
+      image: "/assets/Alex.png",
       linkedin: "https://www.linkedin.com/in/alex-seles/"
+    },
+   {
+      name: "Matheus Haddad",
+      image: "/assets/Matheus.png",
+      linkedin: "https://www.linkedin.com/in/matheushaddad/"
     }
   ];
 
