@@ -18,7 +18,7 @@ export const Program: React.FC = () => {
     },
     {
       id: "03",
-      title: "Gestão e Estratégia de Inovação & QUalidade",
+      title: "Gestão e Estratégia de Inovação & Qualidade",
       description: "O mito vs. a realidade. Como a Inteligência Artificial está a redefinir a estratégia de qualidade, automação e engenharia. Casos reais de governança e inovação tecnológica.",
       tags: ["AI Governance", "Modern QA", "Future-Fit"]
     }
