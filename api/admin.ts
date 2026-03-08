@@ -266,11 +266,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const { data, error } = await supabase
         .from('tickets')
-        .select(`
-          *,
-          orders:order_id (*),
-          ticket_types:ticket_type_id (*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(500);
 
