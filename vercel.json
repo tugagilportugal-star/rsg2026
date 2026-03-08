@@ -1,5 +1,12 @@
 {
   "rewrites": [
-    { "source": "/api/admin/:path*", "destination": "/api/admin?path=:path*" }
+    {
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin?path=:path*"
+    },
+    {
+      "source": "/admin",
+      "destination": "/"
+    }
   ]
 }
