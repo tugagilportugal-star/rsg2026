@@ -267,7 +267,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { data, error } = await supabase
         .from('tickets')
         .select('*')
-        .order('created_at', { ascending: false })
         .limit(500);
 
       if (error) return res.status(500).json({ message: error.message });
