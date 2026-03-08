@@ -1,40 +1,40 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Settings } from 'lucide-react';
+
 import { Navbar } from './components/NavBar';
+import { Modal, SuccessState } from './components/UIComponents';
+import { AdminView } from './components/AdminView';
+import { TicketPurchaseModal } from './components/TicketPurchaseModal';
+
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Speakers } from './sections/Speakers';
 import { Sponsors } from './sections/Sponsors';
 import { Recap } from './sections/Recap';
+import { Tickets } from './sections/Tickets';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
-import { Modal, SuccessState } from './components/UIComponents';
-import { AdminView } from './components/AdminView';
-import { Settings } from 'lucide-react';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
+  const [isTicketModalOpen, setTicketModalOpen] = useState(false);
 
-  // Modal de Sucesso de Compra
+  // Modal de sucesso da compra
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
-  // ✅ Admin só por rota
+  // Admin por rota direta
   const isAdminRoute = window.location.pathname === '/admin';
+
   if (isAdminRoute) {
-    return (
-      <AdminView
-        onClose={() => {
-          window.location.href = '/';
-        }}
-      />
-    );
+    return <AdminView onClose={() => { window.location.href = '/'; }} />;
   }
 
   // Verificar retorno do Stripe ao carregar
-  React.useEffect(() => {
+  useEffect(() => {
     const query = new URLSearchParams(window.location.search);
 
     if (query.get('success')) {
@@ -48,32 +48,33 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white">
+    <>
       <Navbar />
 
-      <Hero />
-      <About />
-      <Features />
-      <Speakers />
-      <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-      <Recap />
+      <main>
+        <Hero />
+        <About />
+        <Features />
+        <Speakers />
+        <Sponsors />
+        <Recap />
 
-      <GetInvolved
-        setSponsorModalOpen={setSponsorModalOpen}
-        setSupporterModalOpen={setSupporterModalOpen}
-      />
+        <Tickets onBuyClick={() => setTicketModalOpen(true)} />
 
-      <FAQ />
+        <GetInvolved
+          setSponsorModalOpen={setSponsorModalOpen}
+          setSupporterModalOpen={setSupporterModalOpen}
+        />
 
-      {/* ✅ SECÇÃO DA EQUIPA */}
-      <Team />
+        <FAQ />
+        <Team />
+        <Footer />
+      </main>
 
-      <Footer />
-
-      {/* FABs (Apenas Admin escondido) */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* FAB Admin escondido */}
+      <div className="fixed bottom-6 right-6 z-40">
         <button
-          onClick={() => (window.location.href = '/admin')}
+          onClick={() => { window.location.href = '/admin'; }}
           className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white transition flex items-center justify-center opacity-50 hover:opacity-100 shadow-sm"
           aria-label="Admin"
           title="Admin Area"
@@ -84,11 +85,19 @@ const App: React.FC = () => {
 
       {/* Modals */}
       <Modal
+        isOpen={isTicketModalOpen}
+        onClose={() => setTicketModalOpen(false)}
+        title="Comprar Bilhete"
+      >
+        <TicketPurchaseModal onSuccess={() => setTicketModalOpen(false)} />
+      </Modal>
+
+      <Modal
         isOpen={isSponsorModalOpen}
         onClose={() => setSponsorModalOpen(false)}
         title="Torne-se um Patrocinador"
       >
-        <SponsorForm />
+        <SponsorForm onSuccess={() => setSponsorModalOpen(false)} />
       </Modal>
 
       <Modal
@@ -96,7 +105,7 @@ const App: React.FC = () => {
         onClose={() => setSupporterModalOpen(false)}
         title="Torne-se um Apoiador"
       >
-        <SupporterForm />
+        <SupporterForm onSuccess={() => setSupporterModalOpen(false)} />
       </Modal>
 
       <Modal
@@ -104,9 +113,9 @@ const App: React.FC = () => {
         onClose={() => setSuccessModalOpen(false)}
         title="Pagamento Confirmado!"
       >
-        <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
+        <SuccessState onClose={() => setSuccessModalOpen(false)} />
       </Modal>
-    </div>
+    </>
   );
 };
 
