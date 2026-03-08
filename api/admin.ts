@@ -1,4 +1,3 @@
-// api/admin/[...route].ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
@@ -12,32 +11,81 @@ function unauthorized(res: VercelResponse) {
   return res.status(401).json({ message: 'Unauthorized' });
 }
 
-function checkBasicAuth(req: VercelRequest, res: VercelResponse): boolean {
+function checkBasicAuth(req: VercelRequest): boolean {
   const header = req.headers.authorization || '';
   if (!header.startsWith('Basic ')) return false;
 
   const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
   const [user, pass] = decoded.split(':');
 
-  const ok =
-    user === process.env.ADMIN_USER &&
-    pass === process.env.ADMIN_PASS;
-
-  return !!ok;
+  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
 }
 
 function getRouteParts(req: VercelRequest): string[] {
-  // /api/admin/xxxx -> aqui chega como req.query.route (string|string[])
   const q = (req.query as any).route;
   if (!q) return [];
   return Array.isArray(q) ? q : [q];
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // auth
-  if (!checkBasicAuth(req, res)) return unauthorized(res);
+function parseBody(req: VercelRequest) {
+  if (!req.body) return {};
+  return typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+}
 
-  const parts = getRouteParts(req); // ex: ['leads'] ou ['leads','<id>']
+function normalizeTicketTypeInput(body: any, partial = false) {
+  const next: Record<string, unknown> = {};
+
+  if (!partial || body?.name !== undefined) {
+    const name = String(body?.name ?? '').trim();
+    if (!name) {
+      return { error: 'name obrigatório' };
+    }
+    next.name = name;
+  }
+
+  if (!partial || body?.price !== undefined) {
+    const price = Number(body?.price);
+    if (!Number.isFinite(price) || price < 0) {
+      return { error: 'price inválido' };
+    }
+    next.price = price;
+  }
+
+  if (!partial || body?.currency !== undefined) {
+    const currency = String(body?.currency ?? 'eur').trim().toLowerCase();
+    if (!currency) {
+      return { error: 'currency obrigatória' };
+    }
+    next.currency = currency;
+  }
+
+  if (!partial || body?.quantity_total !== undefined) {
+    const quantityTotal = Number(body?.quantity_total);
+    if (!Number.isInteger(quantityTotal) || quantityTotal < 0) {
+      return { error: 'quantity_total inválido' };
+    }
+    next.quantity_total = quantityTotal;
+  }
+
+  if (!partial || body?.active !== undefined) {
+    next.active = Boolean(body?.active);
+  }
+
+  if (!partial || body?.sort_order !== undefined) {
+    const sortOrder = Number(body?.sort_order ?? 0);
+    if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+      return { error: 'sort_order inválido' };
+    }
+    next.sort_order = sortOrder;
+  }
+
+  return { data: next };
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!checkBasicAuth(req)) return unauthorized(res);
+
+  const parts = getRouteParts(req);
   const resource = parts[0] || '';
   const id = parts[1] || null;
 
@@ -58,10 +106,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'PATCH' && id) {
-        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const body = parseBody(req);
         const status = body?.status;
 
-        if (!status) return res.status(400).json({ message: 'status obrigatório' });
+        if (!status) {
+          return res.status(400).json({ message: 'status obrigatório' });
+        }
 
         const { data, error } = await supabase
           .from('leads')
@@ -90,7 +140,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // =========================
-    // TICKET TYPES (lotes)
+    // TICKET TYPES (LOTES)
     // =========================
     if (resource === 'ticket-types') {
       if (req.method === 'GET' && !id) {
@@ -104,17 +154,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json(data || []);
       }
 
-      // criar lote
       if (req.method === 'POST' && !id) {
-        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const body = parseBody(req);
+        const normalized = normalizeTicketTypeInput(body, false);
+
+        if ('error' in normalized) {
+          return res.status(400).json({ message: normalized.error });
+        }
 
         const payload = {
-          name: body?.name ?? null,
-          price: body?.price ?? null,
-          currency: body?.currency ?? 'eur',
-          quantity_total: body?.quantity_total ?? null,
-          active: body?.active ?? false,
-          sort_order: body?.sort_order ?? null,
+          ...normalized.data,
+          quantity_sold: 0,
         };
 
         const { data, error } = await supabase
@@ -127,19 +177,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(200).json(data);
       }
 
-      // atualizar lote
       if (req.method === 'PATCH' && id) {
-        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const body = parseBody(req);
+        const normalized = normalizeTicketTypeInput(body, true);
 
-        const update: any = {};
-        const allowed = ['name', 'price', 'currency', 'quantity_total', 'active', 'sort_order', 'quantity_sold'];
-        for (const k of allowed) {
-          if (body?.[k] !== undefined) update[k] = body[k];
+        if ('error' in normalized) {
+          return res.status(400).json({ message: normalized.error });
+        }
+
+        if (
+          normalized.data.quantity_total !== undefined
+        ) {
+          const { data: current, error: currentError } = await supabase
+            .from('ticket_types')
+            .select('quantity_sold')
+            .eq('id', id)
+            .single();
+
+          if (currentError) {
+            return res.status(500).json({ message: currentError.message });
+          }
+
+          const sold = Number(current?.quantity_sold ?? 0);
+          const total = Number(normalized.data.quantity_total);
+
+          if (total < sold) {
+            return res.status(400).json({
+              message: 'quantity_total não pode ser inferior à quantidade já vendida',
+            });
+          }
         }
 
         const { data, error } = await supabase
           .from('ticket_types')
-          .update(update)
+          .update(normalized.data)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error) return res.status(500).json({ message: error.message });
+        return res.status(200).json(data);
+      }
+
+      if (req.method === 'DELETE' && id) {
+        const { data, error } = await supabase
+          .from('ticket_types')
+          .update({ active: false })
           .eq('id', id)
           .select()
           .single();
@@ -152,10 +235,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // =========================
-    // ORDERS (pagamentos)
+    // ORDERS
     // =========================
     if (resource === 'orders') {
-      if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
+      if (req.method !== 'GET') {
+        return res.status(405).json({ message: 'Method not allowed' });
+      }
 
       const { data, error } = await supabase
         .from('orders')
@@ -168,12 +253,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // =========================
-    // TICKETS (bilhetes emitidos)
+    // TICKETS
     // =========================
     if (resource === 'tickets') {
-      if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
+      if (req.method !== 'GET') {
+        return res.status(405).json({ message: 'Method not allowed' });
+      }
 
-      // retorna tickets + info de order + lote
       const { data, error } = await supabase
         .from('tickets')
         .select(`
