@@ -22,18 +22,10 @@ const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
   const [isTicketModalOpen, setTicketModalOpen] = useState(false);
-
-  // Modal de sucesso da compra
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
-  // Admin por rota direta
   const isAdminRoute = window.location.pathname === '/admin';
 
-  if (isAdminRoute) {
-    return <AdminView onClose={() => { window.location.href = '/'; }} />;
-  }
-
-  // Verificar retorno do Stripe ao carregar
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
 
@@ -44,8 +36,13 @@ const App: React.FC = () => {
 
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
+
+  if (isAdminRoute) {
+    return <AdminView onClose={() => { window.location.href = '/'; }} />;
+  }
 
   return (
     <>
@@ -56,7 +53,9 @@ const App: React.FC = () => {
         <About />
         <Features />
         <Speakers />
-        <Sponsors />
+
+        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+
         <Recap />
 
         <Tickets onBuyClick={() => setTicketModalOpen(true)} />
@@ -71,7 +70,6 @@ const App: React.FC = () => {
         <Footer />
       </main>
 
-      {/* FAB Admin escondido */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => { window.location.href = '/admin'; }}
@@ -83,13 +81,12 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      {/* Modals */}
       <Modal
         isOpen={isTicketModalOpen}
         onClose={() => setTicketModalOpen(false)}
         title="Comprar Bilhete"
       >
-        <TicketPurchaseModal onSuccess={() => setTicketModalOpen(false)} />
+        <TicketPurchaseModal />
       </Modal>
 
       <Modal
@@ -97,7 +94,7 @@ const App: React.FC = () => {
         onClose={() => setSponsorModalOpen(false)}
         title="Torne-se um Patrocinador"
       >
-        <SponsorForm onSuccess={() => setSponsorModalOpen(false)} />
+        <SponsorForm />
       </Modal>
 
       <Modal
@@ -105,7 +102,7 @@ const App: React.FC = () => {
         onClose={() => setSupporterModalOpen(false)}
         title="Torne-se um Apoiador"
       >
-        <SupporterForm onSuccess={() => setSupporterModalOpen(false)} />
+        <SupporterForm />
       </Modal>
 
       <Modal
@@ -113,7 +110,10 @@ const App: React.FC = () => {
         onClose={() => setSuccessModalOpen(false)}
         title="Pagamento Confirmado!"
       >
-        <SuccessState onClose={() => setSuccessModalOpen(false)} />
+        <SuccessState
+          message="O seu pagamento foi confirmado com sucesso. Verifique o seu e-mail para os próximos detalhes."
+          onReset={() => setSuccessModalOpen(false)}
+        />
       </Modal>
     </>
   );
