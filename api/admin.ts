@@ -24,7 +24,13 @@ function checkBasicAuth(req: VercelRequest): boolean {
 function getRouteParts(req: VercelRequest): string[] {
   const q = (req.query as any).route;
   if (!q) return [];
-  return Array.isArray(q) ? q : [q];
+
+  const rawParts = Array.isArray(q) ? q : [q];
+
+  return rawParts
+    .flatMap((part) => String(part).split('/'))
+    .map((part) => part.trim())
+    .filter(Boolean);
 }
 
 function parseBody(req: VercelRequest) {
@@ -185,9 +191,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ message: normalized.error });
         }
 
-        if (
-          normalized.data.quantity_total !== undefined
-        ) {
+        if (normalized.data.quantity_total !== undefined) {
           const { data: current, error: currentError } = await supabase
             .from('ticket_types')
             .select('quantity_sold')
