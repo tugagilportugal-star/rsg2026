@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input } from './UIComponents';
-import { Loader2, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 type TicketTypeData = {
   id: string;
@@ -13,11 +13,7 @@ type TicketTypeData = {
   sort_order: number | null;
 };
 
-type Props = {
-  onSuccess?: () => void;
-};
-
-export const TicketPurchaseModal: React.FC<Props> = ({ onSuccess }) => {
+export const TicketPurchaseModal: React.FC = () => {
   const [ticketForm, setTicketForm] = useState({
     firstName: '',
     lastName: '',
@@ -92,7 +88,6 @@ export const TicketPurchaseModal: React.FC<Props> = ({ onSuccess }) => {
       const data = await res.json();
 
       if (data?.url) {
-        onSuccess?.();
         window.location.href = data.url;
       } else {
         alert('Erro ao iniciar pagamento: ' + (data?.message || 'Tente novamente.'));
@@ -105,127 +100,140 @@ export const TicketPurchaseModal: React.FC<Props> = ({ onSuccess }) => {
     }
   };
 
+  if (loadingTicket) {
+    return (
+      <div className="py-8 text-center text-gray-500">
+        A carregar informações do bilhete...
+      </div>
+    );
+  }
+
+  if (!ticketData) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-center">
+        Não foi possível carregar as informações do bilhete.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {loadingTicket ? (
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-6 text-center text-gray-600">
-          A carregar informações do bilhete...
+      <div className="text-center">
+        <h3 className="text-3xl font-black text-brand-darkBlue">
+          {ticketData.name}
+        </h3>
+        <p className="mt-2 text-5xl font-black text-brand-orange">
+          {formatCurrency(ticketData.price, ticketData.currency)}
+          <span className="text-lg font-medium text-gray-500"> / pessoa</span>
+        </p>
+      </div>
+
+      <form onSubmit={handleBuyTicket} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Primeiro Nome"
+            required
+            value={ticketForm.firstName}
+            onChange={(e) => setTicketForm({ ...ticketForm, firstName: e.target.value })}
+          />
+          <Input
+            label="Apelido"
+            required
+            value={ticketForm.lastName}
+            onChange={(e) => setTicketForm({ ...ticketForm, lastName: e.target.value })}
+          />
         </div>
-      ) : ticketData ? (
-        <>
-          <div className="text-center">
-            <h3 className="text-2xl font-black text-gray-900">{ticketData.name}</h3>
-            <p className="mt-2 text-3xl font-black text-brand-darkBlue">
-              {formatCurrency(ticketData.price, ticketData.currency)}
-              <span className="text-base font-medium text-gray-500"> / pessoa</span>
-            </p>
-          </div>
 
-          <form onSubmit={handleBuyTicket} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Primeiro Nome"
-                required
-                value={ticketForm.firstName}
-                onChange={(e) => setTicketForm({ ...ticketForm, firstName: e.target.value })}
-              />
-              <Input
-                label="Apelido"
-                required
-                value={ticketForm.lastName}
-                onChange={(e) => setTicketForm({ ...ticketForm, lastName: e.target.value })}
-              />
-            </div>
+        <Input
+          label="E-mail"
+          type="email"
+          required
+          value={ticketForm.email}
+          onChange={(e) => setTicketForm({ ...ticketForm, email: e.target.value })}
+        />
 
-            <Input
-              label="E-mail"
-              type="email"
-              required
-              value={ticketForm.email}
-              onChange={(e) => setTicketForm({ ...ticketForm, email: e.target.value })}
-            />
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">País</label>
-              <select
-                value={ticketForm.country}
-                onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
-              >
-                <option>Portugal</option>
-                <option>Espanha</option>
-                <option>França</option>
-                <option>Alemanha</option>
-                <option>Reino Unido</option>
-                <option>Brasil</option>
-                <option>Estados Unidos</option>
-                <option>Outro</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Função de trabalho</label>
-              <select
-                value={ticketForm.jobFunction}
-                onChange={(e) =>
-                  setTicketForm({
-                    ...ticketForm,
-                    jobFunction: e.target.value,
-                    jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
-                  })
-                }
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
-              >
-                <option value="">Seleciona…</option>
-                <option>Atendimento ao Cliente</option>
-                <option>Engenharia</option>
-                <option>Executivo</option>
-                <option>Financeiro</option>
-                <option>Recursos Humanos</option>
-                <option>Tecnologia da Informação</option>
-                <option>Jurídico</option>
-                <option>Marketing e Vendas</option>
-                <option>Operações</option>
-                <option>Gestão de Produtos</option>
-                <option>Serviços Profissionais</option>
-                <option>Gerenciamento de projetos</option>
-                <option>Pesquisa</option>
-                <option>Cadeia de suprimentos e manufatura</option>
-                <option>Treinamento e Educação</option>
-                <option>Indústria de trabalho</option>
-                <option>Outros</option>
-              </select>
-            </div>
-
-            {ticketForm.jobFunction === 'Outros' && (
-              <Input
-                label="Qual é a sua função?"
-                required
-                value={ticketForm.jobFunctionOther}
-                onChange={(e) => setTicketForm({ ...ticketForm, jobFunctionOther: e.target.value })}
-              />
-            )}
-
-            <div className="rounded-2xl bg-blue-50 border border-blue-100 px-4 py-3 flex items-start gap-3 text-sm text-gray-700">
-              <Lock className="w-5 h-5 text-brand-darkBlue mt-0.5 flex-shrink-0" />
-              <div>Pagamento seguro via Stripe.</div>
-            </div>
-
-            <Button
-              type="submit"
-              isLoading={buyStatus === 'loading'}
-              className="w-full text-lg font-bold"
-              variant="secondary"
-            >
-              {ticketData.active ? 'Continuar para Pagamento' : 'Lote Indisponível'}
-            </Button>
-          </form>
-        </>
-      ) : (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-6 text-center text-red-700">
-          Não foi possível carregar as informações do bilhete.
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            País
+          </label>
+          <select
+            value={ticketForm.country}
+            onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          >
+            <option>Portugal</option>
+            <option>Espanha</option>
+            <option>França</option>
+            <option>Alemanha</option>
+            <option>Reino Unido</option>
+            <option>Brasil</option>
+            <option>Estados Unidos</option>
+            <option>Outro</option>
+          </select>
         </div>
-      )}
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Função de trabalho
+          </label>
+          <select
+            value={ticketForm.jobFunction}
+            onChange={(e) =>
+              setTicketForm({
+                ...ticketForm,
+                jobFunction: e.target.value,
+                jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
+              })
+            }
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          >
+            <option value="">Seleciona…</option>
+            <option>Atendimento ao Cliente</option>
+            <option>Engenharia</option>
+            <option>Executivo</option>
+            <option>Financeiro</option>
+            <option>Recursos Humanos</option>
+            <option>Tecnologia da Informação</option>
+            <option>Jurídico</option>
+            <option>Marketing e Vendas</option>
+            <option>Operações</option>
+            <option>Gestão de Produtos</option>
+            <option>Serviços Profissionais</option>
+            <option>Gerenciamento de projetos</option>
+            <option>Pesquisa</option>
+            <option>Cadeia de suprimentos e manufatura</option>
+            <option>Treinamento e Educação</option>
+            <option>Indústria de trabalho</option>
+            <option>Outros</option>
+          </select>
+        </div>
+
+        {ticketForm.jobFunction === 'Outros' && (
+          <Input
+            label="Qual é a sua função?"
+            required
+            value={ticketForm.jobFunctionOther}
+            onChange={(e) => setTicketForm({ ...ticketForm, jobFunctionOther: e.target.value })}
+          />
+        )}
+
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+          <Lock className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-gray-600">
+            Pagamento seguro via Stripe
+          </p>
+        </div>
+
+        <Button
+          type="submit"
+          isLoading={buyStatus === 'loading'}
+          className="w-full"
+          variant="secondary"
+          disabled={!ticketData.active}
+        >
+          {ticketData.active ? 'Continuar para Pagamento' : 'Lote Indisponível'}
+        </Button>
+      </form>
     </div>
   );
 };
