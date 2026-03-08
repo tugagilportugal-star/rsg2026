@@ -66,7 +66,7 @@ export const Tickets: React.FC<Props> = ({ onBuyClick }) => {
           {loadingTicket
             ? '...'
             : ticketData?.sort_order !== undefined && ticketData?.sort_order !== null
-              ? `LOTE ${ticketData.sort_order + 1}`
+              ? `LOTE ${ticketData.sort_order}`
               : 'LOTE'}
         </div>
 
