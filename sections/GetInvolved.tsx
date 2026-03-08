@@ -1,27 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
-import { FormType, SponsorFormData, SupporterFormData } from '../types';
-import { saveSubmission } from '../services/db';
-import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText } from 'lucide-react';
+import React from 'react';
+import { Section, Button } from '../components/UIComponents';
+import { Handshake, Camera } from 'lucide-react';
 
-// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
-//const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f';
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
   setSupporterModalOpen: (v: boolean) => void;
 }
 
-interface TicketTypeData {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  active: boolean;
-  quantity_total: number | null;
-  quantity_sold: number | null;
-  sort_order: number | null;
-}
+
 
 
 /* =========================
@@ -31,94 +18,7 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
   setSponsorModalOpen,
   setSupporterModalOpen
 }) => {
-  // Estado para o formulário de compra de bilhete
-  const [ticketForm, setTicketForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    country: 'Portugal',
-    jobFunction: '',
-    jobFunctionOther: '',
-  });
 
-  const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
-  const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
-  const [loadingTicket, setLoadingTicket] = useState(true);
-
-  // 1. Buscar dados via API Proxy (Seguro, sem chaves no front)
-  useEffect(() => {
-    async function fetchTicket() {
-      try {
-        const res = await fetch(`/api/get-ticket`);
-        if (res.ok) {
-          const data = await res.json();
-          setTicketData(data);
-        } else {
-          console.error('Erro ao buscar bilhete');
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingTicket(false);
-      }
-    }
-
-    fetchTicket();
-  }, []);
-
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('pt-PT', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).format(amount / 100);
-  };
-
-  const handleBuyTicket = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBuyStatus('loading');
-
-    try {
-      
-      if (!ticketData?.id) {
-        alert('Ainda estamos a carregar o lote de bilhetes. Tenta novamente em alguns segundos.');
-        setBuyStatus('idle');
-        return;
-      }
-
-      // 2. Chamar API de Checkout
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // ✅ aqui é o payload certo (sem "body dentro do body")
-        body: JSON.stringify({
-          ticketTypeId: ticketData.id,
-          quantity: 1,
-          formData: {
-            attendee_first_name: ticketForm.firstName.trim(),
-            attendee_last_name: ticketForm.lastName.trim(),
-            attendee_email: ticketForm.email.trim(),
-            attendee_country: ticketForm.country,
-            attendee_job_function: ticketForm.jobFunction,
-            attendee_job_function_other:
-              ticketForm.jobFunction === 'Outros' ? ticketForm.jobFunctionOther.trim() : '',
-          },
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        alert('Erro ao iniciar pagamento: ' + (data?.message || 'Tente novamente.'));
-        setBuyStatus('idle');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Erro de conexão. Verifique sua internet.');
-      setBuyStatus('idle');
-    }
-  };
 
   return (
     <Section id="get-involved" className="bg-gray-50">
@@ -165,161 +65,6 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
           >
             Quero Apoiar
           </Button>
-        </div>
-      </div>
-
-      <div className="max-w-3xl mx-auto">
-        {/* Box VENDA DE BILHETES */}
-        <div
-          id="ticket-form"
-          className="bg-white shadow-2xl rounded-3xl overflow-hidden border border-gray-100 relative transform hover:-translate-y-1 transition-transform duration-300 scroll-mt-32"
-        >
-          <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
-
-          <div className="p-8 md:p-12">
-            {loadingTicket ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-10 h-10 text-brand-blue animate-spin mb-4" />
-                <p className="text-gray-500">A carregar informações do bilhete...</p>
-              </div>
-            ) : ticketData ? (
-              <>
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <Ticket className="w-8 h-8 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-brand-darkBlue">{ticketData.name}</h3>
-                    <p className="text-green-600 font-bold text-lg">
-                      {formatCurrency(ticketData.price, ticketData.currency)}
-                      <span className="text-sm font-normal text-gray-500"> / pessoa</span>
-                    </p>
-                  </div>
-                </div>
-
-                <form onSubmit={handleBuyTicket} className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Input
-                      label="Primeiro nome"
-                      required
-                      value={ticketForm.firstName}
-                      onChange={(e) => setTicketForm({ ...ticketForm, firstName: e.target.value })}
-                    />
-                    <Input
-                      label="Sobrenome"
-                      required
-                      value={ticketForm.lastName}
-                      onChange={(e) => setTicketForm({ ...ticketForm, lastName: e.target.value })}
-                    />
-                  </div>
-
-                  <Input
-                    label="Endereço de email"
-                    type="email"
-                    required
-                    value={ticketForm.email}
-                    onChange={(e) => setTicketForm({ ...ticketForm, email: e.target.value })}
-                  />
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-gray-700">País</label>
-                      <select
-                        required
-                        value={ticketForm.country}
-                        onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
-                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      >
-                        <option value="Portugal">Portugal</option>
-                        <option value="Spain">Espanha</option>
-                        <option value="France">França</option>
-                        <option value="Germany">Alemanha</option>
-                        <option value="United Kingdom">Reino Unido</option>
-                        <option value="Brazil">Brasil</option>
-                        <option value="United States">Estados Unidos</option>
-                        <option value="Other">Outro</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Função de trabalho
-                      </label>
-                      <select
-                        required
-                        value={ticketForm.jobFunction}
-                        onChange={(e) =>
-                          setTicketForm({
-                            ...ticketForm,
-                            jobFunction: e.target.value,
-                            jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
-                          })
-                        }
-                        className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
-                      >
-                        <option value="" disabled>Seleciona…</option>
-                        <option value="Atendimento ao Cliente">Atendimento ao Cliente</option>
-                        <option value="Engenharia">Engenharia</option>
-                        <option value="Executivo">Executivo</option>
-                        <option value="Financeiro">Financeiro</option>
-                        <option value="Recursos Humanos">Recursos Humanos</option>
-                        <option value="Tecnologia da Informação">Tecnologia da Informação</option>
-                        <option value="Jurídico">Jurídico</option>
-                        <option value="Marketing e Vendas">Marketing e Vendas</option>
-                        <option value="Operações">Operações</option>
-                        <option value="Gestão de Produtos">Gestão de Produtos</option>
-                        <option value="Serviços Profissionais">Serviços Profissionais</option>
-                        <option value="Gerenciamento de projetos">Gerenciamento de projetos</option>
-                        <option value="Pesquisa">Pesquisa</option>
-                        <option value="Cadeia de suprimentos e manufatura">Cadeia de suprimentos e manufatura</option>
-                        <option value="Treinamento e Educação">Treinamento e Educação</option>
-                        <option value="Indústria de trabalho">Indústria de trabalho</option>
-                        <option value="Outros">Outros</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {ticketForm.jobFunction === 'Outros' && (
-                    <Input
-                      label="Qual?"
-                      required
-                      value={ticketForm.jobFunctionOther}
-                      onChange={(e) => setTicketForm({ ...ticketForm, jobFunctionOther: e.target.value })}
-                    />
-                  )}
-
-                  <div className="pt-4">
-                    <Button
-                      type="submit"
-                      isLoading={buyStatus === 'loading'}
-                      className="w-full text-lg py-4 bg-brand-orange hover:bg-orange-600 shadow-lg"
-                      disabled={
-                        !ticketData?.active ||
-                        (ticketForm.jobFunction === 'Outros' && !ticketForm.jobFunctionOther.trim())
-                      }
-                    >
-                      {ticketData?.active ? (
-                        <>
-                          Continuar para Pagamento <ArrowRight className="ml-2 w-5 h-5" />
-                        </>
-                      ) : (
-                        'Lote Indisponível'
-                      )}
-                    </Button>
-
-                    <div className="flex items-center justify-center gap-2 mt-4 text-xs text-gray-400">
-                      <Lock className="w-3 h-3" />
-                      Pagamento seguro via Stripe
-                    </div>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <div className="text-center py-12 text-red-500">
-                Não foi possível carregar as informações do bilhete.
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </Section>
