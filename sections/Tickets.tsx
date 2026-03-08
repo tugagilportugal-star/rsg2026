@@ -20,21 +20,21 @@ export const Tickets: React.FC<Props> = ({ onBuyClick }) => {
         </p>
       </div>
 
-      <div className="max-w-4xl mx-auto relative">
+      <div className="max-w-3xl mx-auto relative">
         <div className="absolute top-0 right-0 z-20 bg-brand-orange text-white font-black text-lg px-5 py-3 rounded-bl-2xl rounded-tr-2xl shadow-md rotate-0">
           LOTE 1
         </div>
 
-        <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_20px_60px_rgba(0,0,0,0.08)] px-8 md:px-14 py-12 md:py-14">
+          <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_20px_60px_rgba(0,0,0,0.08)] px-8 md:px-10 py-10 md:py-12">
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-5 py-2 text-sm md:text-base font-black tracking-wide">
               <Sparkles className="w-4 h-4" />
-              EARLY BIRD TICKET
+        text-5xl md:text-6xl
             </div>
           </div>
 
           <div className="text-center">
-            <div className="text-6xl md:text-8xl font-black text-brand-darkBlue leading-none">
+            <div className="text-5xl md:text-6xl font-black text-brand-darkBlue leading-none">
               42,80€
             </div>
           </div>
@@ -51,7 +51,7 @@ export const Tickets: React.FC<Props> = ({ onBuyClick }) => {
                 <div className="mt-1 rounded-full bg-sky-100 p-1.5 flex-shrink-0">
                   <Check className="w-4 h-4 text-sky-500" />
                 </div>
-                <span className="text-xl text-gray-700 leading-relaxed">{item}</span>
+                <span className="text-lg text-gray-700 leading-relaxed">{item}</span>
               </div>
             ))}
           </div>
@@ -59,7 +59,7 @@ export const Tickets: React.FC<Props> = ({ onBuyClick }) => {
           <div className="mt-12 max-w-2xl mx-auto">
             <button
               onClick={onBuyClick}
-              className="w-full rounded-[20px] bg-brand-orange text-white py-5 text-2xl font-black shadow-[0_10px_30px_rgba(249,115,22,0.35)] hover:opacity-95 transition"
+              className="w-full rounded-[20px] bg-brand-orange text-white py-4 text-xl font-black shadow-[0_10px_30px_rgba(249,115,22,0.35)] hover:opacity-95 transition"
             >
               Comprar Bilhete
             </button>
