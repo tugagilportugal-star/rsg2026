@@ -14,7 +14,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
       
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
-          Garanta o seu lugar
+          Garanta o teu lugar
         </h2>
         <p className="text-gray-500 text-lg max-w-2xl mx-auto">
           Participe de uma das maiores celebrações da agilidade em Portugal. 
