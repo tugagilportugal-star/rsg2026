@@ -42,7 +42,7 @@ const App: React.FC = () => {
     }
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
-  },[]);
+  },
 
   return (
     <div className="bg-white">
