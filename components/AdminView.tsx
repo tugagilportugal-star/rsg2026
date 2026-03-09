@@ -65,6 +65,16 @@ type TicketRow = {
   check_in_at?: string | null;
 };
 
+type CouponRow = {
+  id: string
+  code: string
+  email?: string | null
+  discount_percent: number
+  single_use: boolean
+  active: boolean
+  created_at?: string | null
+}
+
 type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets';
 
 type TicketTypeForm = {
@@ -142,6 +152,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
 
+  const [coupons, setCoupons] = useState<CouponRow[]>([])
+  const [loadingCoupons, setLoadingCoupons] = useState(false)
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
@@ -186,6 +199,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setError('Erro inesperado ao carregar leads');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchCoupons() {
+    setLoadingCoupons(true)
+
+    try {
+      const res = await fetch('/api/admin/coupons')
+      const data = await res.json()
+
+      if (res.ok) {
+        setCoupons(data || [])
+      } else {
+        console.error('Erro ao carregar coupons')
+     }
+    } catch (err) {
+    console.error(err)
+    } finally {
+      setLoadingCoupons(false)
     }
   }
 
@@ -548,6 +580,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (tab === 'ticketTypes') fetchTicketTypes();
     if (tab === 'orders') fetchOrders();
     if (tab === 'tickets') fetchTickets();
+    if (tab === 'coupons') fetchCoupons();
   }, [isAuthenticated, authHeader, tab]);
 
   function downloadCsv() {
@@ -804,6 +837,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               { key: 'ticketTypes', label: 'Lotes (Tickets)' },
               { key: 'orders', label: 'Orders (Pagamentos)' },
               { key: 'tickets', label: 'Tickets (Participantes)' },
+              { key: 'coupons', label: 'Coupons' },
             ].map((item) => (
               <button
                 key={item.key}
@@ -1132,6 +1166,43 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           )}
         </div>
+
+        {tab === 'coupons' && (
+          <div className="overflow-x-auto rounded-3xl bg-white border">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-left">
+                <tr>
+                  <Th>Código</Th>
+                  <Th>Email</Th>
+                  <Th>Desconto</Th>
+                  <Th>Single Use</Th>
+                  <Th>Ativo</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {loadingCoupons ? (
+                  <tr>
+                    <Td colSpan={5}>A carregar coupons…</Td>
+                  </tr>
+                ) : coupons.length === 0 ? (
+                  <tr>
+                    <Td colSpan={5}>Sem coupons.</Td>
+                  </tr>
+                ) : (
+                  coupons.map((row) => (
+                    <tr key={row.id} className="border-t">
+                      <Td>{row.code}</Td>
+                      <Td>{row.email || '—'}</Td>
+                      <Td>{row.discount_percent}%</Td>
+                      <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
+                      <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {selected && (
           <div
