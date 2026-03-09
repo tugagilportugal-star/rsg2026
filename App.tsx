@@ -14,12 +14,15 @@ import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
 import { Modal, SuccessState } from './components/UIComponents';
+import { TicketForm } from './components/TicketForm';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 
 const App: React.FC = () => {
-  const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
-  const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
+  const[isSponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const[isSupporterModalOpen, setSupporterModalOpen] = useState(false);
+  const [isTicketModalOpen, setTicketModalOpen] = useState(false); // <--- NOVO ESTADO
+  const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
   
   // Modal de Sucesso de Compra
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
@@ -97,6 +100,14 @@ const App: React.FC = () => {
         title="Torne-se um Apoiador"
       >
         <SupporterForm />
+      </Modal>
+
+      <Modal
+        isOpen={isTicketModalOpen}
+        onClose={() => setTicketModalOpen(false)}
+        title="Early Bird Ticket"
+      >
+        <TicketForm />
       </Modal>
 
       <Modal
