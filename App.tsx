@@ -37,4 +37,82 @@ const App: React.FC = () => {
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
     }
-  },
+    
+  return (
+    <div className="bg-white">
+      <Navbar />
+      <Hero />
+      <About />
+      <Features />
+      <Program />
+      <WhyAttend />
+      
+      {/* Secção de Tickets com a função de abrir o Modal */}
+      <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
+      
+      <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+      <Recap />
+
+      <GetInvolved
+        setSponsorModalOpen={setSponsorModalOpen}
+        setSupporterModalOpen={setSupporterModalOpen}
+      />
+
+      <FAQ />
+      <Team />
+      <Footer />
+
+      {/* Botão Admin Escondido */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => (window.location.href = '/admin')}
+          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white transition flex items-center justify-center opacity-50 hover:opacity-100 shadow-sm"
+          aria-label="Admin"
+          title="Admin Area"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Modal: Patrocinador */}
+      <Modal
+        isOpen={isSponsorModalOpen}
+        onClose={() => setSponsorModalOpen(false)}
+        title="Torne-se um Patrocinador"
+      >
+        <SponsorForm />
+      </Modal>
+
+      {/* Modal: Apoiador */}
+      <Modal
+        isOpen={isSupporterModalOpen}
+        onClose={() => setSupporterModalOpen(false)}
+        title="Torne-se um Apoiador"
+      >
+        <SupporterForm />
+      </Modal>
+
+      {/* Modal NOVO: Venda de Bilhetes */}
+      <Modal
+        isOpen={isTicketModalOpen}
+        onClose={() => setTicketModalOpen(false)}
+        title="Registo Lote 1 (Early Bird)"
+      >
+        <TicketForm />
+      </Modal>
+
+      {/* Modal: Sucesso */}
+      <Modal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setSuccessModalOpen(false)}
+        title="Pagamento Confirmado!"
+      >
+        <SuccessState 
+          message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." 
+        />
+      </Modal>
+    </div>
+  );
+};
+
+export default App;
