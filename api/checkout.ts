@@ -83,6 +83,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const attendeeCountry = String(formData?.attendee_country || '').trim() || 'Portugal';
     const attendeeJobFunction = String(formData?.attendee_job_function || '').trim();
     const attendeeJobFunctionOther = String(formData?.attendee_job_function_other || '').trim();
+    
+    const attendeeNif = String(formData?.attendee_nif || '').trim();
+    const attendeeCompany = String(formData?.attendee_company || '').trim();
+    const attendeeJobTitle = String(formData?.attendee_job_title || '').trim();
+    const attendeeTshirt = String(formData?.attendee_tshirt || '').trim();
+
+    const saDataSharingConsent = Boolean(formData?.sa_data_sharing_consent);
+    const saMarketingConsent = Boolean(formData?.sa_marketing_consent);
+    const privacyConsent = Boolean(formData?.privacy_consent);
 
     const originalPrice = Number(ticketType.price);
     let finalPrice = originalPrice;
@@ -130,6 +139,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         attendee_country: attendeeCountry,
         attendee_job_function: attendeeJobFunction,
         attendee_job_function_other: attendeeJobFunctionOther,
+        
+        attendee_nif: attendeeNif,
+        attendee_company: attendeeCompany,
+        attendee_job_title: attendeeJobTitle,
+        attendee_tshirt: attendeeTshirt,
+        sa_data_sharing_consent: String(saDataSharingConsent),
+        sa_marketing_consent: String(saMarketingConsent),
+        privacy_consent: String(privacyConsent),
+        
         coupon_code: appliedCoupon?.code || '',
         coupon_discount_percent: appliedCoupon ? String(appliedCoupon.discount_percent) : '',
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',

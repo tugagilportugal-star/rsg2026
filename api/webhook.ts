@@ -215,6 +215,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       meta.phone ||
       null;
 
+    const attendeeNif =
+      meta.attendee_nif ||
+      meta.nif ||
+      null;
+
+    const attendeeJobTitle =
+      meta.attendee_job_title ||
+      meta.jobTitle ||
+      null;
+
+    const attendeeTshirt =
+      meta.attendee_tshirt ||
+      meta.tshirt ||
+      null;
+
+    const saDataSharingConsent =
+      String(meta.sa_data_sharing_consent || '').trim().toLowerCase() === 'true';
+
+    const saMarketingConsent =
+      String(meta.sa_marketing_consent || '').trim().toLowerCase() === 'true';
+
+    const privacyConsent =
+      String(meta.privacy_consent || '').trim().toLowerCase() === 'true';
+
     const attendeeName =
       meta.attendee_name ||
       meta.name ||
@@ -255,6 +279,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         attendee_country: attendeeCountry,
         attendee_job_function: attendeeJobFunction,
         attendee_job_function_other: attendeeJobFunctionOther,
+        attendee_nif: attendeeNif,
+        attendee_job_title: attendeeJobTitle,
+        attendee_tshirt: attendeeTshirt,
+        sa_data_sharing_consent: saDataSharingConsent,
+        sa_marketing_consent: saMarketingConsent,
+        privacy_consent: privacyConsent,
         checked_in: false,
       })
       .select()

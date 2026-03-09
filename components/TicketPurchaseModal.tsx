@@ -33,9 +33,9 @@ export const TicketPurchaseModal: React.FC = () => {
     jobFunction: '',
     jobFunctionOther: '',
     couponCode: '',
-    saConsent1: false,
-    saConsent2: false,
-    privacy: false,
+    saDataSharingConsent: false,
+    saMarketingConsent: false,
+    privacyConsent: false,
   });
 
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
@@ -162,9 +162,9 @@ export const TicketPurchaseModal: React.FC = () => {
             attendee_company: ticketForm.company.trim(),
             attendee_job_title: ticketForm.jobTitle.trim(),
             attendee_tshirt: ticketForm.tshirt,
-            sa_consent_1: ticketForm.saConsent1,
-            sa_consent_2: ticketForm.saConsent2,
-            privacy_consent: ticketForm.privacy,
+            sa_data_sharing_consent: ticketForm.saDataSharingConsent,
+            sa_marketing_consent: ticketForm.saMarketingConsent,
+            privacy_consent: ticketForm.privacyConsent,
           },
         }),
       });
@@ -402,8 +402,8 @@ export const TicketPurchaseModal: React.FC = () => {
               id="saConsent1"
               type="checkbox"
               required
-              checked={ticketForm.saConsent1}
-              onChange={(e) => setTicketForm({ ...ticketForm, saConsent1: e.target.checked })}
+              checked={ticketForm.saDataSharingConsent}
+              onChange={(e) => setTicketForm({ ...ticketForm, saDataSharingConsent: e.target.checked })}
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
             />
             <label htmlFor="saConsent1" className="ml-3 text-xs text-gray-600 leading-relaxed">
@@ -427,8 +427,8 @@ export const TicketPurchaseModal: React.FC = () => {
             <input
               id="saConsent2"
               type="checkbox"
-              checked={ticketForm.saConsent2}
-              onChange={(e) => setTicketForm({ ...ticketForm, saConsent2: e.target.checked })}
+              checked={ticketForm.saMarketingConsent}
+              onChange={(e) => setTicketForm({ ...ticketForm, saMarketingConsent: e.target.checked })}
               className="mt-1 h-4 w-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue"
             />
             <label htmlFor="saConsent2" className="ml-3 text-xs text-gray-600 leading-relaxed">
@@ -453,8 +453,8 @@ export const TicketPurchaseModal: React.FC = () => {
               id="privacy"
               type="checkbox"
               required
-              checked={ticketForm.privacy}
-              onChange={(e) => setTicketForm({ ...ticketForm, privacy: e.target.checked })}
+              checked={ticketForm.privacyConsent}
+              onChange={(e) => setTicketForm({ ...ticketForm, privacyConsent: e.target.checked })}
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
             />
             <label htmlFor="privacy" className="ml-3 text-sm text-gray-600">
@@ -481,7 +481,7 @@ export const TicketPurchaseModal: React.FC = () => {
       <Button
         type="submit"
         isLoading={buyStatus === 'loading'}
-        className="w-full text-lg mt-6"
+        className="w-full text-lg mt-6"q
         variant="secondary"
         disabled={!ticketData.active}
       >
