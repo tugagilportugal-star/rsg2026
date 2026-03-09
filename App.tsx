@@ -8,7 +8,7 @@ import { WhyAttend } from './sections/WhyAttend';
 import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
 import { Recap } from './sections/Recap';
-import { SponsorForm, SupporterForm } from './sections/GetInvolved';
+import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
