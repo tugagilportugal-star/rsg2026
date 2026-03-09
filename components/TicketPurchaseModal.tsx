@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Input } from './UIComponents';
-import { Lock } from 'lucide-react';
+import { CheckCircle2, Lock, TicketPercent } from 'lucide-react';
 
 type TicketTypeData = {
   id: string;
@@ -13,6 +13,13 @@ type TicketTypeData = {
   sort_order: number | null;
 };
 
+type CouponState = {
+  valid: boolean;
+  code?: string;
+  discountPercent?: number;
+  message?: string;
+};
+
 export const TicketPurchaseModal: React.FC = () => {
   const [ticketForm, setTicketForm] = useState({
     firstName: '',
@@ -21,9 +28,13 @@ export const TicketPurchaseModal: React.FC = () => {
     country: 'Portugal',
     jobFunction: '',
     jobFunctionOther: '',
+    couponCode: '',
   });
 
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'loading'>('idle');
+  const [couponResult, setCouponResult] = useState<CouponState | null>(null);
+
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
 
@@ -47,6 +58,71 @@ export const TicketPurchaseModal: React.FC = () => {
     fetchTicket();
   }, []);
 
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('pt-PT', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+    }).format(amount / 100);
+  };
+
+  const originalPrice = Number(ticketData?.price || 0);
+
+  const finalPrice = useMemo(() => {
+    if (!ticketData) return 0;
+    if (!couponResult?.valid || !couponResult.discountPercent) return originalPrice;
+    return Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
+  }, [ticketData, couponResult, originalPrice]);
+
+  const handleApplyCoupon = async () => {
+    const code = ticketForm.couponCode.trim().toUpperCase();
+    const email = ticketForm.email.trim().toLowerCase();
+
+    if (!code) {
+      setCouponResult({ valid: false, message: 'Introduz um cupão.' });
+      return;
+    }
+
+    if (!email) {
+      setCouponResult({ valid: false, message: 'Preenche primeiro o email.' });
+      return;
+    }
+
+    setCouponStatus('loading');
+
+    try {
+      const res = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, email }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data?.valid) {
+        setCouponResult({
+          valid: false,
+          message: data?.message || 'Cupão inválido.',
+        });
+        return;
+      }
+
+      setCouponResult({
+        valid: true,
+        code: data.code,
+        discountPercent: data.discountPercent,
+        message: `Cupão aplicado: -${data.discountPercent}%`,
+      });
+    } catch (err) {
+      console.error(err);
+      setCouponResult({
+        valid: false,
+        message: 'Erro ao validar cupão.',
+      });
+    } finally {
+      setCouponStatus('idle');
+    }
+  };
+
   const handleBuyTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     setBuyStatus('loading');
@@ -64,6 +140,7 @@ export const TicketPurchaseModal: React.FC = () => {
         body: JSON.stringify({
           ticketTypeId: ticketData.id,
           quantity: 1,
+          couponCode: couponResult?.valid ? ticketForm.couponCode.trim().toUpperCase() : '',
           formData: {
             attendee_first_name: ticketForm.firstName.trim(),
             attendee_last_name: ticketForm.lastName.trim(),
@@ -94,11 +171,7 @@ export const TicketPurchaseModal: React.FC = () => {
   };
 
   if (loadingTicket) {
-    return (
-      <div className="py-8 text-center text-gray-500">
-        A carregar informações do bilhete...
-      </div>
-    );
+    return <div className="py-8 text-center text-gray-500">A carregar informações do bilhete...</div>;
   }
 
   if (!ticketData) {
@@ -131,7 +204,10 @@ export const TicketPurchaseModal: React.FC = () => {
         type="email"
         required
         value={ticketForm.email}
-        onChange={(e) => setTicketForm({ ...ticketForm, email: e.target.value })}
+        onChange={(e) => {
+          setTicketForm({ ...ticketForm, email: e.target.value });
+          setCouponResult(null);
+        }}
       />
 
       <div>
@@ -198,6 +274,51 @@ export const TicketPurchaseModal: React.FC = () => {
           onChange={(e) => setTicketForm({ ...ticketForm, jobFunctionOther: e.target.value })}
         />
       )}
+
+      <Input
+        label="Valor"
+        value={formatCurrency(finalPrice, ticketData.currency)}
+        readOnly
+      />
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Cupom
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={ticketForm.couponCode}
+            onChange={(e) => {
+              setTicketForm({ ...ticketForm, couponCode: e.target.value.toUpperCase() });
+              setCouponResult(null);
+            }}
+            placeholder="Código do cupom"
+            className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          />
+          <button
+            type="button"
+            onClick={handleApplyCoupon}
+            disabled={couponStatus === 'loading'}
+            className="rounded-xl border border-gray-200 px-4 py-3 bg-white hover:bg-gray-50 disabled:opacity-60"
+            title="Aplicar cupom"
+            aria-label="Aplicar cupom"
+          >
+            <TicketPercent className="w-5 h-5 text-brand-orange" />
+          </button>
+        </div>
+
+        {couponResult?.message && (
+          <div
+            className={`mt-2 flex items-center gap-2 text-sm ${
+              couponResult.valid ? 'text-green-700' : 'text-red-700'
+            }`}
+          >
+            {couponResult.valid && <CheckCircle2 className="w-4 h-4" />}
+            <span>{couponResult.message}</span>
+          </div>
+        )}
+      </div>
 
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
         <Lock className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
