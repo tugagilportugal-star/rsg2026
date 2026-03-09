@@ -59,7 +59,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
       </div>
 
       <Input
-        label="E-mail (Para envio do bilhete)"
+        label="E-mail"
         type="email"
         required
         value={formData.email}
@@ -76,7 +76,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
         {/* T-Shirt Select */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tamanho da T-Shirt <span className="text-red-500">*</span>
+            Tamanho T-Shirt <span className="text-red-500">*</span>
           </label>
           <select
             required
