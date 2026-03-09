@@ -55,9 +55,9 @@ const App: React.FC = () => {
         <About />
         <Features />
 
-        <WhyAttend />
         <Program />
-        
+        <WhyAttend />
+
         <Speakers />
 
         <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
