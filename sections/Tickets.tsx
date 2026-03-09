@@ -7,20 +7,6 @@ interface TicketsProps {
 }
 
 export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
-  
-  return (
-    <Section id="tickets" className="bg-gray-50 py-24 relative overflow-hidden">
-  
-  // Função temporária para simular a compra levando à Waitlist/Formulário
-  const handleBuy = () => {
-    const waitlistElement = document.getElementById('waitlist');
-    if (waitlistElement) {
-        waitlistElement.scrollIntoView({ behavior: 'smooth' });
-        // Opcional: focar no campo de nome
-        setTimeout(() => document.getElementById('name')?.focus(), 800);
-    }
-  };
-
   return (
     <Section id="tickets" className="bg-gray-50 py-24 relative overflow-hidden">
       {/* Elementos decorativos de fundo */}
@@ -28,7 +14,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
       
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
-          Garante o teu lugar
+          Garanta o seu lugar
         </h2>
         <p className="text-gray-500 text-lg max-w-2xl mx-auto">
           Participe de uma das maiores celebrações da agilidade em Portugal. 
@@ -40,17 +26,17 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
         {/* Card Principal */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-brand-orange relative transform hover:-translate-y-1 transition-transform duration-300">
           
-          {/* Badge "Lote 1" (Estilo "Ahora" do benchmark) */}
+          {/* Badge "Lote 1" */}
           <div className="absolute top-0 right-0">
              <div className="bg-brand-orange text-white text-xs font-black uppercase py-1 px-8 transform rotate-45 translate-x-8 translate-y-4 shadow-sm">
-                Lote 1
+                Early Bird Ticket
              </div>
           </div>
 
           <div className="p-8 md:p-10 text-center">
             <div className="inline-flex items-center gap-2 bg-orange-50 text-brand-orange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
                 <Sparkles className="w-3 h-3" />
-                Early Bird Ticket
+                Early Bird
             </div>
 
             <div className="flex flex-col items-center justify-center mb-2">
@@ -62,11 +48,11 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             {/* Lista de Benefícios */}
             <ul className="space-y-4 text-left mb-10">
                 {[
-                    "Acesso completo ao evento",
+                    "Acesso completo aos 2 dias",
                     "Kit de Boas-vindas + T-Shirt Oficial",
-                    "Coffee Break Premium",
-                    "Scrum Education Units (SEUs) by Scrum Alliance", // Benefício Extra 1
-                    "Certificado de Participação Digital" // Benefício Extra 2
+                    "Coffee breaks premium",
+                    "Scrum Education Units (SEUs)",
+                    "Certificado de Participação Digital"
                 ].map((item, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-blue/10 flex items-center justify-center mt-0.5">
