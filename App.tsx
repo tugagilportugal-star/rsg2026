@@ -75,24 +75,6 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      {/* Modal: Patrocinador */}
-      <Modal
-        isOpen={isSponsorModalOpen}
-        onClose={() => setSponsorModalOpen(false)}
-        title="Torne-se um Patrocinador"
-      >
-        <SponsorForm />
-      </Modal>
-
-      {/* Modal: Apoiador */}
-      <Modal
-        isOpen={isSupporterModalOpen}
-        onClose={() => setSupporterModalOpen(false)}
-        title="Torne-se um Apoiador"
-      >
-        <SupporterForm />
-      </Modal>
-
       {/* Modal NOVO: Venda de Bilhetes */}
       <Modal
         isOpen={isTicketModalOpen}
