@@ -49,6 +49,18 @@ type TicketRow = {
   ticket_type_id?: string | null;
   attendee_name?: string | null;
   attendee_email?: string | null;
+  attendee_first_name?: string | null;
+  attendee_last_name?: string | null;
+  attendee_country?: string | null;
+  attendee_job_function?: string | null;
+  attendee_job_function_other?: string | null;
+  attendee_nif?: string | null;
+  attendee_company?: string | null;
+  attendee_job_title?: string | null;
+  attendee_tshirt?: string | null;
+  sa_data_sharing_consent?: boolean | null;
+  sa_marketing_consent?: boolean | null;
+  privacy_consent?: boolean | null;
   checked_in?: boolean | null;
   check_in_at?: string | null;
 };
@@ -611,6 +623,18 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         'ticket_type_id',
         'attendee_name',
         'attendee_email',
+        'attendee_first_name',
+        'attendee_last_name',
+        'attendee_country',
+        'attendee_job_function',
+        'attendee_job_function_other',
+        'attendee_nif',
+        'attendee_company',
+        'attendee_job_title',
+        'attendee_tshirt',
+        'sa_data_sharing_consent',
+        'sa_marketing_consent',
+        'privacy_consent',
         'checked_in',
         'check_in_at',
       ];
@@ -1050,8 +1074,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <thead className="bg-gray-50 text-left">
                   <tr>
                     <Th>Data</Th>
-                    <Th>Nome</Th>
-                    <Th>Email</Th>
+                    <Th>Participante</Th>
+                    <Th>Empresa / Cargo</Th>
+                    <Th>NIF</Th>
+                    <Th>T-Shirt</Th>
+                    <Th>Consentimentos</Th>
                     <Th>Order</Th>
                     <Th>Check-in</Th>
                   </tr>
@@ -1059,18 +1086,42 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <tbody>
                   {loadingTickets ? (
                     <tr>
-                      <Td colSpan={5}>A carregar tickets…</Td>
+                      <Td colSpan={8}>A carregar tickets…</Td>
                     </tr>
                   ) : tickets.length === 0 ? (
                     <tr>
-                      <Td colSpan={5}>Sem tickets.</Td>
+                      <Td colSpan={8}>Sem tickets.</Td>
                     </tr>
                   ) : (
                     tickets.map((row) => (
                       <tr key={row.id} className="border-t">
                         <Td>{formatDatePt(row.created_at)}</Td>
-                        <Td>{safe(row.attendee_name)}</Td>
-                        <Td>{safe(row.attendee_email)}</Td>
+                        <Td>
+                          <div className="font-medium text-gray-900">
+                            {safe(row.attendee_name) ||
+                              `${safe(row.attendee_first_name)} ${safe(row.attendee_last_name)}`.trim() ||
+                              '—'}
+                          </div>
+                          <div className="text-xs text-gray-500">{safe(row.attendee_email) || '—'}</div>
+                          <div className="text-xs text-gray-500">{safe(row.attendee_country) || '—'}</div>
+                        </Td>
+                        <Td>
+                          <div>{safe(row.attendee_company) || '—'}</div>
+                          <div className="text-xs text-gray-500">{safe(row.attendee_job_title) || '—'}</div>
+                          <div className="text-xs text-gray-500">
+                            {safe(row.attendee_job_function) || '—'}
+                            {row.attendee_job_function_other ? ` · ${safe(row.attendee_job_function_other)}` : ''}
+                          </div>
+                        </Td>
+                        <Td>{safe(row.attendee_nif) || '—'}</Td>
+                        <Td>{safe(row.attendee_tshirt) || '—'}</Td>
+                        <Td>
+                          <div className="text-xs text-gray-700">
+                            <div>Dados SA: {row.sa_data_sharing_consent ? '✔' : '—'}</div>
+                            <div>Marketing SA: {row.sa_marketing_consent ? '✔' : '—'}</div>
+                            <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
+                          </div>
+                        </Td>
                         <Td>{safe(row.order_id)}</Td>
                         <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
                       </tr>
