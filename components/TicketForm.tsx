@@ -68,7 +68,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
 
       {/* NIF com validação de 9 dígitos */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">NIF (9 dígitos)</label>
+        <label className="block text-sm font-medium text-gray-700">NIF</label>
         <input
           type="text"
           required
