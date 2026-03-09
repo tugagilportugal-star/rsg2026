@@ -34,7 +34,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
   if (status === 'success') {
     return (
       <SuccessState 
-        message="Dados validados com sucesso! Em produção, o utilizador seria redirecionado para o Stripe agora." 
+        message="Dados validados com sucesso! Em produção, o utilizador seria redirecionado para a página de pagamento agora." 
       />
     );
   }
@@ -66,12 +66,42 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
         onChange={e => setFormData({ ...formData, email: e.target.value })}
       />
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <Input
-          label="Contribuinte / NIF (Opcional)"
-          value={formData.nif}
-          onChange={e => setFormData({ ...formData, nif: e.target.value })}
-        />
+      <div>
+  <label className="block text-sm font-medium text-gray-700">NIF (9 dígitos)</label>
+  <input
+    type="text"
+    name="nif"
+    required
+    minLength={9}
+    maxLength={9}
+    pattern="\d{9}"
+    title="O NIF deve conter exatamente 9 números"
+    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+    onKeyPress={(e) => {
+      // Bloqueia qualquer tecla que não seja número
+      if (!/[0-9]/.test(e.key)) {
+        e.preventDefault();
+      }
+    }}
+  />
+</div>
+
+        {/* Exemplo de como inserir os novos campos */}
+      <div className="grid grid-cols-2 gap-4">
+      <label className="block text-sm font-medium text-gray-700">Empresa</label>
+    <input
+      type="text"
+      name="company"
+    />
+  </div>
+        
+    <div>
+    <label className="block text-sm font-medium text-gray-700">Cargo</label>
+    <input
+      type="text"
+      name="jobTitle"
+    />
+  </div>
         
         {/* T-Shirt Select */}
         <div className="mb-4">
