@@ -4,7 +4,6 @@ import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Program } from './sections/Program';
-import { WhyAttend } from './sections/WhyAttend';
 import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
@@ -47,19 +46,11 @@ const App: React.FC = () => {
       <About />
       <Features />
       <Program />
-      <WhyAttend />
       
       {/* Secção de Tickets com a função de abrir o Modal */}
       <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-      
       <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
       <Recap />
-
-      <GetInvolved
-        setSponsorModalOpen={setSponsorModalOpen}
-        setSupporterModalOpen={setSupporterModalOpen}
-      />
-
       <FAQ />
       <Team />
       <Footer />
