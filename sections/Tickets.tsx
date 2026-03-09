@@ -2,7 +2,14 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Check, Info, Sparkles, Tag } from 'lucide-react';
 
-export const Tickets: React.FC = () => {
+interface TicketsProps {
+  onOpenTicketModal: () => void;
+}
+
+export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
+  
+  return (
+    <Section id="tickets" className="bg-gray-50 py-24 relative overflow-hidden">
   
   // Função temporária para simular a compra levando à Waitlist/Formulário
   const handleBuy = () => {
@@ -71,7 +78,7 @@ export const Tickets: React.FC = () => {
             </ul>
 
             <button 
-                onClick={handleBuy}
+                onClick={onOpenTicketModal}
                 className="w-full bg-brand-orange text-white font-black text-lg py-4 rounded-xl shadow-lg hover:bg-orange-600 hover:shadow-orange-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
                 Comprar Bilhete
