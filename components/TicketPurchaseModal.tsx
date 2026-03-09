@@ -481,7 +481,7 @@ export const TicketPurchaseModal: React.FC = () => {
       <Button
         type="submit"
         isLoading={buyStatus === 'loading'}
-        className="w-full text-lg mt-6"q
+        className="w-full text-lg mt-6"
         variant="secondary"
         disabled={!ticketData.active}
       >
