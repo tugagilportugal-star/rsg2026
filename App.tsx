@@ -36,7 +36,8 @@ const App: React.FC = () => {
     }
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
-    }
+    },  
+    )}
     
   return (
     <div className="bg-white">
@@ -96,7 +97,7 @@ const App: React.FC = () => {
       <Modal
         isOpen={isTicketModalOpen}
         onClose={() => setTicketModalOpen(false)}
-        title="Registo Lote 1 (Early Bird)"
+        title="Early Bird Ticket"
       >
         <TicketForm />
       </Modal>
@@ -112,7 +113,5 @@ const App: React.FC = () => {
         />
       </Modal>
     </div>
-  );
-};
 
 export default App;
