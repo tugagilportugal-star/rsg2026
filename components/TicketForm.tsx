@@ -13,6 +13,8 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
     lastName: '',
     email: '',
     nif: '',
+    company: '',
+    jobTitle: '',
     tshirt: '',
     saConsent1: false,
     saConsent2: false,
@@ -23,8 +25,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     setStatus('loading');
 
-    // Aqui, no futuro, faremos a chamada para o Stripe Checkout.
-    // Para já, em ambiente de teste, simulamos um sucesso após 1.5s
+    // Simulação de sucesso
     setTimeout(() => {
       setStatus('success');
       if (onSuccess) onSuccess();
@@ -66,63 +67,67 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
         onChange={e => setFormData({ ...formData, email: e.target.value })}
       />
 
+      {/* NIF com validação de 9 dígitos */}
       <div>
-  <label className="block text-sm font-medium text-gray-700">NIF (9 dígitos)</label>
-  <input
-    type="text"
-    name="nif"
-    required
-    minLength={9}
-    maxLength={9}
-    pattern="\d{9}"
-    title="O NIF deve conter exatamente 9 números"
-    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-    onKeyPress={(e) => {
-      // Bloqueia qualquer tecla que não seja número
-      if (!/[0-9]/.test(e.key)) {
-        e.preventDefault();
-      }
-    }}
-  />
-</div>
+        <label className="block text-sm font-medium text-gray-700">NIF (9 dígitos)</label>
+        <input
+          type="text"
+          required
+          minLength={9}
+          maxLength={9}
+          pattern="\d{9}"
+          title="O NIF deve conter exatamente 9 números"
+          value={formData.nif}
+          onChange={e => setFormData({ ...formData, nif: e.target.value })}
+          onKeyPress={(e) => {
+            if (!/[0-9]/.test(e.key)) {
+              e.preventDefault();
+            }
+          }}
+        />
+      </div>
 
-        {/* Exemplo de como inserir os novos campos */}
+      {/* Novos campos: Empresa e Cargo */}
       <div className="grid grid-cols-2 gap-4">
-      <label className="block text-sm font-medium text-gray-700">Empresa</label>
-    <input
-      type="text"
-      name="company"
-    />
-  </div>
-        
-    <div>
-    <label className="block text-sm font-medium text-gray-700">Cargo</label>
-    <input
-      type="text"
-      name="jobTitle"
-    />
-  </div>
-        
-        {/* T-Shirt Select */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tamanho T-Shirt <span className="text-red-500">*</span>
-          </label>
-          <select
-            required
-            className="w-full bg-white text-gray-900 border-gray-300 rounded-md p-3 border shadow-sm focus:ring-brand-blue focus:border-brand-blue"
-            value={formData.tshirt}
-            onChange={e => setFormData({ ...formData, tshirt: e.target.value })}
-          >
-            <option value="" disabled>Selecione um tamanho...</option>
-            <option value="XS">XS (Extra Small)</option>
-            <option value="S">S (Small)</option>
-            <option value="M">M (Medium)</option>
-            <option value="L">L (Large)</option>
-            <option value="XL">XL (Extra Large)</option>
-            <option value="XXL">XXL (Double Extra Large)</option>
-          </select>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Empresa</label>
+          <input
+            type="text"
+            value={formData.company}
+            onChange={e => setFormData({ ...formData, company: e.target.value })}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          />
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Cargo</label>
+          <input
+            type="text"
+            value={formData.jobTitle}
+            onChange={e => setFormData({ ...formData, jobTitle: e.target.value })}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          />
+        </div>
+      </div>
+        
+      {/* T-Shirt Select */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Tamanho T-Shirt <span className="text-red-500">*</span>
+        </label>
+        <select
+          required
+          className="w-full bg-white text-gray-900 border-gray-300 rounded-md p-3 border shadow-sm focus:ring-brand-blue focus:border-brand-blue"
+          value={formData.tshirt}
+          onChange={e => setFormData({ ...formData, tshirt: e.target.value })}
+        >
+          <option value="" disabled>Selecione um tamanho...</option>
+          <option value="XS">XS (Extra Small)</option>
+          <option value="S">S (Small)</option>
+          <option value="M">M (Medium)</option>
+          <option value="L">L (Large)</option>
+          <option value="XL">XL (Extra Large)</option>
+          <option value="XXL">XXL (Double Extra Large)</option>
+        </select>
       </div>
 
       {/* Separador Legal */}
@@ -133,7 +138,6 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="space-y-4">
-          {/* RGPD Scrum Alliance 1 (Obrigatório) */}
           <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
             <input
               id="saConsent1"
@@ -144,14 +148,10 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
             />
             <label htmlFor="saConsent1" className="ml-3 text-xs text-gray-600 leading-relaxed">
-              <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil) pode compartilhar as minhas informações pessoais com a Scrum Alliance exclusivamente para fins de análise de dados internos da Scrum Alliance. Também concordo em receber e-mails da Scrum Alliance sobre eventos ágeis, oportunidades de aprendizagem e outros tópicos relacionados.{' '}
-              <a href="https://www.scrumalliance.org/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
-                Política de Privacidade da Scrum Alliance
-              </a>.
+              <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil) pode compartilhar as minhas informações pessoais com a Scrum Alliance exclusivamente para fins de análise de dados internos da Scrum Alliance...
             </label>
           </div>
 
-          {/* RGPD Scrum Alliance 2 (Opcional) */}
           <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
             <input
               id="saConsent2"
@@ -161,15 +161,10 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
               className="mt-1 h-4 w-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue"
             />
             <label htmlFor="saConsent2" className="ml-3 text-xs text-gray-600 leading-relaxed">
-              Gostava de uma assinatura gratuita de 2 anos da Scrum Alliance*! Para permitir que a Scrum Alliance me envie um convite por e-mail para ativar a minha assinatura, concordo com a transferência das minhas informações pessoais pelos organizadores deste evento para a Scrum Alliance, Inc., uma organização sem fins lucrativos localizada nos Estados Unidos, e com o processamento das minhas informações pessoais pela Scrum Alliance.{' '}
-              <a href="https://www.scrumalliance.org/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
-                Política de Privacidade da Scrum Alliance
-              </a>.
-              <br/><span className="text-gray-400 mt-1 block">*Oferta não disponível para quem já possui uma assinatura ativa da Scrum Alliance.</span>
+              Gostava de uma assinatura gratuita de 2 anos da Scrum Alliance*!
             </label>
           </div>
 
-          {/* Políticas de Privacidade RSG/TugÁgil (Obrigatório) */}
           <div className="flex items-start">
             <input
               id="privacy"
@@ -180,10 +175,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
             />
             <label htmlFor="privacy" className="ml-3 text-sm text-gray-600">
-              <span className="font-bold text-red-500">*</span> Aceito a{' '}
-              <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?tab=t.0#heading=h.pqcupvajo6ql" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
-                Política de Privacidade
-              </a> do evento.
+              <span className="font-bold text-red-500">*</span> Aceito a Política de Privacidade do evento.
             </label>
           </div>
         </div>
