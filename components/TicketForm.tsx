@@ -59,7 +59,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
       </div>
 
       <Input
-        label="E-mail"
+        label="E-mail (Para envio do bilhete)"
         type="email"
         required
         value={formData.email}
@@ -85,12 +85,12 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
             onChange={e => setFormData({ ...formData, tshirt: e.target.value })}
           >
             <option value="" disabled>Selecione um tamanho...</option>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="XXL">XXL</option>
+            <option value="XS">XS (Extra Small)</option>
+            <option value="S">S (Small)</option>
+            <option value="M">M (Medium)</option>
+            <option value="L">L (Large)</option>
+            <option value="XL">XL (Extra Large)</option>
+            <option value="XXL">XXL (Double Extra Large)</option>
           </select>
         </div>
       </div>
