@@ -7,6 +7,7 @@ import { Program } from './sections/Program';
 import { WhyAttend } from './sections/WhyAttend';
 import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
+import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { Recap } from './sections/Recap';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
@@ -75,6 +76,24 @@ const App: React.FC = () => {
         </button>
       </div>
 
+      {/* Modal: Patrocinador */}
+      <Modal
+        isOpen={isSponsorModalOpen}
+        onClose={() => setSponsorModalOpen(false)}
+        title="Torne-se um Patrocinador"
+      >
+        <SponsorForm />
+      </Modal>
+
+      {/* Modal: Apoiador */}
+      <Modal
+        isOpen={isSupporterModalOpen}
+        onClose={() => setSupporterModalOpen(false)}
+        title="Torne-se um Apoiador"
+      >
+        <SupporterForm />
+      </Modal>
+      
       {/* Modal NOVO: Venda de Bilhetes */}
       <Modal
         isOpen={isTicketModalOpen}
