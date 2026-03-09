@@ -79,6 +79,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
           title="O NIF deve conter exatamente 9 números"
           value={formData.nif}
           onChange={e => setFormData({ ...formData, nif: e.target.value })}
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
           onKeyPress={(e) => {
             if (!/[0-9]/.test(e.key)) {
               e.preventDefault();
@@ -138,6 +139,7 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="space-y-4">
+          {/* RGPD Scrum Alliance 1 (Obrigatório) */}
           <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
             <input
               id="saConsent1"
@@ -148,10 +150,11 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
             />
             <label htmlFor="saConsent1" className="ml-3 text-xs text-gray-600 leading-relaxed">
-              <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil) pode compartilhar as minhas informações pessoais com a Scrum Alliance exclusivamente para fins de análise de dados internos da Scrum Alliance...
+              <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil) pode partilhar as minhas informações pessoais com a Scrum Alliance exclusivamente para fins de análise de dados internos da Scrum Alliance. Também concordo em receber e-mails da Scrum Alliance sobre eventos ágeis, oportunidades de aprendizagem e outros tópicos relacionados. Consulte a <a href="https://www.scrumalliance.org/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">Política de Privacidade da Scrum Alliance</a>.
             </label>
           </div>
 
+          {/* RGPD Scrum Alliance 2 (Opcional) */}
           <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
             <input
               id="saConsent2"
@@ -161,10 +164,12 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
               className="mt-1 h-4 w-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue"
             />
             <label htmlFor="saConsent2" className="ml-3 text-xs text-gray-600 leading-relaxed">
-              Gostava de uma assinatura gratuita de 2 anos da Scrum Alliance*!
+              Gostava de uma assinatura gratuita de 2 anos da Scrum Alliance*! Para permitir que a Scrum Alliance envie-me um convite por e-mail para ativar a minha assinatura, concordo com a transferência das minhas informações pessoais pelos organizadores deste evento para a Scrum Alliance, Inc. Consulte a <a href="https://www.scrumalliance.org/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">Política de Privacidade da Scrum Alliance</a>.
+              <br/><span className="text-gray-400 mt-1 block">*Oferta não disponível para quem já possui uma assinatura ativa da Scrum Alliance.</span>
             </label>
           </div>
 
+          {/* Políticas de Privacidade TugÁgil (Obrigatório) */}
           <div className="flex items-start">
             <input
               id="privacy"
@@ -175,16 +180,8 @@ export const TicketForm: React.FC<TicketFormProps> = ({ onSuccess }) => {
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
             />
             <label htmlFor="privacy" className="ml-3 text-sm text-gray-600">
-              <span className="font-bold text-red-500">*</span> Aceito a Política de Privacidade do evento.
+              <span className="font-bold text-red-500">*</span> Estou de acordo com a <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">Política de Privacidade de Dados</a> do evento.
             </label>
           </div>
         </div>
       </div>
-
-      <Button type="submit" isLoading={status === 'loading'} className="w-full text-lg mt-6">
-        <Ticket className="w-5 h-5 mr-2" />
-        Avançar para Pagamento
-      </Button>
-    </form>
-  );
-};
