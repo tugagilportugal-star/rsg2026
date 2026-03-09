@@ -17,6 +17,8 @@ import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved'
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
+import { Program } from './sections/Program';
+import { WhyAttend } from './sections/WhyAttend';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
@@ -58,7 +60,10 @@ const App: React.FC = () => {
 
         <Recap />
 
-        <Tickets onBuyClick={() => setTicketModalOpen(true)} />
+        <Program />
+        <WhyAttend />
+
+        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
 
         <GetInvolved
           setSponsorModalOpen={setSponsorModalOpen}
