@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Input } from './UIComponents';
-import { CheckCircle2, Lock, TicketPercent } from 'lucide-react';
+import { CheckCircle2, Lock, ShieldCheck, Ticket, TicketPercent } from 'lucide-react';
 
 type TicketTypeData = {
   id: string;
@@ -25,10 +25,17 @@ export const TicketPurchaseModal: React.FC = () => {
     firstName: '',
     lastName: '',
     email: '',
+    nif: '',
+    company: '',
+    jobTitle: '',
+    tshirt: '',
     country: 'Portugal',
     jobFunction: '',
     jobFunctionOther: '',
     couponCode: '',
+    saConsent1: false,
+    saConsent2: false,
+    privacy: false,
   });
 
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
@@ -151,6 +158,13 @@ export const TicketPurchaseModal: React.FC = () => {
               ticketForm.jobFunction === 'Outros'
                 ? ticketForm.jobFunctionOther.trim()
                 : '',
+            attendee_nif: ticketForm.nif.trim(),
+            attendee_company: ticketForm.company.trim(),
+            attendee_job_title: ticketForm.jobTitle.trim(),
+            attendee_tshirt: ticketForm.tshirt,
+            sa_consent_1: ticketForm.saConsent1,
+            sa_consent_2: ticketForm.saConsent2,
+            privacy_consent: ticketForm.privacy,
           },
         }),
       });
@@ -183,10 +197,10 @@ export const TicketPurchaseModal: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleBuyTicket} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleBuyTicket} className="space-y-5 text-left">
+      <div className="grid grid-cols-2 gap-4">
         <Input
-          label="Primeiro Nome"
+          label="Nome"
           required
           value={ticketForm.firstName}
           onChange={(e) => setTicketForm({ ...ticketForm, firstName: e.target.value })}
@@ -211,13 +225,53 @@ export const TicketPurchaseModal: React.FC = () => {
       />
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          País
-        </label>
+        <label className="block text-sm font-medium text-gray-700">NIF</label>
+        <input
+          type="text"
+          required
+          minLength={9}
+          maxLength={9}
+          pattern="\d{9}"
+          title="O NIF deve conter exatamente 9 números"
+          value={ticketForm.nif}
+          onChange={(e) => setTicketForm({ ...ticketForm, nif: e.target.value })}
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          placeholder="Ex: 808392190"
+          onKeyPress={(e) => {
+            if (!/[0-9]/.test(e.key)) {
+              e.preventDefault();
+            }
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Empresa</label>
+          <input
+            type="text"
+            value={ticketForm.company}
+            onChange={(e) => setTicketForm({ ...ticketForm, company: e.target.value })}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Cargo</label>
+          <input
+            type="text"
+            value={ticketForm.jobTitle}
+            onChange={(e) => setTicketForm({ ...ticketForm, jobTitle: e.target.value })}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">País</label>
         <select
           value={ticketForm.country}
           onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
-          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
         >
           <option>Portugal</option>
           <option>Espanha</option>
@@ -231,9 +285,7 @@ export const TicketPurchaseModal: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Função de trabalho
-        </label>
+        <label className="block text-sm font-medium text-gray-700">Função de trabalho</label>
         <select
           value={ticketForm.jobFunction}
           onChange={(e) =>
@@ -243,7 +295,7 @@ export const TicketPurchaseModal: React.FC = () => {
               jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
             })
           }
-          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
         >
           <option value="">Seleciona…</option>
           <option>Atendimento ao Cliente</option>
@@ -275,6 +327,26 @@ export const TicketPurchaseModal: React.FC = () => {
         />
       )}
 
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Tamanho T-Shirt <span className="text-red-500">*</span>
+        </label>
+        <select
+          required
+          className="w-full bg-white text-gray-900 border-gray-300 rounded-md p-3 border shadow-sm focus:ring-brand-blue focus:border-brand-blue"
+          value={ticketForm.tshirt}
+          onChange={(e) => setTicketForm({ ...ticketForm, tshirt: e.target.value })}
+        >
+          <option value="" disabled>Selecione um tamanho...</option>
+          <option value="XS">XS (Extra Small)</option>
+          <option value="S">S (Small)</option>
+          <option value="M">M (Medium)</option>
+          <option value="L">L (Large)</option>
+          <option value="XL">XL (Extra Large)</option>
+          <option value="XXL">XXL (Double Extra Large)</option>
+        </select>
+      </div>
+
       <Input
         label="Valor"
         value={formatCurrency(finalPrice, ticketData.currency)}
@@ -282,9 +354,7 @@ export const TicketPurchaseModal: React.FC = () => {
       />
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-          Cupom
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Cupom</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -294,13 +364,13 @@ export const TicketPurchaseModal: React.FC = () => {
               setCouponResult(null);
             }}
             placeholder="Código do cupom"
-            className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-orange"
+            className="flex-1 block border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
           />
           <button
             type="button"
             onClick={handleApplyCoupon}
             disabled={couponStatus === 'loading'}
-            className="rounded-xl border border-gray-200 px-4 py-3 bg-white hover:bg-gray-50 disabled:opacity-60"
+            className="rounded-md border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 disabled:opacity-60"
             title="Aplicar cupom"
             aria-label="Aplicar cupom"
           >
@@ -320,21 +390,103 @@ export const TicketPurchaseModal: React.FC = () => {
         )}
       </div>
 
+      <div className="pt-4 mt-6 border-t border-gray-100">
+        <div className="flex items-center gap-2 mb-4 text-brand-darkBlue font-bold text-sm uppercase tracking-wider">
+          <ShieldCheck className="w-4 h-4 text-brand-orange" />
+          Termos & Privacidade
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <input
+              id="saConsent1"
+              type="checkbox"
+              required
+              checked={ticketForm.saConsent1}
+              onChange={(e) => setTicketForm({ ...ticketForm, saConsent1: e.target.checked })}
+              className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
+            />
+            <label htmlFor="saConsent1" className="ml-3 text-xs text-gray-600 leading-relaxed">
+              <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil)
+              pode partilhar as minhas informações pessoais com a Scrum Alliance exclusivamente
+              para fins de análise de dados internos da Scrum Alliance. Também concordo em receber
+              e-mails da Scrum Alliance sobre eventos ágeis, oportunidades de aprendizado e outros
+              tópicos relacionados. Consulte a{' '}
+              <a
+                href="https://www.scrumalliance.org/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-blue font-bold hover:underline"
+              >
+                Política de Privacidade da Scrum Alliance
+              </a>.
+            </label>
+          </div>
+
+          <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <input
+              id="saConsent2"
+              type="checkbox"
+              checked={ticketForm.saConsent2}
+              onChange={(e) => setTicketForm({ ...ticketForm, saConsent2: e.target.checked })}
+              className="mt-1 h-4 w-4 text-brand-blue border-gray-300 rounded focus:ring-brand-blue"
+            />
+            <label htmlFor="saConsent2" className="ml-3 text-xs text-gray-600 leading-relaxed">
+              Gostava de uma assinatura gratuita de 2 anos da Scrum Alliance*! Para permitir que a
+              Scrum Alliance me envie um convite por e-mail para ativar minha assinatura, concordo
+              com a transferência das minhas informações pessoais pelos organizadores deste evento
+              para a Scrum Alliance, Inc., e com o processamento das minhas informações pessoais pela
+              Scrum Alliance, de acordo com a{' '}
+              <a
+                href="https://www.scrumalliance.org/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-blue font-bold hover:underline"
+              >
+                Política de Privacidade da Scrum Alliance
+              </a>.
+            </label>
+          </div>
+
+          <div className="flex items-start">
+            <input
+              id="privacy"
+              type="checkbox"
+              required
+              checked={ticketForm.privacy}
+              onChange={(e) => setTicketForm({ ...ticketForm, privacy: e.target.checked })}
+              className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
+            />
+            <label htmlFor="privacy" className="ml-3 text-sm text-gray-600">
+              <span className="font-bold text-red-500">*</span> Estou de acordo com a{' '}
+              <a
+                href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-blue font-bold hover:underline"
+              >
+                Política de Privacidade de Dados
+              </a>{' '}
+              do evento.
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
         <Lock className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-gray-600">
-          Pagamento seguro via Stripe
-        </p>
+        <p className="text-sm text-gray-600">Pagamento seguro via Stripe</p>
       </div>
 
       <Button
         type="submit"
         isLoading={buyStatus === 'loading'}
-        className="w-full"
+        className="w-full text-lg mt-6"
         variant="secondary"
         disabled={!ticketData.active}
       >
-        {ticketData.active ? 'Continuar para Pagamento' : 'Lote Indisponível'}
+        <Ticket className="w-5 h-5 mr-2" />
+        {ticketData.active ? 'Avançar para Pagamento' : 'Lote Indisponível'}
       </Button>
     </form>
   );
