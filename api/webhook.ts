@@ -1,105 +1,67 @@
-// api/webhook.ts
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-
 import { issueInvoiceForOrder } from '../lib/invoicing/index.js';
 import type { InvoiceEmailData } from '../lib/invoicing/types.js';
 
 // ==================================================================
 // 1) EMAIL - BILHETE
 // ==================================================================
-const generateTicketEmail = (name: string, ticketName: string, qrUrl: string, ticketId: string) => `
-<!DOCTYPE html>
-<html>
-  <body style="font-family: sans-serif; background: #f4f4f5; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      <h1 style="color: #003F59; font-size: 24px; margin-bottom: 10px;">Olá, ${name}!</h1>
-      <p style="color: #666; font-size: 16px; line-height: 1.5;">O teu lugar no <strong>Regional Scrum Gathering Lisbon 2026</strong> está garantido.</p>
+const generateTicketEmail = (
+  name: string,
+  ticketName: string,
+  qrUrl: string,
+  ticketId: string
+) => `
+# Olá, ${name}!
 
-      <div style="border: 2px dashed #e5e7eb; padding: 20px; border-radius: 8px; margin: 30px 0; background: #fafafa;">
-        <p style="font-weight: bold; color: #003F59; margin: 0; font-size: 18px;">${ticketName}</p>
-        <p style="color: #888; font-size: 12px; margin: 5px 0 15px 0;">ID: ${ticketId}</p>
+O teu lugar no Regional Scrum Gathering Lisbon 2026 está garantido.
 
-        <img src="${qrUrl}" alt="QR Code" width="200" height="200" style="display:block; margin: 0 auto;" />
+${ticketName}
 
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">
-          Apresenta este código na entrada do evento.
-        </p>
-      </div>
+ID: ${ticketId}
 
-      <p style="color: #666; font-size: 14px;">
-        Estamos ansiosos para te ver em Lisboa!
-        <br/>A tua fatura foi emitida e enviada num e-mail separado.
-      </p>
+Apresenta este código na entrada do evento.
 
-      <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-        <p style="color: #999; font-size: 12px; margin: 0;">Enviado por TugÁgil • RSG Lisbon 2026</p>
-      </div>
-    </div>
-  </body>
-</html>
+Estamos ansiosos para te ver em Lisboa!
+A tua fatura foi emitida e enviada num e-mail separado.
+
+Enviado por TugÁgil • RSG Lisbon 2026
 `;
 
 // ==================================================================
 // 2) EMAIL - FATURA (ANEXO PDF)
 // ==================================================================
 const generateInvoiceEmail = (d: InvoiceEmailData) => `
-<!DOCTYPE html>
-<html lang="pt-PT">
-  <body style="margin:0; padding:0; background:#f4f4f5; font-family: Arial, Helvetica, sans-serif;">
-    <div style="padding:24px;">
-      <div style="max-width:640px; margin:0 auto;">
+Regional Scrum Gathering Lisbon 2026
 
-        <div style="font-weight:700; font-size:18px; color:#003F59;">
-          Regional Scrum Gathering Lisbon 2026
-        </div>
+A tua fatura está pronta
 
-        <div style="background:#ffffff; border-radius:14px; margin-top:16px; overflow:hidden;">
-          <div style="background:#003F59; padding:18px; color:#ffffff;">
-            <strong>A tua fatura está pronta 🧾</strong>
-          </div>
+Olá, ${d.name},
 
-          <div style="padding:22px; font-size:14px; color:#374151;">
-            <p>Olá, <strong>${d.name}</strong>,</p>
+Segue em anexo a fatura referente à tua compra do bilhete para o Regional Scrum Gathering Lisbon 2026.
 
-            <p>
-              Segue em anexo a fatura referente à tua compra do bilhete para o
-              <strong>Regional Scrum Gathering Lisbon 2026</strong>.
-            </p>
+Resumo
 
-            <div style="background:#fafafa; border-radius:10px; padding:14px; margin:16px 0;">
-              <p><strong>Resumo</strong></p>
-              <p>Bilhete: ${d.ticketName}</p>
-              <p>Nº do documento: #${d.invoiceId}</p>
-              <p>Total: ${d.total} €</p>
-            </div>
+Bilhete: ${d.ticketName}
 
-            ${
-              d.isTest
-                ? `<div style="background:#fffbeb; border-left:4px solid #f59e0b; padding:12px; border-radius:8px; font-size:12px;">
-                     <strong>Nota:</strong> Este documento foi gerado em ambiente de testes e não tem validade fiscal.
-                   </div>`
-                : ''
-            }
+Nº do documento: #${d.invoiceId}
 
-            <p style="margin-top:16px;">
-              Se tiveres alguma dúvida, responde a este email.
-            </p>
+Total: ${d.total} €
+${
+  d.isTest
+    ? `
+Nota: Este documento foi gerado em ambiente de testes e não tem validade fiscal.
+`
+    : ''
+}
 
-            <p style="font-size:12px; color:#6b7280; margin-top:24px;">
-              TugÁgil • RSG Lisbon 2026
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>
+Se tiveres alguma dúvida, responde a este email.
+
+TugÁgil • RSG Lisbon 2026
 `;
 
-// precisa estar abaixo de `resend`, então deixamos como function (hoisted)
 async function sendInvoicePdfByEmailResend(params: {
   to: string;
   pdfBytes: Buffer;
@@ -112,7 +74,7 @@ async function sendInvoicePdfByEmailResend(params: {
   const { to, pdfBytes, invoiceId, name, ticketName, total, isTest } = params;
 
   return resend.emails.send({
-    from: 'RSG Lisbon <onboarding@resend.dev>',
+    from: 'RSG Lisbon <noreply@updates.tugagil.com>',
     to,
     subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
     html: generateInvoiceEmail({ name, ticketName, invoiceId, total, isTest }),
@@ -128,7 +90,9 @@ async function sendInvoicePdfByEmailResend(params: {
 // ==================================================================
 // 3) CONFIG GERAL
 // ==================================================================
-export const config = { api: { bodyParser: false } };
+export const config = {
+  api: { bodyParser: false },
+};
 
 async function buffer(readable: any) {
   const chunks: Buffer[] = [];
@@ -138,8 +102,15 @@ async function buffer(readable: any) {
   return Buffer.concat(chunks);
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: '2023-10-16' });
-const supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: '2023-10-16',
+});
+
+const supabase = createClient(
+  process.env.SUPABASE_URL as string,
+  process.env.SUPABASE_SERVICE_ROLE_KEY as string
+);
+
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
 function stripeIsTestMode(): boolean {
@@ -151,16 +122,27 @@ function stripeIsTestMode(): boolean {
 // 4) HANDLER
 // ==================================================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log('🔔 Webhook hit', { ts: new Date().toISOString(), method: req.method, url: (req as any).url });
+  console.log('🔔 Webhook hit', {
+    ts: new Date().toISOString(),
+    method: req.method,
+    url: (req as any).url,
+  });
 
-  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
 
   let event: Stripe.Event;
 
   try {
     const buf = await buffer(req);
     const sig = req.headers['stripe-signature'] as string;
-    event = stripe.webhooks.constructEvent(buf, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
+
+    event = stripe.webhooks.constructEvent(
+      buf,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET as string
+    );
   } catch (err: any) {
     console.error(`❌ Signature Error: ${err.message}`);
     return res.status(400).send('Webhook Error');
@@ -171,66 +153,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
-  console.log(`💰 Processando Order: ${session.id}`);
+  console.log(`🧾 Processando Order: ${session.id}`);
 
   try {
-    const meta = (session.metadata || {}) as any;
-    const ticketTypeId = meta?.ticket_type_id as string | undefined;
-    const qty = Number(meta?.quantity || 1); // fallback 1
+    const meta = (session.metadata || {}) as Record<string, string | undefined>;
 
-    // País do comprador (ISO, ex: "PT"). Preferimos o que vem do Stripe, com fallback para metadata.
+    const ticketTypeId = meta.ticket_type_id;
+    const qty = Number(meta.quantity || 1);
+
+    const couponCode = String(meta.coupon_code || '')
+      .trim()
+      .toUpperCase();
+    const couponSingleUse =
+      String(meta.coupon_single_use || '').trim().toLowerCase() === 'true';
+
+    // País do comprador (ISO, ex: "PT")
     const customerCountryIso =
       session.customer_details?.address?.country ||
-      meta?.attendee_country ||
-      meta?.country ||
+      meta.attendee_country ||
+      meta.country ||
       'PT';
 
     // -----------------------------
-    // Normalização dos novos campos
+    // Normalização dos campos
     // -----------------------------
     const attendeeFirstName =
-      meta?.attendee_first_name ||
-      meta?.firstName ||
-      meta?.first_name ||
+      meta.attendee_first_name ||
+      meta.firstName ||
+      meta.first_name ||
       null;
 
     const attendeeLastName =
-      meta?.attendee_last_name ||
-      meta?.lastName ||
-      meta?.last_name ||
+      meta.attendee_last_name ||
+      meta.lastName ||
+      meta.last_name ||
       null;
 
     const attendeeCountry =
-      meta?.attendee_country ||
-      meta?.country ||
+      meta.attendee_country ||
+      meta.country ||
       null;
 
     const attendeeJobFunction =
-      meta?.attendee_job_function ||
-      meta?.jobFunctionFinal ||
-      meta?.jobFunction ||
+      meta.attendee_job_function ||
+      meta.jobFunctionFinal ||
+      meta.jobFunction ||
       null;
 
     const attendeeJobFunctionOther =
-      meta?.attendee_job_function_other ||
-      meta?.jobFunctionOther ||
+      meta.attendee_job_function_other ||
+      meta.jobFunctionOther ||
       null;
 
-    // Compatibilidade (campos antigos)
     const attendeeCompany =
-      meta?.attendee_company ||
-      meta?.company ||
+      meta.attendee_company ||
+      meta.company ||
       null;
 
     const attendeePhone =
-      meta?.attendee_phone ||
-      meta?.phone ||
+      meta.attendee_phone ||
+      meta.phone ||
       null;
 
-    // Nome completo (compatível com UI/relatórios)
     const attendeeName =
-      meta?.attendee_name ||
-      meta?.name ||
+      meta.attendee_name ||
+      meta.name ||
       [attendeeFirstName, attendeeLastName].filter(Boolean).join(' ').trim() ||
       session.customer_details?.name ||
       null;
@@ -249,41 +236,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .select()
       .single();
 
-    if (orderErr) throw new Error(`DB Order Error: ${orderErr.message}`);
+    if (orderErr) {
+      throw new Error(`DB Order Error: ${orderErr.message}`);
+    }
 
     // 2) Salvar Ticket
     const { data: ticket, error: ticketErr } = await supabase
       .from('tickets')
       .insert({
         order_id: order.id,
-        ticket_type_id: meta.ticket_type_id,
-
-        // antigos (mantém compatibilidade)
+        ticket_type_id: ticketTypeId,
         attendee_name: attendeeName,
         attendee_email: session.customer_details?.email,
         attendee_company: attendeeCompany,
         attendee_phone: attendeePhone,
-
-        // novos campos do formulário
         attendee_first_name: attendeeFirstName,
         attendee_last_name: attendeeLastName,
         attendee_country: attendeeCountry,
         attendee_job_function: attendeeJobFunction,
         attendee_job_function_other: attendeeJobFunctionOther,
-
         checked_in: false,
       })
       .select()
       .single();
 
-    if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+    if (ticketErr) {
+      throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+    }
 
     // 2.1) Atualizar contador do lote e ativar próximo (se esgotou)
     if (ticketTypeId) {
-      const { data: consumeRes, error: consumeErr } = await supabase.rpc('consume_ticket_type', {
-        p_ticket_type_id: ticketTypeId,
-        p_qty: qty,
-      });
+      const { data: consumeRes, error: consumeErr } = await supabase.rpc(
+        'consume_ticket_type',
+        {
+          p_ticket_type_id: ticketTypeId,
+          p_qty: qty,
+        }
+      );
 
       if (consumeErr) {
         console.error('⚠️ consume_ticket_type RPC error:', consumeErr.message);
@@ -291,18 +280,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log('🎟️ consume_ticket_type result:', consumeRes);
       }
     } else {
-      console.warn('⚠️ ticket_type_id não encontrado no metadata; não atualizei quantity_sold.');
+      console.warn(
+        '⚠️ ticket_type_id não encontrado no metadata; não atualizei quantity_sold.'
+      );
     }
 
+    // 2.2) Desativar cupão single_use após pagamento confirmado
+    if (couponCode && couponSingleUse) {
+      const { error: couponErr } = await supabase
+        .from('discount_coupons')
+        .update({
+          active: false,
+          used_at: new Date().toISOString(),
+          used_by_order_id: order.id,
+        })
+        .eq('code', couponCode)
+        .eq('active', true);
+
+      if (couponErr) {
+        console.error('⚠️ Coupon deactivate error:', couponErr.message);
+      } else {
+        console.log(`✅ Cupão ${couponCode} desativado após pagamento confirmado.`);
+      }
+    }
 
     // 3) Buscar nome do Bilhete
     let ticketName = 'Ingresso RSG 2026';
+
     if (ticketTypeId) {
-      const { data: type } = await supabase.from('ticket_types').select('name').eq('id', meta.ticket_type_id).single();
-      if (type) ticketName = type.name;
+      const { data: type } = await supabase
+        .from('ticket_types')
+        .select('name')
+        .eq('id', ticketTypeId)
+        .single();
+
+      if (type) {
+        ticketName = type.name;
+      }
     }
 
-    // 4) Faturação via Provider (InvoiceXpress OU Bill.pt)
+    // 4) Faturação via Provider
     const amountEuro = (order.total_amount || 0) / 100;
     const isTest = stripeIsTestMode();
 
@@ -316,9 +333,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     if (invoiceResult?.invoiceId) {
-      await supabase.from('orders').update({ invoice_id: invoiceResult.invoiceId }).eq('id', order.id);
+      await supabase
+        .from('orders')
+        .update({ invoice_id: invoiceResult.invoiceId })
+        .eq('id', order.id);
 
-      // Se o provider devolveu PDF, enviamos por email (end-to-end)
       if (invoiceResult.pdfBytes) {
         const sendRes = await sendInvoicePdfByEmailResend({
           to: order.customer_email,
@@ -330,23 +349,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           isTest,
         });
 
-        if ((sendRes as any)?.error) console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
-        else console.log('📩 Email com PDF da fatura enviado.');
+        if ((sendRes as any)?.error) {
+          console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
+        } else {
+          console.log('📧 Email com PDF da fatura enviado.');
+        }
       }
     }
 
     // 5) Email do bilhete
-    const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(ticket.qr_code_secret)}&dark=003F59&size=300&margin=1`;
+    const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
+      ticket.qr_code_secret
+    )}&dark=003F59&size=300&margin=1`;
 
     const emailRes = await resend.emails.send({
-      from: 'RSG Lisbon <onboarding@resend.dev>',
+      from: 'RSG Lisbon <noreply@updates.tugagil.com>',
       to: session.customer_details?.email as string,
       subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
-      html: generateTicketEmail(attendeeName || 'Participante', ticketName, qrUrl, ticket.id),
+      html: generateTicketEmail(
+        attendeeName || 'Participante',
+        ticketName,
+        qrUrl,
+        ticket.id
+      ),
     });
 
-    if (emailRes.error) console.error('⚠️ Resend Error:', emailRes.error);
-    else console.log('📧 Email enviado.');
+    if (emailRes.error) {
+      console.error('⚠️ Resend Error:', emailRes.error);
+    } else {
+      console.log('📧 Email enviado.');
+    }
 
     return res.json({ received: true });
   } catch (err: any) {
