@@ -105,7 +105,6 @@ const App: React.FC = () => {
         />
       </Modal>
     </div>
-); // Fecha o return
-}; // FECHA O COMPONENTE APP (Faltava esta chave!)
-
+);
+};
 export default App;
