@@ -36,11 +36,12 @@ const App: React.FC = () => {
     }
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
-    },  
-    )}
-    
+    }
+  }, []); // Aqui fechamos o useEffect corretamente com o array de dependências vazio.
+
   return (
     <div className="bg-white">
+      {/* ... resto do seu código ... */}
       <Navbar />
       <Hero />
       <About />
@@ -113,5 +114,7 @@ const App: React.FC = () => {
         />
       </Modal>
     </div>
+); // Fecha o return
+}; // FECHA O COMPONENTE APP (Faltava esta chave!)
 
 export default App;
