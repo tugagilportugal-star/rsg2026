@@ -86,10 +86,10 @@ export const Navbar: React.FC = () => {
               </div>
 
               <a
-                href="#waitlist"
+                href="#tickets"
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5"
               >
-                Waitlist
+                Buy Ticket
               </a>
             </div>
 
