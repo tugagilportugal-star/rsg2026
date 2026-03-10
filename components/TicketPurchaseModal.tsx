@@ -27,6 +27,7 @@ export const TicketPurchaseModal: React.FC = () => {
     email: '',
     nif: '',
     company: '',
+    jobTitle: '',
     jobFunction: '',
     jobFunctionOther: '',
     country: 'Portugal',
