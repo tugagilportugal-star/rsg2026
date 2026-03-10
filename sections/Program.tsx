@@ -126,10 +126,10 @@ export const Program: React.FC = () => {
                         </p>
 
                         <button 
-                            onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+                            onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
                             className="group inline-flex items-center gap-3 bg-white text-brand-darkBlue px-8 py-3 rounded-full font-bold hover:bg-brand-orange hover:text-white transition-all duration-300 shadow-lg"
                         >
-                            Garanta o seu lugar na Waitlist
+                            Garanta o seu lugar
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
                     </div>
