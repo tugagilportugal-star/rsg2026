@@ -136,7 +136,6 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
           </p>
           
           <div className="text-center mt-12 flex items-center justify-center gap-2 text-gray-400 text-sm">
-         <Info className="w-4 h-4" />
          <span>Fatura com contribuinte disponível no momento da compra.</span>
       </div>
           
