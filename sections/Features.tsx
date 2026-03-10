@@ -51,7 +51,7 @@ export const Features: React.FC = () => {
           O que esperar em 2026?
         </h2>
         <p className="text-xl md:text-2xl text-gray-600 max-w-5xl mx-auto font-medium leading-relaxed">
-          Estamos a desenhar uma experiência<span className="text-brand-orange font-bold">feita de pessoas para pessoas</span>. 
+          Estamos a desenhar uma experiência<span className="text-brand-orange font-bold"> feita de pessoas para pessoas</span>. 
           É muito mais do que um evento: é um <span className="text-brand-blue font-bold">catalisador de mudança</span> para a sua carreira e para a sua organização.
         </p>
       </div>
