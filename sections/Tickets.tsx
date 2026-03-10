@@ -131,13 +131,9 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </button>
           </div>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
+          <p className="mt-4 text-center text-sm text-gray-400">
             Fatura com contribuinte disponível no momento da compra.
           </p>
-          
-          <div className="text-center mt-12 flex items-center justify-center gap-2 text-gray-400 text-sm">
-         <span>Fatura com contribuinte disponível no momento da compra.</span>
-      </div>
           
         </div>
       </div>
