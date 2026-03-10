@@ -75,7 +75,7 @@ type CouponRow = {
   created_at?: string | null
 }
 
-type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets';
+type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons';
 
 type TicketTypeForm = {
   name: string;
