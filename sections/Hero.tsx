@@ -98,7 +98,7 @@ export const Hero: React.FC = () => {
 
         {/* CTA */}
         <button 
-          onClick={() => document.getElementById('get-involved')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
           className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
         >
           Garante o teu Lugar
