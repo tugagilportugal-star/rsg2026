@@ -66,14 +66,16 @@ type TicketRow = {
 };
 
 type CouponRow = {
-  id: string
-  code: string
-  email?: string | null
-  discount_percent: number
-  single_use: boolean
-  active: boolean
-  created_at?: string | null
-}
+  id: string;
+  code: string;
+  email?: string | null;
+  discount_percent: number;
+  single_use: boolean;
+  active: boolean;
+  created_at?: string | null;
+  used_at?: string | null;
+  used_by_order_id?: string | null;
+};
 
 type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons';
 
@@ -214,24 +216,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-  async function fetchCoupons() {
-    setLoadingCoupons(true)
-
-    try {
-      const res = await fetch('/api/admin/coupons')
-      const data = await res.json()
-
-      if (res.ok) {
-        setCoupons(data || [])
-      } else {
-        console.error('Erro ao carregar coupons')
-     }
-    } catch (err) {
-    console.error(err)
-    } finally {
-      setLoadingCoupons(false)
-    }
-  }
+  async function fetchCoupons()
 
   async function fetchTicketTypes() {
     if (!authHeader) return;
@@ -455,7 +440,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
       const res = await fetch('/api/admin/coupons', {
         method: editingCoupon ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: authHeader || '',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(payload),
       });
 
@@ -483,7 +471,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     try {
       const res = await fetch('/api/admin/coupons', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: authHeader || '',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ id }),
       });
 
@@ -670,6 +661,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setTicketTypes([]);
     setOrders([]);
     setTickets([]);
+    setCoupons([]);
+    setCouponModalOpen(false);
+    setEditingCoupon(null);
+    resetCouponForm();
     setError(null);
     setTab('leads');
   };
@@ -782,6 +777,34 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const a = document.createElement('a');
       a.href = url;
       a.download = `tickets-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if (tab === 'coupons') {
+      const headers = [
+        'id',
+        'created_at',
+        'code',
+        'email',
+        'discount_percent',
+        'single_use',
+        'active',
+        'used_at',
+        'used_by_order_id',
+      ];
+    
+      const lines = [
+        headers.join(','),
+        ...coupons.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
+      ];
+    
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `coupons-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
       return;
@@ -918,6 +941,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 if (tab === 'ticketTypes') fetchTicketTypes();
                 if (tab === 'orders') fetchOrders();
                 if (tab === 'tickets') fetchTickets();
+                if (tab === 'coupons') fetchCoupons();
               }}
               className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
             >
@@ -1319,7 +1343,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               onClick={async () => {
                                 await fetch('/api/admin/coupons', {
                                   method: 'PATCH',
-                                  headers: { 'Content-Type': 'application/json' },
+                                  headers: {
+                                    Authorization: authHeader || '',
+                                    'Content-Type': 'application/json',
+                                  },
                                   body: JSON.stringify({
                                     id: row.id,
                                     active: !row.active,
@@ -1348,6 +1375,120 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           )}
          </div>
+
+        {couponModalOpen && (
+          <div
+            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => setCouponModalOpen(false)}
+          >
+            <div
+              className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900">
+                    {editingCoupon ? 'Editar coupon' : 'Novo coupon'}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Defina código, email opcional, desconto e estado.
+                  </p>
+                </div>
+        
+                <button
+                  onClick={() => setCouponModalOpen(false)}
+                  className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+        
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Código
+                  </div>
+                  <input
+                    value={couponForm.code}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })
+                    }
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    placeholder="Ex: RSGTST20"
+                  />
+                </div>
+        
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Email
+                  </div>
+                  <input
+                    value={couponForm.email}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, email: e.target.value })
+                    }
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    placeholder="Opcional"
+                  />
+                </div>
+        
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Desconto (%)
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={couponForm.discount_percent}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, discount_percent: e.target.value })
+                    }
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                  />
+                </div>
+        
+                <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={couponForm.single_use}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, single_use: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm font-medium text-gray-700">Single use</span>
+                </label>
+        
+                <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={couponForm.active}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, active: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm font-medium text-gray-700">Ativo</span>
+                </label>
+              </div>
+        
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setCouponModalOpen(false)}
+                  className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveCoupon}
+                  disabled={savingCoupon}
+                  className="rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold disabled:opacity-60"
+                >
+                  {savingCoupon ? 'A guardar...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {selected && (
           <div
