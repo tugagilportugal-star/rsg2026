@@ -70,7 +70,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     <Section id="tickets" className="relative overflow-hidden bg-white">
       <div className="text-center mb-10 md:mb-12">
         <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue">
-          Garante o teu lugar
+          Garanta o seu lugar
         </h2>
 
         <p className="mt-5 max-w-3xl mx-auto text-lg md:text-2xl text-gray-500 leading-relaxed">
@@ -100,7 +100,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
 
           <div className="mt-8 max-w-[440px] mx-auto space-y-4">
             {[
-              'Acesso completo aos 2 dias',
+              'Acesso completo ao evento',
               'Kit de Boas-vindas + T-Shirt Oficial',
               'Coffee breaks premium',
               'Scrum Education Units (SEUs)',
