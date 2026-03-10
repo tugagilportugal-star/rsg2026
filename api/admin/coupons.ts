@@ -9,7 +9,7 @@ const supabase = createClient(
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
     const { data, error } = await supabase
-      .from('coupons')
+      .from('discount_coupons')
       .select('*')
       .order('created_at', { ascending: false });
 
