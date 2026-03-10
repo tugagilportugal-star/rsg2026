@@ -156,7 +156,7 @@ export const Navbar: React.FC = () => {
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <Ticket className="w-4 h-4" />
-                Early Bird Tickets
+                Buy Ticket
               </a>
         </div>
 
