@@ -27,11 +27,10 @@ export const TicketPurchaseModal: React.FC = () => {
     email: '',
     nif: '',
     company: '',
-    jobTitle: '',
-    tshirt: '',
-    country: 'Portugal',
     jobFunction: '',
     jobFunctionOther: '',
+    country: 'Portugal',
+    tshirt: '',    
     couponCode: '',
     saDataSharingConsent: false,
     saMarketingConsent: false,
@@ -255,37 +254,9 @@ export const TicketPurchaseModal: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Cargo</label>
-          <input
-            type="text"
-            value={ticketForm.jobTitle}
-            onChange={(e) => setTicketForm({ ...ticketForm, jobTitle: e.target.value })}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
-          />
-        </div>
-      </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">País</label>
-        <select
-          value={ticketForm.country}
-          onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
-        >
-          <option>Portugal</option>
-          <option>Espanha</option>
-          <option>França</option>
-          <option>Alemanha</option>
-          <option>Reino Unido</option>
-          <option>Brasil</option>
-          <option>Estados Unidos</option>
-          <option>Outro</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Função de trabalho</label>
+        <label className="block text-sm font-medium text-gray-700">Função</label>
         <select
           value={ticketForm.jobFunction}
           onChange={(e) =>
@@ -320,12 +291,30 @@ export const TicketPurchaseModal: React.FC = () => {
 
       {ticketForm.jobFunction === 'Outros' && (
         <Input
-          label="Qual é a sua função?"
+          label="Sua função:"
           required
           value={ticketForm.jobFunctionOther}
           onChange={(e) => setTicketForm({ ...ticketForm, jobFunctionOther: e.target.value })}
         />
       )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">País</label>
+        <select
+          value={ticketForm.country}
+          onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
+          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+        >
+          <option>Portugal</option>
+          <option>Espanha</option>
+          <option>França</option>
+          <option>Alemanha</option>
+          <option>Reino Unido</option>
+          <option>Brasil</option>
+          <option>Estados Unidos</option>
+          <option>Outro</option>
+        </select>
+      </div>
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -347,14 +336,8 @@ export const TicketPurchaseModal: React.FC = () => {
         </select>
       </div>
 
-      <Input
-        label="Valor"
-        value={formatCurrency(finalPrice, ticketData.currency)}
-        readOnly
-      />
-
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Cupom</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Cupom de Desconto</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -363,7 +346,7 @@ export const TicketPurchaseModal: React.FC = () => {
               setTicketForm({ ...ticketForm, couponCode: e.target.value.toUpperCase() });
               setCouponResult(null);
             }}
-            placeholder="Código do cupom"
+            placeholder="Cupom de desconto"
             className="flex-1 block border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
           />
           <button
@@ -389,6 +372,12 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Input
+        label="Valor"
+        value={formatCurrency(finalPrice, ticketData.currency)}
+        readOnly
+      />
 
       <div className="pt-4 mt-6 border-t border-gray-100">
         <div className="flex items-center gap-2 mb-4 text-brand-darkBlue font-bold text-sm uppercase tracking-wider">
