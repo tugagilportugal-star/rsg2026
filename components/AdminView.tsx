@@ -1165,44 +1165,44 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </table>
             </div>
           )}
-        </div>
 
-        {tab === 'coupons' && (
-          <div className="overflow-x-auto rounded-3xl bg-white border">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-left">
-                <tr>
-                  <Th>Código</Th>
-                  <Th>Email</Th>
-                  <Th>Desconto</Th>
-                  <Th>Single Use</Th>
-                  <Th>Ativo</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {loadingCoupons ? (
+          {tab === 'coupons' && (
+            <div className="overflow-x-auto rounded-3xl bg-white border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 text-left">
                   <tr>
-                    <Td colSpan={5}>A carregar coupons…</Td>
+                    <Th>Código</Th>
+                    <Th>Email</Th>
+                    <Th>Desconto</Th>
+                    <Th>Single Use</Th>
+                    <Th>Ativo</Th>
                   </tr>
-                ) : coupons.length === 0 ? (
-                  <tr>
-                    <Td colSpan={5}>Sem coupons.</Td>
-                  </tr>
-                ) : (
-                  coupons.map((row) => (
-                    <tr key={row.id} className="border-t">
-                      <Td>{row.code}</Td>
-                      <Td>{row.email || '—'}</Td>
-                      <Td>{row.discount_percent}%</Td>
-                      <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
-                      <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                </thead>
+                <tbody>
+                  {loadingCoupons ? (
+                    <tr>
+                      <Td colSpan={5}>A carregar coupons…</Td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+                  ) : coupons.length === 0 ? (
+                    <tr>
+                      <Td colSpan={5}>Sem coupons.</Td>
+                    </tr>
+                  ) : (
+                    coupons.map((row) => (
+                      <tr key={row.id} className="border-t">
+                       <Td>{row.code}</Td>
+                        <Td>{row.email || '—'}</Td>
+                        <Td>{row.discount_percent}%</Td>
+                        <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
+                        <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+         </div>
 
         {selected && (
           <div
