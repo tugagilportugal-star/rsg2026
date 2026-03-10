@@ -48,7 +48,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             {/* Lista de Benefícios */}
             <ul className="space-y-4 text-left mb-10">
                 {[
-                    "Acesso completo aos 2 dias",
+                    "Acesso completo ao evento",
                     "Kit de Boas-vindas + T-Shirt Oficial",
                     "Coffee breaks premium",
                     "Scrum Education Units (SEUs)",
