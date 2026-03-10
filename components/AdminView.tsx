@@ -155,6 +155,18 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
 
+  const [couponModalOpen, setCouponModalOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<CouponRow | null>(null);
+  const [savingCoupon, setSavingCoupon] = useState(false);
+
+  const [couponForm, setCouponForm] = useState({
+    code: '',
+    email: '',
+    discount_percent: '10',
+    single_use: true,
+    active: true,
+  });
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
@@ -400,6 +412,94 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setTicketTypeForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function resetCouponForm() {
+    setEditingCoupon(null);
+    setCouponForm({
+      code: '',
+      email: '',
+      discount_percent: '10',
+      single_use: true,
+      active: true,
+    });
+  }
+
+  function openCreateCoupon() {
+    resetCouponForm();
+    setCouponModalOpen(true);
+  }
+
+  function openEditCoupon(row: CouponRow) {
+    setEditingCoupon(row);
+    setCouponForm({
+      code: row.code || '',
+      email: row.email || '',
+      discount_percent: String(row.discount_percent ?? 10),
+      single_use: Boolean(row.single_use),
+      active: Boolean(row.active),
+    });
+    setCouponModalOpen(true);
+  }
+
+  async function saveCoupon() {
+    try {
+      setSavingCoupon(true);
+
+      const payload = {
+        ...(editingCoupon ? { id: editingCoupon.id } : {}),
+        code: couponForm.code,
+        email: couponForm.email || null,
+        discount_percent: Number(couponForm.discount_percent),
+        single_use: couponForm.single_use,
+        active: couponForm.active,
+      };
+
+      const res = await fetch('/api/admin/coupons', {
+        method: editingCoupon ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.error || 'Erro ao guardar coupon.');
+        return;
+      }
+
+      setCouponModalOpen(false);
+      resetCouponForm();
+      fetchCoupons();
+    } catch (err) {
+      setError('Erro ao guardar coupon.');
+    } finally {
+      setSavingCoupon(false);
+    }
+  }
+
+  async function deleteCoupon(id: string) {
+    const confirmed = window.confirm('Tem a certeza que quer apagar este coupon?');
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.error || 'Erro ao apagar coupon.');
+        return;
+      }
+
+      fetchCoupons();
+    } catch (err) {
+      setError('Erro ao apagar coupon.');
+    }
+  }
+  
   async function saveTicketType(e: React.FormEvent) {
     e.preventDefault();
     if (!authHeader) return;
@@ -794,6 +894,16 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
             )}
 
+            {tab === 'coupons' && (
+              <button
+                onClick={openCreateCoupon}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold"
+              >
+                <Plus className="w-4 h-4" />
+                Novo coupon
+              </button>
+            )}
+
             <button
               onClick={downloadCsv}
               className="inline-flex items-center gap-2 rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
@@ -1176,16 +1286,17 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Desconto</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
+                    <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={5}>A carregar coupons…</Td>
+                      <Td colSpan={6}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={5}>Sem coupons.</Td>
+                      <Td colSpan={6}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
@@ -1195,6 +1306,40 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{row.discount_percent}%</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                        <Td>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => openEditCoupon(row)}
+                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              onClick={async () => {
+                                await fetch('/api/admin/coupons', {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    id: row.id,
+                                    active: !row.active,
+                                  }),
+                                });
+                                fetchCoupons();
+                              }}
+                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                            >
+                              {row.active ? 'Desativar' : 'Ativar'}
+                            </button>
+
+                            <button
+                              onClick={() => deleteCoupon(row.id)}
+                              className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
+                            >
+                              Apagar
+                            </button>
+                          </div>
+                        </Td>
                       </tr>
                     ))
                   )}
