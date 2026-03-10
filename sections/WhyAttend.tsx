@@ -31,8 +31,8 @@ export const WhyAttend: React.FC = () => {
     },
     {
       icon: <Lightbulb className="w-6 h-6 text-brand-orange" />,
-      title: "Actionable Insights",
-      desc: "Teoria sem prática é apenas filosofia. Saia com ferramentas aplicáveis na segunda-feira seguinte (Flight Levels, Team Topologies, AI Strategy)."
+      title: "Insights Acionáveis",
+      desc: "Teoria sem prática é apenas filosofia. Saia com ferramentas aplicáveis no seu dia a dia (Flight Levels, Team Topologies, AI Strategy)."
     },
     {
       icon: <TrendingUp className="w-6 h-6 text-purple-600" />,
@@ -50,7 +50,7 @@ export const WhyAttend: React.FC = () => {
           {/* COLUNA DA ESQUERDA: QUEM DEVE IR */}
           <div>
             <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 leading-tight">
-              Este evento foi desenhado para si?
+              Para quem é este evento
             </h2>
             <p className="text-gray-500 text-lg mb-10 leading-relaxed">
               O RSG Lisbon não é para quem procura receitas mágicas. É para profissionais que querem elevar o nível da agilidade e criar impacto real nas suas organizações.
