@@ -336,6 +336,12 @@ export const TicketPurchaseModal: React.FC = () => {
         </select>
       </div>
 
+      <Input
+        label="Valor"
+        value={formatCurrency(finalPrice, ticketData.currency)}
+        readOnly
+      />
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Cupom de Desconto</label>
         <div className="flex gap-2">
@@ -372,12 +378,6 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         )}
       </div>
-
-      <Input
-        label="Valor"
-        value={formatCurrency(finalPrice, ticketData.currency)}
-        readOnly
-      />
 
       <div className="pt-4 mt-6 border-t border-gray-100">
         <div className="flex items-center gap-2 mb-4 text-brand-darkBlue font-bold text-sm uppercase tracking-wider">
