@@ -68,12 +68,12 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
 
   return (
     <Section id="tickets" className="relative overflow-hidden bg-white">
-      <div className="text-center mb-10 md:mb-12">
+      <div className="text-center mb-6 md:mb-8">
         <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue">
           Garanta o seu lugar
         </h2>
 
-        <p className="mt-5 max-w-3xl mx-auto text-lg md:text-2xl text-gray-500 leading-relaxed">
+        <p className="mt-3 max-w-3xl mx-auto text-lg md:text-2xl text-gray-500 leading-relaxed">
           Participe de uma das maiores celebrações da agilidade em Portugal.
           Preço exclusivo para os primeiros inscritos.
         </p>
@@ -84,21 +84,21 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
           {lotLabel}
         </div>
 
-        <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-8 md:py-9">
-          <div className="flex justify-center mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-4 py-2 text-sm md:text-base font-black tracking-wide">
+        <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-4 md:py-5">
+          <div className="flex justify-center mb-3">
+            <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
               <Sparkles className="w-4 h-4" />
               {ticketName}
             </div>
           </div>
 
           <div className="text-center">
-            <div className="text-5xl md:text-6xl font-black text-brand-darkBlue leading-none">
+            <div className="text-4xl md:text-5xl font-black text-brand-darkBlue leading-none">
               {ticketPrice}
             </div>
           </div>
 
-          <div className="mt-8 max-w-[440px] mx-auto space-y-4">
+          <div className="mt-4 max-w-[440px] mx-auto space-y-2">
             {[
               'Acesso completo ao evento',
               'Kit de Boas-vindas + T-Shirt Oficial',
@@ -106,22 +106,22 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               'Scrum Education Units (SEUs)',
               'Certificado de Participação Digital',
             ].map((item) => (
-              <div key={item} className="flex items-start gap-4 text-left">
-                <div className="mt-1 rounded-full bg-sky-100 p-1.5 flex-shrink-0">
-                  <Check className="w-4 h-4 text-sky-500" />
+              <div key={item} className="flex items-center gap-3 text-left">
+                <div className="rounded-full bg-sky-100 p-1 flex-shrink-0">
+                  <Check className="w-3.5 h-3.5 text-sky-500" />
                 </div>
-                <span className="text-lg md:text-[19px] text-gray-700 leading-relaxed">
+                <span className="text-base md:text-[17px] text-gray-700">
                   {item}
                 </span>
               </div>
             ))}
           </div>
 
-          <div className="mt-10 max-w-[440px] mx-auto">
+          <div className="mt-4 max-w-[440px] mx-auto">
             <button
               onClick={onOpenTicketModal}
               disabled={loadingTicket || !ticketData?.active}
-              className="w-full rounded-[20px] bg-brand-orange text-white py-4 text-xl md:text-2xl font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full rounded-[20px] bg-brand-orange text-white py-3 text-xl md:text-2xl font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loadingTicket
                 ? 'A carregar...'
@@ -131,7 +131,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </button>
           </div>
 
-          <p className="mt-4 text-center text-sm text-gray-400">
+          <p className="mt-3 text-center text-sm text-gray-400">
             Fatura com contribuinte disponível no momento da compra.
           </p>
           
