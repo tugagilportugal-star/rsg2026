@@ -66,14 +66,16 @@ type TicketRow = {
 };
 
 type CouponRow = {
-  id: string
-  code: string
-  email?: string | null
-  discount_percent: number
-  single_use: boolean
-  active: boolean
-  created_at?: string | null
-}
+  id: string;
+  code: string;
+  email?: string | null;
+  discount_percent: number;
+  single_use: boolean;
+  active: boolean;
+  created_at?: string | null;
+  used_at?: string | null;
+  used_by_order_id?: string | null;
+};
 
 type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons';
 
@@ -155,6 +157,18 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
 
+  const [couponModalOpen, setCouponModalOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<CouponRow | null>(null);
+  const [savingCoupon, setSavingCoupon] = useState(false);
+
+  const [couponForm, setCouponForm] = useState({
+    code: '',
+    email: '',
+    discount_percent: '10',
+    single_use: true,
+    active: true,
+  });
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
@@ -203,21 +217,32 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }
 
   async function fetchCoupons() {
-    setLoadingCoupons(true)
+    if (!authHeader) return;
+    setLoadingCoupons(true);
 
     try {
-      const res = await fetch('/api/admin/coupons')
-      const data = await res.json()
+      const res = await fetch('/api/admin/coupons', {
+        headers: { Authorization: authHeader },
+      });
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
+      const data = await res.json();
 
       if (res.ok) {
-        setCoupons(data || [])
+        setCoupons(data || []);
+        setError(null);
       } else {
-        console.error('Erro ao carregar coupons')
-     }
-    } catch (err) {
-    console.error(err)
+        setError(data?.error || 'Erro ao carregar coupons.');
+      }
+    } catch {
+      setError('Erro inesperado ao carregar coupons.');
     } finally {
-      setLoadingCoupons(false)
+      setLoadingCoupons(false);
     }
   }
 
@@ -400,6 +425,154 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setTicketTypeForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function resetCouponForm() {
+    setEditingCoupon(null);
+    setCouponForm({
+      code: '',
+      email: '',
+      discount_percent: '10',
+      single_use: true,
+      active: true,
+    });
+  }
+
+  function openCreateCoupon() {
+    resetCouponForm();
+    setCouponModalOpen(true);
+  }
+
+  function openEditCoupon(row: CouponRow) {
+    setEditingCoupon(row);
+    setCouponForm({
+      code: row.code || '',
+      email: row.email || '',
+      discount_percent: String(row.discount_percent ?? 10),
+      single_use: Boolean(row.single_use),
+      active: Boolean(row.active),
+    });
+    setCouponModalOpen(true);
+  }
+
+  async function saveCoupon() {
+    if (!authHeader) return;
+
+    try {
+      setSavingCoupon(true);
+
+      const payload = {
+        ...(editingCoupon ? { id: editingCoupon.id } : {}),
+        code: couponForm.code,
+        email: couponForm.email || null,
+        discount_percent: Number(couponForm.discount_percent),
+        single_use: couponForm.single_use,
+        active: couponForm.active,
+      };
+
+      const res = await fetch('/api/admin/coupons', {
+        method: editingCoupon ? 'PATCH' : 'POST',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
+      if (!res.ok) {
+        setError(data?.error || 'Erro ao guardar coupon.');
+        return;
+      }
+
+      setCouponModalOpen(false);
+      resetCouponForm();
+      fetchCoupons();
+      setError(null);
+    } catch {
+      setError('Erro ao guardar coupon.');
+    } finally {
+      setSavingCoupon(false);
+    }
+  }
+
+  async function deleteCoupon(id: string) {
+    if (!authHeader) return;
+
+    const confirmed = window.confirm('Tem a certeza que quer apagar este coupon?');
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'DELETE',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
+      if (!res.ok) {
+        setError(data?.error || 'Erro ao apagar coupon.');
+        return;
+      }
+
+      fetchCoupons();
+      setError(null);
+    } catch {
+      setError('Erro ao apagar coupon.');
+    }
+  }
+
+  async function toggleCouponActive(row: CouponRow) {
+    if (!authHeader) return;
+
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'PATCH',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: row.id,
+          active: !row.active,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
+      if (!res.ok) {
+        setError(data?.error || 'Erro ao alterar estado do coupon.');
+        return;
+      }
+
+      fetchCoupons();
+      setError(null);
+    } catch {
+      setError('Erro ao alterar estado do coupon.');
+    }
+  }
+
   async function saveTicketType(e: React.FormEvent) {
     e.preventDefault();
     if (!authHeader) return;
@@ -570,6 +743,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setTicketTypes([]);
     setOrders([]);
     setTickets([]);
+    setCoupons([]);
+    setCouponModalOpen(false);
+    setEditingCoupon(null);
+    resetCouponForm();
     setError(null);
     setTab('leads');
   };
@@ -687,6 +864,34 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return;
     }
 
+    if (tab === 'coupons') {
+      const headers = [
+        'id',
+        'created_at',
+        'code',
+        'email',
+        'discount_percent',
+        'single_use',
+        'active',
+        'used_at',
+        'used_by_order_id',
+      ];
+
+      const lines = [
+        headers.join(','),
+        ...coupons.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
+      ];
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `coupons-rsg-2026-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     const headers = [
       'id',
       'created_at',
@@ -794,6 +999,16 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
             )}
 
+            {tab === 'coupons' && (
+              <button
+                onClick={openCreateCoupon}
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold"
+              >
+                <Plus className="w-4 h-4" />
+                Novo coupon
+              </button>
+            )}
+
             <button
               onClick={downloadCsv}
               className="inline-flex items-center gap-2 rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
@@ -808,6 +1023,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 if (tab === 'ticketTypes') fetchTicketTypes();
                 if (tab === 'orders') fetchOrders();
                 if (tab === 'tickets') fetchTickets();
+                if (tab === 'coupons') fetchCoupons();
               }}
               className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
             >
@@ -842,11 +1058,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <button
                 key={item.key}
                 onClick={() => setTab(item.key as AdminTab)}
-                className={`px-4 py-2 rounded-xl text-sm font-black ${
-                  tab === item.key
-                    ? 'bg-brand-darkBlue text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-xl text-sm font-black ${tab === item.key
+                  ? 'bg-brand-darkBlue text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 {item.label}
               </button>
@@ -929,22 +1144,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <Td>{sold}</Td>
                             <Td>
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                                  available > 0
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'bg-red-50 text-red-700'
-                                }`}
+                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${available > 0
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : 'bg-red-50 text-red-700'
+                                  }`}
                               >
                                 {available}
                               </span>
                             </Td>
                             <Td>
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                                  row.active
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'bg-gray-100 text-gray-700'
-                                }`}
+                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${row.active
+                                  ? 'bg-blue-50 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700'
+                                  }`}
                               >
                                 {row.active ? 'Ativo' : 'Inativo'}
                               </span>
@@ -1176,25 +1389,54 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Desconto</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
+                    <Th>Usado em</Th>
+                    <Th>Data de uso</Th>
+                    <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={5}>A carregar coupons…</Td>
+                      <Td colSpan={8}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={5}>Sem coupons.</Td>
+                      <Td colSpan={8}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
                       <tr key={row.id} className="border-t">
-                       <Td>{row.code}</Td>
+                        <Td>{row.code}</Td>
                         <Td>{row.email || '—'}</Td>
                         <Td>{row.discount_percent}%</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                        <Td>{row.used_by_order_id || '—'}</Td>
+                        <Td>{row.used_at ? formatDatePt(row.used_at) : '—'}</Td>
+                        <Td>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => openEditCoupon(row)}
+                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              onClick={() => toggleCouponActive(row)}
+                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                            >
+                              {row.active ? 'Desativar' : 'Ativar'}
+                            </button>
+
+                            <button
+                              onClick={() => deleteCoupon(row.id)}
+                              className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
+                            >
+                              Apagar
+                            </button>
+                          </div>
+                        </Td>
                       </tr>
                     ))
                   )}
@@ -1202,7 +1444,130 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </table>
             </div>
           )}
-         </div>
+        </div>
+
+        {couponModalOpen && (
+          <div
+            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => {
+              setCouponModalOpen(false);
+              resetCouponForm();
+            }}
+          >
+            <div
+              className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900">
+                    {editingCoupon ? 'Editar coupon' : 'Novo coupon'}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Defina código, email opcional, desconto e estado.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setCouponModalOpen(false);
+                    resetCouponForm();
+                  }}
+                  className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Código
+                  </div>
+                  <input
+                    value={couponForm.code}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })
+                    }
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    placeholder="Ex: RSGTST20"
+                  />
+                </div>
+
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Email
+                  </div>
+                  <input
+                    value={couponForm.email}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, email: e.target.value })
+                    }
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    placeholder="Opcional"
+                  />
+                </div>
+
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Desconto (%)
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={couponForm.discount_percent}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, discount_percent: e.target.value })
+                    }
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                  />
+                </div>
+
+                <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={couponForm.single_use}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, single_use: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm font-medium text-gray-700">Single use</span>
+                </label>
+
+                <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={couponForm.active}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, active: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm font-medium text-gray-700">Ativo</span>
+                </label>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setCouponModalOpen(false);
+                    resetCouponForm();
+                  }}
+                  className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveCoupon}
+                  disabled={savingCoupon}
+                  className="rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold disabled:opacity-60"
+                >
+                  {savingCoupon ? 'A guardar...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {selected && (
           <div
