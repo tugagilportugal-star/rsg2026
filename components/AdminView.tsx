@@ -216,7 +216,35 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-  async function fetchCoupons()
+  async function fetchCoupons() {
+    if (!authHeader) return;
+    setLoadingCoupons(true);
+
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        headers: { Authorization: authHeader },
+      });
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setCoupons(data || []);
+        setError(null);
+      } else {
+        setError(data?.error || 'Erro ao carregar coupons.');
+      }
+    } catch {
+      setError('Erro inesperado ao carregar coupons.');
+    } finally {
+      setLoadingCoupons(false);
+    }
+  }
 
   async function fetchTicketTypes() {
     if (!authHeader) return;
@@ -426,6 +454,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }
 
   async function saveCoupon() {
+    if (!authHeader) return;
+
     try {
       setSavingCoupon(true);
 
@@ -441,13 +471,19 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const res = await fetch('/api/admin/coupons', {
         method: editingCoupon ? 'PATCH' : 'POST',
         headers: {
-          Authorization: authHeader || '',
+          Authorization: authHeader,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
 
       if (!res.ok) {
         setError(data?.error || 'Erro ao guardar coupon.');
@@ -457,7 +493,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setCouponModalOpen(false);
       resetCouponForm();
       fetchCoupons();
-    } catch (err) {
+      setError(null);
+    } catch {
       setError('Erro ao guardar coupon.');
     } finally {
       setSavingCoupon(false);
@@ -465,6 +502,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   }
 
   async function deleteCoupon(id: string) {
+    if (!authHeader) return;
+
     const confirmed = window.confirm('Tem a certeza que quer apagar este coupon?');
     if (!confirmed) return;
 
@@ -472,7 +511,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const res = await fetch('/api/admin/coupons', {
         method: 'DELETE',
         headers: {
-          Authorization: authHeader || '',
+          Authorization: authHeader,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ id }),
@@ -480,17 +519,60 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
       const data = await res.json();
 
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
       if (!res.ok) {
         setError(data?.error || 'Erro ao apagar coupon.');
         return;
       }
 
       fetchCoupons();
-    } catch (err) {
+      setError(null);
+    } catch {
       setError('Erro ao apagar coupon.');
     }
   }
-  
+
+  async function toggleCouponActive(row: CouponRow) {
+    if (!authHeader) return;
+
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'PATCH',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: row.id,
+          active: !row.active,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setError('Credenciais inválidas / sessão expirada');
+        return;
+      }
+
+      if (!res.ok) {
+        setError(data?.error || 'Erro ao alterar estado do coupon.');
+        return;
+      }
+
+      fetchCoupons();
+      setError(null);
+    } catch {
+      setError('Erro ao alterar estado do coupon.');
+    }
+  }
+
   async function saveTicketType(e: React.FormEvent) {
     e.preventDefault();
     if (!authHeader) return;
@@ -794,12 +876,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         'used_at',
         'used_by_order_id',
       ];
-    
+
       const lines = [
         headers.join(','),
         ...coupons.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
       ];
-    
+
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -976,11 +1058,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <button
                 key={item.key}
                 onClick={() => setTab(item.key as AdminTab)}
-                className={`px-4 py-2 rounded-xl text-sm font-black ${
-                  tab === item.key
-                    ? 'bg-brand-darkBlue text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-xl text-sm font-black ${tab === item.key
+                  ? 'bg-brand-darkBlue text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 {item.label}
               </button>
@@ -1063,22 +1144,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <Td>{sold}</Td>
                             <Td>
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                                  available > 0
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'bg-red-50 text-red-700'
-                                }`}
+                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${available > 0
+                                  ? 'bg-emerald-50 text-emerald-700'
+                                  : 'bg-red-50 text-red-700'
+                                  }`}
                               >
                                 {available}
                               </span>
                             </Td>
                             <Td>
                               <span
-                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                                  row.active
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'bg-gray-100 text-gray-700'
-                                }`}
+                                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${row.active
+                                  ? 'bg-blue-50 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700'
+                                  }`}
                               >
                                 {row.active ? 'Ativo' : 'Inativo'}
                               </span>
@@ -1310,26 +1389,30 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Desconto</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
+                    <Th>Usado em</Th>
+                    <Th>Data de uso</Th>
                     <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={6}>A carregar coupons…</Td>
+                      <Td colSpan={8}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={6}>Sem coupons.</Td>
+                      <Td colSpan={8}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
                       <tr key={row.id} className="border-t">
-                       <Td>{row.code}</Td>
+                        <Td>{row.code}</Td>
                         <Td>{row.email || '—'}</Td>
                         <Td>{row.discount_percent}%</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                        <Td>{row.used_by_order_id || '—'}</Td>
+                        <Td>{row.used_at ? formatDatePt(row.used_at) : '—'}</Td>
                         <Td>
                           <div className="flex gap-2">
                             <button
@@ -1340,20 +1423,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             </button>
 
                             <button
-                              onClick={async () => {
-                                await fetch('/api/admin/coupons', {
-                                  method: 'PATCH',
-                                  headers: {
-                                    Authorization: authHeader || '',
-                                    'Content-Type': 'application/json',
-                                  },
-                                  body: JSON.stringify({
-                                    id: row.id,
-                                    active: !row.active,
-                                  }),
-                                });
-                                fetchCoupons();
-                              }}
+                              onClick={() => toggleCouponActive(row)}
                               className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
                             >
                               {row.active ? 'Desativar' : 'Ativar'}
@@ -1374,12 +1444,15 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </table>
             </div>
           )}
-         </div>
+        </div>
 
         {couponModalOpen && (
           <div
             className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
-            onClick={() => setCouponModalOpen(false)}
+            onClick={() => {
+              setCouponModalOpen(false);
+              resetCouponForm();
+            }}
           >
             <div
               className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl"
@@ -1394,15 +1467,18 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     Defina código, email opcional, desconto e estado.
                   </p>
                 </div>
-        
+
                 <button
-                  onClick={() => setCouponModalOpen(false)}
+                  onClick={() => {
+                    setCouponModalOpen(false);
+                    resetCouponForm();
+                  }}
                   className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-        
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
@@ -1417,7 +1493,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     placeholder="Ex: RSGTST20"
                   />
                 </div>
-        
+
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
                     Email
@@ -1431,7 +1507,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     placeholder="Opcional"
                   />
                 </div>
-        
+
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
                     Desconto (%)
@@ -1447,7 +1523,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     className="w-full rounded-2xl border border-gray-300 px-4 py-3"
                   />
                 </div>
-        
+
                 <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
                   <input
                     type="checkbox"
@@ -1458,7 +1534,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
                   <span className="text-sm font-medium text-gray-700">Single use</span>
                 </label>
-        
+
                 <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
                   <input
                     type="checkbox"
@@ -1470,10 +1546,13 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <span className="text-sm font-medium text-gray-700">Ativo</span>
                 </label>
               </div>
-        
+
               <div className="mt-6 flex justify-end gap-3">
                 <button
-                  onClick={() => setCouponModalOpen(false)}
+                  onClick={() => {
+                    setCouponModalOpen(false);
+                    resetCouponForm();
+                  }}
                   className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
                 >
                   Cancelar
