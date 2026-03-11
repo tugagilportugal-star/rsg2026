@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Section } from '../components/UIComponents';
-import { Check, Sparkles } from 'lucide-react';
+import { Bell, Check, CheckCircle2, Sparkles } from 'lucide-react';
+import { useTicketStatus } from '../hooks/useTicketStatus';
 
 interface TicketsProps {
   onOpenTicketModal: () => void;
@@ -17,7 +18,103 @@ type TicketTypeData = {
   sort_order: number | null;
 };
 
+const WaitlistForm: React.FC = () => {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', expectations: '' });
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'Lista de Interessados', ...form }),
+      });
+      setStatus(res.ok ? 'success' : 'error');
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  if (status === 'success') {
+    return (
+      <div className="text-center py-6">
+        <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
+        <p className="text-lg font-bold text-brand-darkBlue">Está na lista!</p>
+        <p className="text-gray-500 text-sm mt-1">Será o primeiro a saber quando os bilhetes abrirem.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 mt-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo <span className="text-red-500">*</span></label>
+          <input
+            required
+            type="text"
+            value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">E-mail <span className="text-red-500">*</span></label>
+          <input
+            required
+            type="email"
+            value={form.email}
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp <span className="text-red-500">*</span></label>
+          <input
+            required
+            type="tel"
+            value={form.phone}
+            onChange={e => setForm({ ...form, phone: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+          <input
+            type="text"
+            value={form.company}
+            onChange={e => setForm({ ...form, company: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">O que mais espera encontrar no RSG 2026?</label>
+        <textarea
+          rows={2}
+          value={form.expectations}
+          onChange={e => setForm({ ...form, expectations: e.target.value })}
+          className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange resize-none"
+        />
+      </div>
+      {status === 'error' && (
+        <p className="text-red-600 text-sm">Ocorreu um erro. Tente novamente.</p>
+      )}
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="w-full rounded-[20px] bg-brand-orange text-white py-3 text-lg font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60"
+      >
+        {status === 'loading' ? 'A enviar...' : 'Entrar na Waitlist'}
+      </button>
+    </form>
+  );
+};
+
 export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
+  const { hasActiveLot, isLoading: statusLoading } = useTicketStatus();
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
 
@@ -66,80 +163,106 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
       ? '...'
       : formatCurrency(ticketData?.price, ticketData?.currency);
 
+  const showTicketBox = !statusLoading && hasActiveLot;
+
   return (
     <Section id="tickets" className="relative overflow-hidden bg-white">
       <div className="text-center mb-6 md:mb-8">
         <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue">
-          Garanta o seu lugar
+          {showTicketBox ? 'Garanta o seu lugar' : 'Waitlist Oficial'}
         </h2>
 
         <p className="mt-3 max-w-3xl mx-auto text-lg md:text-2xl text-gray-500 leading-relaxed">
-          Participe de uma das maiores celebrações da agilidade em Portugal.
-          Preço exclusivo para os primeiros inscritos.
+          {showTicketBox
+            ? 'Participe de uma das maiores celebrações da agilidade em Portugal. Preço exclusivo para os primeiros inscritos.'
+            : 'Seja o primeiro a saber quando os bilhetes abrirem. Inscreva-se na lista de espera e garanta acesso prioritário.'}
         </p>
       </div>
 
       <div className="max-w-[560px] md:max-w-[620px] mx-auto relative">
-        <div className="absolute top-0 right-0 z-20 bg-brand-orange text-white font-black text-base md:text-lg px-4 md:px-5 py-2 md:py-3 rounded-bl-2xl rounded-tr-2xl shadow-md">
-          {lotLabel}
-        </div>
 
-        <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-4 md:py-5">
-          <div className="flex justify-center mb-3">
-            <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
-              <Sparkles className="w-4 h-4" />
-              {ticketName}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-4xl md:text-5xl font-black text-brand-darkBlue leading-none">
-              {ticketPrice}
-            </div>
-          </div>
-
-          <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6">
-            {[
-              'Acesso completo ao evento',
-              'Kit de Boas-vindas + T-Shirt Oficial',
-              'Coffee breaks premium',
-              'Scrum Education Units (SEUs)',
-              'Certificado de Participação Digital',
-              'Acesso à gravação do evento',
-            ].map((item, i) => (
-              <div key={item} className="flex items-center gap-3 text-left">
-                <div className="rounded-full bg-sky-100 p-1 flex-shrink-0">
-                  <Check className="w-3.5 h-3.5 text-sky-500" />
-                </div>
-                <span className="text-base md:text-[17px] text-gray-700">
-                  {item}{i === 5 && <span className="text-red-500">*</span>}
-                </span>
+        {/* WAITLIST MODE */}
+        {!showTicketBox && !statusLoading && (
+          <div className="relative bg-white border-2 border-brand-darkBlue rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-6">
+            <div className="flex justify-center mb-4">
+              <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-brand-darkBlue px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
+                <Bell className="w-4 h-4" />
+                Waitlist Oficial
               </div>
-            ))}
+            </div>
+            <WaitlistForm />
           </div>
-          <p className="mt-2 w-full text-xs text-gray-400 text-center">
-            <span className="text-red-500">*</span> Acesso à gravação disponível por +€10,00 no momento da compra.
-          </p>
+        )}
 
-          <div className="mt-4 w-full">
-            <button
-              onClick={onOpenTicketModal}
-              disabled={loadingTicket || !ticketData?.active}
-              className="w-full rounded-[20px] bg-brand-orange text-white py-3 text-xl md:text-2xl font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loadingTicket
-                ? 'A carregar...'
-                : ticketData?.active
-                  ? 'Comprar Bilhete'
-                  : 'Lote Indisponível'}
-            </button>
-          </div>
+        {/* TICKET BOX MODE */}
+        {showTicketBox && (
+          <>
+            <div className="absolute top-0 right-0 z-20 bg-brand-orange text-white font-black text-base md:text-lg px-4 md:px-5 py-2 md:py-3 rounded-bl-2xl rounded-tr-2xl shadow-md">
+              {lotLabel}
+            </div>
 
-          <p className="mt-3 text-center text-sm text-gray-400">
-            Fatura com contribuinte disponível no momento da compra.
-          </p>
-          
-        </div>
+            <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-4 md:py-5">
+              <div className="flex justify-center mb-3">
+                <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
+                  <Sparkles className="w-4 h-4" />
+                  {ticketName}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-black text-brand-darkBlue leading-none">
+                  {ticketPrice}
+                </div>
+              </div>
+
+              <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6">
+                {[
+                  'Acesso completo ao evento',
+                  'Kit de Boas-vindas + T-Shirt Oficial',
+                  'Coffee breaks premium',
+                  'Scrum Education Units (SEUs)',
+                  'Certificado de Participação Digital',
+                  'Acesso à gravação do evento',
+                ].map((item, i) => (
+                  <div key={item} className="flex items-center gap-3 text-left">
+                    <div className="rounded-full bg-sky-100 p-1 flex-shrink-0">
+                      <Check className="w-3.5 h-3.5 text-sky-500" />
+                    </div>
+                    <span className="text-base md:text-[17px] text-gray-700">
+                      {item}{i === 5 && <span className="text-red-500">*</span>}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 w-full text-xs text-gray-400 text-center">
+                <span className="text-red-500">*</span> Acesso à gravação disponível por +€10,00 no momento da compra.
+              </p>
+
+              <div className="mt-4 w-full">
+                <button
+                  onClick={onOpenTicketModal}
+                  disabled={loadingTicket || !ticketData?.active}
+                  className="w-full rounded-[20px] bg-brand-orange text-white py-3 text-xl md:text-2xl font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loadingTicket
+                    ? 'A carregar...'
+                    : ticketData?.active
+                      ? 'Comprar Bilhete'
+                      : 'Lote Indisponível'}
+                </button>
+              </div>
+
+              <p className="mt-3 text-center text-sm text-gray-400">
+                Fatura com contribuinte disponível no momento da compra.
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* LOADING */}
+        {statusLoading && (
+          <div className="text-center py-12 text-gray-400">A carregar...</div>
+        )}
       </div>
     </Section>
   );
