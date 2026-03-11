@@ -98,7 +98,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </div>
           </div>
 
-          <div className="mt-4 max-w-[440px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+          <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6">
             {[
               'Acesso completo ao evento',
               'Kit de Boas-vindas + T-Shirt Oficial',
@@ -117,11 +117,11 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               </div>
             ))}
           </div>
-          <p className="mt-2 max-w-[440px] mx-auto text-xs text-gray-400">
+          <p className="mt-2 w-full text-xs text-gray-400">
             * Acesso à gravação disponível por +€10,00 no momento da compra.
           </p>
 
-          <div className="mt-4 max-w-[440px] mx-auto">
+          <div className="mt-4 w-full">
             <button
               onClick={onOpenTicketModal}
               disabled={loadingTicket || !ticketData?.active}
