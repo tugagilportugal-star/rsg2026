@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Input } from './UIComponents';
-import { CheckCircle2, Lock, ShieldCheck, Ticket, TicketPercent } from 'lucide-react';
+import { CheckCircle2, Lock, ShieldCheck, Ticket, TicketPercent, Video } from 'lucide-react';
 
 type TicketTypeData = {
   id: string;
@@ -20,6 +20,8 @@ type CouponState = {
   message?: string;
 };
 
+const RECORDING_PRICE = 1000; // €10,00 em cêntimos
+
 export const TicketPurchaseModal: React.FC = () => {
   const [ticketForm, setTicketForm] = useState({
     firstName: '',
@@ -31,13 +33,14 @@ export const TicketPurchaseModal: React.FC = () => {
     jobFunction: '',
     jobFunctionOther: '',
     country: 'Portugal',
-    tshirt: '',    
+    tshirt: '',
     couponCode: '',
     saDataSharingConsent: false,
     saMarketingConsent: false,
     privacyConsent: false,
   });
 
+  const [includeRecording, setIncludeRecording] = useState(false);
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
   const [couponStatus, setCouponStatus] = useState<'idle' | 'loading'>('idle');
   const [couponResult, setCouponResult] = useState<CouponState | null>(null);
@@ -76,9 +79,12 @@ export const TicketPurchaseModal: React.FC = () => {
 
   const finalPrice = useMemo(() => {
     if (!ticketData) return 0;
-    if (!couponResult?.valid || !couponResult.discountPercent) return originalPrice;
-    return Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
-  }, [ticketData, couponResult, originalPrice]);
+    let base = originalPrice;
+    if (couponResult?.valid && couponResult.discountPercent) {
+      base = Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
+    }
+    return base + (includeRecording ? RECORDING_PRICE : 0);
+  }, [ticketData, couponResult, originalPrice, includeRecording]);
 
   const handleApplyCoupon = async () => {
     const code = ticketForm.couponCode.trim().toUpperCase();
@@ -148,6 +154,7 @@ export const TicketPurchaseModal: React.FC = () => {
           ticketTypeId: ticketData.id,
           quantity: 1,
           couponCode: couponResult?.valid ? ticketForm.couponCode.trim().toUpperCase() : '',
+          includeRecording,
           formData: {
             attendee_first_name: ticketForm.firstName.trim(),
             attendee_last_name: ticketForm.lastName.trim(),
@@ -197,7 +204,9 @@ export const TicketPurchaseModal: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleBuyTicket} className="space-y-5 text-left">
+    <form onSubmit={handleBuyTicket} className="text-left space-y-4">
+
+      {/* Nome + Apelido */}
       <div className="grid grid-cols-2 gap-4">
         <Input
           label="Nome"
@@ -213,6 +222,7 @@ export const TicketPurchaseModal: React.FC = () => {
         />
       </div>
 
+      {/* E-mail */}
       <Input
         label="E-mail"
         type="email"
@@ -224,28 +234,26 @@ export const TicketPurchaseModal: React.FC = () => {
         }}
       />
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">NIF</label>
-        <input
-          type="text"
-          required
-          minLength={9}
-          maxLength={9}
-          pattern="\d{9}"
-          title="O NIF deve conter exatamente 9 números"
-          value={ticketForm.nif}
-          onChange={(e) => setTicketForm({ ...ticketForm, nif: e.target.value })}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
-          placeholder="Ex: 808392190"
-          onKeyPress={(e) => {
-            if (!/[0-9]/.test(e.key)) {
-              e.preventDefault();
-            }
-          }}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+      {/* NIF + Empresa */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">NIF <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            required
+            minLength={9}
+            maxLength={9}
+            pattern="\d{9}"
+            title="O NIF deve conter exatamente 9 números"
+            value={ticketForm.nif}
+            onChange={(e) => setTicketForm({ ...ticketForm, nif: e.target.value })}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+            placeholder="Ex: 808392190"
+            onKeyPress={(e) => {
+              if (!/[0-9]/.test(e.key)) e.preventDefault();
+            }}
+          />
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Empresa</label>
           <input
@@ -257,38 +265,58 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Função</label>
-        <select
-          value={ticketForm.jobFunction}
-          onChange={(e) =>
-            setTicketForm({
-              ...ticketForm,
-              jobFunction: e.target.value,
-              jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
-            })
-          }
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
-        >
-          <option value="">Seleciona…</option>
-          <option>Atendimento ao Cliente</option>
-          <option>Engenharia</option>
-          <option>Executivo</option>
-          <option>Financeiro</option>
-          <option>Recursos Humanos</option>
-          <option>Tecnologia da Informação</option>
-          <option>Jurídico</option>
-          <option>Marketing e Vendas</option>
-          <option>Operações</option>
-          <option>Gestão de Produtos</option>
-          <option>Serviços Profissionais</option>
-          <option>Gerenciamento de projetos</option>
-          <option>Pesquisa</option>
-          <option>Cadeia de suprimentos e manufatura</option>
-          <option>Treinamento e Educação</option>
-          <option>Indústria de trabalho</option>
-          <option>Outros</option>
-        </select>
+      {/* Função + País */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Função</label>
+          <select
+            value={ticketForm.jobFunction}
+            onChange={(e) =>
+              setTicketForm({
+                ...ticketForm,
+                jobFunction: e.target.value,
+                jobFunctionOther: e.target.value === 'Outros' ? ticketForm.jobFunctionOther : '',
+              })
+            }
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          >
+            <option value="">Seleciona…</option>
+            <option>Atendimento ao Cliente</option>
+            <option>Engenharia</option>
+            <option>Executivo</option>
+            <option>Financeiro</option>
+            <option>Recursos Humanos</option>
+            <option>Tecnologia da Informação</option>
+            <option>Jurídico</option>
+            <option>Marketing e Vendas</option>
+            <option>Operações</option>
+            <option>Gestão de Produtos</option>
+            <option>Serviços Profissionais</option>
+            <option>Gerenciamento de projetos</option>
+            <option>Pesquisa</option>
+            <option>Cadeia de suprimentos e manufatura</option>
+            <option>Treinamento e Educação</option>
+            <option>Indústria de trabalho</option>
+            <option>Outros</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">País</label>
+          <select
+            value={ticketForm.country}
+            onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+          >
+            <option>Portugal</option>
+            <option>Espanha</option>
+            <option>França</option>
+            <option>Alemanha</option>
+            <option>Reino Unido</option>
+            <option>Brasil</option>
+            <option>Estados Unidos</option>
+            <option>Outro</option>
+          </select>
+        </div>
       </div>
 
       {ticketForm.jobFunction === 'Outros' && (
@@ -300,94 +328,107 @@ export const TicketPurchaseModal: React.FC = () => {
         />
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">País</label>
-        <select
-          value={ticketForm.country}
-          onChange={(e) => setTicketForm({ ...ticketForm, country: e.target.value })}
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
-        >
-          <option>Portugal</option>
-          <option>Espanha</option>
-          <option>França</option>
-          <option>Alemanha</option>
-          <option>Reino Unido</option>
-          <option>Brasil</option>
-          <option>Estados Unidos</option>
-          <option>Outro</option>
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Tamanho T-Shirt <span className="text-red-500">*</span>
-        </label>
-        <select
-          required
-          className="w-full bg-white text-gray-900 border-gray-300 rounded-md p-3 border shadow-sm focus:ring-brand-blue focus:border-brand-blue"
-          value={ticketForm.tshirt}
-          onChange={(e) => setTicketForm({ ...ticketForm, tshirt: e.target.value })}
-        >
-          <option value="" disabled>Selecione um tamanho...</option>
-          <option value="XS">XS (Extra Small)</option>
-          <option value="S">S (Small)</option>
-          <option value="M">M (Medium)</option>
-          <option value="L">L (Large)</option>
-          <option value="XL">XL (Extra Large)</option>
-          <option value="XXL">XXL (Double Extra Large)</option>
-        </select>
-      </div>
-
-      <Input
-        label="Valor"
-        value={formatCurrency(finalPrice, ticketData.currency)}
-        readOnly
-      />
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Cupom de Desconto</label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={ticketForm.couponCode}
-            onChange={(e) => {
-              setTicketForm({ ...ticketForm, couponCode: e.target.value.toUpperCase() });
-              setCouponResult(null);
-            }}
-            placeholder="Cupom de desconto"
-            className="flex-1 block border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
-          />
-          <button
-            type="button"
-            onClick={handleApplyCoupon}
-            disabled={couponStatus === 'loading'}
-            className="rounded-md border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 disabled:opacity-60"
-            title="Aplicar cupom"
-            aria-label="Aplicar cupom"
+      {/* T-Shirt + Gravação */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tamanho T-Shirt <span className="text-red-500">*</span>
+          </label>
+          <select
+            required
+            className="w-full bg-white text-gray-900 border-gray-300 rounded-md p-2 border shadow-sm focus:ring-brand-blue focus:border-brand-blue"
+            value={ticketForm.tshirt}
+            onChange={(e) => setTicketForm({ ...ticketForm, tshirt: e.target.value })}
           >
-            <TicketPercent className="w-5 h-5 text-brand-orange" />
-          </button>
+            <option value="" disabled>Selecione um tamanho...</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="XXL">XXL</option>
+          </select>
         </div>
 
-        {couponResult?.message && (
-          <div
-            className={`mt-2 flex items-center gap-2 text-sm ${
-              couponResult.valid ? 'text-green-700' : 'text-red-700'
-            }`}
-          >
-            {couponResult.valid && <CheckCircle2 className="w-4 h-4" />}
-            <span>{couponResult.message}</span>
-          </div>
-        )}
+        <div
+          onClick={() => setIncludeRecording(!includeRecording)}
+          className={`cursor-pointer flex items-start gap-3 rounded-lg border p-3 mt-0 md:mt-6 transition-colors ${
+            includeRecording
+              ? 'border-brand-orange bg-orange-50'
+              : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+          }`}
+        >
+          <input
+            id="includeRecording"
+            type="checkbox"
+            checked={includeRecording}
+            onChange={(e) => setIncludeRecording(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-0.5 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
+          />
+          <label htmlFor="includeRecording" className="cursor-pointer text-sm text-gray-700 leading-snug">
+            <span className="flex items-center gap-1 font-semibold text-gray-800">
+              <Video className="w-3.5 h-3.5 text-brand-orange" />
+              Acesso à Gravação
+            </span>
+            <span className="text-gray-500">Vídeos de todas as sessões <span className="font-bold text-brand-orange">+€10,00</span></span>
+          </label>
+        </div>
       </div>
 
-      <div className="pt-4 mt-6 border-t border-gray-100">
+      {/* Valor + Cupom */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          label="Valor"
+          value={formatCurrency(finalPrice, ticketData.currency)}
+          readOnly
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Cupom de Desconto</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={ticketForm.couponCode}
+              onChange={(e) => {
+                setTicketForm({ ...ticketForm, couponCode: e.target.value.toUpperCase() });
+                setCouponResult(null);
+              }}
+              placeholder="Cupom de desconto"
+              className="flex-1 block border border-gray-300 rounded-md shadow-sm p-2 focus:ring-brand-blue focus:border-brand-blue"
+            />
+            <button
+              type="button"
+              onClick={handleApplyCoupon}
+              disabled={couponStatus === 'loading'}
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 disabled:opacity-60"
+              title="Aplicar cupom"
+              aria-label="Aplicar cupom"
+            >
+              <TicketPercent className="w-5 h-5 text-brand-orange" />
+            </button>
+          </div>
+          {couponResult?.message && (
+            <div
+              className={`mt-2 flex items-center gap-2 text-sm ${
+                couponResult.valid ? 'text-green-700' : 'text-red-700'
+              }`}
+            >
+              {couponResult.valid && <CheckCircle2 className="w-4 h-4" />}
+              <span>{couponResult.message}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Termos & Privacidade */}
+      <div className="pt-4 mt-2 border-t border-gray-100">
         <div className="flex items-center gap-2 mb-4 text-brand-darkBlue font-bold text-sm uppercase tracking-wider">
           <ShieldCheck className="w-4 h-4 text-brand-orange" />
           Termos & Privacidade
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
             <input
               id="saConsent1"
@@ -464,7 +505,7 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-3">
         <Lock className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
         <p className="text-sm text-gray-600">Pagamento seguro via Stripe</p>
       </div>
@@ -472,7 +513,7 @@ export const TicketPurchaseModal: React.FC = () => {
       <Button
         type="submit"
         isLoading={buyStatus === 'loading'}
-        className="w-full text-lg mt-6"
+        className="w-full text-lg"
         variant="secondary"
         disabled={!ticketData.active}
       >
