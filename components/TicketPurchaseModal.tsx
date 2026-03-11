@@ -40,7 +40,7 @@ export const TicketPurchaseModal: React.FC = () => {
     privacyConsent: false,
   });
 
-  const [includeRecording, setIncludeRecording] = useState(false);
+  const [includeRecording, setIncludeRecording] = useState(true);
   const [buyStatus, setBuyStatus] = useState<'idle' | 'loading'>('idle');
   const [couponStatus, setCouponStatus] = useState<'idle' | 'loading'>('idle');
   const [couponResult, setCouponResult] = useState<CouponState | null>(null);
