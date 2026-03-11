@@ -105,20 +105,20 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               'Coffee breaks premium',
               'Scrum Education Units (SEUs)',
               'Certificado de Participação Digital',
-              'Acesso à gravação do evento*',
-            ].map((item) => (
+              'Acesso à gravação do evento',
+            ].map((item, i) => (
               <div key={item} className="flex items-center gap-3 text-left">
                 <div className="rounded-full bg-sky-100 p-1 flex-shrink-0">
                   <Check className="w-3.5 h-3.5 text-sky-500" />
                 </div>
                 <span className="text-base md:text-[17px] text-gray-700">
-                  {item}
+                  {item}{i === 5 && <span className="text-red-500">*</span>}
                 </span>
               </div>
             ))}
           </div>
-          <p className="mt-2 w-full text-xs text-gray-400">
-            * Acesso à gravação disponível por +€10,00 no momento da compra.
+          <p className="mt-2 w-full text-xs text-gray-400 text-center">
+            <span className="text-red-500">*</span> Acesso à gravação disponível por +€10,00 no momento da compra.
           </p>
 
           <div className="mt-4 w-full">
