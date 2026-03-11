@@ -98,13 +98,14 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </div>
           </div>
 
-          <div className="mt-4 max-w-[440px] mx-auto space-y-2">
+          <div className="mt-4 max-w-[440px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
             {[
               'Acesso completo ao evento',
               'Kit de Boas-vindas + T-Shirt Oficial',
               'Coffee breaks premium',
               'Scrum Education Units (SEUs)',
               'Certificado de Participação Digital',
+              'Acesso à gravação do evento*',
             ].map((item) => (
               <div key={item} className="flex items-center gap-3 text-left">
                 <div className="rounded-full bg-sky-100 p-1 flex-shrink-0">
@@ -116,6 +117,9 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               </div>
             ))}
           </div>
+          <p className="mt-2 max-w-[440px] mx-auto text-xs text-gray-400">
+            * Acesso à gravação disponível por +€10,00 no momento da compra.
+          </p>
 
           <div className="mt-4 max-w-[440px] mx-auto">
             <button
