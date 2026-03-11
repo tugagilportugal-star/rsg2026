@@ -6,6 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function checkBasicAuth(req: VercelRequest): boolean {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Basic ')) return false;
+  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+  const [user, pass] = decoded.split(':');
+  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
+}
+
 function normalizeCode(code: string) {
   return String(code || '').trim().toUpperCase();
 }
@@ -16,6 +24,9 @@ function normalizeEmail(email?: string | null) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!checkBasicAuth(req)) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
   try {
     if (req.method === 'GET') {
       const { data, error } = await supabase

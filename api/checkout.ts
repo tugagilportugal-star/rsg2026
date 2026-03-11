@@ -71,23 +71,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ message: 'Bilhete indisponível ou esgotado.' });
     }
 
-    const attendeeFirstName = String(formData?.attendee_first_name || '').trim();
-    const attendeeLastName = String(formData?.attendee_last_name || '').trim();
-    const attendeeName = `${attendeeFirstName} ${attendeeLastName}`.trim() || 'Participante RSG';
-    const attendeeEmail = String(formData?.attendee_email || '').trim();
+    const truncate = (val: unknown, max = 100) => String(val || '').trim().slice(0, max);
 
-    if (!attendeeEmail) {
-      return res.status(400).json({ message: 'Email do participante é obrigatório' });
+    const attendeeFirstName = truncate(formData?.attendee_first_name);
+    const attendeeLastName = truncate(formData?.attendee_last_name);
+    const attendeeName = `${attendeeFirstName} ${attendeeLastName}`.trim() || 'Participante RSG';
+    const attendeeEmail = truncate(formData?.attendee_email, 254);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!attendeeEmail || !emailRegex.test(attendeeEmail)) {
+      return res.status(400).json({ message: 'Email do participante inválido.' });
     }
 
-    const attendeeCountry = String(formData?.attendee_country || '').trim() || 'Portugal';
-    const attendeeJobFunction = String(formData?.attendee_job_function || '').trim();
-    const attendeeJobFunctionOther = String(formData?.attendee_job_function_other || '').trim();
-    
-    const attendeeNif = String(formData?.attendee_nif || '').trim();
-    const attendeeCompany = String(formData?.attendee_company || '').trim();
-    const attendeeJobTitle = String(formData?.attendee_job_title || '').trim();
-    const attendeeTshirt = String(formData?.attendee_tshirt || '').trim();
+    const attendeeCountry = truncate(formData?.attendee_country, 2) || 'PT';
+    const attendeeJobFunction = truncate(formData?.attendee_job_function);
+    const attendeeJobFunctionOther = truncate(formData?.attendee_job_function_other);
+
+    const attendeeNif = truncate(formData?.attendee_nif, 20);
+    const attendeeCompany = truncate(formData?.attendee_company);
+    const attendeeJobTitle = truncate(formData?.attendee_job_title);
+    const attendeeTshirt = truncate(formData?.attendee_tshirt, 10);
 
     const saDataSharingConsent = Boolean(formData?.sa_data_sharing_consent);
     const saMarketingConsent = Boolean(formData?.sa_marketing_consent);
@@ -164,6 +167,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sa_marketing_consent: String(saMarketingConsent),
         privacy_consent: String(privacyConsent),
         
+        coupon_id: appliedCoupon?.id || '',
         coupon_code: appliedCoupon?.code || '',
         coupon_discount_percent: appliedCoupon ? String(appliedCoupon.discount_percent) : '',
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',

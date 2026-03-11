@@ -30,7 +30,6 @@ export const ASSETS = {
   SERVICES: {
     SUPABASE_URL: (import.meta.env?.VITE_SUPABASE_URL as string) || "",
     SUPABASE_ANON_KEY: (import.meta.env?.VITE_SUPABASE_ANON_KEY as string) || "",
-    RESEND_API_KEY: (import.meta.env?.VITE_RESEND_API_KEY as string) || "",
     FROM_EMAIL: (import.meta.env?.VITE_FROM_EMAIL as string) || "",
   },
 };
