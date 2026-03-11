@@ -132,17 +132,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).send('Method Not Allowed');
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('❌ STRIPE_WEBHOOK_SECRET not configured');
+    return res.status(500).send('Server configuration error');
+  }
+
   let event: Stripe.Event;
 
   try {
     const buf = await buffer(req);
     const sig = req.headers['stripe-signature'] as string;
 
-    event = stripe.webhooks.constructEvent(
-      buf,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET as string
-    );
+    event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
   } catch (err: any) {
     console.error(`❌ Signature Error: ${err.message}`);
     return res.status(400).send('Webhook Error');
@@ -161,6 +163,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const ticketTypeId = meta.ticket_type_id;
     const qty = Number(meta.quantity || 1);
 
+    const couponId = String(meta.coupon_id || '').trim();
     const couponCode = String(meta.coupon_code || '')
       .trim()
       .toUpperCase();
@@ -316,16 +319,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2.2) Desativar cupão single_use após pagamento confirmado
-    if (couponCode && couponSingleUse) {
-      const { error: couponErr } = await supabase
+    if (couponSingleUse && (couponId || couponCode)) {
+      const query = supabase
         .from('discount_coupons')
         .update({
           active: false,
           used_at: new Date().toISOString(),
           used_by_order_id: order.id,
         })
-        .eq('code', couponCode)
         .eq('active', true);
+
+      // Prefere match por ID (atómico), fallback por código
+      const { error: couponErr } = couponId
+        ? await query.eq('id', couponId)
+        : await query.eq('code', couponCode);
 
       if (couponErr) {
         console.error('⚠️ Coupon deactivate error:', couponErr.message);
