@@ -84,8 +84,8 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
           {lotLabel}
         </div>
 
-        <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-8 md:py-9">
-          <div className="flex justify-center mb-6">
+        <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-5 md:py-6">
+          <div className="flex justify-center mb-4">
             <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-4 py-2 text-sm md:text-base font-black tracking-wide">
               <Sparkles className="w-4 h-4" />
               {ticketName}
@@ -98,7 +98,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </div>
           </div>
 
-          <div className="mt-8 max-w-[440px] mx-auto space-y-4">
+          <div className="mt-5 max-w-[440px] mx-auto space-y-3">
             {[
               'Acesso completo ao evento',
               'Kit de Boas-vindas + T-Shirt Oficial',
@@ -117,7 +117,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             ))}
           </div>
 
-          <div className="mt-10 max-w-[440px] mx-auto">
+          <div className="mt-6 max-w-[440px] mx-auto">
             <button
               onClick={onOpenTicketModal}
               disabled={loadingTicket || !ticketData?.active}
