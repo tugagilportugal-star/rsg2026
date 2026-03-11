@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ASSETS } from '../config';
-import { Menu, X, ExternalLink, ArrowUp, Ticket } from 'lucide-react';
+import { Menu, X, ExternalLink, ArrowUp, Ticket, Bell } from 'lucide-react';
+import { useTicketStatus } from '../hooks/useTicketStatus';
 
 export const Navbar: React.FC = () => {
+  const { hasActiveLot } = useTicketStatus();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -87,9 +89,9 @@ export const Navbar: React.FC = () => {
 
               <a
                 href="#tickets"
-                className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5"
+                className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
-                Buy Ticket
+                {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
               </a>
             </div>
 
@@ -155,8 +157,7 @@ export const Navbar: React.FC = () => {
                 href="#tickets"
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
-                <Ticket className="w-4 h-4" />
-                Buy Ticket
+                {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
               </a>
         </div>
 

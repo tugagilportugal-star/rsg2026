@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { ticketTypeId, quantity = 1, formData, couponCode } = req.body;
+    const { ticketTypeId, quantity = 1, formData, couponCode, includeRecording = false } = req.body;
 
     if (!ticketTypeId) {
       return res.status(400).json({ message: 'Ticket Type ID obrigatório' });
@@ -109,23 +109,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       finalPrice = Math.round(originalPrice * (100 - appliedCoupon.discount_percent) / 100);
     }
 
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `RSG Lisbon 2026 - ${ticketType.name}`,
+            description: appliedCoupon
+              ? `Acesso completo aos 2 dias de evento. Cupão ${appliedCoupon.code} aplicado.`
+              : 'Acesso completo aos 2 dias de evento.',
+          },
+          unit_amount: finalPrice,
+        },
+        quantity,
+      },
+    ];
+
+    if (includeRecording) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: 'Acesso à Gravação do Evento - RSG Lisbon 2026',
+            description: 'Vídeos de todas as sessões do evento.',
+          },
+          unit_amount: 1000,
+        },
+        quantity: 1,
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `RSG Lisbon 2026 - ${ticketType.name}`,
-              description: appliedCoupon
-                ? `Acesso completo aos 2 dias de evento. Cupão ${appliedCoupon.code} aplicado.`
-                : 'Acesso completo aos 2 dias de evento.',
-            },
-            unit_amount: finalPrice,
-          },
-          quantity,
-        },
-      ],
+      line_items: lineItems,
       mode: 'payment',
       customer_email: attendeeEmail,
       tax_id_collection: { enabled: true },
@@ -151,6 +167,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         coupon_code: appliedCoupon?.code || '',
         coupon_discount_percent: appliedCoupon ? String(appliedCoupon.discount_percent) : '',
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',
+        include_recording: String(includeRecording),
         original_price: String(originalPrice),
         final_price: String(finalPrice),
       },

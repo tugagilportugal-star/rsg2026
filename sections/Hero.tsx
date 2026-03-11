@@ -2,9 +2,11 @@ import React from 'react';
 import { useCountdown } from '../hooks/useCountdown';
 import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
+import { useTicketStatus } from '../hooks/useTicketStatus';
 
 export const Hero: React.FC = () => {
   const timeLeft = useCountdown('2026-05-21T00:00:00');
+  const { hasActiveLot } = useTicketStatus();
 
   return (
     <section 
@@ -97,11 +99,11 @@ export const Hero: React.FC = () => {
         </div>
 
         {/* CTA */}
-        <button 
+        <button
           onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
           className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
         >
-          Garanta o seu Lugar
+          {hasActiveLot ? 'Garanta o seu Lugar' : 'Entrar na Waitlist'}
         </button>
       </div>
       
