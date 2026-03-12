@@ -69,7 +69,9 @@ type CouponRow = {
   id: string;
   code: string;
   email?: string | null;
-  discount_percent: number;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  recording_only: boolean;
   single_use: boolean;
   active: boolean;
   created_at?: string | null;
@@ -164,7 +166,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [couponForm, setCouponForm] = useState({
     code: '',
     email: '',
+    discount_type: 'percent' as 'percent' | 'amount',
     discount_percent: '10',
+    discount_amount: '',
+    recording_only: false,
     single_use: true,
     active: true,
   });
@@ -430,7 +435,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setCouponForm({
       code: '',
       email: '',
+      discount_type: 'percent',
       discount_percent: '10',
+      discount_amount: '',
+      recording_only: false,
       single_use: true,
       active: true,
     });
@@ -443,10 +451,14 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   function openEditCoupon(row: CouponRow) {
     setEditingCoupon(row);
+    const hasAmount = row.discount_amount != null;
     setCouponForm({
       code: row.code || '',
       email: row.email || '',
-      discount_percent: String(row.discount_percent ?? 10),
+      discount_type: hasAmount ? 'amount' : 'percent',
+      discount_percent: row.discount_percent != null ? String(row.discount_percent) : '10',
+      discount_amount: hasAmount ? String(row.discount_amount! / 100) : '',
+      recording_only: Boolean(row.recording_only),
       single_use: Boolean(row.single_use),
       active: Boolean(row.active),
     });
@@ -463,7 +475,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         ...(editingCoupon ? { id: editingCoupon.id } : {}),
         code: couponForm.code,
         email: couponForm.email || null,
-        discount_percent: Number(couponForm.discount_percent),
+        discount_percent: couponForm.discount_type === 'percent' ? Number(couponForm.discount_percent) : null,
+        discount_amount: couponForm.discount_type === 'amount' ? couponForm.discount_amount : null,
+        recording_only: couponForm.recording_only,
         single_use: couponForm.single_use,
         active: couponForm.active,
       };
@@ -1387,6 +1401,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Código</Th>
                     <Th>Email</Th>
                     <Th>Desconto</Th>
+                    <Th>Gravação</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
                     <Th>Usado em</Th>
@@ -1397,18 +1412,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={8}>A carregar coupons…</Td>
+                      <Td colSpan={9}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={8}>Sem coupons.</Td>
+                      <Td colSpan={9}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
                       <tr key={row.id} className="border-t">
                         <Td>{row.code}</Td>
                         <Td>{row.email || '—'}</Td>
-                        <Td>{row.discount_percent}%</Td>
+                        <Td>
+                          {row.discount_amount != null
+                            ? `-€${(row.discount_amount / 100).toFixed(2)}`
+                            : row.discount_percent != null
+                            ? `-${row.discount_percent}%`
+                            : '—'}
+                        </Td>
+                        <Td>{row.recording_only ? 'Sim' : 'Não'}</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
                         <Td>{row.used_by_order_id || '—'}</Td>
@@ -1508,21 +1530,73 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
                 </div>
 
-                <div>
+                <div className="md:col-span-2">
                   <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
-                    Desconto (%)
+                    Tipo de desconto
                   </div>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={couponForm.discount_percent}
-                    onChange={(e) =>
-                      setCouponForm({ ...couponForm, discount_percent: e.target.value })
-                    }
-                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
-                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCouponForm({ ...couponForm, discount_type: 'percent' })}
+                      className={`flex-1 rounded-2xl border px-4 py-2 text-sm font-bold ${couponForm.discount_type === 'percent' ? 'border-brand-darkBlue bg-brand-darkBlue text-white' : 'border-gray-300 text-gray-700'}`}
+                    >
+                      Percentagem (%)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCouponForm({ ...couponForm, discount_type: 'amount' })}
+                      className={`flex-1 rounded-2xl border px-4 py-2 text-sm font-bold ${couponForm.discount_type === 'amount' ? 'border-brand-darkBlue bg-brand-darkBlue text-white' : 'border-gray-300 text-gray-700'}`}
+                    >
+                      Valor fixo (€)
+                    </button>
+                  </div>
                 </div>
+
+                {couponForm.discount_type === 'percent' ? (
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Desconto (%)
+                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={couponForm.discount_percent}
+                      onChange={(e) =>
+                        setCouponForm({ ...couponForm, discount_percent: e.target.value })
+                      }
+                      className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Valor de desconto (€)
+                    </div>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={couponForm.discount_amount}
+                      onChange={(e) =>
+                        setCouponForm({ ...couponForm, discount_amount: e.target.value })
+                      }
+                      placeholder="Ex: 10.00"
+                      className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    />
+                  </div>
+                )}
+
+                <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={couponForm.recording_only}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, recording_only: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm font-medium text-gray-700">Só para gravação</span>
+                </label>
 
                 <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
                   <input

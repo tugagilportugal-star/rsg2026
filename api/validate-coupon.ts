@@ -11,7 +11,9 @@ type CouponRow = {
   code: string;
   email: string | null;
   active: boolean;
-  discount_percent: number;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  recording_only: boolean;
   single_use: boolean;
 };
 
@@ -33,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (rawEmail) {
       const { data: emailCoupon, error: emailError } = await supabase
         .from('discount_coupons')
-        .select('id, code, email, active, discount_percent, single_use')
+        .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
         .eq('code', rawCode)
         .eq('email', rawEmail)
         .eq('active', true)
@@ -51,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!coupon) {
       const { data: genericCoupon, error: genericError } = await supabase
         .from('discount_coupons')
-        .select('id, code, email, active, discount_percent, single_use')
+        .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
         .eq('code', rawCode)
         .is('email', null)
         .eq('active', true)
@@ -67,16 +69,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!coupon) {
-      return res.status(404).json({
-        valid: false,
-        message: 'Cupão inválido para este email.',
-      });
+      return res.status(404).json({ valid: false, message: 'Cupão inválido.' });
     }
 
     return res.status(200).json({
       valid: true,
       code: coupon.code,
       discountPercent: coupon.discount_percent,
+      discountAmount: coupon.discount_amount,
+      recordingOnly: coupon.recording_only,
       singleUse: coupon.single_use,
       emailBound: Boolean(coupon.email),
     });

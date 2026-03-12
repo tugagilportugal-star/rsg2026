@@ -16,7 +16,9 @@ type TicketTypeData = {
 type CouponState = {
   valid: boolean;
   code?: string;
-  discountPercent?: number;
+  discountPercent?: number | null;
+  discountAmount?: number | null;
+  recordingOnly?: boolean;
   message?: string;
 };
 
@@ -79,26 +81,37 @@ export const TicketPurchaseModal: React.FC = () => {
 
   const finalPrice = useMemo(() => {
     if (!ticketData) return 0;
-    let base = originalPrice;
-    if (couponResult?.valid && couponResult.discountPercent) {
-      base = Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
+    let ticketPrice = originalPrice;
+    let recordingPrice = includeRecording ? RECORDING_PRICE : 0;
+
+    if (couponResult?.valid) {
+      if (couponResult.recordingOnly) {
+        if (includeRecording) {
+          if (couponResult.discountAmount != null) {
+            recordingPrice = Math.max(0, RECORDING_PRICE - couponResult.discountAmount);
+          } else if (couponResult.discountPercent != null) {
+            const total = originalPrice + RECORDING_PRICE;
+            const rawDiscount = Math.round(total * couponResult.discountPercent / 100);
+            recordingPrice = Math.max(0, RECORDING_PRICE - Math.min(rawDiscount, RECORDING_PRICE));
+          }
+        }
+      } else {
+        if (couponResult.discountAmount != null) {
+          ticketPrice = Math.max(0, originalPrice - couponResult.discountAmount);
+        } else if (couponResult.discountPercent != null) {
+          ticketPrice = Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
+        }
+      }
     }
-    return base + (includeRecording ? RECORDING_PRICE : 0);
+
+    return ticketPrice + recordingPrice;
   }, [ticketData, couponResult, originalPrice, includeRecording]);
 
   const handleApplyCoupon = async () => {
     const code = ticketForm.couponCode.trim().toUpperCase();
     const email = ticketForm.email.trim().toLowerCase();
 
-    if (!code) {
-      setCouponResult({ valid: false, message: 'Introduz um cupão.' });
-      return;
-    }
-
-    if (!email) {
-      setCouponResult({ valid: false, message: 'Preenche primeiro o email.' });
-      return;
-    }
+    if (!code) return;
 
     setCouponStatus('loading');
 
@@ -112,25 +125,43 @@ export const TicketPurchaseModal: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok || !data?.valid) {
+        setCouponResult({ valid: false, message: 'Cupão inválido.' });
+        return;
+      }
+
+      if (data.recordingOnly && !includeRecording) {
         setCouponResult({
           valid: false,
-          message: data?.message || 'Cupão inválido.',
+          message: 'Este cupão aplica-se apenas à gravação. Seleciona a opção de gravação para usar o desconto.',
         });
         return;
       }
+
+      let discountLabel: string;
+      if (data.recordingOnly) {
+        const rawDiscount = data.discountAmount != null
+          ? data.discountAmount
+          : Math.round((originalPrice + RECORDING_PRICE) * (data.discountPercent / 100));
+        const actualDiscount = Math.min(rawDiscount, RECORDING_PRICE);
+        discountLabel = `-${formatCurrency(actualDiscount, 'eur')}`;
+      } else {
+        discountLabel = data.discountAmount != null
+          ? `-${formatCurrency(data.discountAmount, 'eur')}`
+          : `-${data.discountPercent}%`;
+      }
+      const recordingSuffix = data.recordingOnly ? ' na gravação' : '';
 
       setCouponResult({
         valid: true,
         code: data.code,
         discountPercent: data.discountPercent,
-        message: `Cupão aplicado: -${data.discountPercent}%`,
+        discountAmount: data.discountAmount,
+        recordingOnly: data.recordingOnly,
+        message: `Cupão aplicado: ${discountLabel}${recordingSuffix}`,
       });
     } catch (err) {
       console.error(err);
-      setCouponResult({
-        valid: false,
-        message: 'Erro ao validar cupão.',
-      });
+      setCouponResult({ valid: false, message: 'Cupão inválido.' });
     } finally {
       setCouponStatus('idle');
     }
