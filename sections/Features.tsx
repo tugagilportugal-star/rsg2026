@@ -11,6 +11,12 @@ export const Features: React.FC = () => {
         color: "bg-blue-500" 
     },
     { 
+        icon: <Users className="w-8 h-8 text-white" />, 
+        title: "Open Space",
+        desc: "A agenda é sua. Discussões orgânicas e resolução de problemas reais.",
+        color: "bg-orange-500" 
+    },
+    { 
         icon: <Rocket className="w-8 h-8 text-white" />, 
         title: "Inovação",
         desc: "Descubra novas formas de trabalho, ferramentas e frameworks que estão a revolucionar equipas de alta performance.",
@@ -18,7 +24,7 @@ export const Features: React.FC = () => {
     },
     { 
         icon: <Coffee className="w-8 h-8 text-white" />, 
-        title: "Networking Ativo",
+        title: "Networking",
         desc: "Conecte-se com profissionais durante pausas pensadas para fomentar parcerias e trocas de experiências.",
         color: "bg-teal-500" 
     },
@@ -45,7 +51,7 @@ export const Features: React.FC = () => {
           O que esperar em 2026?
         </h2>
         <p className="text-xl md:text-2xl text-gray-600 max-w-5xl mx-auto font-medium leading-relaxed">
-          Estamos a desenhar uma experiência visceral, <span className="text-brand-orange font-bold">feita de pessoas para pessoas</span>. 
+          Estamos a desenhar uma experiência<span className="text-brand-orange font-bold"> feita de pessoas para pessoas</span>. 
           É muito mais do que um evento: é um <span className="text-brand-blue font-bold">catalisador de mudança</span> para a sua carreira e para a sua organização.
         </p>
       </div>
@@ -71,7 +77,7 @@ export const Features: React.FC = () => {
             <h3 className="text-2xl font-bold mb-4 relative z-10">E muito mais...</h3>
             <p className="text-blue-100 mb-6 relative z-10">Surpresas que só quem estiver lá vai viver.</p>
             <button 
-                onClick={() => document.getElementById('get-involved')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
                 className="relative z-10 px-6 py-2 border-2 border-brand-orange text-brand-orange font-bold rounded-full hover:bg-brand-orange hover:text-white transition-colors"
             >
                 Garanta o seu lugar

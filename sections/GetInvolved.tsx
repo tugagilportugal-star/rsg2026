@@ -1,73 +1,45 @@
 import React, { useState } from 'react';
 import { Section, Button, Input, Textarea, SuccessState } from '../components/UIComponents';
-import { FormType, InterestFormData, SponsorFormData, SupporterFormData } from '../types';
+import { FormType, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
-import { Handshake, Camera, Ticket, Lock, ArrowRight, Loader2, FileText, BellRing } from 'lucide-react';
-
-// ⚠️ SUBSTITUA PELO ID REAL DO SEU SUPABASE SE NECESSÁRIO
-const TICKET_TYPE_ID = 'f14c53d4-5377-49b9-b87c-980b7b0aad0f'; 
+import { Handshake, Camera, FileText } from 'lucide-react';
 
 interface GetInvolvedProps {
   setSponsorModalOpen: (v: boolean) => void;
   setSupporterModalOpen: (v: boolean) => void;
 }
 
-/* =========================
-   MAIN SECTION (WAITLIST FORM RESTORED)
-========================= */
 export const GetInvolved: React.FC<GetInvolvedProps> = ({
   setSponsorModalOpen,
-  setSupporterModalOpen
+  setSupporterModalOpen,
 }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    role: '',
-    expectations: '',
-    gdpr: false
-  });
-
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('loading');
-    setError(null);
-
-    const ok = await saveSubmission(FormType.INTEREST, formData);
-
-    if (ok) {
-      setStatus('success');
-    } else {
-      setStatus('idle');
-      setError('Ocorreu um erro ao salvar. Tente novamente mais tarde.');
-    }
-  };
-
   return (
     <Section id="get-involved" className="bg-gray-50">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-4">
-          Queres fazer parte do RSG 2026?
+      <div className="text-center mb-12">
+        <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue">
+          Envolve-te no evento
         </h2>
-        <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-          Existem várias formas de construir este futuro connosco. Escolha a que melhor se adapta ao seu perfil.
+        <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
+          Junta-te ao RSG Lisbon 2026 como patrocinador ou apoiador e ajuda-nos
+          a criar uma experiência memorável para a comunidade ágil.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-5xl mx-auto">
-        {/* Box Patrocínios */}
-        <div className="bg-white p-8 md:p-10 rounded-3xl border-2 border-gray-100 hover:border-brand-orange transition-all duration-300 hover:shadow-2xl flex flex-col items-center text-center shadow-lg group">
-          <div className="bg-brand-orange/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-            <Handshake className="w-12 h-12 text-brand-orange" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col">
+          <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-6">
+            <Handshake className="w-7 h-7 text-brand-orange" />
           </div>
-          <h3 className="text-2xl font-bold text-brand-darkBlue mb-4">Patrocínios e Parcerias</h3>
-          <p className="text-gray-600 mb-8">
-            Conecte a sua marca a centenas de líderes e praticantes de agilidade em Portugal.
+
+          <h3 className="text-2xl font-black text-brand-darkBlue mb-4">
+            Patrocínios e Parcerias
+          </h3>
+
+          <p className="text-gray-600 mb-8 flex-1">
+            Conecte a sua marca a centenas de líderes e praticantes de agilidade
+            em Portugal.
           </p>
+
           <Button
             onClick={() => setSponsorModalOpen(true)}
             variant="secondary"
@@ -77,15 +49,19 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
           </Button>
         </div>
 
-        {/* Box Apoiadores */}
-        <div className="bg-white p-8 md:p-10 rounded-3xl border-2 border-gray-100 hover:border-brand-blue transition-all duration-300 hover:shadow-2xl flex flex-col items-center text-center shadow-lg group">
-          <div className="bg-brand-blue/10 p-5 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-            <Camera className="w-12 h-12 text-brand-blue" />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col">
+          <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6">
+            <Camera className="w-7 h-7 text-brand-blue" />
           </div>
-          <h3 className="text-2xl font-bold text-brand-darkBlue mb-4">Apoiadores</h3>
-          <p className="text-gray-600 mb-8">
+
+          <h3 className="text-2xl font-black text-brand-darkBlue mb-4">
+            Apoiadores
+          </h3>
+
+          <p className="text-gray-600 mb-8 flex-1">
             Trabalhas com fotografia, vídeo, som ou design e queres apoiar o evento?
           </p>
+
           <Button
             onClick={() => setSupporterModalOpen(true)}
             className="w-full text-lg font-bold bg-brand-blue text-white"
@@ -94,107 +70,18 @@ export const GetInvolved: React.FC<GetInvolvedProps> = ({
           </Button>
         </div>
       </div>
-
-      <div className="max-w-2xl mx-auto">
-        {/* Box WAITLIST */}
-        <div 
-            id="waitlist" 
-            className="bg-white shadow-2xl rounded-3xl p-8 md:p-12 border border-gray-100 relative overflow-hidden scroll-mt-32"
-        >
-          <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-orange via-brand-blue to-brand-darkBlue"></div>
-
-          {status === 'success' ? (
-            <SuccessState
-              message="Obrigado pelo seu interesse! Você será notificado assim que as inscrições abrirem."
-              onReset={() => {
-                setStatus('idle');
-                setError(null);
-                setFormData({ name: '', email: '', phone: '', company: '', role: '', expectations: '', gdpr: false });
-              }}
-            />
-          ) : (
-            <>
-              <div className="flex flex-col items-center text-center mb-10 pt-4">
-                <div className="bg-gray-100 p-3 rounded-full mb-4">
-                  <BellRing className="w-6 h-6 text-gray-700" />
-                </div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">Waitlist Oficial</h3>
-                <p className="text-gray-500">Seja o primeiro a saber das novidades e bilhetes.</p>
-              </div>
-      
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="Nome Completo"
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-                <Input
-                  label="E-mail"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                />
-                <Input
-                  label="WhatsApp"
-                  required
-                  value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                />
-                <Input
-                  label="Empresa"
-                  value={formData.company}
-                  onChange={e => setFormData({ ...formData, company: e.target.value })}
-                />
-                <Textarea
-                  label="O que mais espera encontrar no RSG 2026?"
-                  value={formData.expectations}
-                  onChange={e => setFormData({ ...formData, expectations: e.target.value })}
-                />
-
-                <div className="flex items-start pt-2">
-                  <input
-                    id="gdpr"
-                    type="checkbox"
-                    required
-                    checked={formData.gdpr}
-                    onChange={e => setFormData({ ...formData, gdpr: e.target.checked })}
-                    className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange"
-                  />
-                  <label htmlFor="gdpr" className="ml-3 text-sm text-gray-600">
-                    Aceito a{' '}
-                    <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
-                      Política de Privacidade
-                    </a>.
-                  </label>
-                </div>
-
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-4">
-                    {error}
-                  </div>
-                )}
-
-                <Button type="submit" isLoading={status === 'loading'} className="w-full">
-                  Entrar na Waitlist <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </form>
-            </>
-          )}
-        </div>
-      </div>
     </Section>
   );
 };
 
-/* =========================
-   SPONSOR FORM
-========================= */
+/* ========================= SPONSOR FORM COMPONENT ========================= */
+
 export const SponsorForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
+
+  const MEDIA_KIT_URL =
+    'https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing';
 
   const [formData, setFormData] = useState<SponsorFormData>({
     name: '',
@@ -203,7 +90,7 @@ export const SponsorForm: React.FC = () => {
     company: '',
     role: '',
     companySize: '',
-    message: ''
+    message: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -224,45 +111,57 @@ export const SponsorForm: React.FC = () => {
   };
 
   if (status === 'success') {
-    return <SuccessState message="Recebemos o seu interesse em patrocinar!" />;
+    return (
+      <SuccessState message="Obrigado pelo seu interesse em patrocinar o RSG Lisbon 2026!" />
+    );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Input
-        label="Seu Nome"
+        label="Nome Completo"
         required
         value={formData.name}
-        onChange={e => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
       />
+
       <Input
-        label="E-mail Corporativo"
+        label="E-mail"
         type="email"
         required
         value={formData.email}
-        onChange={e => setFormData({ ...formData, email: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
       />
+
       <Input
         label="Empresa"
         required
         value={formData.company}
-        onChange={e => setFormData({ ...formData, company: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
       />
+
       <Textarea
         label="Mensagem"
+        required
         value={formData.message}
-        onChange={e => setFormData({ ...formData, message: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
       />
 
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
-         <FileText className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
-         <p className="text-sm text-gray-600">
-            Ainda não viu as opções? <br/>
-            <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
-               Aceda ao nosso Media Kit aqui
-            </a> 
-            {' '}e descubra como a sua organização pode ser parte do RSG Lisbon 2026.
-         </p>
+        <FileText className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-gray-600">
+          Ainda não viu as opções?
+          <br />
+          <a
+            href={MEDIA_KIT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-blue font-bold hover:underline"
+          >
+            Aceda ao nosso Media Kit aqui
+          </a>{' '}
+          e descubra como a sua organização pode ser parte do RSG Lisbon 2026.
+        </p>
       </div>
 
       {error && (
@@ -271,16 +170,20 @@ export const SponsorForm: React.FC = () => {
         </div>
       )}
 
-      <Button type="submit" isLoading={status === 'loading'} className="w-full" variant="secondary">
+      <Button
+        type="submit"
+        isLoading={status === 'loading'}
+        className="w-full"
+        variant="secondary"
+      >
         Enviar Solicitação
       </Button>
     </form>
   );
 };
 
-/* =========================
-   SUPPORTER FORM
-========================= */
+/* ========================= SUPPORTER FORM COMPONENT ========================= */
+
 export const SupporterForm: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -291,7 +194,7 @@ export const SupporterForm: React.FC = () => {
     phone: '',
     area: '',
     portfolio: '',
-    message: ''
+    message: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -321,26 +224,29 @@ export const SupporterForm: React.FC = () => {
         label="Nome Completo"
         required
         value={formData.name}
-        onChange={e => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
       />
+
       <Input
         label="E-mail"
         type="email"
         required
         value={formData.email}
-        onChange={e => setFormData({ ...formData, email: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
       />
+
       <Input
         label="Portfólio (Link)"
         required
         value={formData.portfolio}
-        onChange={e => setFormData({ ...formData, portfolio: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, portfolio: e.target.value })}
       />
+
       <Textarea
         label="Como gostaria de colaborar?"
         required
         value={formData.message}
-        onChange={e => setFormData({ ...formData, message: e.target.value })}
+        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
       />
 
       {error && (

@@ -2,9 +2,11 @@ import React from 'react';
 import { useCountdown } from '../hooks/useCountdown';
 import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
+import { useTicketStatus } from '../hooks/useTicketStatus';
 
 export const Hero: React.FC = () => {
   const timeLeft = useCountdown('2026-05-21T00:00:00');
+  const { hasActiveLot } = useTicketStatus();
 
   return (
     <section 
@@ -87,7 +89,7 @@ export const Hero: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 mb-10 bg-white/5 p-4 md:px-12 md:py-4 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">21 Maio 2026</span>
+            <span className="text-base md:text-lg font-bold">21 May 2026</span>
           </div>
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
           <div className="flex items-center gap-3">
@@ -97,11 +99,11 @@ export const Hero: React.FC = () => {
         </div>
 
         {/* CTA */}
-        <button 
-          onClick={() => document.getElementById('get-involved')?.scrollIntoView({ behavior: 'smooth' })}
+        <button
+          onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
           className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
         >
-          Garante o teu Lugar
+          {hasActiveLot ? 'Garanta o seu Lugar' : 'Entrar na Waitlist'}
         </button>
       </div>
       

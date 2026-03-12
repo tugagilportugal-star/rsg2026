@@ -12,13 +12,15 @@
     "@supabase/supabase-js": "^2.39.3",
     "@vercel/node": "^3.0.0",
     "lucide-react": "^0.460.0",
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "resend": "^3.1.0",
+    "resend": "^6.7.0",
     "stripe": "^14.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

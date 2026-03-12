@@ -71,8 +71,8 @@ export const Footer: React.FC = () => {
              <ul className="space-y-3 text-gray-300">
                 <li><button onClick={() => scrollTo('hero')} className="hover:text-white hover:translate-x-1 transition-all">Início</button></li>
                 <li><button onClick={() => scrollTo('about')} className="hover:text-white hover:translate-x-1 transition-all">Sobre o Evento</button></li>
-                <li><button onClick={() => scrollTo('get-involved')} className="hover:text-white hover:translate-x-1 transition-all">Patrocine</button></li>
-                <li><button onClick={() => scrollTo('get-involved')} className="hover:text-white hover:translate-x-1 transition-all">Inscreva-se</button></li>
+                <li><button onClick={() => scrollTo('sponsors')} className="hover:text-white hover:translate-x-1 transition-all">Patrocine</button></li>
+                <li><button onClick={() => scrollTo('tickets')} className="hover:text-white hover:translate-x-1 transition-all">Bilhetes</button></li>
              </ul>
           </div>
 
@@ -109,7 +109,7 @@ export const Footer: React.FC = () => {
           <div className="md:col-span-1 text-sm text-gray-400">
              <h4 className="text-lg font-bold text-brand-orange mb-6 uppercase tracking-wider">Legal</h4>
              <div className="space-y-3">
-                <p>Copyright © 2025 TugÁgil</p>
+                <p>Copyright © 2026 TugÁgil</p>
                 <p>
                     <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing" target="_blank" rel="noopener noreferrer" className="hover:text-white underline decoration-gray-600 underline-offset-4">Política de Privacidade</a>
                 </p>

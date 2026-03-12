@@ -49,7 +49,7 @@ export const Speakers: React.FC = () => {
           Speakers
         </h2>
         <p className="text-gray-500 text-lg italic">
-          Os grandes nomes da agilidade mundial vão reunir-se aqui.
+          Grandes nomes da agilidade, inovação e tecnologia vão reunir-se aqui.
         </p>
       </div>
 

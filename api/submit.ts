@@ -26,14 +26,18 @@ const MEDIA_KIT_URL =
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const resend = new Resend(RESEND_API_KEY);
 
-// =======================
-// TEMPLATE HTML
-// =======================
-const getStyledEmail = (
-  title: string,
-  bodyContent: string,
-  showButton: boolean = false
-) => {
+// Escapa caracteres HTML para prevenir injeção nos emails de admin
+function escapeHtml(str: string | null | undefined): string {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// --- FUNÇÃO PARA GERAR O LAYOUT BONITO (HTML) ---
+const getStyledEmail = (title: string, bodyContent: string, showButton: boolean = false) => {
   return `
 <!DOCTYPE html>
 <html>
@@ -186,6 +190,25 @@ export default async function handler(
 
     // email ao admin
     if (type !== 'Lista de Interessados') {
+      const adminSubject = `${type}: ${name}`; 
+      
+      const adminHtml = `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2 style="color: #003F59;">Nova submissão: ${escapeHtml(type)}</h2>
+          <hr/>
+          <p><strong>Nome:</strong> ${escapeHtml(name)}</p>
+          <p><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
+          <p><strong>Telefone:</strong> ${escapeHtml(phone)}</p>
+          <p><strong>Empresa:</strong> ${escapeHtml(company) || '-'}</p>
+          <p><strong>Cargo:</strong> ${escapeHtml(role) || '-'}</p>
+          <p><strong>Portfólio:</strong> ${escapeHtml(portfolio) || '-'}</p>
+          <div style="background: #f4f4f5; padding: 15px; margin-top: 10px; border-radius: 5px;">
+            <strong>Mensagem:</strong><br/>
+            ${escapeHtml(message || expectations) || '-'}
+          </div>
+        </div>
+      `;
+
       emailPromises.push(
         resend.emails.send({
           from: RESEND_FROM_ADMIN,
