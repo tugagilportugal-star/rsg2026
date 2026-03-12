@@ -119,7 +119,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (appliedCoupon.discount_amount != null) {
             finalRecordingPrice = Math.max(0, RECORDING_PRICE - appliedCoupon.discount_amount);
           } else if (appliedCoupon.discount_percent != null) {
-            finalRecordingPrice = Math.round(RECORDING_PRICE * (100 - appliedCoupon.discount_percent) / 100);
+            const total = originalPrice + RECORDING_PRICE;
+            const rawDiscount = Math.round(total * appliedCoupon.discount_percent / 100);
+            finalRecordingPrice = Math.max(0, RECORDING_PRICE - Math.min(rawDiscount, RECORDING_PRICE));
           }
         }
       } else {

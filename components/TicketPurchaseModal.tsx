@@ -90,7 +90,9 @@ export const TicketPurchaseModal: React.FC = () => {
           if (couponResult.discountAmount != null) {
             recordingPrice = Math.max(0, RECORDING_PRICE - couponResult.discountAmount);
           } else if (couponResult.discountPercent != null) {
-            recordingPrice = Math.round(RECORDING_PRICE * (100 - couponResult.discountPercent) / 100);
+            const total = originalPrice + RECORDING_PRICE;
+            const rawDiscount = Math.round(total * couponResult.discountPercent / 100);
+            recordingPrice = Math.max(0, RECORDING_PRICE - Math.min(rawDiscount, RECORDING_PRICE));
           }
         }
       } else {
@@ -139,7 +141,7 @@ export const TicketPurchaseModal: React.FC = () => {
       if (data.recordingOnly) {
         const rawDiscount = data.discountAmount != null
           ? data.discountAmount
-          : Math.round(RECORDING_PRICE * (data.discountPercent / 100));
+          : Math.round((originalPrice + RECORDING_PRICE) * (data.discountPercent / 100));
         const actualDiscount = Math.min(rawDiscount, RECORDING_PRICE);
         discountLabel = `-${formatCurrency(actualDiscount, 'eur')}`;
       } else {
