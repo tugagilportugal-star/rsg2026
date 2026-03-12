@@ -135,9 +135,17 @@ export const TicketPurchaseModal: React.FC = () => {
         return;
       }
 
-      const discountLabel = data.discountAmount != null
-        ? `-${formatCurrency(data.discountAmount, 'eur')}`
-        : `-${data.discountPercent}%`;
+      let discountLabel: string;
+      if (data.recordingOnly) {
+        const actualDiscount = data.discountAmount != null
+          ? Math.min(data.discountAmount, RECORDING_PRICE)
+          : Math.round(RECORDING_PRICE * (data.discountPercent / 100));
+        discountLabel = `-${formatCurrency(actualDiscount, 'eur')}`;
+      } else {
+        discountLabel = data.discountAmount != null
+          ? `-${formatCurrency(data.discountAmount, 'eur')}`
+          : `-${data.discountPercent}%`;
+      }
       const recordingSuffix = data.recordingOnly ? ' na gravação' : '';
 
       setCouponResult({
