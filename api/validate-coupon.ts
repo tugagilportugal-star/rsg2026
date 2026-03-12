@@ -69,10 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (!coupon) {
-      return res.status(404).json({
-        valid: false,
-        message: 'Cupão inválido para este email.',
-      });
+      return res.status(404).json({ valid: false, message: 'Cupão inválido.' });
     }
 
     return res.status(200).json({

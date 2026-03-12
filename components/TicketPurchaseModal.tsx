@@ -109,15 +109,7 @@ export const TicketPurchaseModal: React.FC = () => {
     const code = ticketForm.couponCode.trim().toUpperCase();
     const email = ticketForm.email.trim().toLowerCase();
 
-    if (!code) {
-      setCouponResult({ valid: false, message: 'Introduz um cupão.' });
-      return;
-    }
-
-    if (!email) {
-      setCouponResult({ valid: false, message: 'Preenche primeiro o email.' });
-      return;
-    }
+    if (!code) return;
 
     setCouponStatus('loading');
 
@@ -131,9 +123,14 @@ export const TicketPurchaseModal: React.FC = () => {
       const data = await res.json();
 
       if (!res.ok || !data?.valid) {
+        setCouponResult({ valid: false, message: 'Cupão inválido.' });
+        return;
+      }
+
+      if (data.recordingOnly && !includeRecording) {
         setCouponResult({
           valid: false,
-          message: data?.message || 'Cupão inválido.',
+          message: 'Este cupão aplica-se apenas à gravação. Seleciona a opção de gravação para usar o desconto.',
         });
         return;
       }
@@ -142,9 +139,6 @@ export const TicketPurchaseModal: React.FC = () => {
         ? `-${formatCurrency(data.discountAmount, 'eur')}`
         : `-${data.discountPercent}%`;
       const recordingSuffix = data.recordingOnly ? ' na gravação' : '';
-      const warningMsg = data.recordingOnly && !includeRecording
-        ? 'Este cupão aplica-se apenas à gravação. Seleciona a opção de gravação para usar o desconto.'
-        : undefined;
 
       setCouponResult({
         valid: true,
@@ -152,14 +146,11 @@ export const TicketPurchaseModal: React.FC = () => {
         discountPercent: data.discountPercent,
         discountAmount: data.discountAmount,
         recordingOnly: data.recordingOnly,
-        message: warningMsg ?? `Cupão aplicado: ${discountLabel}${recordingSuffix}`,
+        message: `Cupão aplicado: ${discountLabel}${recordingSuffix}`,
       });
     } catch (err) {
       console.error(err);
-      setCouponResult({
-        valid: false,
-        message: 'Erro ao validar cupão.',
-      });
+      setCouponResult({ valid: false, message: 'Cupão inválido.' });
     } finally {
       setCouponStatus('idle');
     }
