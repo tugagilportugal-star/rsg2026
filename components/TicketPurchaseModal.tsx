@@ -137,9 +137,10 @@ export const TicketPurchaseModal: React.FC = () => {
 
       let discountLabel: string;
       if (data.recordingOnly) {
-        const actualDiscount = data.discountAmount != null
-          ? Math.min(data.discountAmount, RECORDING_PRICE)
+        const rawDiscount = data.discountAmount != null
+          ? data.discountAmount
           : Math.round(RECORDING_PRICE * (data.discountPercent / 100));
+        const actualDiscount = Math.min(rawDiscount, RECORDING_PRICE);
         discountLabel = `-${formatCurrency(actualDiscount, 'eur')}`;
       } else {
         discountLabel = data.discountAmount != null
