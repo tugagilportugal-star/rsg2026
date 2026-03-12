@@ -16,7 +16,9 @@ type TicketTypeData = {
 type CouponState = {
   valid: boolean;
   code?: string;
-  discountPercent?: number;
+  discountPercent?: number | null;
+  discountAmount?: number | null;
+  recordingOnly?: boolean;
   message?: string;
 };
 
@@ -79,11 +81,28 @@ export const TicketPurchaseModal: React.FC = () => {
 
   const finalPrice = useMemo(() => {
     if (!ticketData) return 0;
-    let base = originalPrice;
-    if (couponResult?.valid && couponResult.discountPercent) {
-      base = Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
+    let ticketPrice = originalPrice;
+    let recordingPrice = includeRecording ? RECORDING_PRICE : 0;
+
+    if (couponResult?.valid) {
+      if (couponResult.recordingOnly) {
+        if (includeRecording) {
+          if (couponResult.discountAmount != null) {
+            recordingPrice = Math.max(0, RECORDING_PRICE - couponResult.discountAmount);
+          } else if (couponResult.discountPercent != null) {
+            recordingPrice = Math.round(RECORDING_PRICE * (100 - couponResult.discountPercent) / 100);
+          }
+        }
+      } else {
+        if (couponResult.discountAmount != null) {
+          ticketPrice = Math.max(0, originalPrice - couponResult.discountAmount);
+        } else if (couponResult.discountPercent != null) {
+          ticketPrice = Math.round(originalPrice * (100 - couponResult.discountPercent) / 100);
+        }
+      }
     }
-    return base + (includeRecording ? RECORDING_PRICE : 0);
+
+    return ticketPrice + recordingPrice;
   }, [ticketData, couponResult, originalPrice, includeRecording]);
 
   const handleApplyCoupon = async () => {
@@ -119,11 +138,21 @@ export const TicketPurchaseModal: React.FC = () => {
         return;
       }
 
+      const discountLabel = data.discountAmount != null
+        ? `-${formatCurrency(data.discountAmount, 'eur')}`
+        : `-${data.discountPercent}%`;
+      const recordingSuffix = data.recordingOnly ? ' na gravação' : '';
+      const warningMsg = data.recordingOnly && !includeRecording
+        ? 'Este cupão aplica-se apenas à gravação. Seleciona a opção de gravação para usar o desconto.'
+        : undefined;
+
       setCouponResult({
         valid: true,
         code: data.code,
         discountPercent: data.discountPercent,
-        message: `Cupão aplicado: -${data.discountPercent}%`,
+        discountAmount: data.discountAmount,
+        recordingOnly: data.recordingOnly,
+        message: warningMsg ?? `Cupão aplicado: ${discountLabel}${recordingSuffix}`,
       });
     } catch (err) {
       console.error(err);

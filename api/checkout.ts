@@ -16,9 +16,13 @@ type CouponRow = {
   code: string;
   email: string | null;
   active: boolean;
-  discount_percent: number;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  recording_only: boolean;
   single_use: boolean;
 };
+
+const RECORDING_PRICE = 1000;
 
 async function findValidCoupon(code: string, email: string): Promise<CouponRow | null> {
   const normalizedCode = code.trim().toUpperCase();
@@ -29,7 +33,7 @@ async function findValidCoupon(code: string, email: string): Promise<CouponRow |
   if (normalizedEmail) {
     const { data: emailCoupon } = await supabase
       .from('discount_coupons')
-      .select('id, code, email, active, discount_percent, single_use')
+      .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
       .eq('code', normalizedCode)
       .eq('email', normalizedEmail)
       .eq('active', true)
@@ -40,7 +44,7 @@ async function findValidCoupon(code: string, email: string): Promise<CouponRow |
 
   const { data: genericCoupon } = await supabase
     .from('discount_coupons')
-    .select('id, code, email, active, discount_percent, single_use')
+    .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
     .eq('code', normalizedCode)
     .is('email', null)
     .eq('active', true)
@@ -97,7 +101,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const privacyConsent = Boolean(formData?.privacy_consent);
 
     const originalPrice = Number(ticketType.price);
-    let finalPrice = originalPrice;
+    let finalTicketPrice = originalPrice;
+    let finalRecordingPrice = RECORDING_PRICE;
     let appliedCoupon: CouponRow | null = null;
 
     const normalizedCouponCode = String(couponCode || '').trim().toUpperCase();
@@ -109,7 +114,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ message: 'Cupão inválido para este email.' });
       }
 
-      finalPrice = Math.round(originalPrice * (100 - appliedCoupon.discount_percent) / 100);
+      if (appliedCoupon.recording_only) {
+        if (includeRecording) {
+          if (appliedCoupon.discount_amount != null) {
+            finalRecordingPrice = Math.max(0, RECORDING_PRICE - appliedCoupon.discount_amount);
+          } else if (appliedCoupon.discount_percent != null) {
+            finalRecordingPrice = Math.round(RECORDING_PRICE * (100 - appliedCoupon.discount_percent) / 100);
+          }
+        }
+      } else {
+        if (appliedCoupon.discount_amount != null) {
+          finalTicketPrice = Math.max(0, originalPrice - appliedCoupon.discount_amount);
+        } else if (appliedCoupon.discount_percent != null) {
+          finalTicketPrice = Math.round(originalPrice * (100 - appliedCoupon.discount_percent) / 100);
+        }
+      }
     }
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
@@ -118,11 +137,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           currency: 'eur',
           product_data: {
             name: `RSG Lisbon 2026 - ${ticketType.name}`,
-            description: appliedCoupon
+            description: appliedCoupon && !appliedCoupon.recording_only
               ? `Acesso completo aos 2 dias de evento. Cupão ${appliedCoupon.code} aplicado.`
               : 'Acesso completo aos 2 dias de evento.',
           },
-          unit_amount: finalPrice,
+          unit_amount: finalTicketPrice,
         },
         quantity,
       },
@@ -134,9 +153,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           currency: 'eur',
           product_data: {
             name: 'Acesso à Gravação do Evento - RSG Lisbon 2026',
-            description: 'Vídeos de todas as sessões do evento.',
+            description: appliedCoupon?.recording_only
+              ? `Vídeos de todas as sessões do evento. Cupão ${appliedCoupon.code} aplicado.`
+              : 'Vídeos de todas as sessões do evento.',
           },
-          unit_amount: 1000,
+          unit_amount: finalRecordingPrice,
         },
         quantity: 1,
       });
@@ -169,11 +190,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         
         coupon_id: appliedCoupon?.id || '',
         coupon_code: appliedCoupon?.code || '',
-        coupon_discount_percent: appliedCoupon ? String(appliedCoupon.discount_percent) : '',
+        coupon_discount_percent: appliedCoupon?.discount_percent != null ? String(appliedCoupon.discount_percent) : '',
+        coupon_discount_amount: appliedCoupon?.discount_amount != null ? String(appliedCoupon.discount_amount) : '',
+        coupon_recording_only: appliedCoupon ? String(appliedCoupon.recording_only) : '',
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',
         include_recording: String(includeRecording),
         original_price: String(originalPrice),
-        final_price: String(finalPrice),
+        final_price: String(finalTicketPrice + (includeRecording ? finalRecordingPrice : 0)),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#ticket-form`,
