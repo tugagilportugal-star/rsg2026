@@ -1401,6 +1401,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Código</Th>
                     <Th>Email</Th>
                     <Th>Desconto</Th>
+                    <Th>Gravação</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
                     <Th>Usado em</Th>
@@ -1411,11 +1412,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={8}>A carregar coupons…</Td>
+                      <Td colSpan={9}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={8}>Sem coupons.</Td>
+                      <Td colSpan={9}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
@@ -1428,8 +1429,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             : row.discount_percent != null
                             ? `-${row.discount_percent}%`
                             : '—'}
-                          {row.recording_only ? ' (gravação)' : ''}
                         </Td>
+                        <Td>{row.recording_only ? 'Sim' : 'Não'}</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
                         <Td>{row.used_by_order_id || '—'}</Td>
