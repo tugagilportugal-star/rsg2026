@@ -74,7 +74,7 @@ async function sendInvoicePdfByEmailResend(params: {
   const { to, pdfBytes, invoiceId, name, ticketName, total, isTest } = params;
 
   return resend.emails.send({
-    from: 'RSG Lisbon <noreply@updates.tugagil.com>',
+    from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
     to,
     subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
     html: generateInvoiceEmail({ name, ticketName, invoiceId, total, isTest }),
@@ -400,7 +400,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     )}&dark=003F59&size=300&margin=1`;
 
     const emailRes = await resend.emails.send({
-      from: 'RSG Lisbon <noreply@updates.tugagil.com>',
+      from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
       to: session.customer_details?.email as string,
       subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
       html: generateTicketEmail(
