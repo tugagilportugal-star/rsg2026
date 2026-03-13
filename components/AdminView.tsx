@@ -1722,7 +1722,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <Input
                     label="Preço (€)"
                     value={ticketTypeForm.price}
-                    onChange={(value) => updateTicketTypeForm('price', value)}
+                    onChange={(value) => updateTicketTypeForm('price', value.replace(/[^0-9.,]/g, ''))}
                     placeholder="42,80"
                   />
 
