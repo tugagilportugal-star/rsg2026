@@ -84,8 +84,11 @@ async function billCreateDocument(params: {
   // - NÃO aceita boolean true/false; aceita 0/1 (int) ou "0"/"1" (string).
   //
   // Vamos mandar no formato mais compatível: 1 (int).
+  const tipificacao = (process.env.BILL_DOC_TIPIFICACAO || 'FT').trim().toUpperCase();
+  const taxPercent = Number(process.env.BILL_TAX_PERCENT ?? 0);
+
   const body = {
-    tipificacao: 'FT',
+    tipificacao,
     contato: {
       nome: params.customerName || 'Participante RSG',
       email: params.customerEmail,
@@ -96,7 +99,7 @@ async function billCreateDocument(params: {
         nome: params.ticketName,
         quantidade: 1,
         preco_unitario: money(params.amountEuro),
-        imposto: 0,
+        imposto: taxPercent,
       },
     ],
     lingua: 'pt',
