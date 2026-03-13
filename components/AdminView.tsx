@@ -103,13 +103,6 @@ function formatDatePt(value?: string | null) {
   return d.toLocaleString('pt-PT');
 }
 
-function formatMoney(value?: number | null, currency = 'EUR') {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) return '';
-  return new Intl.NumberFormat('pt-PT', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(Number(value));
-}
 
 function formatMoneyEURFromCents(cents?: number | null) {
   if (cents === null || cents === undefined || Number.isNaN(Number(cents))) return '';
@@ -133,7 +126,7 @@ function emptyTicketTypeForm(): TicketTypeForm {
 function toTicketTypeForm(row: TicketTypeRow): TicketTypeForm {
   return {
     name: row.name ?? '',
-    price: String(row.price ?? ''),
+    price: String(row.price != null ? (row.price / 100).toFixed(2) : ''),
     currency: row.currency ?? 'eur',
     quantity_total: String(row.quantity_total ?? 0),
     sort_order: String(row.sort_order ?? 0),
@@ -591,7 +584,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     e.preventDefault();
     if (!authHeader) return;
 
-    const price = Number(ticketTypeForm.price);
+    const priceEuros = Number(ticketTypeForm.price.replace(',', '.'));
+    const price = Math.round(priceEuros * 100);
     const quantityTotal = Number(ticketTypeForm.quantity_total);
     const sortOrder = Number(ticketTypeForm.sort_order);
 
@@ -600,7 +594,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return;
     }
 
-    if (!Number.isFinite(price) || price < 0) {
+    if (!Number.isFinite(priceEuros) || priceEuros < 0) {
       setError('Preço inválido');
       return;
     }
@@ -1153,7 +1147,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               <div className="font-bold text-gray-900">{row.name}</div>
                               <div className="text-xs text-gray-500">{row.currency?.toUpperCase()}</div>
                             </Td>
-                            <Td>{formatMoney(row.price, row.currency || 'EUR')}</Td>
+                            <Td>{formatMoneyEURFromCents(row.price)}</Td>
                             <Td>{total}</Td>
                             <Td>{sold}</Td>
                             <Td>
@@ -1726,11 +1720,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
 
                   <Input
-                    label="Preço"
-                    type="number"
+                    label="Preço (€)"
                     value={ticketTypeForm.price}
-                    onChange={(value) => updateTicketTypeForm('price', value)}
-                    placeholder="250"
+                    onChange={(value) => updateTicketTypeForm('price', value.replace(/[^0-9.,]/g, ''))}
+                    placeholder="42,80"
                   />
 
                   <Input
