@@ -86,21 +86,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
-  // Get ticket name
-  let ticketName = 'Ingresso RSG 2026';
+  // Get ticket info (type + nif + recording)
   const { data: ticket } = await supabase
     .from('tickets')
-    .select('ticket_type_id')
+    .select('ticket_type_id, attendee_nif, include_recording')
     .eq('order_id', orderId)
     .maybeSingle();
 
+  // Detect recording from order amount vs ticket base price
+  let includeRecording = false;
   if (ticket?.ticket_type_id) {
     const { data: type } = await supabase
       .from('ticket_types')
-      .select('name')
+      .select('price')
       .eq('id', ticket.ticket_type_id)
       .single();
-    if (type) ticketName = type.name;
+    if (type && order.total_amount != null) {
+      includeRecording = order.total_amount > type.price;
+    }
   }
 
   const amountEuro = (order.total_amount || 0) / 100;
@@ -111,7 +114,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     customerName: order.customer_name || 'Participante RSG',
     customerEmail: order.customer_email,
     countryIso: order.customer_country || 'PT',
-    ticketName,
+    customerNif: order.customer_nif || ticket?.attendee_nif || null,
+    ticketName: 'RSG Lisbon 2026',
+    includeRecording,
     amountEuro,
   });
 

@@ -11,7 +11,9 @@ export type CreateInvoiceInput = {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
+  customerNif?: string | null;
   ticketName: string;
+  includeRecording?: boolean;
   amountEuro: number;
   isTest: boolean;
   autoFinalize: boolean;
@@ -38,7 +40,9 @@ export type IssueInvoiceInput = {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
+  customerNif?: string | null;
   ticketName: string;
+  includeRecording?: boolean;
   amountEuro: number;
   isTest: boolean;
 

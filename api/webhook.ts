@@ -408,13 +408,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 4) Faturação via Provider
     const amountEuro = (order.total_amount || 0) / 100;
     const isTest = stripeIsTestMode();
+    const includeRecording = String(meta.include_recording || '').toLowerCase() === 'true';
 
     const invoiceResult = await issueInvoiceForOrder({
       isTest,
       customerName: order.customer_name || attendeeName || 'Participante RSG',
       customerEmail: order.customer_email,
       countryIso: customerCountryIso,
+      customerNif: attendeeNif || null,
       ticketName,
+      includeRecording,
       amountEuro,
     });
 
