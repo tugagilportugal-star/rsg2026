@@ -86,6 +86,17 @@ async function billCreateDocument(params: {
   // Vamos mandar no formato mais compatível: 1 (int).
   const tipificacao = (process.env.BILL_DOC_TIPIFICACAO || 'FT').trim().toUpperCase();
   const taxPercent = Number(process.env.BILL_TAX_PERCENT ?? 0);
+  const isencao = (process.env.BILL_ISENCAO || '').trim().toUpperCase();
+
+  const produto: Record<string, unknown> = {
+    nome: params.ticketName,
+    quantidade: 1,
+    preco_unitario: money(params.amountEuro),
+    imposto: taxPercent,
+  };
+  if (taxPercent === 0 && isencao) {
+    produto.isencao = isencao;
+  }
 
   const body = {
     tipificacao,
@@ -94,14 +105,7 @@ async function billCreateDocument(params: {
       email: params.customerEmail,
       pais: params.countryIso,
     },
-    produtos: [
-      {
-        nome: params.ticketName,
-        quantidade: 1,
-        preco_unitario: money(params.amountEuro),
-        imposto: taxPercent,
-      },
-    ],
+    produtos: [produto],
     lingua: 'pt',
     // ✅ enviar como inteiro (mais compatível que boolean)
     terminado: 1,
