@@ -86,25 +86,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
-  // Get ticket info (nif + type for recording detection)
+  // Get ticket NIF
   const { data: ticket } = await supabase
     .from('tickets')
-    .select('ticket_type_id, attendee_nif')
+    .select('attendee_nif')
     .eq('order_id', orderId)
     .maybeSingle();
 
-  // Detect recording: total > base ticket price (recording adds €10 = 1000 cents)
-  let includeRecording = false;
-  if (ticket?.ticket_type_id) {
-    const { data: type } = await supabase
-      .from('ticket_types')
-      .select('price')
-      .eq('id', ticket.ticket_type_id)
-      .single();
-    if (type && order.total_amount != null) {
-      includeRecording = order.total_amount > type.price;
-    }
-  }
+  const includeRecording = order.include_recording === true;
 
   const amountEuro = (order.total_amount || 0) / 100;
   const isTest = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
