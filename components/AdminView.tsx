@@ -584,7 +584,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     e.preventDefault();
     if (!authHeader) return;
 
-    const priceEuros = Number(ticketTypeForm.price);
+    const priceEuros = Number(ticketTypeForm.price.replace(',', '.'));
     const price = Math.round(priceEuros * 100);
     const quantityTotal = Number(ticketTypeForm.quantity_total);
     const sortOrder = Number(ticketTypeForm.sort_order);
@@ -1720,11 +1720,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
 
                   <Input
-                    label="Preço"
-                    type="number"
+                    label="Preço (€)"
                     value={ticketTypeForm.price}
                     onChange={(value) => updateTicketTypeForm('price', value)}
-                    placeholder="250"
+                    placeholder="42,80"
                   />
 
                   <Input
