@@ -47,7 +47,7 @@ async function createInvoiceXpressInvoiceInternal(params: {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
-  ticketName: string;
+  description: string;
   amountEuro: number;
   taxName?: string;
 }): Promise<InvoiceXpressCreateResultInternal> {
@@ -75,7 +75,7 @@ async function createInvoiceXpressInvoiceInternal(params: {
       },
       items: [
         {
-          name: params.ticketName,
+          name: params.description,
           description: 'Compra online (Stripe)',
           unit_price: params.amountEuro.toFixed(2),
           quantity: '1',
@@ -90,6 +90,7 @@ async function createInvoiceXpressInvoiceInternal(params: {
     countryName,
     taxName,
     amountEuro: params.amountEuro,
+    description: params.description,
   });
 
   const resp = await fetch(url, {
@@ -223,11 +224,15 @@ async function downloadPdfFromUrl(url: string): Promise<Buffer | null> {
 // PUBLIC EXPORT (o teu index.ts chama isto)
 // ==================================================================
 export async function createInvoiceWithInvoiceXpress(input: CreateInvoiceInput): Promise<CreateInvoiceResult> {
+  const description = input.includeRecording
+    ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
+    : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026';
+
   const internal = await createInvoiceXpressInvoiceInternal({
     customerName: input.customerName,
     customerEmail: input.customerEmail,
     countryIso: input.countryIso,
-    ticketName: input.ticketName,
+    description,
     amountEuro: input.amountEuro,
     taxName: process.env.INVOICEXPRESS_TAX_NAME || 'IVA23',
   });

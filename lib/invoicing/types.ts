@@ -58,7 +58,7 @@ export type IssueInvoiceResult = {
   pdfBytes: Buffer | null;
 
   // ⚠️ o webhook espera isto
-  total?: string;
+  total: string;
 
   // mantemos também o valor numérico
   totalEuro: number | null;
