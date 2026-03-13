@@ -72,24 +72,23 @@ async function billCreateDocument(params: {
   customerName: string;
   customerEmail: string;
   countryIso: string;
+  customerNif?: string | null;
+  includeRecording?: boolean;
   ticketName: string;
   amountEuro: number;
 }) {
   const ep = endpoints(params.baseUrl);
 
-  // ⚠️ IMPORTANTE
-  // Erro atual: {"error":["1.terminado"]}
-  // Muitas vezes significa que o campo "terminado" no item 1:
-  // - é obrigatório, e/ou
-  // - NÃO aceita boolean true/false; aceita 0/1 (int) ou "0"/"1" (string).
-  //
-  // Vamos mandar no formato mais compatível: 1 (int).
   const tipificacao = (process.env.BILL_DOC_TIPIFICACAO || 'FT').trim().toUpperCase();
   const taxPercent = Number(process.env.BILL_TAX_PERCENT ?? 0);
   const isencao = (process.env.BILL_ISENCAO || '').trim().toUpperCase();
 
+  const descricao = params.includeRecording
+    ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
+    : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026';
+
   const produto: Record<string, unknown> = {
-    nome: params.ticketName,
+    nome: descricao,
     quantidade: 1,
     preco_unitario: money(params.amountEuro),
     imposto: taxPercent,
@@ -98,13 +97,18 @@ async function billCreateDocument(params: {
     produto.isencao = isencao;
   }
 
+  const contato: Record<string, unknown> = {
+    nome: params.customerName || 'Participante RSG',
+    email: params.customerEmail,
+    pais: params.countryIso,
+  };
+  if (params.customerNif) {
+    contato.contribuinte = params.customerNif;
+  }
+
   const body = {
     tipificacao,
-    contato: {
-      nome: params.customerName || 'Participante RSG',
-      email: params.customerEmail,
-      pais: params.countryIso,
-    },
+    contato,
     produtos: [produto],
     lingua: 'pt',
     // ✅ enviar como inteiro (mais compatível que boolean)
@@ -240,6 +244,8 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
     customerName: input.customerName,
     customerEmail: input.customerEmail,
     countryIso,
+    customerNif: input.customerNif,
+    includeRecording: input.includeRecording,
     ticketName: input.ticketName,
     amountEuro: input.amountEuro,
   });
