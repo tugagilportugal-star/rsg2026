@@ -139,7 +139,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
       html: generateInvoiceEmail({
         name: order.customer_name || 'Participante',
-        ticketName,
+        ticketName: includeRecording
+          ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
+          : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026',
         invoiceId: invoiceResult.invoiceId,
         total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
         isTest,
