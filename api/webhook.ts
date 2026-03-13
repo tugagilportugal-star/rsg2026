@@ -13,54 +13,103 @@ const generateTicketEmail = (
   ticketName: string,
   qrUrl: string,
   ticketId: string
-) => `
-# Olá, ${name}!
+) => `<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>O teu bilhete RSG Lisbon 2026</title></head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:40px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr><td style="background:#003F59;padding:32px 40px;text-align:center;">
+          <p style="margin:0;color:#ffffff;font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.8;">Regional Scrum Gathering</p>
+          <h1 style="margin:8px 0 0;color:#ffffff;font-size:28px;font-weight:700;">RSG Lisbon 2026</h1>
+        </td></tr>
+        <!-- Body -->
+        <tr><td style="padding:40px;">
+          <h2 style="margin:0 0 8px;color:#003F59;font-size:22px;">O teu lugar está garantido! 🎉</h2>
+          <p style="margin:0 0 24px;color:#555;font-size:16px;">Olá, <strong>${name}</strong>! O teu bilhete para o RSG Lisbon 2026 foi confirmado.</p>
 
-O teu lugar no Regional Scrum Gathering Lisbon 2026 está garantido.
+          <!-- Ticket card -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7fb;border:2px solid #003F59;border-radius:10px;margin-bottom:32px;">
+            <tr><td style="padding:24px;text-align:center;">
+              <p style="margin:0 0 4px;color:#003F59;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Tipo de bilhete</p>
+              <p style="margin:0 0 20px;color:#003F59;font-size:20px;font-weight:700;">${ticketName}</p>
+              <img src="${qrUrl}" alt="QR Code" width="180" height="180" style="display:block;margin:0 auto 16px;border-radius:8px;" />
+              <p style="margin:0 0 4px;color:#888;font-size:12px;">ID do bilhete</p>
+              <p style="margin:0;color:#003F59;font-size:13px;font-family:monospace;word-break:break-all;">${ticketId}</p>
+            </td></tr>
+          </table>
 
-${ticketName}
+          <p style="margin:0 0 12px;color:#555;font-size:15px;">📍 Apresenta o QR code na entrada do evento.</p>
+          <p style="margin:0 0 32px;color:#555;font-size:15px;">🧾 A tua fatura foi emitida e enviada num e-mail separado.</p>
 
-ID: ${ticketId}
-
-Apresenta este código na entrada do evento.
-
-Estamos ansiosos para te ver em Lisboa!
-A tua fatura foi emitida e enviada num e-mail separado.
-
-Enviado por TugÁgil • RSG Lisbon 2026
-`;
+          <p style="margin:0;color:#888;font-size:13px;text-align:center;">Estamos ansiosos para te ver em Lisboa!</p>
+        </td></tr>
+        <!-- Footer -->
+        <tr><td style="background:#f4f6f8;padding:20px 40px;text-align:center;border-top:1px solid #e0e0e0;">
+          <p style="margin:0;color:#aaa;font-size:12px;">TugÁgil • RSG Lisbon 2026</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
 // ==================================================================
 // 2) EMAIL - FATURA (ANEXO PDF)
 // ==================================================================
-const generateInvoiceEmail = (d: InvoiceEmailData) => `
-Regional Scrum Gathering Lisbon 2026
+const generateInvoiceEmail = (d: InvoiceEmailData) => `<!DOCTYPE html>
+<html lang="pt">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A tua fatura – RSG Lisbon 2026</title></head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:40px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
+        <!-- Header -->
+        <tr><td style="background:#003F59;padding:32px 40px;text-align:center;">
+          <p style="margin:0;color:#ffffff;font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.8;">Regional Scrum Gathering</p>
+          <h1 style="margin:8px 0 0;color:#ffffff;font-size:28px;font-weight:700;">RSG Lisbon 2026</h1>
+        </td></tr>
+        <!-- Body -->
+        <tr><td style="padding:40px;">
+          <h2 style="margin:0 0 8px;color:#003F59;font-size:22px;">A tua fatura está pronta 🧾</h2>
+          <p style="margin:0 0 24px;color:#555;font-size:16px;">Olá, <strong>${d.name}</strong>! Segue em anexo a fatura referente à tua compra.</p>
 
-A tua fatura está pronta
+          <!-- Summary card -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7fb;border:1px solid #cde3ef;border-radius:10px;margin-bottom:24px;">
+            <tr><td style="padding:24px;">
+              <p style="margin:0 0 12px;color:#003F59;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Resumo</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="color:#555;font-size:15px;padding-bottom:8px;">Bilhete</td>
+                  <td style="color:#003F59;font-size:15px;font-weight:600;text-align:right;padding-bottom:8px;">${d.ticketName}</td>
+                </tr>
+                <tr>
+                  <td style="color:#555;font-size:15px;padding-bottom:8px;">Nº do documento</td>
+                  <td style="color:#003F59;font-size:15px;font-weight:600;text-align:right;padding-bottom:8px;">#${d.invoiceId}</td>
+                </tr>
+                <tr style="border-top:1px solid #cde3ef;">
+                  <td style="color:#003F59;font-size:16px;font-weight:700;padding-top:12px;">Total</td>
+                  <td style="color:#003F59;font-size:16px;font-weight:700;text-align:right;padding-top:12px;">${d.total} €</td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
 
-Olá, ${d.name},
+          ${d.isTest ? '<p style="margin:0 0 16px;color:#e67e22;font-size:13px;background:#fef9f0;border:1px solid #f5c97a;border-radius:6px;padding:12px;">⚠️ Documento gerado em ambiente de testes — sem validade fiscal.</p>' : ''}
 
-Segue em anexo a fatura referente à tua compra do bilhete para o Regional Scrum Gathering Lisbon 2026.
-
-Resumo
-
-Bilhete: ${d.ticketName}
-
-Nº do documento: #${d.invoiceId}
-
-Total: ${d.total} €
-${
-  d.isTest
-    ? `
-Nota: Este documento foi gerado em ambiente de testes e não tem validade fiscal.
-`
-    : ''
-}
-
-Se tiveres alguma dúvida, responde a este email.
-
-TugÁgil • RSG Lisbon 2026
-`;
+          <p style="margin:0 0 0;color:#888;font-size:14px;">Se tiveres alguma dúvida, responde a este email.</p>
+        </td></tr>
+        <!-- Footer -->
+        <tr><td style="background:#f4f6f8;padding:20px 40px;text-align:center;border-top:1px solid #e0e0e0;">
+          <p style="margin:0;color:#aaa;font-size:12px;">TugÁgil • RSG Lisbon 2026</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
 async function sendInvoicePdfByEmailResend(params: {
   to: string;
