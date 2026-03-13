@@ -96,7 +96,7 @@ async function billCreateDocument(params: {
         nome: params.ticketName,
         quantidade: 1,
         preco_unitario: money(params.amountEuro),
-        imposto: 23,
+        imposto: 0,
       },
     ],
     lingua: 'pt',
