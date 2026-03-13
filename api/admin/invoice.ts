@@ -86,22 +86,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
-  // Get ticket name
-  let ticketName = 'Ingresso RSG 2026';
+  // Get ticket NIF
   const { data: ticket } = await supabase
     .from('tickets')
-    .select('ticket_type_id')
+    .select('attendee_nif')
     .eq('order_id', orderId)
     .maybeSingle();
 
-  if (ticket?.ticket_type_id) {
-    const { data: type } = await supabase
-      .from('ticket_types')
-      .select('name')
-      .eq('id', ticket.ticket_type_id)
-      .single();
-    if (type) ticketName = type.name;
-  }
+  const includeRecording = order.include_recording === true;
 
   const amountEuro = (order.total_amount || 0) / 100;
   const isTest = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
@@ -111,7 +103,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     customerName: order.customer_name || 'Participante RSG',
     customerEmail: order.customer_email,
     countryIso: order.customer_country || 'PT',
-    ticketName,
+    customerNif: ticket?.attendee_nif || null,
+    ticketName: 'RSG Lisbon 2026',
+    includeRecording,
     amountEuro,
   });
 
@@ -134,9 +128,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
       html: generateInvoiceEmail({
         name: order.customer_name || 'Participante',
-        ticketName,
+        ticketName: includeRecording
+          ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
+          : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026',
         invoiceId: invoiceResult.invoiceId,
-        total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
+        total: invoiceResult.total,
         isTest,
       }),
       attachments: [{
@@ -148,6 +144,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     invoiceId: invoiceResult.invoiceId,
-    total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
+    total: invoiceResult.total,
   });
 }

@@ -268,11 +268,9 @@ export const TicketPurchaseModal: React.FC = () => {
       {/* NIF + Empresa */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">NIF <span className="text-red-500">*</span></label>
+          <label className="block text-sm font-medium text-gray-700">NIF <span className="text-gray-400 text-xs">(opcional)</span></label>
           <input
             type="text"
-            required
-            minLength={9}
             maxLength={9}
             pattern="\d{9}"
             title="O NIF deve conter exatamente 9 números"

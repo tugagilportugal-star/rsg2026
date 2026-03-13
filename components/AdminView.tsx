@@ -38,6 +38,7 @@ type OrderRow = {
   customer_nif?: string | null;
   customer_country?: string | null;
   total_amount?: number | null;
+  include_recording?: boolean | null;
   status?: string | null;
   invoice_id?: string | null;
 };

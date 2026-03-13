@@ -211,6 +211,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ticketTypeId = meta.ticket_type_id;
     const qty = Number(meta.quantity || 1);
+    const includeRecording = String(meta.include_recording || '').toLowerCase() === 'true';
 
     const couponId = String(meta.coupon_id || '').trim();
     const couponCode = String(meta.coupon_code || '')
@@ -307,6 +308,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         customer_name: session.customer_details?.name,
         customer_country: customerCountryIso,
         total_amount: session.amount_total,
+        include_recording: includeRecording,
         status: 'paid',
       })
       .select()
@@ -414,7 +416,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       customerName: order.customer_name || attendeeName || 'Participante RSG',
       customerEmail: order.customer_email,
       countryIso: customerCountryIso,
+      customerNif: attendeeNif || null,
       ticketName,
+      includeRecording,
       amountEuro,
     });
 
@@ -431,7 +435,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           invoiceId: invoiceResult.invoiceId,
           name: order.customer_name || attendeeName || 'Participante',
           ticketName,
-          total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
+          total: invoiceResult.total,
           isTest,
         });
 
