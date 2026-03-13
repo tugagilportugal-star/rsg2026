@@ -435,7 +435,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           invoiceId: invoiceResult.invoiceId,
           name: order.customer_name || attendeeName || 'Participante',
           ticketName,
-          total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
+          total: invoiceResult.total,
           isTest,
         });
 

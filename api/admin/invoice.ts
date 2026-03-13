@@ -132,7 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
           : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026',
         invoiceId: invoiceResult.invoiceId,
-        total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
+        total: invoiceResult.total,
         isTest,
       }),
       attachments: [{
@@ -144,6 +144,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     invoiceId: invoiceResult.invoiceId,
-    total: (invoiceResult as any)?.total ?? amountEuro.toFixed(2),
+    total: invoiceResult.total,
   });
 }
