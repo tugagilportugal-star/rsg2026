@@ -145,6 +145,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+  const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
+  const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
@@ -299,6 +302,29 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setError('Erro inesperado ao carregar pagamentos');
     } finally {
       setLoadingOrders(false);
+    }
+  }
+
+  async function generateInvoice(orderId: string) {
+    if (!authHeader) return;
+    setGeneratingInvoice(orderId);
+    setInvoiceError(null);
+    try {
+      const res = await fetch('/api/admin/invoice', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setInvoiceError({ orderId, msg: json.message || 'Erro desconhecido' });
+      } else {
+        await fetchOrders();
+      }
+    } catch (e: any) {
+      setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
+    } finally {
+      setGeneratingInvoice(null);
     }
   }
 
@@ -764,7 +790,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
     if (tab === 'orders') fetchOrders();
-    if (tab === 'tickets') fetchTickets();
+    if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
   }, [isAuthenticated, authHeader, tab]);
 
@@ -1295,16 +1321,17 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Total</Th>
                     <Th>Estado</Th>
                     <Th>Fatura</Th>
+                    <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingOrders ? (
                     <tr>
-                      <Td colSpan={6}>A carregar orders…</Td>
+                      <Td colSpan={7}>A carregar orders…</Td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
-                      <Td colSpan={6}>Sem orders.</Td>
+                      <Td colSpan={7}>Sem orders.</Td>
                     </tr>
                   ) : (
                     orders.map((row) => (
@@ -1314,7 +1341,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{safe(row.customer_email)}</Td>
                         <Td>{formatMoneyEURFromCents(row.total_amount)}</Td>
                         <Td>{safe(row.status)}</Td>
-                        <Td>{row.invoice_id ? 'Emitida' : 'Pendente'}</Td>
+                        <Td>
+                          {row.invoice_id
+                            ? <span className="text-green-600 font-medium">Emitida</span>
+                            : <span className="text-orange-500">Pendente</span>}
+                          {invoiceError?.orderId === row.id && (
+                            <div className="text-xs text-red-600 mt-1 max-w-xs break-words">{invoiceError.msg}</div>
+                          )}
+                        </Td>
+                        <Td>
+                          {!row.invoice_id && (
+                            <button
+                              onClick={() => generateInvoice(row.id)}
+                              disabled={generatingInvoice === row.id}
+                              className="text-xs px-3 py-1 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
+                            >
+                              {generatingInvoice === row.id ? 'A gerar…' : 'Gerar Fatura'}
+                            </button>
+                          )}
+                        </Td>
                       </tr>
                     ))
                   )}
@@ -1377,7 +1422,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
                           </div>
                         </Td>
-                        <Td>{safe(row.order_id)}</Td>
+                        <Td>
+                          {row.order_id ? (() => {
+                            const order = orders.find(o => o.id === row.order_id);
+                            return (
+                              <button
+                                onClick={() => order && setSelectedOrder(order)}
+                                className="text-[#003F59] hover:underline text-left"
+                                title={row.order_id}
+                              >
+                                {order ? formatMoneyEURFromCents(order.total_amount) : row.order_id.slice(0, 8) + '…'}
+                              </button>
+                            );
+                          })() : '—'}
+                        </Td>
                         <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
                       </tr>
                     ))
@@ -1461,6 +1519,56 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           )}
         </div>
+
+        {selectedOrder && (
+          <div
+            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => setSelectedOrder(null)}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
+                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <dl className="space-y-2 text-sm">
+                {[
+                  ['Data', formatDatePt(selectedOrder.created_at)],
+                  ['Cliente', selectedOrder.customer_name || '—'],
+                  ['Email', selectedOrder.customer_email || '—'],
+                  ['NIF', selectedOrder.customer_nif || '—'],
+                  ['País', selectedOrder.customer_country || '—'],
+                  ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
+                  ['Estado', selectedOrder.status || '—'],
+                  ['Fatura', selectedOrder.invoice_id || 'Pendente'],
+                  ['Stripe Session', selectedOrder.stripe_session_id || '—'],
+                  ['ID', selectedOrder.id],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex gap-2">
+                    <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                    <dd className="text-gray-900 break-all">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              {!selectedOrder.invoice_id && (
+                <div className="mt-4">
+                  <button
+                    onClick={async () => { await generateInvoice(selectedOrder.id); setSelectedOrder(null); }}
+                    disabled={generatingInvoice === selectedOrder.id}
+                    className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
+                  >
+                    {generatingInvoice === selectedOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
+                  </button>
+                  {invoiceError?.orderId === selectedOrder.id && (
+                    <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {couponModalOpen && (
           <div
