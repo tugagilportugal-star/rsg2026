@@ -429,12 +429,10 @@ export const TicketPurchaseModal: React.FC = () => {
             <button
               type="button"
               onClick={handleApplyCoupon}
-              disabled={couponStatus === 'loading'}
-              className="rounded-md border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 disabled:opacity-60"
-              title="Aplicar cupom"
-              aria-label="Aplicar cupom"
+              disabled={couponStatus === 'loading' || !ticketForm.couponCode.trim()}
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 disabled:opacity-60 text-sm font-medium text-brand-orange whitespace-nowrap"
             >
-              <TicketPercent className="w-5 h-5 text-brand-orange" />
+              {couponStatus === 'loading' ? '...' : 'Aplicar'}
             </button>
           </div>
           {couponResult?.message && (
