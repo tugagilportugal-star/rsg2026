@@ -52,13 +52,13 @@ const App: React.FC = () => {
 
       <main>
         <Hero />
+        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
         <About />
         <Features />
         <Program />
         <WhyAttend />
-        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
         <Speakers />
+        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
         <Recap />
         <FAQ />
         <Team />
