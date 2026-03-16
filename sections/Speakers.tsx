@@ -53,7 +53,7 @@ export const Speakers: React.FC = () => {
       name: "Ricardo Caldas",
       role: "Product Owner",
       // Substitua pelo link real da foto do Ricardo
-      image: "https://i.postimg.cc/Hkwp4trQ/Ricardo-Caldas-(1).png",
+      image: "https://i.postimg.cc/kMTwDrw1/Ricardo_Caldas_(2).png",
       linkedin: "https://www.linkedin.com/in/ricardo-caldas/", // Verifique o link
       isRevealed: true
     },
@@ -210,7 +210,7 @@ export const Speakers: React.FC = () => {
                 Keynotes
             </h3>
             {/* Adapta-se perfeitamente: 1, 2 ou 3 colunas dependendo do ecrã */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {keynotes.map(keynote => (
                     <KeynoteCard key={keynote.id} data={keynote} />
                 ))}
