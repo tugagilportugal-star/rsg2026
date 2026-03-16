@@ -11,7 +11,9 @@ export type CreateInvoiceInput = {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
+  customerNif?: string | null;
   ticketName: string;
+  includeRecording?: boolean;
   amountEuro: number;
   isTest: boolean;
   autoFinalize: boolean;
@@ -38,7 +40,9 @@ export type IssueInvoiceInput = {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
+  customerNif?: string | null;
   ticketName: string;
+  includeRecording?: boolean;
   amountEuro: number;
   isTest: boolean;
 
@@ -54,7 +58,7 @@ export type IssueInvoiceResult = {
   pdfBytes: Buffer | null;
 
   // ⚠️ o webhook espera isto
-  total?: string;
+  total: string;
 
   // mantemos também o valor numérico
   totalEuro: number | null;

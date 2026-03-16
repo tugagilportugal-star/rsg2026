@@ -36,6 +36,7 @@ export default function middleware(req: VercelRequest, res: VercelResponse) {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'same-origin');
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Content-Security-Policy', "default-src 'none'");
 
   return;
 }

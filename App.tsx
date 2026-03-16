@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Settings } from 'lucide-react';
 
 import { Navbar } from './components/NavBar';
+import { TicketStatusProvider } from './hooks/useTicketStatus';
 import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
@@ -47,6 +48,7 @@ const App: React.FC = () => {
   }
 
   return (
+    <TicketStatusProvider>
     <>
       <Navbar />
 
@@ -80,6 +82,7 @@ const App: React.FC = () => {
         isOpen={isTicketModalOpen}
         onClose={() => setTicketModalOpen(false)}
         title="Comprar Bilhete"
+        size="lg"
       >
         <TicketPurchaseModal />
       </Modal>
@@ -111,6 +114,7 @@ const App: React.FC = () => {
         />
       </Modal>
     </>
+    </TicketStatusProvider>
   );
 };
 

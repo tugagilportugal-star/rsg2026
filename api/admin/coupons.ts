@@ -6,6 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function checkBasicAuth(req: VercelRequest): boolean {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Basic ')) return false;
+  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+  const [user, pass] = decoded.split(':');
+  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
+}
+
 function normalizeCode(code: string) {
   return String(code || '').trim().toUpperCase();
 }
@@ -16,6 +24,9 @@ function normalizeEmail(email?: string | null) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!checkBasicAuth(req)) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
   try {
     if (req.method === 'GET') {
       const { data, error } = await supabase
@@ -35,20 +46,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         code,
         email,
         discount_percent,
+        discount_amount,
+        recording_only = false,
         single_use = true,
         active = true,
       } = req.body || {};
 
       const normalizedCode = normalizeCode(code);
       const normalizedEmail = normalizeEmail(email);
-      const discount = Number(discount_percent);
 
       if (!normalizedCode) {
         return res.status(400).json({ error: 'Código é obrigatório.' });
       }
 
-      if (!Number.isFinite(discount) || discount < 1 || discount > 100) {
-        return res.status(400).json({ error: 'Desconto deve estar entre 1 e 100.' });
+      const hasPercent = discount_percent !== undefined && discount_percent !== '' && discount_percent !== null;
+      const hasAmount = discount_amount !== undefined && discount_amount !== '' && discount_amount !== null;
+
+      if (!hasPercent && !hasAmount) {
+        return res.status(400).json({ error: 'Indica desconto em % ou valor fixo (€).' });
+      }
+
+      let discountPercent: number | null = null;
+      let discountAmountCents: number | null = null;
+
+      if (hasPercent) {
+        discountPercent = Number(discount_percent);
+        if (!Number.isFinite(discountPercent) || discountPercent < 1 || discountPercent > 100) {
+          return res.status(400).json({ error: 'Desconto (%) deve estar entre 1 e 100.' });
+        }
+      }
+      if (hasAmount) {
+        discountAmountCents = Math.round(Number(discount_amount) * 100);
+        if (!Number.isFinite(discountAmountCents) || discountAmountCents < 1) {
+          return res.status(400).json({ error: 'Valor de desconto deve ser positivo.' });
+        }
       }
 
       const { data, error } = await supabase
@@ -56,7 +87,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .insert({
           code: normalizedCode,
           email: normalizedEmail,
-          discount_percent: discount,
+          discount_percent: discountPercent,
+          discount_amount: discountAmountCents,
+          recording_only: Boolean(recording_only),
           single_use: Boolean(single_use),
           active: Boolean(active),
         })
@@ -76,6 +109,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         code,
         email,
         discount_percent,
+        discount_amount,
+        recording_only,
         single_use,
         active,
       } = req.body || {};
@@ -89,12 +124,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (code !== undefined) payload.code = normalizeCode(code);
       if (email !== undefined) payload.email = normalizeEmail(email);
       if (discount_percent !== undefined) {
-        const discount = Number(discount_percent);
-        if (!Number.isFinite(discount) || discount < 1 || discount > 100) {
-          return res.status(400).json({ error: 'Desconto deve estar entre 1 e 100.' });
+        if (discount_percent === null || discount_percent === '') {
+          payload.discount_percent = null;
+        } else {
+          const discount = Number(discount_percent);
+          if (!Number.isFinite(discount) || discount < 1 || discount > 100) {
+            return res.status(400).json({ error: 'Desconto (%) deve estar entre 1 e 100.' });
+          }
+          payload.discount_percent = discount;
         }
-        payload.discount_percent = discount;
       }
+      if (discount_amount !== undefined) {
+        if (discount_amount === null || discount_amount === '') {
+          payload.discount_amount = null;
+        } else {
+          const amountCents = Math.round(Number(discount_amount) * 100);
+          if (!Number.isFinite(amountCents) || amountCents < 1) {
+            return res.status(400).json({ error: 'Valor de desconto deve ser positivo.' });
+          }
+          payload.discount_amount = amountCents;
+        }
+      }
+      if (recording_only !== undefined) payload.recording_only = Boolean(recording_only);
       if (single_use !== undefined) payload.single_use = Boolean(single_use);
       if (active !== undefined) payload.active = Boolean(active);
 

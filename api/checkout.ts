@@ -16,9 +16,13 @@ type CouponRow = {
   code: string;
   email: string | null;
   active: boolean;
-  discount_percent: number;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  recording_only: boolean;
   single_use: boolean;
 };
+
+const RECORDING_PRICE = 1000;
 
 async function findValidCoupon(code: string, email: string): Promise<CouponRow | null> {
   const normalizedCode = code.trim().toUpperCase();
@@ -29,7 +33,7 @@ async function findValidCoupon(code: string, email: string): Promise<CouponRow |
   if (normalizedEmail) {
     const { data: emailCoupon } = await supabase
       .from('discount_coupons')
-      .select('id, code, email, active, discount_percent, single_use')
+      .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
       .eq('code', normalizedCode)
       .eq('email', normalizedEmail)
       .eq('active', true)
@@ -40,7 +44,7 @@ async function findValidCoupon(code: string, email: string): Promise<CouponRow |
 
   const { data: genericCoupon } = await supabase
     .from('discount_coupons')
-    .select('id, code, email, active, discount_percent, single_use')
+    .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
     .eq('code', normalizedCode)
     .is('email', null)
     .eq('active', true)
@@ -55,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { ticketTypeId, quantity = 1, formData, couponCode } = req.body;
+    const { ticketTypeId, quantity = 1, formData, couponCode, includeRecording = false } = req.body;
 
     if (!ticketTypeId) {
       return res.status(400).json({ message: 'Ticket Type ID obrigatório' });
@@ -71,30 +75,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ message: 'Bilhete indisponível ou esgotado.' });
     }
 
-    const attendeeFirstName = String(formData?.attendee_first_name || '').trim();
-    const attendeeLastName = String(formData?.attendee_last_name || '').trim();
-    const attendeeName = `${attendeeFirstName} ${attendeeLastName}`.trim() || 'Participante RSG';
-    const attendeeEmail = String(formData?.attendee_email || '').trim();
+    const truncate = (val: unknown, max = 100) => String(val || '').trim().slice(0, max);
 
-    if (!attendeeEmail) {
-      return res.status(400).json({ message: 'Email do participante é obrigatório' });
+    const attendeeFirstName = truncate(formData?.attendee_first_name);
+    const attendeeLastName = truncate(formData?.attendee_last_name);
+    const attendeeName = `${attendeeFirstName} ${attendeeLastName}`.trim() || 'Participante RSG';
+    const attendeeEmail = truncate(formData?.attendee_email, 254);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!attendeeEmail || !emailRegex.test(attendeeEmail)) {
+      return res.status(400).json({ message: 'Email do participante inválido.' });
     }
 
-    const attendeeCountry = String(formData?.attendee_country || '').trim() || 'Portugal';
-    const attendeeJobFunction = String(formData?.attendee_job_function || '').trim();
-    const attendeeJobFunctionOther = String(formData?.attendee_job_function_other || '').trim();
-    
-    const attendeeNif = String(formData?.attendee_nif || '').trim();
-    const attendeeCompany = String(formData?.attendee_company || '').trim();
-    const attendeeJobTitle = String(formData?.attendee_job_title || '').trim();
-    const attendeeTshirt = String(formData?.attendee_tshirt || '').trim();
+    const attendeeCountry = truncate(formData?.attendee_country, 2) || 'PT';
+    const attendeeJobFunction = truncate(formData?.attendee_job_function);
+    const attendeeJobFunctionOther = truncate(formData?.attendee_job_function_other);
+
+    const attendeeNif = truncate(formData?.attendee_nif, 20);
+    const attendeeCompany = truncate(formData?.attendee_company);
+    const attendeeJobTitle = truncate(formData?.attendee_job_title);
+    const attendeeTshirt = truncate(formData?.attendee_tshirt, 10);
 
     const saDataSharingConsent = Boolean(formData?.sa_data_sharing_consent);
     const saMarketingConsent = Boolean(formData?.sa_marketing_consent);
     const privacyConsent = Boolean(formData?.privacy_consent);
 
     const originalPrice = Number(ticketType.price);
-    let finalPrice = originalPrice;
+    let finalTicketPrice = originalPrice;
+    let finalRecordingPrice = RECORDING_PRICE;
     let appliedCoupon: CouponRow | null = null;
 
     const normalizedCouponCode = String(couponCode || '').trim().toUpperCase();
@@ -106,26 +114,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ message: 'Cupão inválido para este email.' });
       }
 
-      finalPrice = Math.round(originalPrice * (100 - appliedCoupon.discount_percent) / 100);
+      if (appliedCoupon.recording_only) {
+        if (includeRecording) {
+          if (appliedCoupon.discount_amount != null) {
+            finalRecordingPrice = Math.max(0, RECORDING_PRICE - appliedCoupon.discount_amount);
+          } else if (appliedCoupon.discount_percent != null) {
+            const total = originalPrice + RECORDING_PRICE;
+            const rawDiscount = Math.round(total * appliedCoupon.discount_percent / 100);
+            finalRecordingPrice = Math.max(0, RECORDING_PRICE - Math.min(rawDiscount, RECORDING_PRICE));
+          }
+        }
+      } else {
+        if (appliedCoupon.discount_amount != null) {
+          finalTicketPrice = Math.max(0, originalPrice - appliedCoupon.discount_amount);
+        } else if (appliedCoupon.discount_percent != null) {
+          finalTicketPrice = Math.round(originalPrice * (100 - appliedCoupon.discount_percent) / 100);
+        }
+      }
+    }
+
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `RSG Lisbon 2026 - ${ticketType.name}`,
+            description: appliedCoupon && !appliedCoupon.recording_only
+              ? `Acesso completo aos 2 dias de evento. Cupão ${appliedCoupon.code} aplicado.`
+              : 'Acesso completo aos 2 dias de evento.',
+          },
+          unit_amount: finalTicketPrice,
+        },
+        quantity,
+      },
+    ];
+
+    if (includeRecording) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: 'Acesso à Gravação do Evento - RSG Lisbon 2026',
+            description: appliedCoupon?.recording_only
+              ? `Vídeos de todas as sessões do evento. Cupão ${appliedCoupon.code} aplicado.`
+              : 'Vídeos de todas as sessões do evento.',
+          },
+          unit_amount: finalRecordingPrice,
+        },
+        quantity: 1,
+      });
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `RSG Lisbon 2026 - ${ticketType.name}`,
-              description: appliedCoupon
-                ? `Acesso completo aos 2 dias de evento. Cupão ${appliedCoupon.code} aplicado.`
-                : 'Acesso completo aos 2 dias de evento.',
-            },
-            unit_amount: finalPrice,
-          },
-          quantity,
-        },
-      ],
+      line_items: lineItems,
       mode: 'payment',
       customer_email: attendeeEmail,
       tax_id_collection: { enabled: true },
@@ -148,11 +190,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sa_marketing_consent: String(saMarketingConsent),
         privacy_consent: String(privacyConsent),
         
+        coupon_id: appliedCoupon?.id || '',
         coupon_code: appliedCoupon?.code || '',
-        coupon_discount_percent: appliedCoupon ? String(appliedCoupon.discount_percent) : '',
+        coupon_discount_percent: appliedCoupon?.discount_percent != null ? String(appliedCoupon.discount_percent) : '',
+        coupon_discount_amount: appliedCoupon?.discount_amount != null ? String(appliedCoupon.discount_amount) : '',
+        coupon_recording_only: appliedCoupon ? String(appliedCoupon.recording_only) : '',
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',
+        include_recording: String(includeRecording),
         original_price: String(originalPrice),
-        final_price: String(finalPrice),
+        final_price: String(finalTicketPrice + (includeRecording ? finalRecordingPrice : 0)),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#ticket-form`,

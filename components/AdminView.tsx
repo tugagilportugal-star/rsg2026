@@ -38,6 +38,7 @@ type OrderRow = {
   customer_nif?: string | null;
   customer_country?: string | null;
   total_amount?: number | null;
+  include_recording?: boolean | null;
   status?: string | null;
   invoice_id?: string | null;
 };
@@ -69,7 +70,9 @@ type CouponRow = {
   id: string;
   code: string;
   email?: string | null;
-  discount_percent: number;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  recording_only: boolean;
   single_use: boolean;
   active: boolean;
   created_at?: string | null;
@@ -101,13 +104,6 @@ function formatDatePt(value?: string | null) {
   return d.toLocaleString('pt-PT');
 }
 
-function formatMoney(value?: number | null, currency = 'EUR') {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) return '';
-  return new Intl.NumberFormat('pt-PT', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(Number(value));
-}
 
 function formatMoneyEURFromCents(cents?: number | null) {
   if (cents === null || cents === undefined || Number.isNaN(Number(cents))) return '';
@@ -131,7 +127,7 @@ function emptyTicketTypeForm(): TicketTypeForm {
 function toTicketTypeForm(row: TicketTypeRow): TicketTypeForm {
   return {
     name: row.name ?? '',
-    price: String(row.price ?? ''),
+    price: String(row.price != null ? (row.price / 100).toFixed(2) : ''),
     currency: row.currency ?? 'eur',
     quantity_total: String(row.quantity_total ?? 0),
     sort_order: String(row.sort_order ?? 0),
@@ -150,6 +146,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+  const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
+  const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
@@ -164,7 +163,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [couponForm, setCouponForm] = useState({
     code: '',
     email: '',
+    discount_type: 'percent' as 'percent' | 'amount',
     discount_percent: '10',
+    discount_amount: '',
+    recording_only: false,
     single_use: true,
     active: true,
   });
@@ -304,6 +306,29 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
+  async function generateInvoice(orderId: string) {
+    if (!authHeader) return;
+    setGeneratingInvoice(orderId);
+    setInvoiceError(null);
+    try {
+      const res = await fetch('/api/admin/invoice', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setInvoiceError({ orderId, msg: json.message || 'Erro desconhecido' });
+      } else {
+        await fetchOrders();
+      }
+    } catch (e: any) {
+      setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
+    } finally {
+      setGeneratingInvoice(null);
+    }
+  }
+
   async function fetchTickets() {
     if (!authHeader) return;
     setLoadingTickets(true);
@@ -430,7 +455,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setCouponForm({
       code: '',
       email: '',
+      discount_type: 'percent',
       discount_percent: '10',
+      discount_amount: '',
+      recording_only: false,
       single_use: true,
       active: true,
     });
@@ -443,10 +471,14 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   function openEditCoupon(row: CouponRow) {
     setEditingCoupon(row);
+    const hasAmount = row.discount_amount != null;
     setCouponForm({
       code: row.code || '',
       email: row.email || '',
-      discount_percent: String(row.discount_percent ?? 10),
+      discount_type: hasAmount ? 'amount' : 'percent',
+      discount_percent: row.discount_percent != null ? String(row.discount_percent) : '10',
+      discount_amount: hasAmount ? String(row.discount_amount! / 100) : '',
+      recording_only: Boolean(row.recording_only),
       single_use: Boolean(row.single_use),
       active: Boolean(row.active),
     });
@@ -463,7 +495,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         ...(editingCoupon ? { id: editingCoupon.id } : {}),
         code: couponForm.code,
         email: couponForm.email || null,
-        discount_percent: Number(couponForm.discount_percent),
+        discount_percent: couponForm.discount_type === 'percent' ? Number(couponForm.discount_percent) : null,
+        discount_amount: couponForm.discount_type === 'amount' ? couponForm.discount_amount : null,
+        recording_only: couponForm.recording_only,
         single_use: couponForm.single_use,
         active: couponForm.active,
       };
@@ -577,7 +611,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     e.preventDefault();
     if (!authHeader) return;
 
-    const price = Number(ticketTypeForm.price);
+    const priceEuros = Number(ticketTypeForm.price.replace(',', '.'));
+    const price = Math.round(priceEuros * 100);
     const quantityTotal = Number(ticketTypeForm.quantity_total);
     const sortOrder = Number(ticketTypeForm.sort_order);
 
@@ -586,7 +621,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return;
     }
 
-    if (!Number.isFinite(price) || price < 0) {
+    if (!Number.isFinite(priceEuros) || priceEuros < 0) {
       setError('Preço inválido');
       return;
     }
@@ -756,7 +791,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
     if (tab === 'orders') fetchOrders();
-    if (tab === 'tickets') fetchTickets();
+    if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
   }, [isAuthenticated, authHeader, tab]);
 
@@ -1139,7 +1174,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               <div className="font-bold text-gray-900">{row.name}</div>
                               <div className="text-xs text-gray-500">{row.currency?.toUpperCase()}</div>
                             </Td>
-                            <Td>{formatMoney(row.price, row.currency || 'EUR')}</Td>
+                            <Td>{formatMoneyEURFromCents(row.price)}</Td>
                             <Td>{total}</Td>
                             <Td>{sold}</Td>
                             <Td>
@@ -1287,16 +1322,17 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Total</Th>
                     <Th>Estado</Th>
                     <Th>Fatura</Th>
+                    <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingOrders ? (
                     <tr>
-                      <Td colSpan={6}>A carregar orders…</Td>
+                      <Td colSpan={7}>A carregar orders…</Td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
-                      <Td colSpan={6}>Sem orders.</Td>
+                      <Td colSpan={7}>Sem orders.</Td>
                     </tr>
                   ) : (
                     orders.map((row) => (
@@ -1306,7 +1342,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{safe(row.customer_email)}</Td>
                         <Td>{formatMoneyEURFromCents(row.total_amount)}</Td>
                         <Td>{safe(row.status)}</Td>
-                        <Td>{row.invoice_id ? 'Emitida' : 'Pendente'}</Td>
+                        <Td>
+                          {row.invoice_id
+                            ? <span className="text-green-600 font-medium">Emitida</span>
+                            : <span className="text-orange-500">Pendente</span>}
+                          {invoiceError?.orderId === row.id && (
+                            <div className="text-xs text-red-600 mt-1 max-w-xs break-words">{invoiceError.msg}</div>
+                          )}
+                        </Td>
+                        <Td>
+                          {!row.invoice_id && (
+                            <button
+                              onClick={() => generateInvoice(row.id)}
+                              disabled={generatingInvoice === row.id}
+                              className="text-xs px-3 py-1 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
+                            >
+                              {generatingInvoice === row.id ? 'A gerar…' : 'Gerar Fatura'}
+                            </button>
+                          )}
+                        </Td>
                       </tr>
                     ))
                   )}
@@ -1369,7 +1423,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
                           </div>
                         </Td>
-                        <Td>{safe(row.order_id)}</Td>
+                        <Td>
+                          {row.order_id ? (() => {
+                            const order = orders.find(o => o.id === row.order_id);
+                            return (
+                              <button
+                                onClick={() => order && setSelectedOrder(order)}
+                                className="text-[#003F59] hover:underline text-left"
+                                title={row.order_id}
+                              >
+                                {order ? formatMoneyEURFromCents(order.total_amount) : row.order_id.slice(0, 8) + '…'}
+                              </button>
+                            );
+                          })() : '—'}
+                        </Td>
                         <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
                       </tr>
                     ))
@@ -1387,6 +1454,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Código</Th>
                     <Th>Email</Th>
                     <Th>Desconto</Th>
+                    <Th>Gravação</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
                     <Th>Usado em</Th>
@@ -1397,18 +1465,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={8}>A carregar coupons…</Td>
+                      <Td colSpan={9}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={8}>Sem coupons.</Td>
+                      <Td colSpan={9}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
                       <tr key={row.id} className="border-t">
                         <Td>{row.code}</Td>
                         <Td>{row.email || '—'}</Td>
-                        <Td>{row.discount_percent}%</Td>
+                        <Td>
+                          {row.discount_amount != null
+                            ? `-€${(row.discount_amount / 100).toFixed(2)}`
+                            : row.discount_percent != null
+                            ? `-${row.discount_percent}%`
+                            : '—'}
+                        </Td>
+                        <Td>{row.recording_only ? 'Sim' : 'Não'}</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
                         <Td>{row.used_by_order_id || '—'}</Td>
@@ -1445,6 +1520,56 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           )}
         </div>
+
+        {selectedOrder && (
+          <div
+            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => setSelectedOrder(null)}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
+                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <dl className="space-y-2 text-sm">
+                {[
+                  ['Data', formatDatePt(selectedOrder.created_at)],
+                  ['Cliente', selectedOrder.customer_name || '—'],
+                  ['Email', selectedOrder.customer_email || '—'],
+                  ['NIF', selectedOrder.customer_nif || '—'],
+                  ['País', selectedOrder.customer_country || '—'],
+                  ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
+                  ['Estado', selectedOrder.status || '—'],
+                  ['Fatura', selectedOrder.invoice_id || 'Pendente'],
+                  ['Stripe Session', selectedOrder.stripe_session_id || '—'],
+                  ['ID', selectedOrder.id],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex gap-2">
+                    <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                    <dd className="text-gray-900 break-all">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              {!selectedOrder.invoice_id && (
+                <div className="mt-4">
+                  <button
+                    onClick={async () => { await generateInvoice(selectedOrder.id); setSelectedOrder(null); }}
+                    disabled={generatingInvoice === selectedOrder.id}
+                    className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
+                  >
+                    {generatingInvoice === selectedOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
+                  </button>
+                  {invoiceError?.orderId === selectedOrder.id && (
+                    <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {couponModalOpen && (
           <div
@@ -1508,21 +1633,73 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
                 </div>
 
-                <div>
+                <div className="md:col-span-2">
                   <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
-                    Desconto (%)
+                    Tipo de desconto
                   </div>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={couponForm.discount_percent}
-                    onChange={(e) =>
-                      setCouponForm({ ...couponForm, discount_percent: e.target.value })
-                    }
-                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
-                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCouponForm({ ...couponForm, discount_type: 'percent' })}
+                      className={`flex-1 rounded-2xl border px-4 py-2 text-sm font-bold ${couponForm.discount_type === 'percent' ? 'border-brand-darkBlue bg-brand-darkBlue text-white' : 'border-gray-300 text-gray-700'}`}
+                    >
+                      Percentagem (%)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCouponForm({ ...couponForm, discount_type: 'amount' })}
+                      className={`flex-1 rounded-2xl border px-4 py-2 text-sm font-bold ${couponForm.discount_type === 'amount' ? 'border-brand-darkBlue bg-brand-darkBlue text-white' : 'border-gray-300 text-gray-700'}`}
+                    >
+                      Valor fixo (€)
+                    </button>
+                  </div>
                 </div>
+
+                {couponForm.discount_type === 'percent' ? (
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Desconto (%)
+                    </div>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={couponForm.discount_percent}
+                      onChange={(e) =>
+                        setCouponForm({ ...couponForm, discount_percent: e.target.value })
+                      }
+                      className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                      Valor de desconto (€)
+                    </div>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={couponForm.discount_amount}
+                      onChange={(e) =>
+                        setCouponForm({ ...couponForm, discount_amount: e.target.value })
+                      }
+                      placeholder="Ex: 10.00"
+                      className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                    />
+                  </div>
+                )}
+
+                <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={couponForm.recording_only}
+                    onChange={(e) =>
+                      setCouponForm({ ...couponForm, recording_only: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm font-medium text-gray-700">Só para gravação</span>
+                </label>
 
                 <label className="flex items-center gap-3 rounded-2xl border border-gray-200 px-4 py-3">
                   <input
@@ -1652,11 +1829,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
 
                   <Input
-                    label="Preço"
-                    type="number"
+                    label="Preço (€)"
                     value={ticketTypeForm.price}
-                    onChange={(value) => updateTicketTypeForm('price', value)}
-                    placeholder="250"
+                    onChange={(value) => updateTicketTypeForm('price', value.replace(/[^0-9.,]/g, ''))}
+                    placeholder="42,80"
                   />
 
                   <Input
