@@ -1,7 +1,7 @@
 export const ASSETS = {
   HERO_BG: "/assets/Lisbon-hero-banner.jpg",
   GROUP_PHOTO_BG: "https://i.postimg.cc/xCHQMjQ4/Tugagil-608.jpg",
-  LISBON_BG: "/assets/lisboa.jpg",
+  LISBON_BG: "https://i.postimg.cc/Dy9vGwcL/Alto-de-Moinhos.webp",
   
   SPONSOR_LOGO: "/assets/Logo-Horizontal-Full-Color-Scrum-Alliance.png",
   TUGAGIL_LOGO: "/assets/Group-23.png",
