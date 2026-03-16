@@ -32,7 +32,7 @@ export const Speakers: React.FC = () => {
       // Substitua pelo link real da foto da Lyssa
       image: "https://i.postimg.cc/htmyQzQ1/Lyssa-Adkins.png", 
       linkedin: "https://www.linkedin.com/in/lyssaadkins/",
-      isRevealed: true
+      isRevealed: false
     },
     {
       id: "k3",
