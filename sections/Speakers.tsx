@@ -53,7 +53,7 @@ export const Speakers: React.FC = () => {
       name: "Ricardo Caldas",
       role: "Product Owner",
       // Substitua pelo link real da foto do Ricardo
-      image: "https://i.postimg.cc/kMTwDrw1/Ricardo_Caldas_(2).png",
+      image: "https://i.postimg.cc/htsVZTwL/Ricardo-Caldas-(3).png",
       linkedin: "https://www.linkedin.com/in/ricardo-caldas/", // Verifique o link
       isRevealed: true
     },
