@@ -56,9 +56,9 @@ export const About: React.FC = () => {
            
            <div className="mb-16 text-center lg:text-left">
               <span className="inline-block border border-brand-orange text-brand-orange rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest mb-4">
-                O Destino 2026
+                Destino 2026
               </span>
-              <h2 className="text-4xl md:text-6xl font-black mb-6">A nossa casa em Lisboa</h2>
+              <h2 className="text-4xl md:text-6xl font-black mb-6">Nossa casa em Lisboa</h2>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
                 Unimos a energia de um dos maiores ecossistemas tecnológicos da Europa à máxima conveniência para os nossos participantes.
               </p>
