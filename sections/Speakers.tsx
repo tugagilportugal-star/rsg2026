@@ -207,7 +207,7 @@ export const Speakers: React.FC = () => {
         <div className="mb-24">
             <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3">
                 <Sparkles className="text-brand-orange w-6 h-6" />
-                Featured Keynotes
+                Keynotes
             </h3>
             {/* Adapta-se perfeitamente: 1, 2 ou 3 colunas dependendo do ecrã */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -220,7 +220,7 @@ export const Speakers: React.FC = () => {
         {/* 2. Secção de Speakers */}
         <div>
             <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left">
-                Speakers & Panelists
+                Speakers
             </h3>
             {/* Grelha de Speakers: 2 no telemóvel, 3 no tablet, 5 no desktop */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">
