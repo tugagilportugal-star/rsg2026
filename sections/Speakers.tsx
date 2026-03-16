@@ -127,7 +127,6 @@ export const Speakers: React.FC = () => {
             </span>
             <h3 className="text-2xl md:text-3xl font-black text-white mb-1 leading-tight">{data.name}</h3>
             <p className="text-brand-orange font-bold text-xs mb-1">{data.role}</p>
-            <p className="text-gray-300 text-xs mb-4">{data.company}</p>
             
             {data.linkedin && (
               <a 
@@ -181,7 +180,6 @@ export const Speakers: React.FC = () => {
         
         <h4 className="font-bold text-lg text-brand-darkBlue mb-1">{data.name}</h4>
         <p className="text-xs font-medium text-brand-orange mb-1">{data.role}</p>
-        <p className="text-[11px] text-gray-500 leading-tight">{data.company}</p>
       </div>
     );
   };
