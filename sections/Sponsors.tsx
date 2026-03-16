@@ -34,7 +34,6 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
   ];
-
   // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {
@@ -143,6 +142,32 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                     src={sponsor.logo} 
                     alt={sponsor.name} 
                     className="h-12 md:h-16 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* --- COMMUNITY SUPPORTERS --- */}
+        {communitySupporters.length > 0 && (
+          <div className="mb-20">
+            <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
+              Community Supporters
+            </span>
+            <div className="flex flex-wrap justify-center gap-6 items-center">
+              {communitySupporters.map((sponsor, idx) => (
+                <a 
+                  key={idx} 
+                  href={sponsor.url}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group bg-white px-6 py-3 rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100"
+                  title={`Visitar ${sponsor.name}`}
+                >
+                  <img 
+                    src={sponsor.logo} 
+                    alt={sponsor.name} 
+                    className="h-10 md:h-12 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
                   />
                 </a>
               ))}
