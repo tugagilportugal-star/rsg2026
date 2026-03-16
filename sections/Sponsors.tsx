@@ -34,15 +34,6 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
   ];
-   // --- NOVA LISTA: COMUNIDADES APOIADORAS ---
-  const communitySupporters: Sponsor[] =[
-    {
-      name: "Geek Girls Portugal",
-      logo: "https://i.postimg.cc/y8HJw0xb/Geek-Girls-Portugal.jpg",
-      url: "https://geekgirlsportugal.pt/"
-    }
-  ];
-
   // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {
