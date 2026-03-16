@@ -1,7 +1,7 @@
 import React from 'react';
 import { Section } from '../components/UIComponents';
 import { ASSETS } from '../config';
-import { Download, ExternalLink } from 'lucide-react';
+import { Download } from 'lucide-react';
 
 interface SponsorsProps {
     onOpenSponsorModal: () => void;
@@ -17,29 +17,30 @@ interface Sponsor {
 export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
-  // --- LISTAS DE PATROCINADORES (ESTRUTURA PRONTA) ---
+  // --- LISTAS DE PATROCINADORES ---
   
-  const goldSponsors: Sponsor[] = [
-    // Exemplo futuro:
-    // { name: "Empresa Gold", logo: "link_imagem", url: "https://..." },
-  ];
+  const goldSponsors: Sponsor[] = [];
+  const silverSponsors: Sponsor[] = [];
 
-  const silverSponsors: Sponsor[] = [
-    // Exemplo futuro:
-    // { name: "Empresa Silver", logo: "link_imagem", url: "https://..." },
-  ];
-
-  const bronzeSponsors: Sponsor[] = [
+  const bronzeSponsors: Sponsor[] =[
     { 
       name: "Ateliê de Software", 
-      logo: ASSETS.ATELIE_LOGO, // Certifique-se de configurar no config.ts
+      logo: ASSETS.ATELIE_LOGO,
       url: "https://atelie.software/" 
     },
     {
        name: "Tabaqueira", 
-       logo: ASSETS.TABAQUEIRA_LOGO, // Certifique-se de configurar no config.ts
+       logo: ASSETS.TABAQUEIRA_LOGO,
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
+  ];
+  // --- COMUNIDADES APOIADORAS ---
+  const communitySupporters: Sponsor[] =[
+    {
+      name: "Geek Girls Portugal",
+      logo: "https://i.postimg.cc/y8HJw0xb/Geek-Girls-Portugal.jpg",
+      url: "https://geekgirlsportugal.pt/"
+    }
   ];
 
   return (
@@ -69,7 +70,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </div>
         </div>
 
-        {/* --- GOLD SPONSORS (SÓ APARECE SE TIVER DADOS) --- */}
+        {/* --- GOLD SPONSORS --- */}
         {goldSponsors.length > 0 && (
           <div className="mb-16">
             <span className="text-xs font-bold tracking-[0.2em] text-yellow-600 uppercase mb-8 block">
@@ -95,7 +96,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
           </div>
         )}
 
-        {/* --- SILVER SPONSORS (SÓ APARECE SE TIVER DADOS) --- */}
+        {/* --- SILVER SPONSORS --- */}
         {silverSponsors.length > 0 && (
           <div className="mb-16">
             <span className="text-xs font-bold tracking-[0.2em] text-gray-500 uppercase mb-8 block">
@@ -141,6 +142,32 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                     src={sponsor.logo} 
                     alt={sponsor.name} 
                     className="h-12 md:h-16 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* --- COMMUNITY SUPPORTERS --- */}
+        {communitySupporters.length > 0 && (
+          <div className="mb-20">
+            <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
+              Community Supporters
+            </span>
+            <div className="flex flex-wrap justify-center gap-6 items-center">
+              {communitySupporters.map((sponsor, idx) => (
+                <a 
+                  key={idx} 
+                  href={sponsor.url}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group bg-white px-6 py-3 rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100"
+                  title={`Visitar ${sponsor.name}`}
+                >
+                  <img 
+                    src={sponsor.logo} 
+                    alt={sponsor.name} 
+                    className="h-10 md:h-12 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
                   />
                 </a>
               ))}
