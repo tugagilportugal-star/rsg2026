@@ -3,10 +3,8 @@ import { Section } from '../components/UIComponents';
 import { Linkedin, Sparkles, UserCircle2 } from 'lucide-react';
 
 interface SpeakerData {
-  id: string;
   name: string;
   role: string;
-  company: string;
   image: string;
   linkedin: string;
   isRevealed: boolean;
