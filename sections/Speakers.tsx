@@ -195,7 +195,7 @@ export const Speakers: React.FC = () => {
             O Line-Up
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
-            Keynotes / Speakers
+            Keynotes & Speakers
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
             Grandes nomes da agilidade, inovação e inteligência artificial.
