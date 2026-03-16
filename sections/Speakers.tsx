@@ -20,22 +20,21 @@ export const Speakers: React.FC = () => {
   const keynotes: SpeakerData[] =[
     {
       id: "k1",
-      name: "Lyssa Adkins",
-      role: "Author of Coaching Agile Teams",
-      company: "Systems Coach",
-      // Substitua pelo link real da foto da Lyssa
-      image: "https://ui-avatars.com/api/?name=Lyssa+Adkins&background=F47A20&color=fff&size=600", 
-      linkedin: "https://www.linkedin.com/in/lyssaadkins/",
-      isRevealed: true
-    },
-    {
-      id: "k2",
       name: "TBA",
       role: "Global Leader",
       company: "To Be Announced",
       image: "",
       linkedin: "",
       isRevealed: false
+    },
+    {
+      id: "k2",
+      name: "Lyssa Adkins",
+      role: "Author of Coaching Agile Teams",
+      // Substitua pelo link real da foto da Lyssa
+      image: "https://i.postimg.cc/htmyQzQ1/Lyssa-Adkins.png", 
+      linkedin: "https://www.linkedin.com/in/lyssaadkins/",
+      isRevealed: true
     },
     {
       id: "k3",
@@ -56,20 +55,18 @@ export const Speakers: React.FC = () => {
       id: "s1",
       name: "Ricardo Caldas",
       role: "Product Owner",
-      company: "Volkswagen Group Digital Solutions",
       // Substitua pelo link real da foto do Ricardo
-      image: "https://ui-avatars.com/api/?name=Ricardo+Caldas&background=003F59&color=fff&size=400",
-      linkedin: "https://www.linkedin.com/in/ricardocaldas/", // Verifique o link
+      image: "https://i.postimg.cc/SxbL5Zjk/Ricardo-Caldas-(1).png",
+      linkedin: "https://www.linkedin.com/in/ricardo-caldas/", // Verifique o link
       isRevealed: true
     },
     {
       id: "s2",
       name: "Joana Silva",
-      role: "Engineering Leader",
-      company: "TBA",
-      image: "https://ui-avatars.com/api/?name=Joana+Silva&background=003F59&color=fff&size=400",
-      linkedin: "#",
-      isRevealed: false // Mude para true quando anunciar
+      role: "Director of Quality Assurance",
+      image: "https://i.postimg.cc/Gpwcvy73/Joana-Silva.png",
+      linkedin: "https://www.linkedin.com/in/joanacssilva/",
+      isRevealed: true // Mude para true quando anunciar
     },
     {
       id: "s3",
