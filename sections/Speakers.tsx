@@ -3,6 +3,7 @@ import { Section } from '../components/UIComponents';
 import { Linkedin, Sparkles, UserCircle2 } from 'lucide-react';
 
 interface SpeakerData {
+  id: string;
   name: string;
   role: string;
   image: string;
@@ -20,7 +21,6 @@ export const Speakers: React.FC = () => {
       id: "k1",
       name: "TBA",
       role: "Global Leader",
-      company: "To Be Announced",
       image: "",
       linkedin: "",
       isRevealed: false
@@ -38,7 +38,6 @@ export const Speakers: React.FC = () => {
       id: "k3",
       name: "TBA",
       role: "Industry Expert",
-      company: "To Be Announced",
       image: "",
       linkedin: "",
       isRevealed: false
@@ -70,7 +69,6 @@ export const Speakers: React.FC = () => {
       id: "s3",
       name: "Manuel Pais",
       role: "Co-author of Team Topologies",
-      company: "IT Revolution",
       image: "https://ui-avatars.com/api/?name=Manuel+Pais&background=003F59&color=fff&size=400",
       linkedin: "https://www.linkedin.com/in/manuelpais/",
       isRevealed: false // Mude para true quando anunciar
@@ -78,8 +76,7 @@ export const Speakers: React.FC = () => {
     {
       id: "s4",
       name: "Paulo Caroli",
-      role: "Author of Lean Inception",
-      company: "Thoughtworks",
+      role: "Author of Lean Inception & Team OKRs",
       image: "https://ui-avatars.com/api/?name=Paulo+Caroli&background=003F59&color=fff&size=400",
       linkedin: "https://www.linkedin.com/in/paulocaroli/",
       isRevealed: false // Mude para true quando anunciar
@@ -89,7 +86,6 @@ export const Speakers: React.FC = () => {
       id: `tba-${i+5}`,
       name: "Revealing Soon",
       role: "Agile Practitioner",
-      company: "TBA",
       image: "",
       linkedin: "",
       isRevealed: false
