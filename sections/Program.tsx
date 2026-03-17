@@ -44,7 +44,7 @@ export const Program: React.FC = () => {
           
           <div className="max-w-3xl mx-auto">
             <p className="text-white text-xl md:text-2xl font-medium leading-relaxed mb-4">
-              A estrutura do evento foi desenhada para conectar <span className="text-brand-orange">Agilidade</span>, <span className="text-brand-blue">Inovação</span> e <span className="text-purple-400">Inteligência Artificial</span>.
+              A estrutura do evento foi desenhada para conectar <span className="text-brand-orange">Agilidade</span>, <span className="text-brand-orange">Inovação</span> e <span className="text-orange-400">Inteligência Artificial</span>.
             </p>
           </div>
         </div>
