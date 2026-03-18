@@ -103,7 +103,7 @@ async function billCreateDocument(params: {
     pais: params.countryIso,
   };
   if (params.customerNif) {
-    contato.contribuinte = params.customerNif;
+    contato.nif = params.customerNif;
   }
 
   const body = {
