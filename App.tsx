@@ -80,7 +80,7 @@ const App: React.FC = () => {
       </Modal>
 
       <Modal isOpen={isTicketModalOpen} onClose={() => setTicketModalOpen(false)} title="Early Bird Ticket">
-        <TicketForm />
+        <TicketPurchaseModal />
       </Modal>
 
       <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
