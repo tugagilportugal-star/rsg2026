@@ -35,7 +35,6 @@ type OrderRow = {
   stripe_session_id?: string | null;
   customer_email?: string | null;
   customer_name?: string | null;
-  customer_nif?: string | null;
   customer_country?: string | null;
   total_amount?: number | null;
   include_recording?: boolean | null;
@@ -152,6 +151,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
@@ -790,7 +790,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!isAuthenticated) return;
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
-    if (tab === 'orders') fetchOrders();
+    if (tab === 'orders') { fetchOrders(); fetchTickets(); }
     if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
   }, [isAuthenticated, authHeader, tab]);
@@ -1395,7 +1395,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </tr>
                   ) : (
                     tickets.map((row) => (
-                      <tr key={row.id} className="border-t">
+                      <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedTicket(row)}>
                         <Td>{formatDatePt(row.created_at)}</Td>
                         <Td>
                           <div className="font-medium text-gray-900">
@@ -1428,7 +1428,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             const order = orders.find(o => o.id === row.order_id);
                             return (
                               <button
-                                onClick={() => order && setSelectedOrder(order)}
+                                onClick={(e) => { e.stopPropagation(); order && setSelectedOrder(order); }}
                                 className="text-[#003F59] hover:underline text-left"
                                 title={row.order_id}
                               >
@@ -1521,52 +1521,97 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           )}
         </div>
 
-        {selectedOrder && (
+        {selectedOrder && (() => {
+          const orderTicket = tickets.find(t => t.order_id === selectedOrder.id);
+          return (
+            <div
+              className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+              onClick={() => setSelectedOrder(null)}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
+                  <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                </div>
+                <dl className="space-y-2 text-sm">
+                  {[
+                    ['Data', formatDatePt(selectedOrder.created_at)],
+                    ['Cliente', selectedOrder.customer_name || '—'],
+                    ['Email', selectedOrder.customer_email || '—'],
+                    ['NIF', orderTicket?.attendee_nif || '—'],
+                    ['País', selectedOrder.customer_country || '—'],
+                    ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
+                    ['Estado', selectedOrder.status || '—'],
+                    ['Fatura', selectedOrder.invoice_id || 'Pendente'],
+                    ['Stripe Session', selectedOrder.stripe_session_id || '—'],
+                    ['ID', selectedOrder.id],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex gap-2">
+                      <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                      <dd className="text-gray-900 break-all">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {!selectedOrder.invoice_id && (
+                  <div className="mt-4">
+                    <button
+                      onClick={async () => { await generateInvoice(selectedOrder.id); setSelectedOrder(null); }}
+                      disabled={generatingInvoice === selectedOrder.id}
+                      className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
+                    >
+                      {generatingInvoice === selectedOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
+                    </button>
+                    {invoiceError?.orderId === selectedOrder.id && (
+                      <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {selectedTicket && (
           <div
             className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
-            onClick={() => setSelectedOrder(null)}
+            onClick={() => setSelectedTicket(null)}
           >
             <div
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
-                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                <h3 className="text-lg font-bold text-[#003F59]">Detalhes do Ticket</h3>
+                <button onClick={() => setSelectedTicket(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
               </div>
               <dl className="space-y-2 text-sm">
-                {[
-                  ['Data', formatDatePt(selectedOrder.created_at)],
-                  ['Cliente', selectedOrder.customer_name || '—'],
-                  ['Email', selectedOrder.customer_email || '—'],
-                  ['NIF', selectedOrder.customer_nif || '—'],
-                  ['País', selectedOrder.customer_country || '—'],
-                  ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
-                  ['Estado', selectedOrder.status || '—'],
-                  ['Fatura', selectedOrder.invoice_id || 'Pendente'],
-                  ['Stripe Session', selectedOrder.stripe_session_id || '—'],
-                  ['ID', selectedOrder.id],
-                ].map(([label, value]) => (
+                {([
+                  ['Data', formatDatePt(selectedTicket.created_at)],
+                  ['Nome', selectedTicket.attendee_name || `${selectedTicket.attendee_first_name || ''} ${selectedTicket.attendee_last_name || ''}`.trim() || '—'],
+                  ['Email', selectedTicket.attendee_email || '—'],
+                  ['País', selectedTicket.attendee_country || '—'],
+                  ['NIF', selectedTicket.attendee_nif || '—'],
+                  ['Empresa', selectedTicket.attendee_company || '—'],
+                  ['Cargo', selectedTicket.attendee_job_title || '—'],
+                  ['Função', selectedTicket.attendee_job_function
+                    ? selectedTicket.attendee_job_function + (selectedTicket.attendee_job_function_other ? ` · ${selectedTicket.attendee_job_function_other}` : '')
+                    : '—'],
+                  ['T-Shirt', selectedTicket.attendee_tshirt || '—'],
+                  ['Dados SA', selectedTicket.sa_data_sharing_consent ? 'Sim' : 'Não'],
+                  ['Marketing SA', selectedTicket.sa_marketing_consent ? 'Sim' : 'Não'],
+                  ['Privacidade', selectedTicket.privacy_consent ? 'Sim' : 'Não'],
+                  ['Check-in', selectedTicket.checked_in ? `Sim · ${formatDatePt(selectedTicket.check_in_at)}` : 'Não'],
+                  ['ID', selectedTicket.id],
+                ] as [string, string][]).map(([label, value]) => (
                   <div key={label} className="flex gap-2">
                     <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
                     <dd className="text-gray-900 break-all">{value}</dd>
                   </div>
                 ))}
               </dl>
-              {!selectedOrder.invoice_id && (
-                <div className="mt-4">
-                  <button
-                    onClick={async () => { await generateInvoice(selectedOrder.id); setSelectedOrder(null); }}
-                    disabled={generatingInvoice === selectedOrder.id}
-                    className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
-                  >
-                    {generatingInvoice === selectedOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
-                  </button>
-                  {invoiceError?.orderId === selectedOrder.id && (
-                    <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         )}
