@@ -26,7 +26,6 @@ const App: React.FC = () => {
   if (isAdminRoute) {
     return <AdminView onClose={() => { window.location.href = '/'; }} />;
   }
-
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get('success')) {
@@ -37,3 +36,29 @@ const App: React.FC = () => {
       alert('A compra foi cancelada.');
     }
   },
+  return (
+    <div className="bg-white">
+      <Navbar />
+      <Hero />
+      <About />
+      <Features />
+      <Program />
+      
+      {/* Secção de Tickets com a função de abrir o Modal */}
+      <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
+      
+      <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+      <Recap />
+      <GetInvolved
+        setSponsorModalOpen={setSponsorModalOpen}
+        setSupporterModalOpen={setSupporterModalOpen}
+      />
+      <FAQ />
+      <Team />
+      <Footer />
+
+      {/* Botão Admin Escondido */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => (window.location.href = '/admin')}
+          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text
