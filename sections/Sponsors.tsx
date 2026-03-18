@@ -7,7 +7,6 @@ interface SponsorsProps {
     onOpenSponsorModal: () => void;
 }
 
-// Interface para os dados do patrocinador
 interface Sponsor {
   name: string;
   logo: string;
@@ -19,7 +18,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
 
   // --- LISTAS DE PATROCINADORES ---
   
-  const goldSponsors: Sponsor[] = [];
+  const goldSponsors: Sponsor[] =[];
   const silverSponsors: Sponsor[] = [];
 
   const bronzeSponsors: Sponsor[] =[
@@ -34,12 +33,18 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
   ];
+
   // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
       logo: "https://i.postimg.cc/y8HJw0xb/Geek-Girls-Portugal.jpg",
       url: "https://geekgirlsportugal.pt/"
+    },
+    {
+      name: "Agile Academy",
+      logo: "https://i.postimg.cc/7L5DFnSk/Agile-Academy.png", 
+      url: "https://www.agile-academy.com/pt/" 
     }
   ];
 
@@ -148,26 +153,29 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </div>
           </div>
         )}
+
         {/* --- COMMUNITY SUPPORTERS --- */}
         {communitySupporters.length > 0 && (
           <div className="mb-20">
             <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
               Community Supporters
             </span>
-            <div className="flex flex-wrap justify-center gap-6 items-center">
+            {/* Adicionado um layout flex com wrap para acomodar os logos lado a lado graciosamente */}
+            <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
               {communitySupporters.map((sponsor, idx) => (
                 <a 
                   key={idx} 
                   href={sponsor.url}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group bg-white px-6 py-3 rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100"
+                  className="group bg-white px-6 py-4 rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24"
                   title={`Visitar ${sponsor.name}`}
                 >
                   <img 
                     src={sponsor.logo} 
                     alt={sponsor.name} 
-                    className="h-10 md:h-12 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
+                    // Limitado a altura máxima e largura para não quebrar o alinhamento
+                    className="max-h-12 max-w-[160px] w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
                   />
                 </a>
               ))}
