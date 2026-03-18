@@ -160,7 +160,6 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
               Community Supporters
             </span>
-            {/* Adicionado um layout flex com wrap para acomodar os logos lado a lado graciosamente */}
             <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
               {communitySupporters.map((sponsor, idx) => (
                 <a 
@@ -168,14 +167,15 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                   href={sponsor.url}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group bg-white px-6 py-4 rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24"
+                  /* FIXAMOS o tamanho do cartão: h-24 (altura) e w-48 (largura) para todos serem iguais */
+                  className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-4"
                   title={`Visitar ${sponsor.name}`}
                 >
                   <img 
                     src={sponsor.logo} 
                     alt={sponsor.name} 
-                    // Limitado a altura máxima e largura para não quebrar o alinhamento
-                    className="max-h-12 max-w-[160px] w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
+                    /* FIXAMOS a imagem para ocupar o espaço total uniformemente */
+                    className="h-14 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
                   />
                 </a>
               ))}
