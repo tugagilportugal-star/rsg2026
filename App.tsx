@@ -41,15 +41,13 @@ const App: React.FC = () => {
     <div className="bg-white">
       <Navbar />
       <Hero />
+      {/* Secção de Tickets com a função de abrir o Modal */}
+      <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
       <About />
       <Features />
       <Program />
-      
-      {/* Secção de Tickets com a função de abrir o Modal */}
-      <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-      
+      <Recap />      
       <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-      <Recap />
       <GetInvolved
         setSponsorModalOpen={setSponsorModalOpen}
         setSupporterModalOpen={setSupporterModalOpen}
