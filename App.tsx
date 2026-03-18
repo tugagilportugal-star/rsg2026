@@ -57,9 +57,10 @@ const App: React.FC = () => {
       <Team />
       <Footer />
     </div>
-
+    
       {/* Botão Admin Escondido */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => (window.location.href = '/admin')}
           className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text
+      </div>
