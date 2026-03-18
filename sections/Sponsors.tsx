@@ -38,12 +38,12 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
-      logo: "https://i.postimg.cc/g2XN1ggh/Geek-Girls-Portugal.png",
+      logo: "https://i.postimg.cc/wM4pvW8v/Geek-Girls-Portugal.jpg",
       url: "https://geekgirlsportugal.pt/"
     },
     {
       name: "Agile Academy",
-      logo: "https://i.postimg.cc/mDxqmvRk/Agile-Academy-(1).png", 
+      logo: "https://defo0p6yzl68u.cloudfront.net/production/layout/Agile-Academy-Logo@2x.png", 
       url: "https://www.agile-academy.com/pt/" 
     }
   ];
