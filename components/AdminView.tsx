@@ -370,9 +370,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setCreditNoteForRefund(false);
         await fetchOrders();
         await fetchTickets();
-        if (wasForRefund && ncOrderId) {
-          setRefundModal({ orderId: ncOrderId, orderLabel: json.creditNoteNumber || ncOrderLabel || ncOrderId, creditNoteMotivo: motivo });
-        }
       }
     } catch (e: any) {
       setCreditNoteError(e?.message || 'Erro de rede');
