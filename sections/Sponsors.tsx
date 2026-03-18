@@ -43,7 +43,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
     },
     {
       name: "Agile Academy",
-      logo: "https://defo0p6yzl68u.cloudfront.net/production/layout/Agile-Academy-Logo@2x.png", 
+      logo: "https://i.postimg.cc/02mCfzjY/Agile-Academy.png", 
       url: "https://www.agile-academy.com/pt/" 
     }
   ];
