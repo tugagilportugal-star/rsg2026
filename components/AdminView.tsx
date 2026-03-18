@@ -947,7 +947,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
     if (tab === 'orders') { fetchOrders(); fetchTickets(); }
-    if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
+    if (tab === 'tickets') { fetchTickets(); fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
     if (tab === 'logs') fetchLogs();
   }, [adminUser?.email, tab]);

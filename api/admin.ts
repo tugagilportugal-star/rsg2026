@@ -21,7 +21,10 @@ function getRouteParts(req: VercelRequest): string[] {
 
 function parseBody(req: VercelRequest) {
   if (!req.body) return {};
-  return typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  if (typeof req.body === 'string') {
+    try { return JSON.parse(req.body); } catch { return {}; }
+  }
+  return req.body;
 }
 
 function normalizeTicketTypeInput(body: any, partial = false) {

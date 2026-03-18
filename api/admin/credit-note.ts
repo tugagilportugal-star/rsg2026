@@ -36,6 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!orderId) return res.status(400).json({ message: 'order_id é obrigatório.' });
   if (!motivo) return res.status(400).json({ message: 'motivo é obrigatório.' });
+  if (motivo.length > 500) return res.status(400).json({ message: 'motivo demasiado longo (máx. 500 caracteres).' });
 
   // Fetch order
   const { data: order, error: orderErr } = await supabase

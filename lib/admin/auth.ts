@@ -35,11 +35,12 @@ export async function logAction(
   entityId?: string,
   details?: Record<string, unknown>
 ) {
-  await supabase.from('admin_audit_log').insert({
+  const { error } = await supabase.from('admin_audit_log').insert({
     admin_email: adminEmail,
     action,
     entity_type: entityType ?? null,
     entity_id: entityId ?? null,
     details: details ?? null,
   });
+  if (error) console.error('[logAction] failed to write audit log:', error.message);
 }
