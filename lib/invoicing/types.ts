@@ -25,6 +25,7 @@ export type CreateInvoiceInput = {
 export type CreateInvoiceResult = {
   provider: BillingProvider;
   invoiceId: string | null;
+  invoiceNumber?: string | null;
   status: string | null;
   permalink?: string | null;
   pdfBytes?: Buffer | null;
@@ -53,6 +54,7 @@ export type IssueInvoiceInput = {
 export type IssueInvoiceResult = {
   provider: BillingProvider;
   invoiceId: string | null;
+  invoiceNumber: string | null;
   status: string | null;
   permalink: string | null;
   pdfBytes: Buffer | null;

@@ -61,10 +61,11 @@ export async function issueInvoiceForOrder(
   return {
     provider: res.provider,
     invoiceId: res.invoiceId,
+    invoiceNumber: res.invoiceNumber ?? null,
     status: res.status,
     permalink: res.permalink ?? null,
     pdfBytes: res.pdfBytes ?? null,
-    total: totalStr,          // 👈 o webhook usa isto
+    total: totalStr,
     totalEuro: res.totalEuro ?? null,
     raw: res.raw,
   };

@@ -35,12 +35,12 @@ type OrderRow = {
   stripe_session_id?: string | null;
   customer_email?: string | null;
   customer_name?: string | null;
-  customer_nif?: string | null;
   customer_country?: string | null;
   total_amount?: number | null;
   include_recording?: boolean | null;
   status?: string | null;
   invoice_id?: string | null;
+  invoice_number?: string | null;
 };
 
 type TicketRow = {
@@ -152,6 +152,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
@@ -790,7 +791,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!isAuthenticated) return;
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
-    if (tab === 'orders') fetchOrders();
+    if (tab === 'orders') { fetchOrders(); fetchTickets(); }
     if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
   }, [isAuthenticated, authHeader, tab]);
@@ -1322,21 +1323,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Total</Th>
                     <Th>Estado</Th>
                     <Th>Fatura</Th>
-                    <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingOrders ? (
                     <tr>
-                      <Td colSpan={7}>A carregar orders…</Td>
+                      <Td colSpan={6}>A carregar orders…</Td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
-                      <Td colSpan={7}>Sem orders.</Td>
+                      <Td colSpan={6}>Sem orders.</Td>
                     </tr>
                   ) : (
                     orders.map((row) => (
-                      <tr key={row.id} className="border-t">
+                      <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedOrder(row)}>
                         <Td>{formatDatePt(row.created_at)}</Td>
                         <Td>{safe(row.customer_name)}</Td>
                         <Td>{safe(row.customer_email)}</Td>
@@ -1346,20 +1346,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                           {row.invoice_id
                             ? <span className="text-green-600 font-medium">Emitida</span>
                             : <span className="text-orange-500">Pendente</span>}
-                          {invoiceError?.orderId === row.id && (
-                            <div className="text-xs text-red-600 mt-1 max-w-xs break-words">{invoiceError.msg}</div>
-                          )}
-                        </Td>
-                        <Td>
-                          {!row.invoice_id && (
-                            <button
-                              onClick={() => generateInvoice(row.id)}
-                              disabled={generatingInvoice === row.id}
-                              className="text-xs px-3 py-1 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
-                            >
-                              {generatingInvoice === row.id ? 'A gerar…' : 'Gerar Fatura'}
-                            </button>
-                          )}
                         </Td>
                       </tr>
                     ))
@@ -1380,7 +1366,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>NIF</Th>
                     <Th>T-Shirt</Th>
                     <Th>Consentimentos</Th>
-                    <Th>Order</Th>
+                    <Th>Pagamento / Fatura</Th>
                     <Th>Check-in</Th>
                   </tr>
                 </thead>
@@ -1394,52 +1380,63 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       <Td colSpan={8}>Sem tickets.</Td>
                     </tr>
                   ) : (
-                    tickets.map((row) => (
-                      <tr key={row.id} className="border-t">
-                        <Td>{formatDatePt(row.created_at)}</Td>
-                        <Td>
-                          <div className="font-medium text-gray-900">
-                            {safe(row.attendee_name) ||
-                              `${safe(row.attendee_first_name)} ${safe(row.attendee_last_name)}`.trim() ||
-                              '—'}
-                          </div>
-                          <div className="text-xs text-gray-500">{safe(row.attendee_email) || '—'}</div>
-                          <div className="text-xs text-gray-500">{safe(row.attendee_country) || '—'}</div>
-                        </Td>
-                        <Td>
-                          <div>{safe(row.attendee_company) || '—'}</div>
-                          <div className="text-xs text-gray-500">{safe(row.attendee_job_title) || '—'}</div>
-                          <div className="text-xs text-gray-500">
-                            {safe(row.attendee_job_function) || '—'}
-                            {row.attendee_job_function_other ? ` · ${safe(row.attendee_job_function_other)}` : ''}
-                          </div>
-                        </Td>
-                        <Td>{safe(row.attendee_nif) || '—'}</Td>
-                        <Td>{safe(row.attendee_tshirt) || '—'}</Td>
-                        <Td>
-                          <div className="text-xs text-gray-700">
-                            <div>Dados SA: {row.sa_data_sharing_consent ? '✔' : '—'}</div>
-                            <div>Marketing SA: {row.sa_marketing_consent ? '✔' : '—'}</div>
-                            <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
-                          </div>
-                        </Td>
-                        <Td>
-                          {row.order_id ? (() => {
-                            const order = orders.find(o => o.id === row.order_id);
-                            return (
-                              <button
-                                onClick={() => order && setSelectedOrder(order)}
-                                className="text-[#003F59] hover:underline text-left"
-                                title={row.order_id}
-                              >
-                                {order ? formatMoneyEURFromCents(order.total_amount) : row.order_id.slice(0, 8) + '…'}
-                              </button>
-                            );
-                          })() : '—'}
-                        </Td>
-                        <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
-                      </tr>
-                    ))
+                    tickets.map((row) => {
+                      const order = orders.find(o => o.id === row.order_id);
+                      return (
+                        <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedTicket(row)}>
+                          <Td>{formatDatePt(row.created_at)}</Td>
+                          <Td>
+                            <div className="font-medium text-gray-900">
+                              {safe(row.attendee_name) ||
+                                `${safe(row.attendee_first_name)} ${safe(row.attendee_last_name)}`.trim() ||
+                                '—'}
+                            </div>
+                            <div className="text-xs text-gray-500">{safe(row.attendee_email) || '—'}</div>
+                            <div className="text-xs text-gray-500">{safe(row.attendee_country) || '—'}</div>
+                          </Td>
+                          <Td>
+                            <div>{safe(row.attendee_company) || '—'}</div>
+                            <div className="text-xs text-gray-500">{safe(row.attendee_job_title) || '—'}</div>
+                            <div className="text-xs text-gray-500">
+                              {safe(row.attendee_job_function) || '—'}
+                              {row.attendee_job_function_other ? ` · ${safe(row.attendee_job_function_other)}` : ''}
+                            </div>
+                          </Td>
+                          <Td>{safe(row.attendee_nif) || '—'}</Td>
+                          <Td>{safe(row.attendee_tshirt) || '—'}</Td>
+                          <Td>
+                            <div className="text-xs text-gray-700">
+                              <div>Dados SA: {row.sa_data_sharing_consent ? '✔' : '—'}</div>
+                              <div>Marketing SA: {row.sa_marketing_consent ? '✔' : '—'}</div>
+                              <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
+                            </div>
+                          </Td>
+                          <Td>
+                            {order ? (
+                              <div className="space-y-1">
+                                <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
+                                {order.invoice_id
+                                  ? <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                  : (
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); generateInvoice(order.id); }}
+                                      disabled={generatingInvoice === order.id}
+                                      className="text-xs px-2 py-0.5 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
+                                    >
+                                      {generatingInvoice === order.id ? 'A gerar…' : 'Gerar Fatura'}
+                                    </button>
+                                  )
+                                }
+                                {invoiceError?.orderId === order.id && (
+                                  <div className="text-xs text-red-600 max-w-xs break-words">{invoiceError.msg}</div>
+                                )}
+                              </div>
+                            ) : '—'}
+                          </Td>
+                          <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -1521,55 +1518,105 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           )}
         </div>
 
-        {selectedOrder && (
-          <div
-            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
-            onClick={() => setSelectedOrder(null)}
-          >
+        {selectedOrder && (() => {
+          const orderTicket = tickets.find(t => t.order_id === selectedOrder.id);
+          return (
             <div
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+              onClick={() => setSelectedOrder(null)}
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
-                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
-              </div>
-              <dl className="space-y-2 text-sm">
-                {[
-                  ['Data', formatDatePt(selectedOrder.created_at)],
-                  ['Cliente', selectedOrder.customer_name || '—'],
-                  ['Email', selectedOrder.customer_email || '—'],
-                  ['NIF', selectedOrder.customer_nif || '—'],
-                  ['País', selectedOrder.customer_country || '—'],
-                  ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
-                  ['Estado', selectedOrder.status || '—'],
-                  ['Fatura', selectedOrder.invoice_id || 'Pendente'],
-                  ['Stripe Session', selectedOrder.stripe_session_id || '—'],
-                  ['ID', selectedOrder.id],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex gap-2">
-                    <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
-                    <dd className="text-gray-900 break-all">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-              {!selectedOrder.invoice_id && (
-                <div className="mt-4">
-                  <button
-                    onClick={async () => { await generateInvoice(selectedOrder.id); setSelectedOrder(null); }}
-                    disabled={generatingInvoice === selectedOrder.id}
-                    className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
-                  >
-                    {generatingInvoice === selectedOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
-                  </button>
-                  {invoiceError?.orderId === selectedOrder.id && (
-                    <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
-                  )}
+              <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
+                  <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
                 </div>
-              )}
+                <dl className="space-y-2 text-sm">
+                  {[
+                    ['Data', formatDatePt(selectedOrder.created_at)],
+                    ['Cliente', selectedOrder.customer_name || '—'],
+                    ['Email', selectedOrder.customer_email || '—'],
+                    ['NIF', orderTicket?.attendee_nif || '—'],
+                    ['País', selectedOrder.customer_country || '—'],
+                    ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
+                    ['Estado', selectedOrder.status || '—'],
+                    ['Nº Fatura', selectedOrder.invoice_number || selectedOrder.invoice_id || 'Pendente'],
+                    ['Stripe Session', selectedOrder.stripe_session_id || '—'],
+                    ['ID', selectedOrder.id],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex gap-2">
+                      <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                      <dd className="text-gray-900 break-all">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
+
+        {selectedTicket && (() => {
+          const ticketOrder = orders.find(o => o.id === selectedTicket.order_id);
+          return (
+            <div
+              className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+              onClick={() => setSelectedTicket(null)}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-[#003F59]">Detalhes do Ticket</h3>
+                  <button onClick={() => setSelectedTicket(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                </div>
+                <dl className="space-y-2 text-sm">
+                  {([
+                    ['Data', formatDatePt(selectedTicket.created_at)],
+                    ['Nome', selectedTicket.attendee_name || `${selectedTicket.attendee_first_name || ''} ${selectedTicket.attendee_last_name || ''}`.trim() || '—'],
+                    ['Email', selectedTicket.attendee_email || '—'],
+                    ['País', selectedTicket.attendee_country || '—'],
+                    ['NIF', selectedTicket.attendee_nif || '—'],
+                    ['Empresa', selectedTicket.attendee_company || '—'],
+                    ['Cargo', selectedTicket.attendee_job_title || '—'],
+                    ['Função', selectedTicket.attendee_job_function
+                      ? selectedTicket.attendee_job_function + (selectedTicket.attendee_job_function_other ? ` · ${selectedTicket.attendee_job_function_other}` : '')
+                      : '—'],
+                    ['T-Shirt', selectedTicket.attendee_tshirt || '—'],
+                    ['Dados SA', selectedTicket.sa_data_sharing_consent ? 'Sim' : 'Não'],
+                    ['Marketing SA', selectedTicket.sa_marketing_consent ? 'Sim' : 'Não'],
+                    ['Privacidade', selectedTicket.privacy_consent ? 'Sim' : 'Não'],
+                    ['Check-in', selectedTicket.checked_in ? `Sim · ${formatDatePt(selectedTicket.check_in_at)}` : 'Não'],
+                    ['Pagamento', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
+                    ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
+                    ['ID', selectedTicket.id],
+                  ] as [string, string][]).map(([label, value]) => (
+                    <div key={label} className="flex gap-2">
+                      <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                      <dd className="text-gray-900 break-all">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {ticketOrder && !ticketOrder.invoice_id && (
+                  <div className="mt-4">
+                    <button
+                      onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
+                      disabled={generatingInvoice === ticketOrder.id}
+                      className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
+                    >
+                      {generatingInvoice === ticketOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
+                    </button>
+                    {invoiceError?.orderId === ticketOrder.id && (
+                      <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {couponModalOpen && (
           <div

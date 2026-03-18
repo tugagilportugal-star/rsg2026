@@ -411,6 +411,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const amountEuro = (order.total_amount || 0) / 100;
     const isTest = stripeIsTestMode();
 
+    console.log('[webhook] invoice input:', {
+      customerName: order.customer_name || attendeeName || 'Participante RSG',
+      customerEmail: order.customer_email,
+      countryIso: customerCountryIso,
+      customerNif: attendeeNif || null,
+      includeRecording,
+      amountEuro,
+    });
+
     const invoiceResult = await issueInvoiceForOrder({
       isTest,
       customerName: order.customer_name || attendeeName || 'Participante RSG',
@@ -425,14 +434,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (invoiceResult?.invoiceId) {
       await supabase
         .from('orders')
-        .update({ invoice_id: invoiceResult.invoiceId })
+        .update({
+          invoice_id: invoiceResult.invoiceId,
+          invoice_number: invoiceResult.invoiceNumber ?? null,
+        })
         .eq('id', order.id);
 
       if (invoiceResult.pdfBytes) {
         const sendRes = await sendInvoicePdfByEmailResend({
           to: order.customer_email,
           pdfBytes: invoiceResult.pdfBytes,
-          invoiceId: invoiceResult.invoiceId,
+          invoiceId: invoiceResult.invoiceNumber || invoiceResult.invoiceId,
           name: order.customer_name || attendeeName || 'Participante',
           ticketName,
           total: invoiceResult.total,
