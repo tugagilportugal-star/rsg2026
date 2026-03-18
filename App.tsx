@@ -49,10 +49,6 @@ const App: React.FC = () => {
       <Program />
       <Speakers />      
       <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-      <GetInvolved
-        setSponsorModalOpen={setSponsorModalOpen}
-        setSupporterModalOpen={setSupporterModalOpen}
-      />
       <Recap />
       <FAQ />
       <Team />
