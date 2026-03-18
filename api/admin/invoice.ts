@@ -83,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(404).json({ message: 'Order não encontrada.' });
   }
 
-  if (order.invoice_id && !forceTestMode) {
+  if (order.invoice_id && !forceTestMode && !order.credit_note_id) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 

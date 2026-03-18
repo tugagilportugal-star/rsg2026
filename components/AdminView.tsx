@@ -41,6 +41,10 @@ type OrderRow = {
   status?: string | null;
   invoice_id?: string | null;
   invoice_number?: string | null;
+  credit_note_id?: string | null;
+  credit_note_number?: string | null;
+  credit_note_motivo?: string | null;
+  refunded_at?: string | null;
 };
 
 type TicketRow = {
@@ -135,6 +139,8 @@ function toTicketTypeForm(row: TicketTypeRow): TicketTypeForm {
   };
 }
 
+const MOTIVOS_ESTORNO = ['Estorno por desistência da compra', 'Erro no valor faturado'];
+
 export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tab, setTab] = useState<AdminTab>('leads');
 
@@ -153,6 +159,17 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
+  const [creditNoteModal, setCreditNoteModal] = useState<{ orderId: string; orderLabel: string } | null>(null);
+  const [creditNoteMotivo, setCreditNoteMotivo] = useState('');
+  const [creditNoteCustom, setCreditNoteCustom] = useState('');
+  const [generatingCreditNote, setGeneratingCreditNote] = useState(false);
+  const [creditNoteError, setCreditNoteError] = useState<string | null>(null);
+  const [creditNoteForRefund, setCreditNoteForRefund] = useState(false);
+  const [refundModal, setRefundModal] = useState<{ orderId: string; orderLabel: string; hasCreditNote: boolean } | null>(null);
+  const [refundMotivo, setRefundMotivo] = useState('');
+  const [refundCustom, setRefundCustom] = useState('');
+  const [markingRefund, setMarkingRefund] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
@@ -327,6 +344,69 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
     } finally {
       setGeneratingInvoice(null);
+    }
+  }
+
+  async function generateCreditNote(orderId: string, motivo: string) {
+    if (!authHeader) return;
+    setGeneratingCreditNote(true);
+    setCreditNoteError(null);
+    try {
+      const res = await fetch('/api/admin/credit-note', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, motivo }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCreditNoteError(json.message || 'Erro desconhecido');
+      } else {
+        const wasForRefund = creditNoteForRefund;
+        const ncOrderId = creditNoteModal?.orderId;
+        const ncOrderLabel = creditNoteModal?.orderLabel;
+        setCreditNoteModal(null);
+        setCreditNoteMotivo('');
+        setCreditNoteCustom('');
+        setCreditNoteForRefund(false);
+        await fetchOrders();
+        await fetchTickets();
+        if (wasForRefund && ncOrderId) {
+          setRefundModal({ orderId: ncOrderId, orderLabel: json.creditNoteNumber || ncOrderLabel || ncOrderId, creditNoteMotivo: motivo });
+        }
+      }
+    } catch (e: any) {
+      setCreditNoteError(e?.message || 'Erro de rede');
+    } finally {
+      setGeneratingCreditNote(false);
+    }
+  }
+
+  async function markAsRefunded(orderId: string, motivo?: string) {
+    if (!authHeader) return;
+    setMarkingRefund(true);
+    setRefundError(null);
+    try {
+      const body: Record<string, unknown> = { order_id: orderId };
+      if (motivo) body.motivo = motivo;
+      const res = await fetch('/api/admin/refund', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setRefundError(json.message || 'Erro ao marcar estorno');
+      } else {
+        setRefundModal(null);
+        setRefundMotivo('');
+        setRefundCustom('');
+        await fetchOrders();
+        await fetchTickets();
+      }
+    } catch (e: any) {
+      setRefundError(e?.message || 'Erro de rede');
+    } finally {
+      setMarkingRefund(false);
     }
   }
 
@@ -1599,7 +1679,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </div>
                   ))}
                 </dl>
-                {ticketOrder && !ticketOrder.invoice_id && (
+                {ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
@@ -1613,10 +1693,195 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     )}
                   </div>
                 )}
+                {ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedTicket(null);
+                        setCreditNoteMotivo('');
+                        setCreditNoteCustom('');
+                        setCreditNoteError(null);
+                        setCreditNoteForRefund(false);
+                        setCreditNoteModal({
+                          orderId: ticketOrder.id,
+                          orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
+                        });
+                      }}
+                      className="w-full py-2 rounded-lg border border-orange-400 text-orange-600 text-sm font-medium hover:bg-orange-50"
+                    >
+                      Emitir Nota de Crédito
+                    </button>
+                  </div>
+                )}
+                {ticketOrder?.credit_note_id && (
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
+                  </p>
+                )}
+                {ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedTicket(null);
+                        setRefundError(null);
+                        setRefundMotivo('');
+                        setRefundCustom('');
+                        setRefundModal({
+                          orderId: ticketOrder.id,
+                          orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
+                          hasCreditNote: !!ticketOrder.credit_note_id,
+                        });
+                      }}
+                      className="w-full py-2 rounded-lg border border-red-400 text-red-600 text-sm font-medium hover:bg-red-50"
+                    >
+                      Emitir Estorno
+                    </button>
+                  </div>
+                )}
+                {ticketOrder?.refunded_at && (
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    Estornado em <span className="font-medium text-gray-700">{new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')}</span>
+                  </p>
+                )}
               </div>
             </div>
           );
         })()}
+
+        {creditNoteModal && (
+          <div
+            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!generatingCreditNote) setCreditNoteModal(null); }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">
+                  {creditNoteForRefund ? 'Nota de Crédito para Estorno' : 'Nota de Crédito'}
+                </h3>
+                <button onClick={() => { setCreditNoteModal(null); setCreditNoteForRefund(false); }} disabled={generatingCreditNote} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              {creditNoteForRefund && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                  Para emitir o estorno financeiro é necessário primeiro emitir uma nota de crédito. Seleciona o motivo que se aplica.
+                </div>
+              )}
+              <p className="text-sm text-gray-500 mb-4">
+                Fatura: <span className="font-medium text-gray-700">{creditNoteModal.orderLabel}</span>
+              </p>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm font-medium text-gray-700">Motivo</p>
+                {(creditNoteForRefund
+                  ? [...MOTIVOS_ESTORNO, 'Outro']
+                  : ['Troca / inclusão de NIF', 'Correção de dados do cliente', 'Estorno por desistência da compra', 'Erro no valor faturado', 'Outro']
+                ).map((opt) => (
+                  <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="motivo"
+                      value={opt}
+                      checked={creditNoteMotivo === opt}
+                      onChange={() => setCreditNoteMotivo(opt)}
+                    />
+                    {opt}
+                  </label>
+                ))}
+                {creditNoteMotivo === 'Outro' && (
+                  <textarea
+                    className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    rows={2}
+                    placeholder="Descreve o motivo…"
+                    value={creditNoteCustom}
+                    onChange={(e) => setCreditNoteCustom(e.target.value)}
+                  />
+                )}
+              </div>
+              {creditNoteError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{creditNoteError}</p>
+              )}
+              <button
+                onClick={() => {
+                  const motivo = creditNoteMotivo === 'Outro' ? creditNoteCustom.trim() : creditNoteMotivo;
+                  if (!motivo) return;
+                  generateCreditNote(creditNoteModal.orderId, motivo);
+                }}
+                disabled={generatingCreditNote || !creditNoteMotivo || (creditNoteMotivo === 'Outro' && !creditNoteCustom.trim())}
+                className="w-full py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
+              >
+                {generatingCreditNote ? 'A emitir…' : 'Confirmar Nota de Crédito'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {refundModal && (
+          <div
+            className="fixed inset-0 z-[220] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!markingRefund) { setRefundModal(null); setRefundError(null); } }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">Emitir Estorno</h3>
+                <button onClick={() => { setRefundModal(null); setRefundError(null); }} disabled={markingRefund} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-3">
+                Fatura: <span className="font-medium text-gray-700">{refundModal.orderLabel}</span>
+              </p>
+              {!refundModal.hasCreditNote && (
+                <div className="mb-4">
+                  <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                    Não existe nota de crédito para esta fatura. Será criada automaticamente ao validar o estorno no Stripe.
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Motivo da nota de crédito</p>
+                  <div className="space-y-2">
+                    {[...MOTIVOS_ESTORNO, 'Outro'].map((opt) => (
+                      <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="radio"
+                          name="refundMotivo"
+                          value={opt}
+                          checked={refundMotivo === opt}
+                          onChange={() => setRefundMotivo(opt)}
+                        />
+                        {opt}
+                      </label>
+                    ))}
+                    {refundMotivo === 'Outro' && (
+                      <textarea
+                        className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        rows={2}
+                        placeholder="Descreve o motivo…"
+                        value={refundCustom}
+                        onChange={(e) => setRefundCustom(e.target.value)}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                O sistema irá validar que o estorno foi efetuado no Stripe antes de registar.
+              </div>
+              {refundError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{refundError}</p>
+              )}
+              <button
+                onClick={() => {
+                  const motivo = refundMotivo === 'Outro' ? refundCustom.trim() : refundMotivo;
+                  markAsRefunded(refundModal.orderId, !refundModal.hasCreditNote ? motivo : undefined);
+                }}
+                disabled={markingRefund || (!refundModal.hasCreditNote && (!refundMotivo || (refundMotivo === 'Outro' && !refundCustom.trim())))}
+                className="w-full py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {markingRefund ? 'A validar no Stripe…' : 'Validar e Registar Estorno'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {couponModalOpen && (
           <div
