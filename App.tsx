@@ -15,7 +15,7 @@ import { Team } from './sections/Team';
 import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
-import { TicketForm } from './components/TicketForm';
+import { TicketPuchaseModal } from './components/TicketPurchaseModel';
 
 const App: React.FC = () => {
   const[isSponsorModalOpen, setSponsorModalOpen] = useState(false);
