@@ -110,8 +110,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     terminado: 1,
   };
 
-  console.log('[credit-note] payload:', JSON.stringify(body));
-
   // 4) Create credit note
   const createUrl = withApiToken(`${baseUrl}/api/1.0/documentos`, apiToken);
   const createResp = await fetch(createUrl, {

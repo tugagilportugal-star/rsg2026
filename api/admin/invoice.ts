@@ -99,15 +99,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const amountEuro = (order.total_amount || 0) / 100;
   const isTest = forceTestMode || (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
 
-  console.log('[admin/invoice] invoice input:', {
-    orderId,
-    isTest,
-    forceTestMode,
-    customerNif: ticket?.attendee_nif || null,
-    includeRecording: order.include_recording,
-    amountEuro,
-  });
-
   const invoiceResult = await issueInvoiceForOrder({
     isTest,
     customerName: order.customer_name || 'Participante RSG',

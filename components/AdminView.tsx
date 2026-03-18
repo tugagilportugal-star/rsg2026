@@ -164,7 +164,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [creditNoteCustom, setCreditNoteCustom] = useState('');
   const [generatingCreditNote, setGeneratingCreditNote] = useState(false);
   const [creditNoteError, setCreditNoteError] = useState<string | null>(null);
-  const [creditNoteForRefund, setCreditNoteForRefund] = useState(false);
   const [refundModal, setRefundModal] = useState<{ orderId: string; orderLabel: string; hasCreditNote: boolean } | null>(null);
   const [refundMotivo, setRefundMotivo] = useState('');
   const [refundCustom, setRefundCustom] = useState('');
@@ -361,13 +360,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       if (!res.ok) {
         setCreditNoteError(json.message || 'Erro desconhecido');
       } else {
-        const wasForRefund = creditNoteForRefund;
-        const ncOrderId = creditNoteModal?.orderId;
-        const ncOrderLabel = creditNoteModal?.orderLabel;
         setCreditNoteModal(null);
         setCreditNoteMotivo('');
         setCreditNoteCustom('');
-        setCreditNoteForRefund(false);
         await fetchOrders();
         await fetchTickets();
       }
@@ -1698,7 +1693,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         setCreditNoteMotivo('');
                         setCreditNoteCustom('');
                         setCreditNoteError(null);
-                        setCreditNoteForRefund(false);
                         setCreditNoteModal({
                           orderId: ticketOrder.id,
                           orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
@@ -1755,25 +1749,15 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#003F59]">
-                  {creditNoteForRefund ? 'Nota de Crédito para Estorno' : 'Nota de Crédito'}
-                </h3>
-                <button onClick={() => { setCreditNoteModal(null); setCreditNoteForRefund(false); }} disabled={generatingCreditNote} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                <h3 className="text-lg font-bold text-[#003F59]">Nota de Crédito</h3>
+                <button onClick={() => setCreditNoteModal(null)} disabled={generatingCreditNote} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
               </div>
-              {creditNoteForRefund && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
-                  Para emitir o estorno financeiro é necessário primeiro emitir uma nota de crédito. Seleciona o motivo que se aplica.
-                </div>
-              )}
               <p className="text-sm text-gray-500 mb-4">
                 Fatura: <span className="font-medium text-gray-700">{creditNoteModal.orderLabel}</span>
               </p>
               <div className="space-y-2 mb-4">
                 <p className="text-sm font-medium text-gray-700">Motivo</p>
-                {(creditNoteForRefund
-                  ? [...MOTIVOS_ESTORNO, 'Outro']
-                  : ['Troca / inclusão de NIF', 'Correção de dados do cliente', 'Estorno por desistência da compra', 'Erro no valor faturado', 'Outro']
-                ).map((opt) => (
+                {['Troca / inclusão de NIF', 'Correção de dados do cliente', 'Estorno por desistência da compra', 'Erro no valor faturado', 'Outro'].map((opt) => (
                   <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
                     <input
                       type="radio"
