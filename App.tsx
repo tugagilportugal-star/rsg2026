@@ -35,7 +35,8 @@ const App: React.FC = () => {
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
     }
-  },
+  }, []); // <--- Aqui estava o erro TS1135 e TS1005
+
   return (
     <div className="bg-white">
       <Navbar />
@@ -56,11 +57,18 @@ const App: React.FC = () => {
       <FAQ />
       <Team />
       <Footer />
-    </div>
-    
-      {/* Botão Admin Escondido */}
+
+      {/* Botão Admin Escondido - Agora dentro da div principal */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={() => (window.location.href = '/admin')}
-          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text
+          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
+        >
+          <Settings size={20} />
+        </button>
       </div>
+    </div> // <--- Fechamento da div principal
+  );
+}; // <--- Fechamento do componente App
+
+export default App;
