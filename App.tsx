@@ -6,6 +6,7 @@ import { Features } from './sections/Features';
 import { Program } from './sections/Program';
 import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
+import { Speakers } from './sections/Speakers';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { Recap } from './sections/Recap';
 import { FAQ } from './sections/FAQ';
@@ -46,12 +47,13 @@ const App: React.FC = () => {
       <About />
       <Features />
       <Program />
-      <Recap />      
+      <Speakers />      
       <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
       <GetInvolved
         setSponsorModalOpen={setSponsorModalOpen}
         setSupporterModalOpen={setSupporterModalOpen}
       />
+      <Recap />
       <FAQ />
       <Team />
       <Footer />
