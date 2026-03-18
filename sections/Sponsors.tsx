@@ -38,7 +38,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
-      logo: "https://i.postimg.cc/wM4pvW8v/Geek-Girls-Portugal.jpg",
+      logo: "https://i.postimg.cc/g2XN1ggh/Geek-Girls-Portugal.png",
       url: "https://geekgirlsportugal.pt/"
     },
     {
