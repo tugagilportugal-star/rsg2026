@@ -124,10 +124,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(502).json({ message: `Erro ao gerar fatura: ${raw}` });
   }
 
-  // Save invoice_id
+  const invoiceLabel = invoiceResult.invoiceNumber || invoiceResult.invoiceId;
+
+  // Save invoice_id and invoice_number
   await supabase
     .from('orders')
-    .update({ invoice_id: invoiceResult.invoiceId })
+    .update({
+      invoice_id: invoiceResult.invoiceId,
+      invoice_number: invoiceResult.invoiceNumber ?? null,
+    })
     .eq('id', orderId);
 
   // Send PDF email
@@ -141,12 +146,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ticketName: includeRecording
           ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
           : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026',
-        invoiceId: invoiceResult.invoiceId,
+        invoiceId: invoiceLabel,
         total: invoiceResult.total,
         isTest,
       }),
       attachments: [{
-        filename: `invoice-${invoiceResult.invoiceId}.pdf`,
+        filename: `fatura-${invoiceLabel.replace(/[\s/]/g, '-')}.pdf`,
         content: invoiceResult.pdfBytes.toString('base64'),
       }],
     });
@@ -154,6 +159,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     invoiceId: invoiceResult.invoiceId,
+    invoiceNumber: invoiceResult.invoiceNumber,
     total: invoiceResult.total,
   });
 }

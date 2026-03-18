@@ -40,6 +40,7 @@ type OrderRow = {
   include_recording?: boolean | null;
   status?: string | null;
   invoice_id?: string | null;
+  invoice_number?: string | null;
 };
 
 type TicketRow = {
@@ -1541,7 +1542,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ['País', selectedOrder.customer_country || '—'],
                     ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
                     ['Estado', selectedOrder.status || '—'],
-                    ['Fatura', selectedOrder.invoice_id || 'Pendente'],
+                    ['Nº Fatura', selectedOrder.invoice_number || selectedOrder.invoice_id || 'Pendente'],
                     ['Stripe Session', selectedOrder.stripe_session_id || '—'],
                     ['ID', selectedOrder.id],
                   ].map(([label, value]) => (
@@ -1589,7 +1590,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ['Privacidade', selectedTicket.privacy_consent ? 'Sim' : 'Não'],
                     ['Check-in', selectedTicket.checked_in ? `Sim · ${formatDatePt(selectedTicket.check_in_at)}` : 'Não'],
                     ['Pagamento', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
-                    ['Fatura', ticketOrder?.invoice_id || 'Pendente'],
+                    ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
                     ['ID', selectedTicket.id],
                   ] as [string, string][]).map(([label, value]) => (
                     <div key={label} className="flex gap-2">

@@ -434,14 +434,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (invoiceResult?.invoiceId) {
       await supabase
         .from('orders')
-        .update({ invoice_id: invoiceResult.invoiceId })
+        .update({
+          invoice_id: invoiceResult.invoiceId,
+          invoice_number: invoiceResult.invoiceNumber ?? null,
+        })
         .eq('id', order.id);
 
       if (invoiceResult.pdfBytes) {
         const sendRes = await sendInvoicePdfByEmailResend({
           to: order.customer_email,
           pdfBytes: invoiceResult.pdfBytes,
-          invoiceId: invoiceResult.invoiceId,
+          invoiceId: invoiceResult.invoiceNumber || invoiceResult.invoiceId,
           name: order.customer_name || attendeeName || 'Participante',
           ticketName,
           total: invoiceResult.total,

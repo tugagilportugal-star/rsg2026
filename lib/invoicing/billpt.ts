@@ -167,6 +167,11 @@ async function billGetDocument(params: { baseUrl: string; apiToken: string; id: 
   return data;
 }
 
+function extractInvoiceNumber(doc: any): string | null {
+  const n = doc?.invoice_number ?? doc?.invoiceNumber ?? doc?.documento?.invoice_number ?? null;
+  return n ? String(n) : null;
+}
+
 function extractTokenDownload(doc: any): string | null {
   const token = doc?.token_download ?? doc?.tokenDownload ?? doc?.documento?.token_download ?? null;
   return token ? String(token) : null;
@@ -270,11 +275,10 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
 
   const doc = await billGetDocument({ baseUrl, apiToken, id: invoiceId });
 
-  console.log('🔎 DEBUG Bill.pt doc fields:', JSON.stringify(doc));
-
   const tokenDownload = extractTokenDownload(doc);
   const status = extractStatus(doc);
   const totalEuro = extractTotalEuro(doc, input.amountEuro);
+  const invoiceNumber = extractInvoiceNumber(doc);
 
   let pdfBytes: Buffer | null = null;
 
@@ -290,6 +294,7 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
   return {
     provider: 'billpt',
     invoiceId,
+    invoiceNumber,
     status,
     permalink,
     pdfBytes,
