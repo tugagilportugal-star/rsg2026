@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Pencil, Plus, Power, Trash2, X } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 type LeadStatus = 'Pending' | 'InProgress' | 'Completed' | 'Deleted';
 
@@ -84,7 +85,19 @@ type CouponRow = {
   used_by_order_id?: string | null;
 };
 
-type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons';
+type AuditLogRow = {
+  id: string;
+  created_at: string;
+  admin_email: string;
+  action: string;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  details?: any;
+};
+
+type AdminUserInfo = { email: string; name: string | null; role: 'edit' | 'view' };
+
+type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons' | 'logs';
 
 type TicketTypeForm = {
   name: string;
@@ -142,7 +155,7 @@ function toTicketTypeForm(row: TicketTypeRow): TicketTypeForm {
 const MOTIVOS_ESTORNO = ['Estorno por desistência da compra', 'Erro no valor faturado'];
 
 export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [tab, setTab] = useState<AdminTab>('leads');
+  const [tab, setTab] = useState<AdminTab>('tickets');
 
   const [data, setData] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -173,6 +186,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
 
+  const [logs, setLogs] = useState<AuditLogRow[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
   const [couponModalOpen, setCouponModalOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<CouponRow | null>(null);
   const [savingCoupon, setSavingCoupon] = useState(false);
@@ -188,9 +204,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     active: true,
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState('');
-  const [pass, setPass] = useState('');
+  const [session, setSession] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [selected, setSelected] = useState<LeadRow | null>(null);
@@ -201,10 +218,74 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [ticketTypeForm, setTicketTypeForm] = useState<TicketTypeForm>(emptyTicketTypeForm());
   const [savingTicketType, setSavingTicketType] = useState(false);
 
-  const authHeader = useMemo(() => {
-    if (!user || !pass) return null;
-    return 'Basic ' + btoa(`${user}:${pass}`);
-  }, [user, pass]);
+  const token = session?.access_token ?? null;
+  const authHeader = token ? `Bearer ${token}` : null;
+  const canEdit = adminUser?.role === 'edit';
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        loadAdminUser(session.access_token);
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        loadAdminUser(session.access_token);
+      } else {
+        setAdminUser(null);
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function loadAdminUser(accessToken: string) {
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch('/api/admin?route=me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAdminUser(data);
+      } else {
+        setAuthError('O teu email não tem acesso ao admin. Contacta o administrador.');
+        await supabase.auth.signOut();
+      }
+    } catch {
+      setAuthError('Erro de ligação ao verificar acesso.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setAuthError(null);
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+  }
+
+  async function fetchLogs() {
+    if (!authHeader) return;
+    setLoadingLogs(true);
+    try {
+      const res = await fetch('/api/admin?route=audit-log', {
+        headers: { Authorization: authHeader },
+      });
+      if (res.ok) setLogs(await res.json());
+    } finally {
+      setLoadingLogs(false);
+    }
+  }
 
   async function fetchLeads() {
     if (!authHeader) return;
@@ -215,8 +296,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -245,8 +327,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -274,8 +357,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -303,8 +387,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -411,8 +496,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -446,8 +532,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -478,8 +565,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -587,8 +675,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -627,8 +716,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -663,8 +753,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -739,8 +830,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -774,8 +866,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -811,8 +904,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -830,43 +924,33 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!user || !pass) {
-      setError('Credenciais inválidas');
-      return;
-    }
-
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUser('');
-    setPass('');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setAdminUser(null);
+    setSession(null);
     setSelected(null);
     setData([]);
     setTicketTypes([]);
     setOrders([]);
     setTickets([]);
     setCoupons([]);
+    setLogs([]);
     setCouponModalOpen(false);
     setEditingCoupon(null);
     resetCouponForm();
     setError(null);
-    setTab('leads');
+    setTab('tickets');
   };
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!adminUser) return;
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
     if (tab === 'orders') { fetchOrders(); fetchTickets(); }
     if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
-  }, [isAuthenticated, authHeader, tab]);
+    if (tab === 'logs') fetchLogs();
+  }, [adminUser?.email, tab]);
 
   function downloadCsv() {
     const escape = (v: unknown) => {
@@ -1028,11 +1112,19 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     URL.revokeObjectURL(url);
   }
 
-  if (!isAuthenticated) {
+  if (authLoading) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!adminUser) {
     return (
       <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl p-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-black text-gray-900">Admin</h2>
               <p className="text-sm text-gray-500">Acesso restrito</p>
@@ -1045,43 +1137,26 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </button>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-              placeholder="Utilizador"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Password"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            {error && (
-              <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 rounded-2xl bg-brand-darkBlue text-white font-bold py-3"
-              >
-                Entrar
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 rounded-2xl bg-gray-100 text-gray-800 font-bold py-3"
-              >
-                Voltar ao site
-              </button>
+          {authError && (
+            <div className="mb-6 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {authError}
             </div>
-          </form>
+          )}
+
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition"
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h13.1c-.6 3-2.3 5.5-4.8 7.2v6h7.8c4.5-4.2 7.4-10.4 7.4-17.5z"/><path fill="#34A853" d="M24 48c6.5 0 12-2.2 16-5.9l-7.8-6c-2.2 1.5-5 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9H2.4v6.2C6.4 42.7 14.6 48 24 48z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.5-.8-3-.8-4.5s.3-3 .8-4.5v-6.2H2.4C.9 16.6 0 20.2 0 24s.9 7.4 2.4 10.7l8.1-6.2z"/><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.3 30.4 0 24 0 14.6 0 6.4 5.3 2.4 13.3l8.1 6.2C12.4 13.7 17.7 9.5 24 9.5z"/></svg>
+            Entrar com Google
+          </button>
+
+          <button
+            onClick={onClose}
+            className="mt-3 w-full rounded-2xl bg-gray-100 text-gray-600 font-semibold py-3 text-sm hover:bg-gray-200"
+          >
+            Voltar ao site
+          </button>
         </div>
       </div>
     );

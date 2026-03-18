@@ -1,19 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { verifyAdminToken, logAction } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
-
-function checkBasicAuth(req: VercelRequest): boolean {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Basic ')) return false;
-  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-  const [user, pass] = decoded.split(':');
-  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
-}
 
 async function safeReadJson(resp: Response): Promise<any> {
   const text = await resp.text();
@@ -27,10 +20,9 @@ function withApiToken(url: string, apiToken: string): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!checkBasicAuth(req)) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+  const admin = await verifyAdminToken(req.headers.authorization || '');
+  if (!admin) return res.status(401).json({ message: 'Unauthorized' });
+  if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
 
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -161,6 +153,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .from('orders')
     .update({ refunded_at: new Date().toISOString() })
     .eq('id', orderId);
+
+  await logAction(admin.email, 'emitir_estorno', 'order', orderId, { nc_created: !order.credit_note_id, refunded_at: new Date().toISOString() });
 
   return res.status(200).json({ ok: true });
 }

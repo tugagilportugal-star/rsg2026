@@ -1,18 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdminToken, logAction } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-function checkBasicAuth(req: VercelRequest): boolean {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Basic ')) return false;
-  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-  const [user, pass] = decoded.split(':');
-  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
-}
 
 function normalizeCode(code: string) {
   return String(code || '').trim().toUpperCase();
@@ -24,9 +17,8 @@ function normalizeEmail(email?: string | null) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!checkBasicAuth(req)) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+  const admin = await verifyAdminToken(req.headers.authorization || '');
+  if (!admin) return res.status(401).json({ message: 'Unauthorized' });
   try {
     if (req.method === 'GET') {
       const { data, error } = await supabase
@@ -42,6 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
+      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
       const {
         code,
         email,
@@ -100,10 +93,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: error.message });
       }
 
+      await logAction(admin.email, 'criar_cupao', 'coupon', data.id, { code: data.code });
       return res.status(201).json(data);
     }
 
     if (req.method === 'PATCH') {
+      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
       const {
         id,
         code,
@@ -160,10 +155,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: error.message });
       }
 
+      await logAction(admin.email, 'editar_cupao', 'coupon', data.id, { code: data.code });
       return res.status(200).json(data);
     }
 
     if (req.method === 'DELETE') {
+      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
       const { id } = req.body || {};
 
       if (!id) {
@@ -179,6 +176,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: error.message });
       }
 
+      await logAction(admin.email, 'eliminar_cupao', 'coupon', id, {});
       return res.status(200).json({ ok: true });
     }
 

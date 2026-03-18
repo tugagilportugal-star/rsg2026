@@ -1,25 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdminToken, logAction } from '../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
-
-function unauthorized(res: VercelResponse) {
-  res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-  return res.status(401).json({ message: 'Unauthorized' });
-}
-
-function checkBasicAuth(req: VercelRequest): boolean {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Basic ')) return false;
-
-  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-  const [user, pass] = decoded.split(':');
-
-  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
-}
 
 function getRouteParts(req: VercelRequest): string[] {
   const q = (req.query as any).route;
@@ -89,7 +75,8 @@ function normalizeTicketTypeInput(body: any, partial = false) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!checkBasicAuth(req)) return unauthorized(res);
+  const admin = await verifyAdminToken(req.headers.authorization || '');
+  if (!admin) return res.status(401).json({ message: 'Unauthorized' });
 
   const parts = getRouteParts(req);
   const resource = parts[0] || '';
@@ -112,6 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'PATCH' && id) {
+        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
         const body = parseBody(req);
         const status = body?.status;
 
@@ -127,10 +115,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'atualizar_lead', 'lead', id, { status });
         return res.status(200).json(data);
       }
 
       if (req.method === 'DELETE' && id) {
+        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
         const { data, error } = await supabase
           .from('leads')
           .update({ status: 'Deleted' })
@@ -139,6 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'eliminar_lead', 'lead', id, {});
         return res.status(200).json(data);
       }
 
@@ -161,6 +152,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'POST' && !id) {
+        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
         const body = parseBody(req);
         const normalized = normalizeTicketTypeInput(body, false);
 
@@ -180,10 +172,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'criar_lote', 'ticket_type', data.id, { name: data.name });
         return res.status(200).json(data);
       }
 
       if (req.method === 'PATCH' && id) {
+        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
         const body = parseBody(req);
         const normalized = normalizeTicketTypeInput(body, true);
 
@@ -220,10 +214,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'editar_lote', 'ticket_type', id, normalized.data as Record<string, unknown>);
         return res.status(200).json(data);
       }
 
       if (req.method === 'DELETE' && id) {
+        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
         const { data, error } = await supabase
           .from('ticket_types')
           .update({ active: false })
@@ -232,6 +228,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'desativar_lote', 'ticket_type', id, {});
         return res.status(200).json(data);
       }
 
@@ -269,6 +266,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select('*')
         .limit(500);
 
+      if (error) return res.status(500).json({ message: error.message });
+      return res.status(200).json(data || []);
+    }
+
+    // =========================
+    // ME
+    // =========================
+    if (resource === 'me') {
+      if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
+      return res.status(200).json(admin);
+    }
+
+    // =========================
+    // AUDIT LOG
+    // =========================
+    if (resource === 'audit-log') {
+      if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
+      const { data, error } = await supabase
+        .from('admin_audit_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
       if (error) return res.status(500).json({ message: error.message });
       return res.status(200).json(data || []);
     }
