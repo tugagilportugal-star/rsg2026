@@ -270,6 +270,8 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
 
   const doc = await billGetDocument({ baseUrl, apiToken, id: invoiceId });
 
+  console.log('🔎 DEBUG Bill.pt doc fields:', JSON.stringify(doc));
+
   const tokenDownload = extractTokenDownload(doc);
   const status = extractStatus(doc);
   const totalEuro = extractTotalEuro(doc, input.amountEuro);
