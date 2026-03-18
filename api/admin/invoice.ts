@@ -67,6 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const orderId = String(req.body?.order_id || '').trim();
+  const forceTestMode = req.body?.test_mode === true;
   if (!orderId) {
     return res.status(400).json({ message: 'order_id é obrigatório.' });
   }
@@ -82,7 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(404).json({ message: 'Order não encontrada.' });
   }
 
-  if (order.invoice_id) {
+  if (order.invoice_id && !forceTestMode) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
@@ -96,7 +97,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const includeRecording = order.include_recording === true;
 
   const amountEuro = (order.total_amount || 0) / 100;
-  const isTest = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
+  const isTest = forceTestMode || (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
+
+  console.log('[admin/invoice] invoice input:', {
+    orderId,
+    isTest,
+    forceTestMode,
+    customerNif: ticket?.attendee_nif || null,
+    includeRecording: order.include_recording,
+    amountEuro,
+  });
 
   const invoiceResult = await issueInvoiceForOrder({
     isTest,
