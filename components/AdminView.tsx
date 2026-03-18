@@ -223,15 +223,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const canEdit = adminUser?.role === 'edit';
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        loadAdminUser(session.access_token);
-      } else {
-        setAuthLoading(false);
-      }
-    });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
