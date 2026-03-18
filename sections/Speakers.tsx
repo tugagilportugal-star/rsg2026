@@ -22,13 +22,13 @@ export const Speakers: React.FC = () => {
       name: "Lyssa Adkins",
       role: "Author of Coaching Agile Teams",
       // Substitua pelo link real da foto da Lyssa
-      image: "https://ui-avatars.com/api/?name=Lyssa+Adkins&background=F47A20&color=fff&size=600", 
+      image: "https://i.postimg.cc/htmyQzQ1/Lyssa-Adkins.png", 
       linkedin: "https://www.linkedin.com/in/lyssaadkins/",
-      isRevealed: false
+      isRevealed: true
     },
     {
       id: "k2",
-      name: "TBA",
+      name: "Nadia",
       role: "Global Leader",
       image: "",
       linkedin: "",
@@ -36,8 +36,8 @@ export const Speakers: React.FC = () => {
     },
     {
       id: "k3",
-      name: "TBA",
-      role: "Industry Expert",
+      name: "David Anderson",
+      role: "Kanban Expert",
       image: "",
       linkedin: "",
       isRevealed: false
