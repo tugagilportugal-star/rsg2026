@@ -19,19 +19,19 @@ export const Speakers: React.FC = () => {
   const keynotes: SpeakerData[] =[
     {
       id: "k1",
-      name: "TBA",
-      role: "Global Leader",
-      image: "",
-      linkedin: "",
-      isRevealed: false
-    },
-    {
-      id: "k2",
       name: "Lyssa Adkins",
       role: "Author of Coaching Agile Teams",
       // Substitua pelo link real da foto da Lyssa
       image: "https://i.postimg.cc/htmyQzQ1/Lyssa-Adkins.png", 
       linkedin: "https://www.linkedin.com/in/lyssaadkins/",
+      isRevealed: true
+    },
+    {
+      id: "k2",
+      name: "TBA",
+      role: "Global Leader",
+      image: "",
+      linkedin: "",
       isRevealed: false
     },
     {
