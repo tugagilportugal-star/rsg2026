@@ -2,39 +2,48 @@ import React, { useState } from 'react';
 import { Section } from '../components/UIComponents';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-const faqData = [
-    {
-        question: "Qual o valor dos ingressos?",
-        answer: "Os valores ainda não estão definidos, mas inscreva-se na nossa Waitlist para manter-se informado(a), ser notificado(a) primeiro e ter acesso a condições especiais antes da abertura oficial das vendas."
-    },
-    {
-        question: "Existem descontos para membros da Scrum Alliance?",
-        answer: "Sim. Membros da Scrum Alliance têm direito a um desconto exclusivo de 10% no valor do ingresso. O código promocional e as instruções para aplicar o desconto serão disponibilizados no momento da abertura das inscrições."
-    },
-    {
-        question: "Onde será o evento?",
-        answer: "Na vibrante cidade de Lisboa! Estamos neste momento a escolher um local que forneça a estrutura adequada para fornecer uma experiência incrível para todos, com fácil acesso via transporte público ou carro, e com uma infraestrutura moderna."
-    },
-    {
-        question: "Qual a data do evento?",
-        answer: "21 de Maio de 2026. Reserve na sua agenda!"
-    },
-    {
-        question: "O evento será em inglês ou português?",
-        answer: "Como um evento internacional, teremos sessões em ambos os idiomas. O RSG Lisbon preza pela multiculturalidade, por isso espere keynotes globais em inglês, mas também trilhas e talks locais em português."
-    },
-    {
-        question: "Para quem é este evento?",
-        answer: "Scrum Masters, Product Owners, Agile Coaches, Líderes, Desenvolvedores. Acima de tudo, o RSG Lisbon é para qualquer pessoa interessada em transformação organizacional, inovação e novas formas de trabalho."
-    }
-];
-
 export const FAQ: React.FC = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const toggleAccordion = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
+
+    const faqData =[
+        {
+            question: "Qual o valor dos ingressos?",
+            answer: (
+                <>
+                    Os bilhetes já se encontram disponíveis para compra online! Pode consultar os valores e garantir o seu lugar{' '}
+                    <button onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })} className="text-brand-blue font-bold hover:underline">aqui</button>.
+                    <br/><br/>
+                    Se pretende trazer a sua equipa ou posicionar a sua empresa num dos maiores eventos de agilidade em Portugal, oferecemos condições especiais para compras em lote e pacotes de patrocínio. Envie-nos uma mensagem através da{' '}
+                    <button onClick={() => document.getElementById('sponsors')?.scrollIntoView({ behavior: 'smooth' })} className="text-brand-blue font-bold hover:underline">secção de parcerias</button> 
+                    {' '}ou um e-mail diretamente para <a href="mailto:tuga@tugagil.com" className="text-brand-orange font-bold hover:underline">tuga@tugagil.com</a>. Teremos todo o gosto em lhe apresentar nossas condições e desenhar o que melhor enquadra para a sua organização.
+                </>
+            )
+        },
+        {
+            question: "Existem descontos para membros da Scrum Alliance?",
+            answer: "Sim! Os membros ativos da Scrum Alliance têm direito a um desconto exclusivo de 10% no valor do bilhete. O código promocional é partilhado diretamente através das comunicações oficiais da Scrum Alliance. Basta inserir o código no campo indicado durante o processo de compra, aqui no site oficial."
+        },
+        {
+            question: "Onde será o evento?",
+            answer: "O evento terá lugar no Auditório Alto dos Moinhos, na vibrante cidade de Lisboa. Escolhemos este espaço para unir a energia de um dos maiores ecossistemas tecnológicos da Europa à máxima conveniência para os nossos participantes: tem a Linha Azul do metro literalmente à porta e facilidade de estacionamento nas imediações."
+        },
+        {
+            question: "Qual a data do evento?",
+            answer: "21 de Maio de 2026. Reserve na sua agenda!"
+        },
+        {
+            question: "O evento será em inglês ou português?",
+            answer: "Como um evento internacional, teremos sessões em ambos os idiomas. O RSG Lisbon preza pela multiculturalidade, por isso espere keynotes globais em inglês, mas também trilhas e talks locais em português."
+        },
+        {
+            question: "Para quem é este evento?",
+            answer: "Para Scrum Masters, Agile Coaches, Product Managers e Owners, Líderes, Executivos e Consultores de Transformação. Acima de tudo, o RSG Lisbon é o espaço ideal para qualquer pessoa apaixonada por transformação organizacional, inovação e novas formas de trabalho, que procure elevar o nível da agilidade e criar um impacto real nas suas organizações."
+        }
+    ];
 
     return (
         <Section id="faq" className="bg-white border-t border-gray-100">
@@ -48,14 +57,14 @@ export const FAQ: React.FC = () => {
                         >
                             <span className="font-semibold text-gray-800">{item.question}</span>
                             {openIndex === index ? (
-                                <ChevronUp className="w-5 h-5 text-brand-orange" />
+                                <ChevronUp className="w-5 h-5 text-brand-orange flex-shrink-0 ml-4" />
                             ) : (
-                                <ChevronDown className="w-5 h-5 text-gray-500" />
+                                <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0 ml-4" />
                             )}
                         </button>
                         <div
                             className={`transition-all duration-300 ease-in-out ${
-                                openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                                openIndex === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
                             }`}
                         >
                             <div className="p-5 bg-white text-gray-600 leading-relaxed border-t border-gray-200">
