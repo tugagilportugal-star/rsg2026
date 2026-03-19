@@ -145,6 +145,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (single_use !== undefined) payload.single_use = Boolean(single_use);
       if (active !== undefined) payload.active = Boolean(active);
 
+      const { data: before } = await supabase
+        .from('discount_coupons')
+        .select('*')
+        .eq('id', id)
+        .single();
+
       const { data, error } = await supabase
         .from('discount_coupons')
         .update(payload)
@@ -156,7 +162,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: error.message });
       }
 
-      await logAction(admin.email, 'editar_cupao', 'coupon', data.id, { code: data.code });
+      const changedKeys = Object.keys(payload);
+      const beforeSnapshot = Object.fromEntries(changedKeys.map(k => [k, (before as any)?.[k]]));
+      await logAction(admin.email, 'editar_cupao', 'coupon', data.id, { before: beforeSnapshot, after: payload });
       return res.status(200).json(data);
     }
 

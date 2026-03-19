@@ -110,6 +110,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ message: 'status obrigatório' });
         }
 
+        const { data: before } = await supabase.from('leads').select('status').eq('id', id).single();
+
         const { data, error } = await supabase
           .from('leads')
           .update({ status })
@@ -118,12 +120,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
-        await logAction(admin.email, 'atualizar_lead', 'lead', id, { status });
+        await logAction(admin.email, 'atualizar_lead', 'lead', id, { before: { status: before?.status }, after: { status } });
         return res.status(200).json(data);
       }
 
       if (req.method === 'DELETE' && id) {
         if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+
+        const { data: before } = await supabase.from('leads').select('status').eq('id', id).single();
+
         const { data, error } = await supabase
           .from('leads')
           .update({ status: 'Deleted' })
@@ -132,7 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
-        await logAction(admin.email, 'eliminar_lead', 'lead', id, {});
+        await logAction(admin.email, 'eliminar_lead', 'lead', id, { before: { status: before?.status }, after: { status: 'Deleted' } });
         return res.status(200).json(data);
       }
 
@@ -188,20 +193,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ message: normalized.error });
         }
 
+        const { data: before, error: beforeError } = await supabase
+          .from('ticket_types')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (beforeError) return res.status(500).json({ message: beforeError.message });
+
         if (normalized.data.quantity_total !== undefined) {
-          const { data: current, error: currentError } = await supabase
-            .from('ticket_types')
-            .select('quantity_sold')
-            .eq('id', id)
-            .single();
-
-          if (currentError) {
-            return res.status(500).json({ message: currentError.message });
-          }
-
-          const sold = Number(current?.quantity_sold ?? 0);
+          const sold = Number(before?.quantity_sold ?? 0);
           const total = Number(normalized.data.quantity_total);
-
           if (total < sold) {
             return res.status(400).json({
               message: 'quantity_total não pode ser inferior à quantidade já vendida',
@@ -217,12 +219,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
-        await logAction(admin.email, 'editar_lote', 'ticket_type', id, normalized.data as Record<string, unknown>);
+
+        const changedKeys = Object.keys(normalized.data);
+        const beforeSnapshot = Object.fromEntries(changedKeys.map(k => [k, (before as any)?.[k]]));
+        await logAction(admin.email, 'editar_lote', 'ticket_type', id, { before: beforeSnapshot, after: normalized.data });
         return res.status(200).json(data);
       }
 
       if (req.method === 'DELETE' && id) {
         if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+
+        const { data: before } = await supabase.from('ticket_types').select('name, active').eq('id', id).single();
+
         const { data, error } = await supabase
           .from('ticket_types')
           .update({ active: false })
@@ -231,7 +239,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .single();
 
         if (error) return res.status(500).json({ message: error.message });
-        await logAction(admin.email, 'desativar_lote', 'ticket_type', id, {});
+        await logAction(admin.email, 'desativar_lote', 'ticket_type', id, { before: { active: before?.active }, after: { active: false } });
         return res.status(200).json(data);
       }
 
