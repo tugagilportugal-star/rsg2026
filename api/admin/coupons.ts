@@ -21,7 +21,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!admin) return res.status(401).json({ message: 'Unauthorized' });
   try {
     if (req.method === 'GET') {
-      if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
       const { data, error } = await supabase
         .from('discount_coupons')
         .select('*')
