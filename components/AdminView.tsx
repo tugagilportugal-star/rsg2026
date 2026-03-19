@@ -95,9 +95,11 @@ type AuditLogRow = {
   details?: any;
 };
 
-type AdminUserInfo = { email: string; name: string | null; role: 'edit' | 'view' };
+type AdminRole = 'superadmin' | 'edit' | 'view';
+type AdminUserInfo = { email: string; name: string | null; role: AdminRole };
+type AdminUserRow = { email: string; name: string | null; role: AdminRole; active: boolean; created_at?: string | null };
 
-type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons' | 'logs';
+type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons' | 'logs' | 'adminUsers';
 
 type TicketTypeForm = {
   name: string;
@@ -189,6 +191,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [logs, setLogs] = useState<AuditLogRow[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  const [adminUsers, setAdminUsers] = useState<AdminUserRow[]>([]);
+  const [loadingAdminUsers, setLoadingAdminUsers] = useState(false);
+  const [adminUserForm, setAdminUserForm] = useState({ email: '', name: '', role: 'view' as AdminRole });
+  const [savingAdminUser, setSavingAdminUser] = useState(false);
+
   const [couponModalOpen, setCouponModalOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<CouponRow | null>(null);
   const [savingCoupon, setSavingCoupon] = useState(false);
@@ -276,6 +283,76 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     } finally {
       setLoadingLogs(false);
     }
+  }
+
+  async function fetchAdminUsers() {
+    if (!authHeader) return;
+    setLoadingAdminUsers(true);
+    try {
+      const res = await fetch('/api/admin?route=admin-users', { headers: { Authorization: authHeader } });
+      if (res.ok) setAdminUsers(await res.json());
+    } finally {
+      setLoadingAdminUsers(false);
+    }
+  }
+
+  async function saveAdminUser(e: React.FormEvent) {
+    e.preventDefault();
+    if (!authHeader) return;
+    const email = adminUserForm.email.trim().toLowerCase();
+    if (!email) return;
+    setSavingAdminUser(true);
+    try {
+      const res = await fetch('/api/admin?route=admin-users', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: adminUserForm.name.trim() || null, role: adminUserForm.role }),
+      });
+      if (res.ok) {
+        setAdminUserForm({ email: '', name: '', role: 'view' });
+        await fetchAdminUsers();
+      } else {
+        const json = await res.json().catch(() => null);
+        setError(json?.message || 'Erro ao adicionar utilizador.');
+      }
+    } catch {
+      setError('Erro ao adicionar utilizador.');
+    } finally {
+      setSavingAdminUser(false);
+    }
+  }
+
+  async function updateAdminUserRole(email: string, role: AdminRole) {
+    if (!authHeader) return;
+    const res = await fetch(`/api/admin?route=admin-users/${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    });
+    if (res.ok) await fetchAdminUsers();
+    else { const j = await res.json().catch(() => null); setError(j?.message || 'Erro ao atualizar role.'); }
+  }
+
+  async function toggleAdminUserActive(email: string, active: boolean) {
+    if (!authHeader) return;
+    const res = await fetch(`/api/admin?route=admin-users/${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active }),
+    });
+    if (res.ok) await fetchAdminUsers();
+    else { const j = await res.json().catch(() => null); setError(j?.message || 'Erro ao atualizar estado.'); }
+  }
+
+  async function deleteAdminUser(email: string) {
+    if (!authHeader) return;
+    if (!confirm(`Remover o acesso de ${email}?`)) return;
+    const res = await fetch(`/api/admin?route=admin-users/${encodeURIComponent(email)}`, {
+      method: 'DELETE',
+      headers: { Authorization: authHeader },
+    });
+    if (res.ok) await fetchAdminUsers();
+    else { const j = await res.json().catch(() => null); setError(j?.message || 'Erro ao remover utilizador.'); }
   }
 
   async function fetchLeads() {
@@ -981,6 +1058,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setTickets([]);
     setCoupons([]);
     setLogs([]);
+    setAdminUsers([]);
     setCouponModalOpen(false);
     setEditingCoupon(null);
     resetCouponForm();
@@ -996,6 +1074,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (tab === 'tickets') { fetchTickets(); fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
     if (tab === 'logs') fetchLogs();
+    if (tab === 'adminUsers') fetchAdminUsers();
   }, [adminUser?.email, tab]);
 
   function downloadCsv() {
@@ -1259,12 +1338,23 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Recarregar
             </button>
 
-            <button
-              onClick={() => setTab('logs')}
-              className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'logs' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-            >
-              Logs
-            </button>
+            {adminUser?.role === 'superadmin' && (
+              <button
+                onClick={() => setTab('logs')}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'logs' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                Logs
+              </button>
+            )}
+
+            {adminUser?.role === 'superadmin' && (
+              <button
+                onClick={() => setTab('adminUsers')}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'adminUsers' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                Utilizadores
+              </button>
+            )}
 
             <button
               onClick={handleLogout}
@@ -1753,6 +1843,112 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   )}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {tab === 'adminUsers' && (
+            <div className="space-y-6">
+              <form onSubmit={saveAdminUser} className="bg-white rounded-3xl border p-6">
+                <h3 className="font-bold text-gray-800 mb-4">Adicionar utilizador</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <input
+                    type="email"
+                    placeholder="Email Google"
+                    value={adminUserForm.email}
+                    onChange={e => setAdminUserForm(f => ({ ...f, email: e.target.value }))}
+                    required
+                    className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Nome (opcional)"
+                    value={adminUserForm.name}
+                    onChange={e => setAdminUserForm(f => ({ ...f, name: e.target.value }))}
+                    className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
+                  />
+                  <select
+                    value={adminUserForm.role}
+                    onChange={e => setAdminUserForm(f => ({ ...f, role: e.target.value as AdminRole }))}
+                    className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
+                  >
+                    <option value="view">View</option>
+                    <option value="edit">Edit</option>
+                    <option value="superadmin">Super Admin</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingAdminUser}
+                  className="mt-3 rounded-xl bg-brand-darkBlue text-white px-5 py-2 text-sm font-bold disabled:opacity-50"
+                >
+                  {savingAdminUser ? 'A guardar...' : 'Adicionar'}
+                </button>
+              </form>
+
+              <div className="overflow-x-auto rounded-3xl bg-white border">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50 text-left">
+                    <tr>
+                      <Th>Email</Th>
+                      <Th>Nome</Th>
+                      <Th>Role</Th>
+                      <Th>Estado</Th>
+                      <Th>Ações</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loadingAdminUsers ? (
+                      <tr><Td colSpan={5}>A carregar...</Td></tr>
+                    ) : adminUsers.length === 0 ? (
+                      <tr><Td colSpan={5}>Sem utilizadores.</Td></tr>
+                    ) : (
+                      adminUsers.map(u => (
+                        <tr key={u.email} className="border-t">
+                          <Td>{u.email}</Td>
+                          <Td>{u.name || '—'}</Td>
+                          <Td>
+                            <select
+                              value={u.role}
+                              disabled={u.email === adminUser?.email}
+                              onChange={e => updateAdminUserRole(u.email, e.target.value as AdminRole)}
+                              className="rounded-lg border border-gray-200 px-2 py-1 text-xs"
+                            >
+                              <option value="view">View</option>
+                              <option value="edit">Edit</option>
+                              <option value="superadmin">Super Admin</option>
+                            </select>
+                          </Td>
+                          <Td>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${u.active ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {u.active ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </Td>
+                          <Td>
+                            <div className="flex gap-2">
+                              {u.email !== adminUser?.email && (
+                                <>
+                                  <button
+                                    onClick={() => toggleAdminUserActive(u.email, !u.active)}
+                                    className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                                  >
+                                    {u.active ? 'Desativar' : 'Ativar'}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteAdminUser(u.email)}
+                                    className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
+                                  >
+                                    Remover
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </Td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

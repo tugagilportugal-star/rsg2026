@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdminToken, logAction } from '../../lib/admin/auth.js';
+import { verifyAdminToken, logAction, canEdit } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!admin) return res.status(401).json({ message: 'Unauthorized' });
   try {
     if (req.method === 'GET') {
-      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+      if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
       const { data, error } = await supabase
         .from('discount_coupons')
         .select('*')
@@ -35,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
-      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+      if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
       const {
         code,
         email,
@@ -99,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'PATCH') {
-      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+      if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
       const {
         id,
         code,
@@ -169,7 +169,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+      if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
       const { id } = req.body || {};
 
       if (!id) {
