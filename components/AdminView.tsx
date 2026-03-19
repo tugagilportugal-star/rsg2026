@@ -1228,6 +1228,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               { key: 'orders', label: 'Orders (Pagamentos)' },
               { key: 'tickets', label: 'Tickets (Participantes)' },
               { key: 'coupons', label: 'Coupons' },
+              { key: 'logs', label: 'Logs' },
             ].map((item) => (
               <button
                 key={item.key}
@@ -1646,6 +1647,45 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               Apagar
                             </button>
                           </div>
+                        </Td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {tab === 'logs' && (
+            <div className="overflow-x-auto rounded-3xl bg-white border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 text-left">
+                  <tr>
+                    <Th>Data</Th>
+                    <Th>Admin</Th>
+                    <Th>Ação</Th>
+                    <Th>Entidade</Th>
+                    <Th>ID</Th>
+                    <Th>Detalhes</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loadingLogs ? (
+                    <tr><Td colSpan={6}>A carregar logs…</Td></tr>
+                  ) : logs.length === 0 ? (
+                    <tr><Td colSpan={6}>Sem registos.</Td></tr>
+                  ) : (
+                    logs.map((row) => (
+                      <tr key={row.id} className="border-t">
+                        <Td>{formatDatePt(row.created_at)}</Td>
+                        <Td>{row.admin_email}</Td>
+                        <Td><span className="font-mono bg-gray-100 px-1 rounded">{row.action}</span></Td>
+                        <Td>{row.entity_type || '—'}</Td>
+                        <Td><span className="font-mono text-xs text-gray-500">{row.entity_id || '—'}</span></Td>
+                        <Td>
+                          {row.details ? (
+                            <pre className="text-xs text-gray-600 whitespace-pre-wrap max-w-xs">{JSON.stringify(row.details, null, 2)}</pre>
+                          ) : '—'}
                         </Td>
                       </tr>
                     ))
