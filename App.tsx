@@ -29,6 +29,13 @@ const App: React.FC = () => {
 
   const isAdminRoute = window.location.pathname === '/admin';
 
+  // After Google OAuth, Supabase redirects to site root with #access_token in the hash.
+  // Detect this and redirect to /admin so the AdminView can process the token.
+  if (!isAdminRoute && window.location.hash.includes('access_token=')) {
+    window.location.replace('/admin' + window.location.hash);
+    return null;
+  }
+
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
 
