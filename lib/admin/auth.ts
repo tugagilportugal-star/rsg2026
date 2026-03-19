@@ -5,11 +5,17 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
+export type AdminRole = 'superadmin' | 'edit' | 'view';
+
 export type AdminUser = {
   email: string;
   name: string | null;
-  role: 'edit' | 'view';
+  role: AdminRole;
 };
+
+export function canEdit(role: AdminRole): boolean {
+  return role === 'edit' || role === 'superadmin';
+}
 
 export async function verifyAdminToken(authHeader: string): Promise<AdminUser | null> {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;

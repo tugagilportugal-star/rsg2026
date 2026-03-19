@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdminToken, logAction } from '../lib/admin/auth.js';
+import { verifyAdminToken, logAction, canEdit } from '../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
@@ -102,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'PATCH' && id) {
-        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+        if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
         const body = parseBody(req);
         const status = body?.status;
 
@@ -125,7 +125,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'DELETE' && id) {
-        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+        if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
 
         const { data: before } = await supabase.from('leads').select('status').eq('id', id).single();
 
@@ -160,7 +160,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'POST' && !id) {
-        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+        if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
         const body = parseBody(req);
         const normalized = normalizeTicketTypeInput(body, false);
 
@@ -185,7 +185,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'PATCH' && id) {
-        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+        if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
         const body = parseBody(req);
         const normalized = normalizeTicketTypeInput(body, true);
 
@@ -227,7 +227,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (req.method === 'DELETE' && id) {
-        if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
+        if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
 
         const { data: before } = await supabase.from('ticket_types').select('name, active').eq('id', id).single();
 
@@ -290,10 +290,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // =========================
-    // AUDIT LOG
+    // AUDIT LOG (superadmin only)
     // =========================
     if (resource === 'audit-log') {
       if (req.method !== 'GET') return res.status(405).json({ message: 'Method not allowed' });
+      if (admin.role !== 'superadmin') return res.status(403).json({ message: 'Sem permissão.' });
       const { data, error } = await supabase
         .from('admin_audit_log')
         .select('*')
@@ -301,6 +302,73 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .limit(200);
       if (error) return res.status(500).json({ message: error.message });
       return res.status(200).json(data || []);
+    }
+
+    // =========================
+    // ADMIN USERS (superadmin only)
+    // =========================
+    if (resource === 'admin-users') {
+      if (admin.role !== 'superadmin') return res.status(403).json({ message: 'Sem permissão.' });
+
+      if (req.method === 'GET') {
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('email, name, role, active, created_at')
+          .order('created_at', { ascending: true });
+        if (error) return res.status(500).json({ message: error.message });
+        return res.status(200).json(data || []);
+      }
+
+      if (req.method === 'POST') {
+        const body = parseBody(req);
+        const email = String(body?.email || '').trim().toLowerCase();
+        const name = String(body?.name || '').trim() || null;
+        const role = body?.role;
+        if (!email) return res.status(400).json({ message: 'email obrigatório.' });
+        if (!['superadmin', 'edit', 'view'].includes(role)) return res.status(400).json({ message: 'role inválido.' });
+        const { data, error } = await supabase
+          .from('admin_users')
+          .insert({ email, name, role, active: true })
+          .select()
+          .single();
+        if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'criar_admin', 'admin_user', email, { name, role });
+        return res.status(200).json(data);
+      }
+
+      if (req.method === 'PATCH' && id) {
+        const body = parseBody(req);
+        const payload: Record<string, unknown> = {};
+        if (body?.role !== undefined) {
+          if (!['superadmin', 'edit', 'view'].includes(body.role)) return res.status(400).json({ message: 'role inválido.' });
+          payload.role = body.role;
+        }
+        if (body?.active !== undefined) payload.active = Boolean(body.active);
+        if (body?.name !== undefined) payload.name = String(body.name).trim() || null;
+        const { data: before } = await supabase.from('admin_users').select('role, active, name').eq('email', id).single();
+        const { data, error } = await supabase
+          .from('admin_users')
+          .update(payload)
+          .eq('email', id)
+          .select()
+          .single();
+        if (error) return res.status(500).json({ message: error.message });
+        const changedKeys = Object.keys(payload);
+        const beforeSnapshot = Object.fromEntries(changedKeys.map(k => [k, (before as any)?.[k]]));
+        await logAction(admin.email, 'editar_admin', 'admin_user', id, { before: beforeSnapshot, after: payload });
+        return res.status(200).json(data);
+      }
+
+      if (req.method === 'DELETE' && id) {
+        if (id === admin.email) return res.status(400).json({ message: 'Não podes remover a tua própria conta.' });
+        const { data: before } = await supabase.from('admin_users').select('email, role').eq('email', id).single();
+        const { error } = await supabase.from('admin_users').delete().eq('email', id);
+        if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'remover_admin', 'admin_user', id, { email: before?.email, role: before?.role });
+        return res.status(200).json({ ok: true });
+      }
+
+      return res.status(405).json({ message: 'Method not allowed' });
     }
 
     return res.status(404).json({ message: 'Not found' });
