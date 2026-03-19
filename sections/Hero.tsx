@@ -60,7 +60,7 @@ export const Hero: React.FC = () => {
             </h1>
         </div>
 
-        {/* LISBOA 2026 */}
+        {/* LISBON 2026 */}
         <div className="text-2xl md:text-4xl lg:text-5xl text-gray-200 font-light uppercase tracking-[0.4em] md:tracking-[0.6em] mb-8 drop-shadow-lg pl-2">
           LISBON 2026
         </div>
