@@ -228,6 +228,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const token = session?.access_token ?? null;
   const authHeader = token ? `Bearer ${token}` : null;
   const canEdit = adminUser?.role === 'edit' || adminUser?.role === 'superadmin';
+  const isSuperAdmin = adminUser?.role === 'superadmin';
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -1715,7 +1716,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
                                 {order.invoice_id
                                   ? <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
-                                  : canEdit
+                                  : isSuperAdmin
                                     ? (
                                       <button
                                         onClick={(e) => { e.stopPropagation(); generateInvoice(order.id); }}
@@ -2046,7 +2047,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </div>
                   ))}
                 </dl>
-                {canEdit && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
@@ -2060,7 +2061,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     )}
                   </div>
                 )}
-                {canEdit && ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
+                {isSuperAdmin && ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
                   <div className="mt-3">
                     <button
                       onClick={() => {
@@ -2084,7 +2085,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
                   </p>
                 )}
-                {canEdit && ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
+                {isSuperAdmin && ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
                   <div className="mt-3">
                     <button
                       onClick={() => {

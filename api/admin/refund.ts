@@ -22,7 +22,7 @@ function withApiToken(url: string, apiToken: string): string {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const admin = await verifyAdminToken(req.headers.authorization || '');
   if (!admin) return res.status(401).json({ message: 'Unauthorized' });
-  if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
+  if (admin.role !== 'superadmin') return res.status(403).json({ message: 'Apenas superadmin pode registar estornos.' });
 
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
