@@ -254,6 +254,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       if (res.ok) {
         const data = await res.json();
         setAdminUser(data);
+        if (window.location.pathname !== '/admin') {
+          window.location.href = '/admin';
+        }
       } else {
         setAuthError('O teu email não tem acesso ao admin. Contacta o administrador.');
         await supabase.auth.signOut();
