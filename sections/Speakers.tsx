@@ -28,7 +28,7 @@ export const Speakers: React.FC = () => {
     },
     {
       id: "k2",
-      name: "TBA",
+      name: "Nadia",
       role: "Global Leader",
       image: "",
       linkedin: "",
@@ -36,8 +36,8 @@ export const Speakers: React.FC = () => {
     },
     {
       id: "k3",
-      name: "TBA",
-      role: "Industry Expert",
+      name: "David Anderson",
+      role: "Kanban Expert",
       image: "",
       linkedin: "",
       isRevealed: false
