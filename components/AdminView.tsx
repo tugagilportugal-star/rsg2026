@@ -791,6 +791,33 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return;
     }
 
+    // Activating: check if another lote is already active
+    if (ticketTypeForm.active) {
+      const currentActive = ticketTypes.find(t => t.active && t.id !== editingTicketType?.id);
+      if (currentActive) {
+        const confirmed = confirm(
+          `O lote "${currentActive.name}" está ativo e será desativado para ativar "${ticketTypeForm.name.trim()}". Continuar?`
+        );
+        if (!confirmed) return;
+
+        try {
+          const deactivateRes = await fetch(`/api/admin/ticket-types/${encodeURIComponent(currentActive.id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: authHeader!, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: false }),
+          });
+          if (!deactivateRes.ok) {
+            const json = await deactivateRes.json().catch(() => null);
+            setError(json?.message || 'Falha ao desativar lote atual');
+            return;
+          }
+        } catch {
+          setError('Erro ao desativar lote atual');
+          return;
+        }
+      }
+    }
+
     setSavingTicketType(true);
 
     try {
@@ -880,15 +907,43 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   async function toggleTicketTypeActive(row: TicketTypeRow) {
     if (!authHeader) return;
 
+    // Activating: check if another lote is already active
+    if (!row.active) {
+      const currentActive = ticketTypes.find(t => t.active && t.id !== row.id);
+      if (currentActive) {
+        const confirmed = confirm(
+          `O lote "${currentActive.name}" está ativo e será desativado para ativar "${row.name}". Continuar?`
+        );
+        if (!confirmed) return;
+
+        // Deactivate current active first
+        setUpdatingId(row.id);
+        try {
+          const deactivateRes = await fetch(`/api/admin/ticket-types/${encodeURIComponent(currentActive.id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: false }),
+          });
+          if (!deactivateRes.ok) {
+            const json = await deactivateRes.json().catch(() => null);
+            setError(json?.message || 'Falha ao desativar lote atual');
+            setUpdatingId(null);
+            return;
+          }
+        } catch {
+          setError('Erro ao desativar lote atual');
+          setUpdatingId(null);
+          return;
+        }
+      }
+    }
+
     setUpdatingId(row.id);
 
     try {
       const res = await fetch(`/api/admin/ticket-types/${encodeURIComponent(row.id)}`, {
         method: 'PATCH',
-        headers: {
-          Authorization: authHeader,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !row.active }),
       });
 
