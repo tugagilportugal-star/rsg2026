@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Pencil, Plus, Power, Trash2, X } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 type LeadStatus = 'Pending' | 'InProgress' | 'Completed' | 'Deleted';
 
@@ -41,6 +42,10 @@ type OrderRow = {
   status?: string | null;
   invoice_id?: string | null;
   invoice_number?: string | null;
+  credit_note_id?: string | null;
+  credit_note_number?: string | null;
+  credit_note_motivo?: string | null;
+  refunded_at?: string | null;
 };
 
 type TicketRow = {
@@ -80,7 +85,19 @@ type CouponRow = {
   used_by_order_id?: string | null;
 };
 
-type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons';
+type AuditLogRow = {
+  id: string;
+  created_at: string;
+  admin_email: string;
+  action: string;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  details?: any;
+};
+
+type AdminUserInfo = { email: string; name: string | null; role: 'edit' | 'view' };
+
+type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons' | 'logs';
 
 type TicketTypeForm = {
   name: string;
@@ -135,8 +152,10 @@ function toTicketTypeForm(row: TicketTypeRow): TicketTypeForm {
   };
 }
 
+const MOTIVOS_ESTORNO = ['Estorno por desistência da compra', 'Erro no valor faturado'];
+
 export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [tab, setTab] = useState<AdminTab>('leads');
+  const [tab, setTab] = useState<AdminTab>('tickets');
 
   const [data, setData] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -153,9 +172,22 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
+  const [creditNoteModal, setCreditNoteModal] = useState<{ orderId: string; orderLabel: string } | null>(null);
+  const [creditNoteMotivo, setCreditNoteMotivo] = useState('');
+  const [creditNoteCustom, setCreditNoteCustom] = useState('');
+  const [generatingCreditNote, setGeneratingCreditNote] = useState(false);
+  const [creditNoteError, setCreditNoteError] = useState<string | null>(null);
+  const [refundModal, setRefundModal] = useState<{ orderId: string; orderLabel: string; hasCreditNote: boolean } | null>(null);
+  const [refundMotivo, setRefundMotivo] = useState('');
+  const [refundCustom, setRefundCustom] = useState('');
+  const [markingRefund, setMarkingRefund] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
+
+  const [logs, setLogs] = useState<AuditLogRow[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
 
   const [couponModalOpen, setCouponModalOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<CouponRow | null>(null);
@@ -172,9 +204,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     active: true,
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState('');
-  const [pass, setPass] = useState('');
+  const [session, setSession] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [selected, setSelected] = useState<LeadRow | null>(null);
@@ -185,10 +218,65 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [ticketTypeForm, setTicketTypeForm] = useState<TicketTypeForm>(emptyTicketTypeForm());
   const [savingTicketType, setSavingTicketType] = useState(false);
 
-  const authHeader = useMemo(() => {
-    if (!user || !pass) return null;
-    return 'Basic ' + btoa(`${user}:${pass}`);
-  }, [user, pass]);
+  const token = session?.access_token ?? null;
+  const authHeader = token ? `Bearer ${token}` : null;
+  const canEdit = adminUser?.role === 'edit';
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        loadAdminUser(session.access_token);
+      } else {
+        setAdminUser(null);
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function loadAdminUser(accessToken: string) {
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch('/api/admin?route=me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAdminUser(data);
+      } else {
+        setAuthError('O teu email não tem acesso ao admin. Contacta o administrador.');
+        await supabase.auth.signOut();
+      }
+    } catch {
+      setAuthError('Erro de ligação ao verificar acesso.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setAuthError(null);
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/admin` },
+    });
+  }
+
+  async function fetchLogs() {
+    if (!authHeader) return;
+    setLoadingLogs(true);
+    try {
+      const res = await fetch('/api/admin?route=audit-log', {
+        headers: { Authorization: authHeader },
+      });
+      if (res.ok) setLogs(await res.json());
+    } finally {
+      setLoadingLogs(false);
+    }
+  }
 
   async function fetchLeads() {
     if (!authHeader) return;
@@ -199,8 +287,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -229,8 +318,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -258,8 +348,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -287,8 +378,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -330,6 +422,62 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
+  async function generateCreditNote(orderId: string, motivo: string) {
+    if (!authHeader) return;
+    setGeneratingCreditNote(true);
+    setCreditNoteError(null);
+    try {
+      const res = await fetch('/api/admin/credit-note', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, motivo }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCreditNoteError(json.message || 'Erro desconhecido');
+      } else {
+        setCreditNoteModal(null);
+        setCreditNoteMotivo('');
+        setCreditNoteCustom('');
+        await fetchOrders();
+        await fetchTickets();
+      }
+    } catch (e: any) {
+      setCreditNoteError(e?.message || 'Erro de rede');
+    } finally {
+      setGeneratingCreditNote(false);
+    }
+  }
+
+  async function markAsRefunded(orderId: string, motivo?: string) {
+    if (!authHeader) return;
+    setMarkingRefund(true);
+    setRefundError(null);
+    try {
+      const body: Record<string, unknown> = { order_id: orderId };
+      if (motivo) body.motivo = motivo;
+      const res = await fetch('/api/admin/refund', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setRefundError(json.message || 'Erro ao marcar estorno');
+      } else {
+        setRefundModal(null);
+        setRefundMotivo('');
+        setRefundCustom('');
+        await fetchOrders();
+        await fetchTickets();
+      }
+    } catch (e: any) {
+      setRefundError(e?.message || 'Erro de rede');
+    } finally {
+      setMarkingRefund(false);
+    }
+  }
+
   async function fetchTickets() {
     if (!authHeader) return;
     setLoadingTickets(true);
@@ -339,8 +487,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -374,8 +523,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -406,8 +556,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -515,8 +666,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -555,8 +707,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -591,8 +744,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -637,6 +791,33 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return;
     }
 
+    // Activating: check if another lote is already active
+    if (ticketTypeForm.active) {
+      const currentActive = ticketTypes.find(t => t.active && t.id !== editingTicketType?.id);
+      if (currentActive) {
+        const confirmed = confirm(
+          `O lote "${currentActive.name}" está ativo e será desativado para ativar "${ticketTypeForm.name.trim()}". Continuar?`
+        );
+        if (!confirmed) return;
+
+        try {
+          const deactivateRes = await fetch(`/api/admin/ticket-types/${encodeURIComponent(currentActive.id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: authHeader!, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: false }),
+          });
+          if (!deactivateRes.ok) {
+            const json = await deactivateRes.json().catch(() => null);
+            setError(json?.message || 'Falha ao desativar lote atual');
+            return;
+          }
+        } catch {
+          setError('Erro ao desativar lote atual');
+          return;
+        }
+      }
+    }
+
     setSavingTicketType(true);
 
     try {
@@ -667,8 +848,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -702,8 +884,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -724,23 +907,52 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   async function toggleTicketTypeActive(row: TicketTypeRow) {
     if (!authHeader) return;
 
+    // Activating: check if another lote is already active
+    if (!row.active) {
+      const currentActive = ticketTypes.find(t => t.active && t.id !== row.id);
+      if (currentActive) {
+        const confirmed = confirm(
+          `O lote "${currentActive.name}" está ativo e será desativado para ativar "${row.name}". Continuar?`
+        );
+        if (!confirmed) return;
+
+        // Deactivate current active first
+        setUpdatingId(row.id);
+        try {
+          const deactivateRes = await fetch(`/api/admin/ticket-types/${encodeURIComponent(currentActive.id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: false }),
+          });
+          if (!deactivateRes.ok) {
+            const json = await deactivateRes.json().catch(() => null);
+            setError(json?.message || 'Falha ao desativar lote atual');
+            setUpdatingId(null);
+            return;
+          }
+        } catch {
+          setError('Erro ao desativar lote atual');
+          setUpdatingId(null);
+          return;
+        }
+      }
+    }
+
     setUpdatingId(row.id);
 
     try {
       const res = await fetch(`/api/admin/ticket-types/${encodeURIComponent(row.id)}`, {
         method: 'PATCH',
-        headers: {
-          Authorization: authHeader,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !row.active }),
       });
 
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -758,43 +970,33 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!user || !pass) {
-      setError('Credenciais inválidas');
-      return;
-    }
-
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUser('');
-    setPass('');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setAdminUser(null);
+    setSession(null);
     setSelected(null);
     setData([]);
     setTicketTypes([]);
     setOrders([]);
     setTickets([]);
     setCoupons([]);
+    setLogs([]);
     setCouponModalOpen(false);
     setEditingCoupon(null);
     resetCouponForm();
     setError(null);
-    setTab('leads');
+    setTab('tickets');
   };
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!adminUser) return;
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
     if (tab === 'orders') { fetchOrders(); fetchTickets(); }
-    if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
+    if (tab === 'tickets') { fetchTickets(); fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
-  }, [isAuthenticated, authHeader, tab]);
+    if (tab === 'logs') fetchLogs();
+  }, [adminUser?.email, tab]);
 
   function downloadCsv() {
     const escape = (v: unknown) => {
@@ -956,11 +1158,19 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     URL.revokeObjectURL(url);
   }
 
-  if (!isAuthenticated) {
+  if (authLoading) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!adminUser) {
     return (
       <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl p-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-black text-gray-900">Admin</h2>
               <p className="text-sm text-gray-500">Acesso restrito</p>
@@ -973,43 +1183,26 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </button>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-              placeholder="Utilizador"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Password"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            {error && (
-              <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 rounded-2xl bg-brand-darkBlue text-white font-bold py-3"
-              >
-                Entrar
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 rounded-2xl bg-gray-100 text-gray-800 font-bold py-3"
-              >
-                Voltar ao site
-              </button>
+          {authError && (
+            <div className="mb-6 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {authError}
             </div>
-          </form>
+          )}
+
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition"
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h13.1c-.6 3-2.3 5.5-4.8 7.2v6h7.8c4.5-4.2 7.4-10.4 7.4-17.5z"/><path fill="#34A853" d="M24 48c6.5 0 12-2.2 16-5.9l-7.8-6c-2.2 1.5-5 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9H2.4v6.2C6.4 42.7 14.6 48 24 48z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.5-.8-3-.8-4.5s.3-3 .8-4.5v-6.2H2.4C.9 16.6 0 20.2 0 24s.9 7.4 2.4 10.7l8.1-6.2z"/><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.3 30.4 0 24 0 14.6 0 6.4 5.3 2.4 13.3l8.1 6.2C12.4 13.7 17.7 9.5 24 9.5z"/></svg>
+            Entrar com Google
+          </button>
+
+          <button
+            onClick={onClose}
+            className="mt-3 w-full rounded-2xl bg-gray-100 text-gray-600 font-semibold py-3 text-sm hover:bg-gray-200"
+          >
+            Voltar ao site
+          </button>
         </div>
       </div>
     );
@@ -1064,6 +1257,13 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
             >
               Recarregar
+            </button>
+
+            <button
+              onClick={() => setTab('logs')}
+              className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'logs' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            >
+              Logs
             </button>
 
             <button
@@ -1516,6 +1716,45 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </table>
             </div>
           )}
+
+          {tab === 'logs' && (
+            <div className="overflow-x-auto rounded-3xl bg-white border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 text-left">
+                  <tr>
+                    <Th>Data</Th>
+                    <Th>Admin</Th>
+                    <Th>Ação</Th>
+                    <Th>Entidade</Th>
+                    <Th>ID</Th>
+                    <Th>Detalhes</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loadingLogs ? (
+                    <tr><Td colSpan={6}>A carregar logs…</Td></tr>
+                  ) : logs.length === 0 ? (
+                    <tr><Td colSpan={6}>Sem registos.</Td></tr>
+                  ) : (
+                    logs.map((row) => (
+                      <tr key={row.id} className="border-t">
+                        <Td>{formatDatePt(row.created_at)}</Td>
+                        <Td>{row.admin_email}</Td>
+                        <Td><span className="font-mono bg-gray-100 px-1 rounded">{row.action}</span></Td>
+                        <Td>{row.entity_type || '—'}</Td>
+                        <Td><span className="font-mono text-xs text-gray-500">{row.entity_id || '—'}</span></Td>
+                        <Td>
+                          {row.details ? (
+                            <pre className="text-xs text-gray-600 whitespace-pre-wrap max-w-xs">{JSON.stringify(row.details, null, 2)}</pre>
+                          ) : '—'}
+                        </Td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {selectedOrder && (() => {
@@ -1599,7 +1838,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </div>
                   ))}
                 </dl>
-                {ticketOrder && !ticketOrder.invoice_id && (
+                {ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
@@ -1613,10 +1852,184 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     )}
                   </div>
                 )}
+                {ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedTicket(null);
+                        setCreditNoteMotivo('');
+                        setCreditNoteCustom('');
+                        setCreditNoteError(null);
+                        setCreditNoteModal({
+                          orderId: ticketOrder.id,
+                          orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
+                        });
+                      }}
+                      className="w-full py-2 rounded-lg border border-orange-400 text-orange-600 text-sm font-medium hover:bg-orange-50"
+                    >
+                      Emitir Nota de Crédito
+                    </button>
+                  </div>
+                )}
+                {ticketOrder?.credit_note_id && (
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
+                  </p>
+                )}
+                {ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedTicket(null);
+                        setRefundError(null);
+                        setRefundMotivo('');
+                        setRefundCustom('');
+                        setRefundModal({
+                          orderId: ticketOrder.id,
+                          orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
+                          hasCreditNote: !!ticketOrder.credit_note_id,
+                        });
+                      }}
+                      className="w-full py-2 rounded-lg border border-red-400 text-red-600 text-sm font-medium hover:bg-red-50"
+                    >
+                      Emitir Estorno
+                    </button>
+                  </div>
+                )}
+                {ticketOrder?.refunded_at && (
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    Estornado em <span className="font-medium text-gray-700">{new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')}</span>
+                  </p>
+                )}
               </div>
             </div>
           );
         })()}
+
+        {creditNoteModal && (
+          <div
+            className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!generatingCreditNote) setCreditNoteModal(null); }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">Nota de Crédito</h3>
+                <button onClick={() => setCreditNoteModal(null)} disabled={generatingCreditNote} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Fatura: <span className="font-medium text-gray-700">{creditNoteModal.orderLabel}</span>
+              </p>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm font-medium text-gray-700">Motivo</p>
+                {['Troca / inclusão de NIF', 'Correção de dados do cliente', 'Estorno por desistência da compra', 'Erro no valor faturado', 'Outro'].map((opt) => (
+                  <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="motivo"
+                      value={opt}
+                      checked={creditNoteMotivo === opt}
+                      onChange={() => setCreditNoteMotivo(opt)}
+                    />
+                    {opt}
+                  </label>
+                ))}
+                {creditNoteMotivo === 'Outro' && (
+                  <textarea
+                    className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    rows={2}
+                    placeholder="Descreve o motivo…"
+                    value={creditNoteCustom}
+                    onChange={(e) => setCreditNoteCustom(e.target.value)}
+                  />
+                )}
+              </div>
+              {creditNoteError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{creditNoteError}</p>
+              )}
+              <button
+                onClick={() => {
+                  const motivo = creditNoteMotivo === 'Outro' ? creditNoteCustom.trim() : creditNoteMotivo;
+                  if (!motivo) return;
+                  generateCreditNote(creditNoteModal.orderId, motivo);
+                }}
+                disabled={generatingCreditNote || !creditNoteMotivo || (creditNoteMotivo === 'Outro' && !creditNoteCustom.trim())}
+                className="w-full py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
+              >
+                {generatingCreditNote ? 'A emitir…' : 'Confirmar Nota de Crédito'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {refundModal && (
+          <div
+            className="fixed inset-0 z-[220] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!markingRefund) { setRefundModal(null); setRefundError(null); } }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">Emitir Estorno</h3>
+                <button onClick={() => { setRefundModal(null); setRefundError(null); }} disabled={markingRefund} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-3">
+                Fatura: <span className="font-medium text-gray-700">{refundModal.orderLabel}</span>
+              </p>
+              {!refundModal.hasCreditNote && (
+                <div className="mb-4">
+                  <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                    Não existe nota de crédito para esta fatura. Será criada automaticamente ao validar o estorno no Stripe.
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Motivo da nota de crédito</p>
+                  <div className="space-y-2">
+                    {[...MOTIVOS_ESTORNO, 'Outro'].map((opt) => (
+                      <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="radio"
+                          name="refundMotivo"
+                          value={opt}
+                          checked={refundMotivo === opt}
+                          onChange={() => setRefundMotivo(opt)}
+                        />
+                        {opt}
+                      </label>
+                    ))}
+                    {refundMotivo === 'Outro' && (
+                      <textarea
+                        className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        rows={2}
+                        placeholder="Descreve o motivo…"
+                        value={refundCustom}
+                        onChange={(e) => setRefundCustom(e.target.value)}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                O sistema irá validar que o estorno foi efetuado no Stripe antes de registar.
+              </div>
+              {refundError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{refundError}</p>
+              )}
+              <button
+                onClick={() => {
+                  const motivo = refundMotivo === 'Outro' ? refundCustom.trim() : refundMotivo;
+                  markAsRefunded(refundModal.orderId, !refundModal.hasCreditNote ? motivo : undefined);
+                }}
+                disabled={markingRefund || (!refundModal.hasCreditNote && (!refundMotivo || (refundMotivo === 'Outro' && !refundCustom.trim())))}
+                className="w-full py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {markingRefund ? 'A validar no Stripe…' : 'Validar e Registar Estorno'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {couponModalOpen && (
           <div

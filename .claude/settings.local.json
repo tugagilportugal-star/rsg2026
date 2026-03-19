@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(grep -n \"query\\\\|.sql\\\\|exec\" /c/Users/frmca/Projetos/rsg2026/api/*.ts /c/Users/frmca/Projetos/rsg2026/api/*/*.ts)",
+      "Bash(grep -n \"dangerouslySetInnerHTML\\\\|innerHTML\" /c/Users/frmca/Projetos/rsg2026/components/*.tsx)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(find /c/Users/frmca/Projetos/rsg2026/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(grep -r VITE_ /c/Users/frmca/Projetos/rsg2026 --include=*.ts --include=*.tsx)",
+      "Bash(grep -r \"BILLING_PROVIDER\\\\|BILL_API_TOKEN\\\\|INVOICEXPRESS\\\\|STRIPE_WEBHOOK\\\\|VERCEL_ENV\" /c/Users/frmca/Projetos/rsg2026 --include=*.ts --include=*.tsx --include=*.json)",
+      "Bash(grep -r process.env. /c/Users/frmca/Projetos/rsg2026/api /c/Users/frmca/Projetos/rsg2026/lib --include=*.ts)",
+      "Bash(ls -la /c/Users/frmca/Projetos/rsg2026/.env*)",
+      "Bash(find /c/Users/frmca/Projetos/rsg2026 -type f \\\\\\(-name *.sql -o -name schema* -o -name *seed* -o -name database.ts -o -name db.ts \\\\\\))",
+      "Bash(grep -r discount_coupons /c/Users/frmca/Projetos/rsg2026 --include=*.ts --include=*.tsx --include=*.sql)",
+      "Bash(find /c/Users/frmca/Projetos/rsg2026 -type f \\\\\\(-name *.md -o -name README* -o -name supabase* \\\\\\) ! -path */node_modules/*)",
+      "WebSearch",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:bill.pt)",
+      "WebFetch(domain:api.bill.pt)"
+    ]
+  }
+}

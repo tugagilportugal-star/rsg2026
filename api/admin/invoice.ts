@@ -2,20 +2,13 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { issueInvoiceForOrder } from '../../lib/invoicing/index.js';
+import { verifyAdminToken, logAction } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-function checkBasicAuth(req: VercelRequest): boolean {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Basic ')) return false;
-  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-  const [user, pass] = decoded.split(':');
-  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
-}
 
 function generateInvoiceEmail(d: {
   name: string; ticketName: string; invoiceId: string; total: string; isTest: boolean;
@@ -57,10 +50,9 @@ function generateInvoiceEmail(d: {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!checkBasicAuth(req)) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+  const admin = await verifyAdminToken(req.headers.authorization || '');
+  if (!admin) return res.status(401).json({ message: 'Unauthorized' });
+  if (admin.role !== 'edit') return res.status(403).json({ message: 'Sem permissão de edição.' });
 
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
@@ -83,7 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(404).json({ message: 'Order não encontrada.' });
   }
 
-  if (order.invoice_id && !forceTestMode) {
+  if (order.invoice_id && !forceTestMode && !order.credit_note_id) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
@@ -98,15 +90,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const amountEuro = (order.total_amount || 0) / 100;
   const isTest = forceTestMode || (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
-
-  console.log('[admin/invoice] invoice input:', {
-    orderId,
-    isTest,
-    forceTestMode,
-    customerNif: ticket?.attendee_nif || null,
-    includeRecording: order.include_recording,
-    amountEuro,
-  });
 
   const invoiceResult = await issueInvoiceForOrder({
     isTest,
@@ -134,6 +117,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       invoice_number: invoiceResult.invoiceNumber ?? null,
     })
     .eq('id', orderId);
+
+  await logAction(admin.email, 'gerar_fatura', 'order', orderId, { invoice_number: invoiceResult.invoiceNumber, invoice_id: invoiceResult.invoiceId, is_test: isTest });
 
   // Send PDF email
   if (invoiceResult.pdfBytes) {
