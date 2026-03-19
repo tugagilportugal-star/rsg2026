@@ -1260,6 +1260,13 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </button>
 
             <button
+              onClick={() => setTab('logs')}
+              className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'logs' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+            >
+              Logs
+            </button>
+
+            <button
               onClick={handleLogout}
               className="rounded-xl bg-gray-100 hover:bg-gray-200 px-4 py-2 text-sm font-bold"
             >
@@ -1283,7 +1290,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               { key: 'orders', label: 'Orders (Pagamentos)' },
               { key: 'tickets', label: 'Tickets (Participantes)' },
               { key: 'coupons', label: 'Coupons' },
-              { key: 'logs', label: 'Logs' },
             ].map((item) => (
               <button
                 key={item.key}
