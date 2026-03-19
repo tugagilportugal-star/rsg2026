@@ -227,7 +227,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const token = session?.access_token ?? null;
   const authHeader = token ? `Bearer ${token}` : null;
-  const canEdit = adminUser?.role === 'edit';
+  const canEdit = adminUser?.role === 'edit' || adminUser?.role === 'superadmin';
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -1297,7 +1297,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {tab === 'ticketTypes' && (
+            {canEdit && tab === 'ticketTypes' && (
               <button
                 onClick={openCreateTicketTypeModal}
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold"
@@ -1307,7 +1307,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
             )}
 
-            {tab === 'coupons' && (
+            {canEdit && tab === 'coupons' && (
               <button
                 onClick={openCreateCoupon}
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold"
@@ -1489,33 +1489,35 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               </span>
                             </Td>
                             <Td>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => openEditTicketTypeModal(row)}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2"
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                  Editar
-                                </button>
+                              {canEdit && (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => openEditTicketTypeModal(row)}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                    Editar
+                                  </button>
 
-                                <button
-                                  onClick={() => toggleTicketTypeActive(row)}
-                                  disabled={updatingId === row.id}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2 disabled:opacity-50"
-                                >
-                                  <Power className="w-4 h-4" />
-                                  {row.active ? 'Desativar' : 'Ativar'}
-                                </button>
+                                  <button
+                                    onClick={() => toggleTicketTypeActive(row)}
+                                    disabled={updatingId === row.id}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2 disabled:opacity-50"
+                                  >
+                                    <Power className="w-4 h-4" />
+                                    {row.active ? 'Desativar' : 'Ativar'}
+                                  </button>
 
-                                <button
-                                  onClick={() => archiveTicketType(row)}
-                                  disabled={updatingId === row.id}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 px-3 py-2 disabled:opacity-50"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Remover
-                                </button>
-                              </div>
+                                  <button
+                                    onClick={() => archiveTicketType(row)}
+                                    disabled={updatingId === row.id}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 px-3 py-2 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Remover
+                                  </button>
+                                </div>
+                              )}
                             </Td>
                           </tr>
                         );
@@ -1565,34 +1567,40 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{safe(row.phone)}</Td>
                         <Td>{safe(row.company)}</Td>
                         <Td>
-                          <select
-                            value={safe(row.status)}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              patchStatus(row.id, e.target.value as LeadStatus);
-                            }}
-                            disabled={updatingId === row.id}
-                            className="rounded-xl border border-gray-300 px-2 py-1"
-                          >
-                            {STATUS_OPTIONS.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
+                          {canEdit ? (
+                            <select
+                              value={safe(row.status)}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                patchStatus(row.id, e.target.value as LeadStatus);
+                              }}
+                              disabled={updatingId === row.id}
+                              className="rounded-xl border border-gray-300 px-2 py-1"
+                            >
+                              {STATUS_OPTIONS.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span>{safe(row.status)}</span>
+                          )}
                         </Td>
                         <Td>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              softDeleteLead(row.id);
-                            }}
-                            className="text-red-600 font-bold"
-                            disabled={updatingId === row.id}
-                          >
-                            Deleted
-                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                softDeleteLead(row.id);
+                              }}
+                              className="text-red-600 font-bold"
+                              disabled={updatingId === row.id}
+                            >
+                              Deleted
+                            </button>
+                          )}
                         </Td>
                       </tr>
                     ))
@@ -1707,15 +1715,17 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
                                 {order.invoice_id
                                   ? <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
-                                  : (
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); generateInvoice(order.id); }}
-                                      disabled={generatingInvoice === order.id}
-                                      className="text-xs px-2 py-0.5 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
-                                    >
-                                      {generatingInvoice === order.id ? 'A gerar…' : 'Gerar Fatura'}
-                                    </button>
-                                  )
+                                  : canEdit
+                                    ? (
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); generateInvoice(order.id); }}
+                                        disabled={generatingInvoice === order.id}
+                                        className="text-xs px-2 py-0.5 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
+                                      >
+                                        {generatingInvoice === order.id ? 'A gerar…' : 'Gerar Fatura'}
+                                      </button>
+                                    )
+                                    : <span className="text-xs text-orange-500">Pendente</span>
                                 }
                                 {invoiceError?.orderId === order.id && (
                                   <div className="text-xs text-red-600 max-w-xs break-words">{invoiceError.msg}</div>
@@ -1776,28 +1786,30 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{row.used_by_order_id || '—'}</Td>
                         <Td>{row.used_at ? formatDatePt(row.used_at) : '—'}</Td>
                         <Td>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => openEditCoupon(row)}
-                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
-                            >
-                              Editar
-                            </button>
+                          {canEdit && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => openEditCoupon(row)}
+                                className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                              >
+                                Editar
+                              </button>
 
-                            <button
-                              onClick={() => toggleCouponActive(row)}
-                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
-                            >
-                              {row.active ? 'Desativar' : 'Ativar'}
-                            </button>
+                              <button
+                                onClick={() => toggleCouponActive(row)}
+                                className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                              >
+                                {row.active ? 'Desativar' : 'Ativar'}
+                              </button>
 
-                            <button
-                              onClick={() => deleteCoupon(row.id)}
-                              className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
-                            >
-                              Apagar
-                            </button>
-                          </div>
+                              <button
+                                onClick={() => deleteCoupon(row.id)}
+                                className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
+                              >
+                                Apagar
+                              </button>
+                            </div>
+                          )}
                         </Td>
                       </tr>
                     ))
@@ -2034,7 +2046,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </div>
                   ))}
                 </dl>
-                {ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
+                {canEdit && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
@@ -2048,7 +2060,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     )}
                   </div>
                 )}
-                {ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
+                {canEdit && ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
                   <div className="mt-3">
                     <button
                       onClick={() => {
@@ -2072,7 +2084,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
                   </p>
                 )}
-                {ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
+                {canEdit && ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
                   <div className="mt-3">
                     <button
                       onClick={() => {
