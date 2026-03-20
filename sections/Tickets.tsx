@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Section } from '../components/UIComponents';
-import { Bell, Check, CheckCircle2, Sparkles } from 'lucide-react';
+import { Bell, Check, CheckCircle2, Sparkles, Gift } from 'lucide-react';
 import { useTicketStatus } from '../hooks/useTicketStatus';
 
 interface TicketsProps {
@@ -18,6 +18,9 @@ type TicketTypeData = {
   sort_order: number | null;
 };
 
+// ==========================================
+// FORMULÁRIO DE WAITLIST (Mantido Intacto)
+// ==========================================
 const WaitlistForm: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', expectations: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -52,67 +55,38 @@ const WaitlistForm: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo <span className="text-red-500">*</span></label>
-          <input
-            required
-            type="text"
-            value={form.name}
-            onChange={e => setForm({ ...form, name: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
-          />
+          <input required type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">E-mail <span className="text-red-500">*</span></label>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
-          />
+          <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp <span className="text-red-500">*</span></label>
-          <input
-            required
-            type="tel"
-            value={form.phone}
-            onChange={e => setForm({ ...form, phone: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
-          />
+          <input required type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-          <input
-            type="text"
-            value={form.company}
-            onChange={e => setForm({ ...form, company: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange"
-          />
+          <input type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange" />
         </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">O que mais espera encontrar no RSG 2026?</label>
-        <textarea
-          rows={2}
-          value={form.expectations}
-          onChange={e => setForm({ ...form, expectations: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange resize-none"
-        />
+        <textarea rows={2} value={form.expectations} onChange={e => setForm({ ...form, expectations: e.target.value })} className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-brand-orange focus:border-brand-orange resize-none" />
       </div>
       {status === 'error' && (
         <p className="text-red-600 text-sm">Ocorreu um erro. Tente novamente.</p>
       )}
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="w-full rounded-[20px] bg-brand-orange text-white py-3 text-lg font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60"
-      >
+      <button type="submit" disabled={status === 'loading'} className="w-full rounded-[20px] bg-brand-orange text-white py-3 text-lg font-black shadow-[0_10px_24px_rgba(249,115,22,0.28)] hover:opacity-95 transition disabled:opacity-60">
         {status === 'loading' ? 'A enviar...' : 'Entrar na Waitlist'}
       </button>
     </form>
   );
 };
 
+// ==========================================
+// SECÇÃO PRINCIPAL TICKETS
+// ==========================================
 export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   const { hasActiveLot, isLoading: statusLoading } = useTicketStatus();
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
@@ -136,7 +110,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     }
 
     fetchTicket();
-  }, []);
+  },[]);
 
   const formatCurrency = (amount?: number, currency?: string) => {
     if (amount === undefined || amount === null || !currency) return '—';
@@ -164,6 +138,32 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
       : formatCurrency(ticketData?.price, ticketData?.currency);
 
   const showTicketBox = !statusLoading && hasActiveLot;
+
+  // --- NOVA LISTA DE BENEFÍCIOS (Com Bónus e Links) ---
+  const ticketBenefits: { text: React.ReactNode; isBonus: boolean }[] =[
+    { text: "Acesso completo ao evento", isBonus: false },
+    { text: "Kit de Boas-vindas + T-Shirt Oficial", isBonus: false },
+    { text: "Coffee breaks premium", isBonus: false },
+    { text: "Scrum Education Units (SEUs)", isBonus: false },
+    { text: "Certificado de Participação Digital", isBonus: false },
+    { text: "Acesso à gravação do evento*", isBonus: false },
+    { 
+      text: (
+        <>
+          1 ano de acesso a<a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (~€249)
+        </>
+      ), 
+      isBonus: true 
+    },
+    { 
+      text: (
+        <>
+          Acesso anual ao plano Essentials <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> (~€85)
+        </>
+      ), 
+      isBonus: true 
+    }
+  ];
 
   return (
     <Section id="tickets" className="relative overflow-hidden bg-white">
@@ -202,6 +202,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </div>
 
             <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-4 md:py-5">
+              
               <div className="flex justify-center mb-3">
                 <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 text-brand-orange px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
                   <Sparkles className="w-4 h-4" />
@@ -209,35 +210,35 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center mb-6">
                 <div className="text-4xl md:text-5xl font-black text-brand-darkBlue leading-none">
                   {ticketPrice}
                 </div>
+                {!loadingTicket && ticketData?.price && (
+                    <span className="text-gray-400 font-medium text-sm mt-1 block">
+                        + IVA (23%)
+                    </span>
+                )}
               </div>
 
-              <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6">
-                {[
-                  'Acesso completo ao evento',
-                  'Kit de Boas-vindas + T-Shirt Oficial',
-                  'Coffee breaks premium',
-                  'Scrum Education Units (SEUs)',
-                  'Certificado de Participação Digital',
-                  'Acesso à gravação do evento',
-                ].map((item, i) => (
-                  <div key={item} className="flex items-center gap-3 text-left">
-                    <div className="rounded-full bg-sky-100 p-1 flex-shrink-0">
-                      <Check className="w-3.5 h-3.5 text-sky-500" />
+              {/* Renderização da Nova Lista de Benefícios */}
+              <div className="mt-4 w-full flex flex-col gap-y-3 border-t border-gray-100 pt-6 mb-6">
+                {ticketBenefits.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 text-left">
+                    <div className={`rounded-full p-1.5 flex-shrink-0 mt-0.5 ${item.isBonus ? 'bg-orange-100' : 'bg-sky-100'}`}>
+                      {item.isBonus ? (
+                         <Gift className="w-4 h-4 text-brand-orange" />
+                      ) : (
+                         <Check className="w-4 h-4 text-sky-500" />
+                      )}
                     </div>
-                    <span className="text-base md:text-[17px] text-gray-700">
-                      {item}{i === 5 && <span className="text-red-500">*</span>}
+                    <span className={`text-base md:text-[16px] leading-snug ${item.isBonus ? 'font-bold text-gray-800' : 'text-gray-600'}`}>
+                      {item.text}
                     </span>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 w-full text-xs text-gray-400 text-center">
-                <span className="text-red-500">*</span> Acesso à gravação disponível por +€10,00 no momento da compra.
-              </p>
-
+              
               <div className="mt-4 w-full">
                 <button
                   onClick={onOpenTicketModal}
@@ -251,10 +252,20 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                       : 'Lote Indisponível'}
                 </button>
               </div>
+              
+              {/* Notas Legais e Disclaimers Atualizados */}
+              <div className="mt-6 text-left space-y-3 border-t border-gray-100 pt-4">
+                  <p className="text-[11px] text-gray-400 leading-tight">
+                      <span className="text-red-500 font-bold">*</span> Acesso à gravação disponível por +€10,00 no momento da compra.
+                  </p>
+                  <p className="text-[11px] text-gray-400 leading-tight">
+                      <span className="text-gray-500 font-bold">**</span> Os bónus exclusivos (Agile Academy e Kanban+) são ativados diretamente pelo participante após o evento. <span className="font-semibold text-gray-500">Zero partilha de dados</span> da nossa parte, garantindo a sua total privacidade.
+                  </p>
+                  <p className="text-[11px] text-gray-400 leading-tight text-center mt-2">
+                      Fatura com contribuinte disponível no momento da compra.
+                  </p>
+              </div>
 
-              <p className="mt-3 text-center text-sm text-gray-400">
-                Fatura com contribuinte disponível no momento da compra.
-              </p>
             </div>
           </>
         )}
