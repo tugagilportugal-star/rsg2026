@@ -150,7 +150,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { 
       text: (
         <>
-          1 ano de acesso a<a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (~€249)
+          1 ano de acesso a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (~€249)
         </>
       ), 
       isBonus: true 
