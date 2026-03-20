@@ -94,7 +94,7 @@ export const Hero: React.FC = () => {
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
           <div className="flex items-center gap-3">
             <MapPin className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos - Lisbon, Portugal</span>
+            <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos | Lisbon, Portugal</span>
           </div>
         </div>
 
