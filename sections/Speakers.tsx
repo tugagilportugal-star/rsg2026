@@ -69,9 +69,9 @@ export const Speakers: React.FC = () => {
       id: "s3",
       name: "Manuel Pais",
       role: "Co-author of Team Topologies",
-      image: "https://ui-avatars.com/api/?name=Manuel+Pais&background=003F59&color=fff&size=400",
+      image: "https://i.postimg.cc/zvdsnp0t/Manuel-Pais.png",
       linkedin: "https://www.linkedin.com/in/manuelpais/",
-      isRevealed: false // Mude para true quando anunciar
+      isRevealed: true
     },
     {
       id: "s4",
