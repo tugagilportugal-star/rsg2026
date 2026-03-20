@@ -215,9 +215,6 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                   {ticketPrice}
                 </div>
                 {!loadingTicket && ticketData?.price && (
-                    <span className="text-gray-400 font-medium text-sm mt-1 block">
-                        + IVA (23%)
-                    </span>
                 )}
               </div>
 
