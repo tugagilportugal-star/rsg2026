@@ -19,7 +19,7 @@ type TicketTypeData = {
 };
 
 // ==========================================
-// FORMULÁRIO DE WAITLIST (Mantido Intacto)
+// FORMULÁRIO DE WAITLIST
 // ==========================================
 const WaitlistForm: React.FC = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', expectations: '' });
@@ -89,8 +89,8 @@ const WaitlistForm: React.FC = () => {
 // ==========================================
 export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   const { hasActiveLot, isLoading: statusLoading } = useTicketStatus();
-  const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
-  const [loadingTicket, setLoadingTicket] = useState(true);
+  const[ticketData, setTicketData] = useState<TicketTypeData | null>(null);
+  const[loadingTicket, setLoadingTicket] = useState(true);
 
   useEffect(() => {
     async function fetchTicket() {
@@ -139,7 +139,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
 
   const showTicketBox = !statusLoading && hasActiveLot;
 
-  // --- NOVA LISTA DE BENEFÍCIOS (Com Bónus e Links) ---
+  // --- LISTA DE BENEFÍCIOS ---
   const ticketBenefits: { text: React.ReactNode; isBonus: boolean }[] =[
     { text: "Acesso completo ao evento", isBonus: false },
     { text: "Kit de Boas-vindas + T-Shirt Oficial", isBonus: false },
@@ -214,8 +214,6 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                 <div className="text-4xl md:text-5xl font-black text-brand-darkBlue leading-none">
                   {ticketPrice}
                 </div>
-                {!loadingTicket && ticketData?.price &&
-                }
               </div>
 
               {/* Renderização da Nova Lista de Benefícios */}
