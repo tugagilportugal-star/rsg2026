@@ -214,8 +214,8 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                 <div className="text-4xl md:text-5xl font-black text-brand-darkBlue leading-none">
                   {ticketPrice}
                 </div>
-                {!loadingTicket && ticketData?.price && (
-                )}
+                {!loadingTicket && ticketData?.price &&
+                }
               </div>
 
               {/* Renderização da Nova Lista de Benefícios */}
