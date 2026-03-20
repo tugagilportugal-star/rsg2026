@@ -1,6 +1,6 @@
 import React from 'react';
 import { Section } from '../components/UIComponents';
-import { Check, Info, Sparkles, Tag, Gift } from 'lucide-react'; // Importámos o Gift
+import { Check, Info, Sparkles, Tag, Gift } from 'lucide-react';
 
 interface TicketsProps {
   onOpenTicketModal: () => void;
@@ -8,16 +8,30 @@ interface TicketsProps {
 
 export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   
-  // Transformámos a lista num array de objetos para gerir o destaque dos bónus
-  const ticketBenefits =[
+  // Transformámos a propriedade 'text' para aceitar elementos React (links) em vez de apenas texto simples
+  const ticketBenefits: { text: React.ReactNode; isBonus: boolean }[] =[
     { text: "Acesso completo ao evento", isBonus: false },
     { text: "Kit de Boas-vindas + T-Shirt Oficial", isBonus: false },
     { text: "Coffee breaks premium", isBonus: false },
     { text: "Scrum Education Units (SEUs)", isBonus: false },
     { text: "Certificado de Participação Digital", isBonus: false },
     { text: "Acesso à gravação do evento*", isBonus: false },
-    { text: "1 Ano de Agile Academy (~€249)", isBonus: true },
-    { text: "1 Ano de acesso à plataforma Kanban+ (~€85)", isBonus: true }
+    { 
+      text: (
+        <>
+          1 Ano de <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (Valor real: ~€299)
+        </>
+      ), 
+      isBonus: true 
+    },
+    { 
+      text: (
+        <>
+          Acesso à plataforma <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> (Valor real: ~€140)
+        </>
+      ), 
+      isBonus: true 
+    }
   ];
 
   return (
@@ -30,7 +44,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
           Garanta o seu lugar
         </h2>
         <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-          Participe de uma das maiores celebrações da agilidade em Portugal. 
+          Participe na maior celebração da agilidade em Portugal. 
           Preço exclusivo para os primeiros inscritos.
         </p>
       </div>
@@ -60,6 +74,10 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                     + IVA (23%)
                 </span>
             </div>
+            
+            <p className="text-green-600 text-xs font-bold bg-green-50 inline-block px-2 py-1 rounded mb-8">
+                Poupança de 40% vs. Preço Final
+            </p>
 
             {/* Lista de Benefícios */}
             <ul className="space-y-4 text-left mb-8">
