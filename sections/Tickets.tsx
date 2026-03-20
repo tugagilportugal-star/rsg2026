@@ -19,7 +19,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { 
       text: (
         <>
-          1 Ano de <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (Valor real: ~€299)
+          1 ano de <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (Valor real: ~€299)
         </>
       ), 
       isBonus: true 
@@ -27,7 +27,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { 
       text: (
         <>
-          Acesso à plataforma <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> (Valor real: ~€140)
+          Acesso anual ao plano Essentials da plataforma <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> (Valor real: ~€140)
         </>
       ), 
       isBonus: true 
@@ -70,15 +70,8 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
                 <span className="text-5xl md:text-6xl font-black text-brand-darkBlue tracking-tight">
                     42,80€
                 </span>
-                <span className="text-gray-400 font-medium text-sm mt-1">
-                    + IVA (23%)
-                </span>
             </div>
             
-            <p className="text-green-600 text-xs font-bold bg-green-50 inline-block px-2 py-1 rounded mb-8">
-                Poupança de 40% vs. Preço Final
-            </p>
-
             {/* Lista de Benefícios */}
             <ul className="space-y-4 text-left mb-8">
                 {ticketBenefits.map((item, idx) => (
