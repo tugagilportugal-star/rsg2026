@@ -57,18 +57,18 @@ const App: React.FC = () => {
   return (
     <TicketStatusProvider>
     <>
-      <Navbar />
+      <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
       <main>
-        <Hero />
+        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
         <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
         <About />
-        <Features />
-        <Program />
+        <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
         <WhyAttend />
         <Speakers />
         <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-        <Recap />
+        <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
         <FAQ />
         <Team />
         <Footer />
