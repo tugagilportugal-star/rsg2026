@@ -3,7 +3,7 @@ import { ASSETS } from '../config';
 import { Menu, X, ExternalLink, ArrowUp, Ticket, Bell } from 'lucide-react';
 import { useTicketStatus } from '../hooks/useTicketStatus';
 
-export const Navbar: React.FC = () => {
+export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
   const { hasActiveLot } = useTicketStatus();
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -87,12 +87,12 @@ export const Navbar: React.FC = () => {
                 ))}
               </div>
 
-              <a
-                href="#tickets"
+              <button
+                onClick={onOpenTicketModal}
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
-              </a>
+              </button>
             </div>
 
             {/* --- MOBILE TRIGGER --- */}
@@ -153,12 +153,12 @@ export const Navbar: React.FC = () => {
               </a>
             ))}
 
-            <a
-                href="#tickets"
+            <button
+                onClick={() => { setIsMobileMenuOpen(false); onOpenTicketModal(); }}
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
-              </a>
+              </button>
         </div>
 
         <div className="p-8 bg-black/20 flex flex-col items-center gap-4 border-t border-white/10">

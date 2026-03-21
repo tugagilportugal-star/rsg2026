@@ -2,7 +2,7 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Globe2, Mic, Users, Coffee, Rocket, Heart, BrainCircuit } from 'lucide-react';
 
-export const Features: React.FC = () => {
+export const Features: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
   const features = [
     { 
         icon: <Globe2 className="w-8 h-8 text-white" />, 
@@ -77,7 +77,7 @@ export const Features: React.FC = () => {
             <h3 className="text-2xl font-bold mb-4 relative z-10">E muito mais...</h3>
             <p className="text-blue-100 mb-6 relative z-10">Surpresas que só quem estiver lá vai viver.</p>
             <button 
-                onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={onOpenTicketModal}
                 className="relative z-10 px-6 py-2 border-2 border-brand-orange text-brand-orange font-bold rounded-full hover:bg-brand-orange hover:text-white transition-colors"
             >
                 Garanta o seu lugar

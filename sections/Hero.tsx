@@ -4,7 +4,7 @@ import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
 import { useTicketStatus } from '../hooks/useTicketStatus';
 
-export const Hero: React.FC = () => {
+export const Hero: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
   const timeLeft = useCountdown('2026-05-21T00:00:00');
   const { hasActiveLot } = useTicketStatus();
 
@@ -94,13 +94,13 @@ export const Hero: React.FC = () => {
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
           <div className="flex items-center gap-3">
             <MapPin className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos - Lisbon, Portugal</span>
+           <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos - Lisbon, Portugal</span>
           </div>
         </div>
 
         {/* CTA */}
         <button
-          onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={onOpenTicketModal}
           className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
         >
           {hasActiveLot ? 'Garanta o seu Lugar' : 'Entrar na Waitlist'}
