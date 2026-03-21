@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Section } from '../components/UIComponents';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-export const FAQ: React.FC = () => {
+export const FAQ: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const toggleAccordion = (index: number) => {
@@ -15,7 +15,7 @@ export const FAQ: React.FC = () => {
             answer: (
                 <>
                     Os bilhetes já se encontram disponíveis para compra online! Pode consultar os valores e garantir o seu lugar{' '}
-                    <button onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })} className="text-brand-blue font-bold hover:underline">aqui</button>.
+                    <button onClick={onOpenTicketModal} className="text-brand-blue font-bold hover:underline">aqui</button>.
                     <br/><br/>
                     Se pretende trazer a sua equipa ou posicionar a sua empresa num dos maiores eventos de agilidade em Portugal, oferecemos condições especiais para compras em lote e pacotes de patrocínio. Envie-nos uma mensagem através da{' '}
                     <button onClick={() => document.getElementById('sponsors')?.scrollIntoView({ behavior: 'smooth' })} className="text-brand-blue font-bold hover:underline">secção de parcerias</button> 
