@@ -89,12 +89,12 @@ export const Hero: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 mb-10 bg-white/5 p-4 md:px-12 md:py-4 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">21 May 2026</span>
+            <span className="text-base md:text-lg font-bold">21 Maio 2026</span>
           </div>
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
           <div className="flex items-center gap-3">
             <MapPin className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos - Lisbon, Portugal</span>
+            <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos - Lisboa, Portugal</span>
           </div>
         </div>
 
