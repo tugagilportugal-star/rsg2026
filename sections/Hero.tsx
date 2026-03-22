@@ -3,7 +3,13 @@ import { useCountdown } from '../hooks/useCountdown';
 import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
 
-export const Hero: React.FC = () => {
+// A interface que diz ao TypeScript que podemos receber esta prop do App.tsx
+interface HeroProps {
+  onOpenTicketModal?: () => void;
+}
+
+// A tipagem HeroProps
+export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
   const timeLeft = useCountdown('2026-05-21T00:00:00');
 
   return (
@@ -60,7 +66,7 @@ export const Hero: React.FC = () => {
           ))}
         </div>
 
-        {/* AJUSTE NO BLOCO DE LOCALIZAÇÃO (MOBILE-FRIENDLY) */}
+        {/* BLOCO DE LOCALIZAÇÃO COM AJUSTE MOBILE */}
         <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-4 md:gap-12 mb-10 bg-white/5 p-5 md:px-12 md:py-4 rounded-3xl md:rounded-full backdrop-blur-md border border-white/10 shadow-inner w-full md:w-auto max-w-md md:max-w-none mx-auto">
           
           <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
@@ -79,6 +85,7 @@ export const Hero: React.FC = () => {
 
         </div>
 
+        {/* BOTÃO - Mantém a funcionalidade de scroll como você pediu! */}
         <button 
           onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
           className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
