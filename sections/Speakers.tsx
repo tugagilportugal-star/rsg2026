@@ -1,95 +1,236 @@
 import React from 'react';
-import { useCountdown } from '../hooks/useCountdown';
-import { MapPin, Calendar, ArrowDown } from 'lucide-react';
-import { ASSETS } from '../config';
+import { Section } from '../components/UIComponents';
+import { Linkedin, Sparkles, UserCircle2 } from 'lucide-react';
 
-export const Hero: React.FC = () => {
-  const timeLeft = useCountdown('2026-05-21T00:00:00');
+interface SpeakerData {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  linkedin: string;
+  isRevealed: boolean;
+}
+
+export const Speakers: React.FC = () => {
+  
+  // ==========================================
+  // 1. KEYNOTES (Destaque Principal)
+  // ==========================================
+  const keynotes: SpeakerData[] =[
+    {
+      id: "k1",
+      name: "Lyssa Adkins",
+      role: "Author of Coaching Agile Teams",
+      // Substitua pelo link real da foto da Lyssa
+      image: "https://i.postimg.cc/htmyQzQ1/Lyssa-Adkins.png", 
+      linkedin: "https://www.linkedin.com/in/lyssaadkins/",
+      isRevealed: true
+    },
+    {
+      id: "k2",
+      name: "TBA",
+      role: "Global Leader",
+      image: "",
+      linkedin: "",
+      isRevealed: false
+    },
+  ];
+
+  // ==========================================
+  // 2. SPEAKERS, PAINÉIS E MODERADORES
+  // ==========================================
+  const speakers: SpeakerData[] =[
+    {
+      id: "s1",
+      name: "Ricardo Caldas",
+      role: "Product Owner",
+      // Substitua pelo link real da foto do Ricardo
+      image: "https://i.postimg.cc/SxbL5Zjk/Ricardo-Caldas-(1).png",
+      linkedin: "https://www.linkedin.com/in/ricardo-caldas/", // Verifique o link
+      isRevealed: true
+    },
+    {
+      id: "s2",
+      name: "Joana Silva",
+      role: "Director of Quality Assurance",
+      image: "https://i.postimg.cc/Gpwcvy73/Joana-Silva.png",
+      linkedin: "https://www.linkedin.com/in/joanacssilva/",
+      isRevealed: true // Mude para true quando anunciar
+    },
+    {
+      id: "s3",
+      name: "Manuel Pais",
+      role: "Co-author of Team Topologies",
+      image: "https://i.postimg.cc/zvdsnp0t/Manuel-Pais.png",
+      linkedin: "https://www.linkedin.com/in/manuelpais/",
+      isRevealed: true
+    },
+    {
+      id: "s4",
+      name: "Paulo Caroli",
+      role: "Author of Lean Inception & Team OKRs",
+      image: "https://i.postimg.cc/NjDKxV5z/Paulo-Caroli.png",
+      linkedin: "https://www.linkedin.com/in/paulocaroli/",
+      isRevealed: true
+    },
+    {
+      id: "s5",
+      name: "Paulo Caroli",
+      role: "Author of Lean Inception & Team OKRs",
+      image: "https://i.postimg.cc/NjDKxV5z/Paulo-Caroli.png",
+      linkedin: "https://www.linkedin.com/in/paulocaroli/",
+      isRevealed: false
+    },
+    // Placeholders para manter a grelha de 10 speakers planeados
+    ...Array.from({ length: 6 }).map((_, i) => ({
+      id: `tba-${i+5}`,
+      name: "Revealing Soon",
+      role: "Agile Practitioner",
+      image: "",
+      linkedin: "",
+      isRevealed: false
+    }))
+  ];
+
+  // ==========================================
+  // COMPONENTES DE RENDERIZAÇÃO (CARDS)
+  // ==========================================
+
+  // Card para Keynote
+  const KeynoteCard = ({ data }: { data: SpeakerData }) => {
+    if (!data.isRevealed) {
+      return (
+        <div className="relative overflow-hidden rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-200 aspect-[4/5] flex flex-col items-center justify-center text-center p-8 group transition-all duration-300 hover:bg-gray-100">
+           <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-6">
+              <UserCircle2 className="w-10 h-10 text-gray-400" />
+           </div>
+           <h3 className="text-xl font-black text-gray-400 mb-2">Keynote</h3>
+           <p className="text-gray-400 text-sm font-medium uppercase tracking-widest">A anunciar brevemente</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="group relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-xl">
+        <img 
+          src={data.image} 
+          alt={data.name} 
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        {/* Gradiente para garantir leitura do texto */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-darkBlue via-brand-darkBlue/40 to-transparent opacity-90"></div>
+        
+        <div className="absolute bottom-0 left-0 w-full p-8 md:p-10 flex flex-col items-start text-left">
+            <span className="inline-flex items-center gap-1 bg-brand-orange text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">
+                <Sparkles className="w-3 h-3" /> Keynote
+            </span>
+            <h3 className="text-3xl md:text-4xl font-black text-white mb-2">{data.name}</h3>
+            <p className="text-brand-orange font-bold text-sm mb-1">{data.role}</p>
+            
+            {data.linkedin && (
+              <a 
+                href={data.linkedin} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white"
+                aria-label={`LinkedIn de ${data.name}`}
+              >
+                <Linkedin className="w-5 h-5" />
+              </a>
+            )}
+        </div>
+      </div>
+    );
+  };
+
+  // Card para Speaker Standard
+  const SpeakerCard = ({ data }: { data: SpeakerData }) => {
+    if (!data.isRevealed) {
+      return (
+        <div className="flex flex-col items-center text-center group">
+          <div className="w-full aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center mb-4 transition-colors group-hover:bg-gray-100">
+             <UserCircle2 className="w-12 h-12 text-gray-300 mb-2" />
+             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Em Breve</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-center text-center group">
+        <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-4 shadow-md border border-gray-100">
+          <img 
+            src={data.image} 
+            alt={data.name} 
+            // O efeito grayscale -> color no hover é um clássico premium
+            className="w-full h-full object-cover transition-all duration-500 grayscale group-hover:grayscale-0 group-hover:scale-105"
+          />
+          {/* O link do linkedin aparece sobre a foto no hover (opcional, mas fica elegante) */}
+          {data.linkedin && (
+            <a 
+              href={data.linkedin} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-brand-darkBlue text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-brand-blue shadow-lg"
+              aria-label={`LinkedIn de ${data.name}`}
+            >
+              <Linkedin className="w-5 h-5" />
+            </a>
+          )}
+        </div>
+        
+        <h4 className="font-bold text-xl text-brand-darkBlue mb-1">{data.name}</h4>
+        <p className="text-sm font-medium text-brand-orange mb-1">{data.role}</p>
+      </div>
+    );
+  };
 
   return (
-    <section 
-      id="hero" 
-      className="relative min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-fixed text-white overflow-hidden pt-16"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.6), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
-      }}
-    >
-      <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
-        <div className="mt-24 bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg flex items-center gap-2">
-           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
-             Official Scrum Alliance Event
-           </span>
-        </div>
-      </div>
-
-      <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center justify-center flex-grow pt-32">
+    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
+      <div className="max-w-7xl mx-auto">
         
-        <div className="flex flex-col items-center mb-6 animate-fade-in-up">
-            <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-4">
-                ORGANIZADO POR
-            </span>
-            <a href="https://www.tugagil.com/" target="_blank" rel="noopener noreferrer" className="hover:scale-105 transition-transform duration-300">
-                <img src={ASSETS.TUGAGIL_LOGO} alt="TugÁgil" className="h-12 md:h-16 w-auto object-contain drop-shadow-2xl" />
-            </a>
+        {/* Cabeçalho */}
+        <div className="text-center mb-20">
+          <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">
+            O Line-Up
+          </span>
+          <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
+            Keynotes & Speakers
+          </h2>
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
+            Grandes nomes da agilidade, inovação e inteligência artificial.
+            <br/> <span className="text-brand-blue font-semibold">Mais oradores serão anunciados em breve.</span>
+          </p>
         </div>
 
-        <div className="flex flex-col items-center leading-none mb-8">
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter drop-shadow-xl">Regional Scrum</h1>
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter drop-shadow-xl pb-2">Gathering</h1>
-        </div>
-
-        <div className="text-2xl md:text-4xl lg:text-5xl text-gray-200 font-light uppercase tracking-[0.4em] md:tracking-[0.6em] mb-8 drop-shadow-lg pl-2">
-          LISBON 2026
-        </div>
-
-        <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl mx-auto font-medium drop-shadow-md">
-          A maior celebração da agilidade em Portugal. Reserve a data.
-        </p>
-
-        <div className="grid grid-cols-4 gap-4 md:gap-8 mb-12 w-full md:w-auto">
-          {[
-            { label: 'Dias', value: timeLeft.days },
-            { label: 'Horas', value: timeLeft.hours },
-            { label: 'Mins', value: timeLeft.minutes },
-            { label: 'Segs', value: timeLeft.seconds },
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center p-3 md:p-4 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl min-w-[70px] md:min-w-[100px]">
-              <span className="text-xl md:text-3xl font-black text-brand-orange">{String(item.value).padStart(2, '0')}</span>
-              <span className="text-[9px] md:text-[10px] uppercase tracking-widest mt-1 text-gray-400 font-bold">{item.label}</span>
+        {/* 1. Secção de Keynotes */}
+        <div className="mb-24">
+            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3">
+                <Sparkles className="text-brand-orange w-6 h-6" />
+                Keynotes
+            </h3>
+            {/* Adapta-se perfeitamente: 1, 2 ou 3 colunas dependendo do ecrã */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                {keynotes.map(keynote => (
+                    <KeynoteCard key={keynote.id} data={keynote} />
+                ))}
             </div>
-          ))}
         </div>
 
-        {/* AJUSTE NO BLOCO DE LOCALIZAÇÃO (MOBILE-FRIENDLY) */}
-        <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-4 md:gap-12 mb-10 bg-white/5 p-5 md:px-12 md:py-4 rounded-3xl md:rounded-full backdrop-blur-md border border-white/10 shadow-inner w-full md:w-auto max-w-md md:max-w-none mx-auto">
-          
-          <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
-            <Calendar className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
-            <span className="text-base md:text-lg font-bold text-left">21 Maio 2026</span>
-          </div>
-          
-          <div className="hidden md:block h-5 w-px bg-white/20"></div>
-          
-          <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
-            <MapPin className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
-            <span className="text-base md:text-lg font-bold text-left leading-tight">
-              Auditório Alto dos Moinhos<br className="md:hidden"/> Lisboa, Portugal
-            </span>
-          </div>
-
+        {/* 2. Secção de Speakers */}
+        <div>
+            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left">
+                Speakers
+            </h3>
+            {/* Grelha de Speakers: 2 no telemóvel, 3 no tablet, 5 no desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">
+                {speakers.map(speaker => (
+                    <SpeakerCard key={speaker.id} data={speaker} />
+                ))}
+            </div>
         </div>
 
-        <button 
-          onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
-          className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
-        >
-          Garante o teu Lugar
-        </button>
       </div>
-      
-      <div className="absolute bottom-10 animate-bounce text-white/30 hidden md:block">
-        <ArrowDown className="w-8 h-8" />
-      </div>
-    </section>
+    </Section>
   );
 };
