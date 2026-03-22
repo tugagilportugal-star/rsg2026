@@ -150,7 +150,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { 
       text: (
         <>
-          1 ano de acesso a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> (~€249)
+          1 ano de acesso gratuito a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a>
         </>
       ), 
       isBonus: true 
@@ -158,7 +158,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { 
       text: (
         <>
-          Acesso anual ao plano Essentials <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> (~€85)
+          1 ano de acesso gratuito ao <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a>
         </>
       ), 
       isBonus: true 
