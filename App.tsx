@@ -60,7 +60,7 @@ const App: React.FC = () => {
       <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
       <main>
-        <Hero onOpenTicketModal={() => setTicketModalOpen(false)} />
+        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
         <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
         <About />
         <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
