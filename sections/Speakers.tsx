@@ -28,14 +28,6 @@ export const Speakers: React.FC = () => {
     },
     {
       id: "k2",
-      name: "Nadia",
-      role: "Global Leader",
-      image: "",
-      linkedin: "",
-      isRevealed: false
-    },
-    {
-      id: "k3",
       name: "David Anderson",
       role: "Kanban Expert",
       image: "",
@@ -111,7 +103,7 @@ export const Speakers: React.FC = () => {
     }
 
     return (
-      <div className="group relative overflow-hidden rounded-[2rem] aspect-[3/4] w-full max-w-[320px] mx-auto shadow-xl">
+      <div className="group relative overflow-hidden rounded-[2rem] aspect-[4/54] w-full max-w-[320px] mx-auto shadow-xl">
         <img 
           src={data.image} 
           alt={data.name} 
@@ -208,7 +200,7 @@ export const Speakers: React.FC = () => {
                 Keynotes
             </h3>
             {/* Grelha com justify-items-center para manter os cartões centrados mesmo que haja espaço */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                 {keynotes.map(keynote => (
                     <KeynoteCard key={keynote.id} data={keynote} />
                 ))}
