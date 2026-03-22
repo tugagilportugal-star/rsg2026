@@ -85,18 +85,22 @@ export const Hero: React.FC = () => {
           ))}
         </div>
 
-        {/* DATA E LOCAL */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 mb-10 bg-white/5 p-4 md:px-12 md:py-4 rounded-full backdrop-blur-md border border-white/10 shadow-inner">
-          <div className="flex items-center gap-3">
-            <Calendar className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">21 Maio 2026</span>
+        {/* AJUSTE NO BLOCO DE LOCALIZAÇÃO (MOBILE-FRIENDLY) */}
+        <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-4 md:gap-12 mb-10 bg-white/5 p-5 md:px-12 md:py-4 rounded-3xl md:rounded-full backdrop-blur-md border border-white/10 shadow-inner w-full md:w-auto max-w-md md:max-w-none mx-auto">
+          
+          <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
+            <Calendar className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
+            <span className="text-base md:text-lg font-bold text-left">21 Maio 2026</span>
           </div>
+          
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
-          <div className="flex items-center gap-3">
-            <MapPin className="w-5 h-5 text-brand-blue" />
-            <span className="text-base md:text-lg font-bold">Auditório Alto dos Moinhos - Lisboa, Portugal</span>
+          
+          <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
+            <MapPin className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
+            <span className="text-base md:text-lg font-bold text-left leading-tight">
+              Auditório Alto dos Moinhos<br className="md:hidden"/> Lisboa, Portugal
+            </span>
           </div>
-        </div>
 
         {/* CTA */}
         <button
