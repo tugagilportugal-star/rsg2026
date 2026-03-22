@@ -79,7 +79,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
           <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
             <MapPin className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
             <span className="text-base md:text-lg font-bold text-left leading-tight">
-              Auditório Alto dos Moinhos<br className="md:hidden"/>- Lisboa, Portugal
+              Auditório Alto dos Moinhos<br className="md:hidden"/> - Lisboa, Portugal
             </span>
           </div>
 
