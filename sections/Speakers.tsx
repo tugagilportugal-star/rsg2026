@@ -76,10 +76,10 @@ export const Speakers: React.FC = () => {
     {
       id: "s4",
       name: "Paulo Caroli",
-      role: "Author of Lean Inception",
-      image: "https://ui-avatars.com/api/?name=Paulo+Caroli&background=003F59&color=fff&size=400",
+      role: "Author of Lean Inception & Team OKRs",
+      image: "https://i.postimg.cc/NjDKxV5z/Paulo-Caroli.png",
       linkedin: "https://www.linkedin.com/in/paulocaroli/",
-      isRevealed: false 
+      isRevealed: true
     },
     // Placeholders para manter a grelha de 10 speakers planeados
     ...Array.from({ length: 6 }).map((_, i) => ({
