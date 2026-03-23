@@ -4,9 +4,9 @@ import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Program } from './sections/Program';
+import { WhyAttend } from './sections/WhyAttend';
 import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
-import { Speakers } from './sections/Speakers';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { Recap } from './sections/Recap';
 import { FAQ } from './sections/FAQ';
@@ -15,21 +15,18 @@ import { Team } from './sections/Team';
 import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
-import { TicketPurchaseModal } from './components/TicketPurchaseModal';
+import { TicketForm } from './components/TicketForm';
+import { TicketStatusProvider } from './hooks/useTicketStatus';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
-  const [isTicketModalOpen, setTicketModalOpen] = useState(false);
+  const[isTicketModalOpen, setTicketModalOpen] = useState(false);
   const[isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
-
-  // After Google OAuth, Supabase redirects to site root with #access_token in the hash.
-  // Detect this and redirect to /admin so the AdminView can process the token.
-  if (!isAdminRoute && window.location.hash.includes('access_token=')) {
-    window.location.replace('/admin' + window.location.hash);
-    return null;
+  if (isAdminRoute) {
+    return <AdminView onClose={() => { window.location.href = '/'; }} />;
   }
 
   useEffect(() => {
@@ -41,38 +38,58 @@ const App: React.FC = () => {
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
     }
-  }, []); // <--- Aqui estava o erro TS1135 e TS1005
+  },[]);
+
+  const openTicketModal = () => setTicketModalOpen(true);
 
   return (
     <TicketStatusProvider>
-    <>
-      <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
-
-      <main>
-        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
+      <div className="bg-white">
+        <Navbar onOpenTicketModal={openTicketModal} />
+        <Hero />
         <About />
-        <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <WhyAttend />
-        <Speakers />
+        <Features onOpenTicketModal={openTicketModal} />
+        <Program onOpenTicketModal={openTicketModal} />
+        <WhyAttend onOpenTicketModal={openTicketModal} />
+        <Tickets onOpenTicketModal={openTicketModal} />
         <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-        <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <GetInvolved
+          setSponsorModalOpen={setSponsorModalOpen}
+          setSupporterModalOpen={setSupporterModalOpen}
+        />
+        <Recap />
+        <FAQ />
         <Team />
         <Footer />
-      </main>
 
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => (window.location.href = '/admin')}
-          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
-        >
-          <Settings size={20} />
-        </button>
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            onClick={() => (window.location.href = '/admin')}
+            className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white transition flex items-center justify-center opacity-50 hover:opacity-100 shadow-sm"
+            title="Admin Area"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+
+        <Modal isOpen={isSponsorModalOpen} onClose={() => setSponsorModalOpen(false)} title="Torne-se um Patrocinador">
+          <SponsorForm />
+        </Modal>
+
+        <Modal isOpen={isSupporterModalOpen} onClose={() => setSupporterModalOpen(false)} title="Torne-se um Apoiador">
+          <SupporterForm />
+        </Modal>
+
+        <Modal isOpen={isTicketModalOpen} onClose={() => setTicketModalOpen(false)} title="Early Bird Ticket">
+          <TicketForm />
+        </Modal>
+
+        <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
+          <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
+        </Modal>
       </div>
-    </div> // <--- Fechamento da div principal
+    </TicketStatusProvider>
   );
-}; // <--- Fechamento do componente App
+};
 
 export default App;
