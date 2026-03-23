@@ -32,7 +32,7 @@ export const Speakers: React.FC = () => {
       image: "",
       linkedin: "",
       isRevealed: false
-    }
+    },
   ];
 
   // ==========================================
@@ -43,8 +43,9 @@ export const Speakers: React.FC = () => {
       id: "s1",
       name: "Ricardo Caldas",
       role: "Product Owner",
+      // Substitua pelo link real da foto do Ricardo
       image: "https://i.postimg.cc/SxbL5Zjk/Ricardo-Caldas-(1).png",
-      linkedin: "https://www.linkedin.com/in/ricardo-caldas/",
+      linkedin: "https://www.linkedin.com/in/ricardo-caldas/", // Verifique o link
       isRevealed: true
     },
     {
@@ -53,7 +54,7 @@ export const Speakers: React.FC = () => {
       role: "Director of Quality Assurance",
       image: "https://i.postimg.cc/Gpwcvy73/Joana-Silva.png",
       linkedin: "https://www.linkedin.com/in/joanacssilva/",
-      isRevealed: true
+      isRevealed: true // Mude para true quando anunciar
     },
     {
       id: "s3",
@@ -70,6 +71,14 @@ export const Speakers: React.FC = () => {
       image: "https://i.postimg.cc/NjDKxV5z/Paulo-Caroli.png",
       linkedin: "https://www.linkedin.com/in/paulocaroli/",
       isRevealed: true
+    },
+    {
+      id: "s5",
+      name: "Paulo Caroli",
+      role: "Author of Lean Inception & Team OKRs",
+      image: "https://i.postimg.cc/NjDKxV5z/Paulo-Caroli.png",
+      linkedin: "https://www.linkedin.com/in/paulocaroli/",
+      isRevealed: false
     },
     // Placeholders para manter a grelha de 10 speakers planeados (total: 4 reais + 6 TBA)
     ...Array.from({ length: 6 }).map((_, i) => ({
@@ -90,8 +99,7 @@ export const Speakers: React.FC = () => {
   const KeynoteCard = ({ data }: { data: SpeakerData }) => {
     if (!data.isRevealed) {
       return (
-        // Adicionado: w-full max-w-[400px] mx-auto
-        <div className="relative overflow-hidden rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-200 aspect-[4/5] w-full max-w-[400px] mx-auto flex flex-col items-center justify-center text-center p-8 group transition-all duration-300 hover:bg-gray-100">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-200 aspect-[4/5] flex flex-col items-center justify-center text-center p-8 group transition-all duration-300 hover:bg-gray-100">
            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-6">
               <UserCircle2 className="w-10 h-10 text-gray-400" />
            </div>
@@ -102,8 +110,7 @@ export const Speakers: React.FC = () => {
     }
 
     return (
-      // Adicionado: w-full max-w-[400px] mx-auto
-      <div className="group relative overflow-hidden rounded-[2rem] aspect-[4/5] w-full max-w-[400px] mx-auto shadow-xl">
+      <div className="group relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-xl">
         <img 
           src={data.image} 
           alt={data.name} 
@@ -124,7 +131,7 @@ export const Speakers: React.FC = () => {
                 href={data.linkedin} 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white mt-4"
+                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white"
                 aria-label={`LinkedIn de ${data.name}`}
               >
                 <Linkedin className="w-5 h-5" />
@@ -157,7 +164,7 @@ export const Speakers: React.FC = () => {
             // O efeito grayscale -> color no hover é um clássico premium
             className="w-full h-full object-cover transition-all duration-500 grayscale group-hover:grayscale-0 group-hover:scale-105"
           />
-          {/* O link do linkedin aparece sobre a foto no hover */}
+          {/* O link do linkedin aparece sobre a foto no hover (opcional, mas fica elegante) */}
           {data.linkedin && (
             <a 
               href={data.linkedin} 
@@ -201,8 +208,8 @@ export const Speakers: React.FC = () => {
                 <Sparkles className="text-brand-orange w-6 h-6" />
                 Keynotes
             </h3>
-            {/* Ajuste de Grelha: justify-items-center para que os cards (que agora têm limite de largura) fiquem sempre bem centrados nas colunas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">
+            {/* Adapta-se perfeitamente: 1, 2 ou 3 colunas dependendo do ecrã */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                 {keynotes.map(keynote => (
                     <KeynoteCard key={keynote.id} data={keynote} />
                 ))}

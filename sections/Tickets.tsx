@@ -147,21 +147,21 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { text: "Scrum Education Units (SEUs)", isBonus: false },
     { text: "Certificado de Participação Digital", isBonus: false },
     { text: "Acesso à gravação do evento*", isBonus: false },
-    { 
+    {
       text: (
         <>
-          1 ano de acesso gratuito a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a>
+          1 ano de acesso gratuito a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> <span className="text-xs font-medium"><span className="line-through text-gray-400">€249</span> <span className="text-green-600 font-bold">FREE</span></span>
         </>
-      ), 
-      isBonus: true 
+      ),
+      isBonus: true
     },
-    { 
+    {
       text: (
         <>
-          1 ano de acesso gratuito ao <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a>
+          1 ano de acesso gratuito ao <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> <span className="text-xs font-medium"><span className="line-through text-gray-400">€85</span> <span className="text-green-600 font-bold">FREE</span></span>
         </>
-      ), 
-      isBonus: true 
+      ),
+      isBonus: true
     }
   ];
 
@@ -179,7 +179,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
         </p>
       </div>
 
-      <div className="max-w-[560px] md:max-w-[620px] mx-auto relative">
+      <div className="max-w-[560px] md:max-w-[860px] mx-auto relative">
 
         {/* WAITLIST MODE */}
         {!showTicketBox && !statusLoading && (
@@ -217,7 +217,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               </div>
 
               {/* Renderização da Nova Lista de Benefícios */}
-              <div className="mt-4 w-full flex flex-col gap-y-3 border-t border-gray-100 pt-6 mb-6">
+              <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-gray-100 pt-6 mb-6">
                 {ticketBenefits.map((item, i) => (
                   <div key={i} className="flex items-start gap-3 text-left">
                     <div className={`rounded-full p-1.5 flex-shrink-0 mt-0.5 ${item.isBonus ? 'bg-orange-100' : 'bg-sky-100'}`}>

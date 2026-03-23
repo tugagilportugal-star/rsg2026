@@ -6,6 +6,11 @@ import { useTicketStatus } from '../hooks/useTicketStatus';
 export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
   const { hasActiveLot } = useTicketStatus();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const scrollThenOpen = () => {
+    document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(onOpenTicketModal, 700);
+  };
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -88,7 +93,7 @@ export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTick
               </div>
 
               <button
-                onClick={onOpenTicketModal}
+                onClick={scrollThenOpen}
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
@@ -154,7 +159,7 @@ export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTick
             ))}
 
             <button
-                onClick={() => { setIsMobileMenuOpen(false); onOpenTicketModal(); }}
+                onClick={() => { setIsMobileMenuOpen(false); scrollThenOpen(); }}
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
