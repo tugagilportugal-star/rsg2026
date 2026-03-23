@@ -150,8 +150,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     {
       text: (
         <>
-          <span className="block">1 ano de acesso gratuito a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a></span>
-          <span className="block text-xs font-medium mt-0.5"><span className="line-through text-gray-400">€249</span> <span className="text-green-600 font-bold">FREE</span></span>
+          1 ano de acesso gratuito a <a href="https://www.agile-academy.com/pt/e-learning/#elearning-overview" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Agile Academy</a> <span className="text-xs font-medium"><span className="line-through text-gray-400">€249</span> <span className="text-green-600 font-bold">FREE</span></span>
         </>
       ),
       isBonus: true
@@ -159,8 +158,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     {
       text: (
         <>
-          <span className="block">1 ano de acesso gratuito ao <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a></span>
-          <span className="block text-xs font-medium mt-0.5"><span className="line-through text-gray-400">€85</span> <span className="text-green-600 font-bold">FREE</span></span>
+          1 ano de acesso gratuito ao <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="underline decoration-gray-300 hover:decoration-brand-orange hover:text-brand-orange transition-colors">Kanban+</a> <span className="text-xs font-medium"><span className="line-through text-gray-400">€85</span> <span className="text-green-600 font-bold">FREE</span></span>
         </>
       ),
       isBonus: true
