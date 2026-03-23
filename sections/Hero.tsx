@@ -12,6 +12,11 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
   const timeLeft = useCountdown('2026-05-21T00:00:00');
 
+  const scrollThenOpen = () => {
+    document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => onOpenTicketModal?.(), 700);
+  };
+
   return (
     <section 
       id="hero" 
@@ -87,7 +92,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
 
         {/* BOTÃO - Mantém a funcionalidade de scroll como você pediu! */}
         <button 
-          onClick={onOpenTicketModal}
+          onClick={scrollThenOpen}
           className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
         >
           Garante o teu Lugar
