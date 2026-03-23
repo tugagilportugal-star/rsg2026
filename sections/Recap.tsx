@@ -3,7 +3,7 @@ import { Section } from '../components/UIComponents';
 import { Star, Play, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import { ASSETS } from '../config';
 
-export const Recap: React.FC = () => {
+export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -165,12 +165,12 @@ export const Recap: React.FC = () => {
       )}
       
       <div className="text-center mt-24 relative z-10">
-        <a 
-            href="#tickets"
+        <button
+            onClick={onOpenTicketModal}
             className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 rounded-full backdrop-blur-md border border-white/20 hover:bg-brand-orange hover:border-brand-orange hover:text-white transition-all duration-300 cursor-pointer shadow-lg group"
         >
             <span className="font-bold text-white text-lg group-hover:scale-105 transition-transform">Reviva a experiência. Junte-se a nós em 2026.</span>
-        </a>
+        </button>
       </div>
     </Section>
   );

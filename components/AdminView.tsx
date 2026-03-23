@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Pencil, Plus, Power, Trash2, X } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 type LeadStatus = 'Pending' | 'InProgress' | 'Completed' | 'Deleted';
 
@@ -35,12 +36,16 @@ type OrderRow = {
   stripe_session_id?: string | null;
   customer_email?: string | null;
   customer_name?: string | null;
-  customer_nif?: string | null;
   customer_country?: string | null;
   total_amount?: number | null;
   include_recording?: boolean | null;
   status?: string | null;
   invoice_id?: string | null;
+  invoice_number?: string | null;
+  credit_note_id?: string | null;
+  credit_note_number?: string | null;
+  credit_note_motivo?: string | null;
+  refunded_at?: string | null;
 };
 
 type TicketRow = {
@@ -80,7 +85,21 @@ type CouponRow = {
   used_by_order_id?: string | null;
 };
 
-type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons';
+type AuditLogRow = {
+  id: string;
+  created_at: string;
+  admin_email: string;
+  action: string;
+  entity_type?: string | null;
+  entity_id?: string | null;
+  details?: any;
+};
+
+type AdminRole = 'superadmin' | 'edit' | 'view';
+type AdminUserInfo = { email: string; name: string | null; role: AdminRole };
+type AdminUserRow = { email: string; name: string | null; role: AdminRole; active: boolean; created_at?: string | null };
+
+type AdminTab = 'leads' | 'ticketTypes' | 'orders' | 'tickets' | 'coupons' | 'logs' | 'adminUsers';
 
 type TicketTypeForm = {
   name: string;
@@ -135,8 +154,10 @@ function toTicketTypeForm(row: TicketTypeRow): TicketTypeForm {
   };
 }
 
+const MOTIVOS_ESTORNO = ['Estorno por desistência da compra', 'Erro no valor faturado'];
+
 export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [tab, setTab] = useState<AdminTab>('leads');
+  const [tab, setTab] = useState<AdminTab>('tickets');
 
   const [data, setData] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -152,9 +173,28 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
+  const [creditNoteModal, setCreditNoteModal] = useState<{ orderId: string; orderLabel: string } | null>(null);
+  const [creditNoteMotivo, setCreditNoteMotivo] = useState('');
+  const [creditNoteCustom, setCreditNoteCustom] = useState('');
+  const [generatingCreditNote, setGeneratingCreditNote] = useState(false);
+  const [creditNoteError, setCreditNoteError] = useState<string | null>(null);
+  const [refundModal, setRefundModal] = useState<{ orderId: string; orderLabel: string; hasCreditNote: boolean } | null>(null);
+  const [refundMotivo, setRefundMotivo] = useState('');
+  const [refundCustom, setRefundCustom] = useState('');
+  const [markingRefund, setMarkingRefund] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
+
+  const [logs, setLogs] = useState<AuditLogRow[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
+  const [adminUsers, setAdminUsers] = useState<AdminUserRow[]>([]);
+  const [loadingAdminUsers, setLoadingAdminUsers] = useState(false);
+  const [adminUserForm, setAdminUserForm] = useState({ email: '', name: '', role: 'view' as AdminRole });
+  const [savingAdminUser, setSavingAdminUser] = useState(false);
 
   const [couponModalOpen, setCouponModalOpen] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState<CouponRow | null>(null);
@@ -171,9 +211,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     active: true,
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState('');
-  const [pass, setPass] = useState('');
+  const [session, setSession] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [selected, setSelected] = useState<LeadRow | null>(null);
@@ -184,10 +225,139 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [ticketTypeForm, setTicketTypeForm] = useState<TicketTypeForm>(emptyTicketTypeForm());
   const [savingTicketType, setSavingTicketType] = useState(false);
 
-  const authHeader = useMemo(() => {
-    if (!user || !pass) return null;
-    return 'Basic ' + btoa(`${user}:${pass}`);
-  }, [user, pass]);
+  const token = session?.access_token ?? null;
+  const authHeader = token ? `Bearer ${token}` : null;
+  const canEdit = adminUser?.role === 'edit' || adminUser?.role === 'superadmin';
+  const isSuperAdmin = adminUser?.role === 'superadmin';
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        loadAdminUser(session.access_token);
+      } else {
+        setAdminUser(null);
+        setAuthLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function loadAdminUser(accessToken: string) {
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch('/api/admin?route=me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAdminUser(data);
+        if (window.location.pathname !== '/admin') {
+          window.location.href = '/admin';
+        }
+      } else {
+        setAuthError('O teu email não tem acesso ao admin. Contacta o administrador.');
+        await supabase.auth.signOut();
+      }
+    } catch {
+      setAuthError('Erro de ligação ao verificar acesso.');
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    setAuthError(null);
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/admin` },
+    });
+  }
+
+  async function fetchLogs() {
+    if (!authHeader) return;
+    setLoadingLogs(true);
+    try {
+      const res = await fetch('/api/admin?route=audit-log', {
+        headers: { Authorization: authHeader },
+      });
+      if (res.ok) setLogs(await res.json());
+    } finally {
+      setLoadingLogs(false);
+    }
+  }
+
+  async function fetchAdminUsers() {
+    if (!authHeader) return;
+    setLoadingAdminUsers(true);
+    try {
+      const res = await fetch('/api/admin?route=admin-users', { headers: { Authorization: authHeader } });
+      if (res.ok) setAdminUsers(await res.json());
+    } finally {
+      setLoadingAdminUsers(false);
+    }
+  }
+
+  async function saveAdminUser(e: React.FormEvent) {
+    e.preventDefault();
+    if (!authHeader) return;
+    const email = adminUserForm.email.trim().toLowerCase();
+    if (!email) return;
+    setSavingAdminUser(true);
+    try {
+      const res = await fetch('/api/admin?route=admin-users', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: adminUserForm.name.trim() || null, role: adminUserForm.role }),
+      });
+      if (res.ok) {
+        setAdminUserForm({ email: '', name: '', role: 'view' });
+        await fetchAdminUsers();
+      } else {
+        const json = await res.json().catch(() => null);
+        setError(json?.message || 'Erro ao adicionar utilizador.');
+      }
+    } catch {
+      setError('Erro ao adicionar utilizador.');
+    } finally {
+      setSavingAdminUser(false);
+    }
+  }
+
+  async function updateAdminUserRole(email: string, role: AdminRole) {
+    if (!authHeader) return;
+    const res = await fetch(`/api/admin?route=admin-users/${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    });
+    if (res.ok) await fetchAdminUsers();
+    else { const j = await res.json().catch(() => null); setError(j?.message || 'Erro ao atualizar role.'); }
+  }
+
+  async function toggleAdminUserActive(email: string, active: boolean) {
+    if (!authHeader) return;
+    const res = await fetch(`/api/admin?route=admin-users/${encodeURIComponent(email)}`, {
+      method: 'PATCH',
+      headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active }),
+    });
+    if (res.ok) await fetchAdminUsers();
+    else { const j = await res.json().catch(() => null); setError(j?.message || 'Erro ao atualizar estado.'); }
+  }
+
+  async function deleteAdminUser(email: string) {
+    if (!authHeader) return;
+    if (!confirm(`Remover o acesso de ${email}?`)) return;
+    const res = await fetch(`/api/admin?route=admin-users/${encodeURIComponent(email)}`, {
+      method: 'DELETE',
+      headers: { Authorization: authHeader },
+    });
+    if (res.ok) await fetchAdminUsers();
+    else { const j = await res.json().catch(() => null); setError(j?.message || 'Erro ao remover utilizador.'); }
+  }
 
   async function fetchLeads() {
     if (!authHeader) return;
@@ -198,8 +368,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -228,8 +399,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -257,8 +429,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -286,8 +459,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -329,6 +503,62 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
+  async function generateCreditNote(orderId: string, motivo: string) {
+    if (!authHeader) return;
+    setGeneratingCreditNote(true);
+    setCreditNoteError(null);
+    try {
+      const res = await fetch('/api/admin/credit-note', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, motivo }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setCreditNoteError(json.message || 'Erro desconhecido');
+      } else {
+        setCreditNoteModal(null);
+        setCreditNoteMotivo('');
+        setCreditNoteCustom('');
+        await fetchOrders();
+        await fetchTickets();
+      }
+    } catch (e: any) {
+      setCreditNoteError(e?.message || 'Erro de rede');
+    } finally {
+      setGeneratingCreditNote(false);
+    }
+  }
+
+  async function markAsRefunded(orderId: string, motivo?: string) {
+    if (!authHeader) return;
+    setMarkingRefund(true);
+    setRefundError(null);
+    try {
+      const body: Record<string, unknown> = { order_id: orderId };
+      if (motivo) body.motivo = motivo;
+      const res = await fetch('/api/admin/refund', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setRefundError(json.message || 'Erro ao marcar estorno');
+      } else {
+        setRefundModal(null);
+        setRefundMotivo('');
+        setRefundCustom('');
+        await fetchOrders();
+        await fetchTickets();
+      }
+    } catch (e: any) {
+      setRefundError(e?.message || 'Erro de rede');
+    } finally {
+      setMarkingRefund(false);
+    }
+  }
+
   async function fetchTickets() {
     if (!authHeader) return;
     setLoadingTickets(true);
@@ -338,8 +568,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -373,8 +604,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -405,8 +637,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       });
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -514,8 +747,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -554,8 +788,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -590,8 +825,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const data = await res.json();
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Credenciais inválidas / sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -636,6 +872,33 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return;
     }
 
+    // Activating: check if another lote is already active
+    if (ticketTypeForm.active) {
+      const currentActive = ticketTypes.find(t => t.active && t.id !== editingTicketType?.id);
+      if (currentActive) {
+        const confirmed = confirm(
+          `O lote "${currentActive.name}" está ativo e será desativado para ativar "${ticketTypeForm.name.trim()}". Continuar?`
+        );
+        if (!confirmed) return;
+
+        try {
+          const deactivateRes = await fetch(`/api/admin/ticket-types/${encodeURIComponent(currentActive.id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: authHeader!, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: false }),
+          });
+          if (!deactivateRes.ok) {
+            const json = await deactivateRes.json().catch(() => null);
+            setError(json?.message || 'Falha ao desativar lote atual');
+            return;
+          }
+        } catch {
+          setError('Erro ao desativar lote atual');
+          return;
+        }
+      }
+    }
+
     setSavingTicketType(true);
 
     try {
@@ -666,8 +929,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -701,8 +965,9 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -723,23 +988,52 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   async function toggleTicketTypeActive(row: TicketTypeRow) {
     if (!authHeader) return;
 
+    // Activating: check if another lote is already active
+    if (!row.active) {
+      const currentActive = ticketTypes.find(t => t.active && t.id !== row.id);
+      if (currentActive) {
+        const confirmed = confirm(
+          `O lote "${currentActive.name}" está ativo e será desativado para ativar "${row.name}". Continuar?`
+        );
+        if (!confirmed) return;
+
+        // Deactivate current active first
+        setUpdatingId(row.id);
+        try {
+          const deactivateRes = await fetch(`/api/admin/ticket-types/${encodeURIComponent(currentActive.id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ active: false }),
+          });
+          if (!deactivateRes.ok) {
+            const json = await deactivateRes.json().catch(() => null);
+            setError(json?.message || 'Falha ao desativar lote atual');
+            setUpdatingId(null);
+            return;
+          }
+        } catch {
+          setError('Erro ao desativar lote atual');
+          setUpdatingId(null);
+          return;
+        }
+      }
+    }
+
     setUpdatingId(row.id);
 
     try {
       const res = await fetch(`/api/admin/ticket-types/${encodeURIComponent(row.id)}`, {
         method: 'PATCH',
-        headers: {
-          Authorization: authHeader,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !row.active }),
       });
 
       const json = await res.json().catch(() => null);
 
       if (res.status === 401) {
-        setIsAuthenticated(false);
-        setError('Sessão expirada');
+        await supabase.auth.signOut();
+        setAdminUser(null);
+        setError('Sessão expirada. Por favor volta a entrar.');
         return;
       }
 
@@ -757,43 +1051,35 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!user || !pass) {
-      setError('Credenciais inválidas');
-      return;
-    }
-
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUser('');
-    setPass('');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setAdminUser(null);
+    setSession(null);
     setSelected(null);
     setData([]);
     setTicketTypes([]);
     setOrders([]);
     setTickets([]);
     setCoupons([]);
+    setLogs([]);
+    setAdminUsers([]);
     setCouponModalOpen(false);
     setEditingCoupon(null);
     resetCouponForm();
     setError(null);
-    setTab('leads');
+    setTab('tickets');
   };
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!adminUser) return;
     if (tab === 'leads') fetchLeads();
     if (tab === 'ticketTypes') fetchTicketTypes();
-    if (tab === 'orders') fetchOrders();
-    if (tab === 'tickets') { fetchTickets(); if (orders.length === 0) fetchOrders(); }
+    if (tab === 'orders') { fetchOrders(); fetchTickets(); }
+    if (tab === 'tickets') { fetchTickets(); fetchOrders(); }
     if (tab === 'coupons') fetchCoupons();
-  }, [isAuthenticated, authHeader, tab]);
+    if (tab === 'logs') fetchLogs();
+    if (tab === 'adminUsers') fetchAdminUsers();
+  }, [adminUser?.email, tab]);
 
   function downloadCsv() {
     const escape = (v: unknown) => {
@@ -955,11 +1241,19 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     URL.revokeObjectURL(url);
   }
 
-  if (!isAuthenticated) {
+  if (authLoading) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!adminUser) {
     return (
       <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl p-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-black text-gray-900">Admin</h2>
               <p className="text-sm text-gray-500">Acesso restrito</p>
@@ -972,43 +1266,26 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </button>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-              placeholder="Utilizador"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="password"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              placeholder="Password"
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            {error && (
-              <div className="rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 rounded-2xl bg-brand-darkBlue text-white font-bold py-3"
-              >
-                Entrar
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 rounded-2xl bg-gray-100 text-gray-800 font-bold py-3"
-              >
-                Voltar ao site
-              </button>
+          {authError && (
+            <div className="mb-6 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {authError}
             </div>
-          </form>
+          )}
+
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm transition"
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M47.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h13.1c-.6 3-2.3 5.5-4.8 7.2v6h7.8c4.5-4.2 7.4-10.4 7.4-17.5z"/><path fill="#34A853" d="M24 48c6.5 0 12-2.2 16-5.9l-7.8-6c-2.2 1.5-5 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9H2.4v6.2C6.4 42.7 14.6 48 24 48z"/><path fill="#FBBC05" d="M10.5 28.5c-.5-1.5-.8-3-.8-4.5s.3-3 .8-4.5v-6.2H2.4C.9 16.6 0 20.2 0 24s.9 7.4 2.4 10.7l8.1-6.2z"/><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.3 30.4 0 24 0 14.6 0 6.4 5.3 2.4 13.3l8.1 6.2C12.4 13.7 17.7 9.5 24 9.5z"/></svg>
+            Entrar com Google
+          </button>
+
+          <button
+            onClick={onClose}
+            className="mt-3 w-full rounded-2xl bg-gray-100 text-gray-600 font-semibold py-3 text-sm hover:bg-gray-200"
+          >
+            Voltar ao site
+          </button>
         </div>
       </div>
     );
@@ -1024,7 +1301,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {tab === 'ticketTypes' && (
+            {canEdit && tab === 'ticketTypes' && (
               <button
                 onClick={openCreateTicketTypeModal}
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold"
@@ -1034,7 +1311,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
             )}
 
-            {tab === 'coupons' && (
+            {canEdit && tab === 'coupons' && (
               <button
                 onClick={openCreateCoupon}
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-darkBlue text-white px-4 py-2 text-sm font-bold"
@@ -1064,6 +1341,24 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             >
               Recarregar
             </button>
+
+            {adminUser?.role === 'superadmin' && (
+              <button
+                onClick={() => setTab('logs')}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'logs' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                Logs
+              </button>
+            )}
+
+            {adminUser?.role === 'superadmin' && (
+              <button
+                onClick={() => setTab('adminUsers')}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${tab === 'adminUsers' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
+              >
+                Utilizadores
+              </button>
+            )}
 
             <button
               onClick={handleLogout}
@@ -1198,33 +1493,35 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               </span>
                             </Td>
                             <Td>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => openEditTicketTypeModal(row)}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2"
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                  Editar
-                                </button>
+                              {canEdit && (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => openEditTicketTypeModal(row)}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                    Editar
+                                  </button>
 
-                                <button
-                                  onClick={() => toggleTicketTypeActive(row)}
-                                  disabled={updatingId === row.id}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2 disabled:opacity-50"
-                                >
-                                  <Power className="w-4 h-4" />
-                                  {row.active ? 'Desativar' : 'Ativar'}
-                                </button>
+                                  <button
+                                    onClick={() => toggleTicketTypeActive(row)}
+                                    disabled={updatingId === row.id}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-gray-100 hover:bg-gray-200 px-3 py-2 disabled:opacity-50"
+                                  >
+                                    <Power className="w-4 h-4" />
+                                    {row.active ? 'Desativar' : 'Ativar'}
+                                  </button>
 
-                                <button
-                                  onClick={() => archiveTicketType(row)}
-                                  disabled={updatingId === row.id}
-                                  className="inline-flex items-center gap-1 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 px-3 py-2 disabled:opacity-50"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Remover
-                                </button>
-                              </div>
+                                  <button
+                                    onClick={() => archiveTicketType(row)}
+                                    disabled={updatingId === row.id}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 px-3 py-2 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Remover
+                                  </button>
+                                </div>
+                              )}
                             </Td>
                           </tr>
                         );
@@ -1274,34 +1571,40 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{safe(row.phone)}</Td>
                         <Td>{safe(row.company)}</Td>
                         <Td>
-                          <select
-                            value={safe(row.status)}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              patchStatus(row.id, e.target.value as LeadStatus);
-                            }}
-                            disabled={updatingId === row.id}
-                            className="rounded-xl border border-gray-300 px-2 py-1"
-                          >
-                            {STATUS_OPTIONS.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
+                          {canEdit ? (
+                            <select
+                              value={safe(row.status)}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                patchStatus(row.id, e.target.value as LeadStatus);
+                              }}
+                              disabled={updatingId === row.id}
+                              className="rounded-xl border border-gray-300 px-2 py-1"
+                            >
+                              {STATUS_OPTIONS.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span>{safe(row.status)}</span>
+                          )}
                         </Td>
                         <Td>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              softDeleteLead(row.id);
-                            }}
-                            className="text-red-600 font-bold"
-                            disabled={updatingId === row.id}
-                          >
-                            Deleted
-                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                softDeleteLead(row.id);
+                              }}
+                              className="text-red-600 font-bold"
+                              disabled={updatingId === row.id}
+                            >
+                              Deleted
+                            </button>
+                          )}
                         </Td>
                       </tr>
                     ))
@@ -1322,21 +1625,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Total</Th>
                     <Th>Estado</Th>
                     <Th>Fatura</Th>
-                    <Th>Ações</Th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingOrders ? (
                     <tr>
-                      <Td colSpan={7}>A carregar orders…</Td>
+                      <Td colSpan={6}>A carregar orders…</Td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
-                      <Td colSpan={7}>Sem orders.</Td>
+                      <Td colSpan={6}>Sem orders.</Td>
                     </tr>
                   ) : (
                     orders.map((row) => (
-                      <tr key={row.id} className="border-t">
+                      <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedOrder(row)}>
                         <Td>{formatDatePt(row.created_at)}</Td>
                         <Td>{safe(row.customer_name)}</Td>
                         <Td>{safe(row.customer_email)}</Td>
@@ -1346,20 +1648,6 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                           {row.invoice_id
                             ? <span className="text-green-600 font-medium">Emitida</span>
                             : <span className="text-orange-500">Pendente</span>}
-                          {invoiceError?.orderId === row.id && (
-                            <div className="text-xs text-red-600 mt-1 max-w-xs break-words">{invoiceError.msg}</div>
-                          )}
-                        </Td>
-                        <Td>
-                          {!row.invoice_id && (
-                            <button
-                              onClick={() => generateInvoice(row.id)}
-                              disabled={generatingInvoice === row.id}
-                              className="text-xs px-3 py-1 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
-                            >
-                              {generatingInvoice === row.id ? 'A gerar…' : 'Gerar Fatura'}
-                            </button>
-                          )}
                         </Td>
                       </tr>
                     ))
@@ -1380,7 +1668,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>NIF</Th>
                     <Th>T-Shirt</Th>
                     <Th>Consentimentos</Th>
-                    <Th>Order</Th>
+                    <Th>Pagamento / Fatura</Th>
                     <Th>Check-in</Th>
                   </tr>
                 </thead>
@@ -1394,52 +1682,65 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       <Td colSpan={8}>Sem tickets.</Td>
                     </tr>
                   ) : (
-                    tickets.map((row) => (
-                      <tr key={row.id} className="border-t">
-                        <Td>{formatDatePt(row.created_at)}</Td>
-                        <Td>
-                          <div className="font-medium text-gray-900">
-                            {safe(row.attendee_name) ||
-                              `${safe(row.attendee_first_name)} ${safe(row.attendee_last_name)}`.trim() ||
-                              '—'}
-                          </div>
-                          <div className="text-xs text-gray-500">{safe(row.attendee_email) || '—'}</div>
-                          <div className="text-xs text-gray-500">{safe(row.attendee_country) || '—'}</div>
-                        </Td>
-                        <Td>
-                          <div>{safe(row.attendee_company) || '—'}</div>
-                          <div className="text-xs text-gray-500">{safe(row.attendee_job_title) || '—'}</div>
-                          <div className="text-xs text-gray-500">
-                            {safe(row.attendee_job_function) || '—'}
-                            {row.attendee_job_function_other ? ` · ${safe(row.attendee_job_function_other)}` : ''}
-                          </div>
-                        </Td>
-                        <Td>{safe(row.attendee_nif) || '—'}</Td>
-                        <Td>{safe(row.attendee_tshirt) || '—'}</Td>
-                        <Td>
-                          <div className="text-xs text-gray-700">
-                            <div>Dados SA: {row.sa_data_sharing_consent ? '✔' : '—'}</div>
-                            <div>Marketing SA: {row.sa_marketing_consent ? '✔' : '—'}</div>
-                            <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
-                          </div>
-                        </Td>
-                        <Td>
-                          {row.order_id ? (() => {
-                            const order = orders.find(o => o.id === row.order_id);
-                            return (
-                              <button
-                                onClick={() => order && setSelectedOrder(order)}
-                                className="text-[#003F59] hover:underline text-left"
-                                title={row.order_id}
-                              >
-                                {order ? formatMoneyEURFromCents(order.total_amount) : row.order_id.slice(0, 8) + '…'}
-                              </button>
-                            );
-                          })() : '—'}
-                        </Td>
-                        <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
-                      </tr>
-                    ))
+                    tickets.map((row) => {
+                      const order = orders.find(o => o.id === row.order_id);
+                      return (
+                        <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedTicket(row)}>
+                          <Td>{formatDatePt(row.created_at)}</Td>
+                          <Td>
+                            <div className="font-medium text-gray-900">
+                              {safe(row.attendee_name) ||
+                                `${safe(row.attendee_first_name)} ${safe(row.attendee_last_name)}`.trim() ||
+                                '—'}
+                            </div>
+                            <div className="text-xs text-gray-500">{safe(row.attendee_email) || '—'}</div>
+                            <div className="text-xs text-gray-500">{safe(row.attendee_country) || '—'}</div>
+                          </Td>
+                          <Td>
+                            <div>{safe(row.attendee_company) || '—'}</div>
+                            <div className="text-xs text-gray-500">{safe(row.attendee_job_title) || '—'}</div>
+                            <div className="text-xs text-gray-500">
+                              {safe(row.attendee_job_function) || '—'}
+                              {row.attendee_job_function_other ? ` · ${safe(row.attendee_job_function_other)}` : ''}
+                            </div>
+                          </Td>
+                          <Td>{safe(row.attendee_nif) || '—'}</Td>
+                          <Td>{safe(row.attendee_tshirt) || '—'}</Td>
+                          <Td>
+                            <div className="text-xs text-gray-700">
+                              <div>Dados SA: {row.sa_data_sharing_consent ? '✔' : '—'}</div>
+                              <div>Marketing SA: {row.sa_marketing_consent ? '✔' : '—'}</div>
+                              <div>Privacidade: {row.privacy_consent ? '✔' : '—'}</div>
+                            </div>
+                          </Td>
+                          <Td>
+                            {order ? (
+                              <div className="space-y-1">
+                                <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
+                                {order.invoice_id
+                                  ? <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                  : isSuperAdmin
+                                    ? (
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); generateInvoice(order.id); }}
+                                        disabled={generatingInvoice === order.id}
+                                        className="text-xs px-2 py-0.5 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
+                                      >
+                                        {generatingInvoice === order.id ? 'A gerar…' : 'Gerar Fatura'}
+                                      </button>
+                                    )
+                                    : <span className="text-xs text-orange-500">Pendente</span>
+                                }
+                                {invoiceError?.orderId === order.id && (
+                                  <div className="text-xs text-red-600 max-w-xs break-words">{invoiceError.msg}</div>
+                                )}
+                              </div>
+                            ) : '—'}
+                          </Td>
+                          <Td>{row.checked_in ? `Sim · ${formatDatePt(row.check_in_at)}` : 'Não'}</Td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -1489,28 +1790,30 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{row.used_by_order_id || '—'}</Td>
                         <Td>{row.used_at ? formatDatePt(row.used_at) : '—'}</Td>
                         <Td>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => openEditCoupon(row)}
-                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
-                            >
-                              Editar
-                            </button>
+                          {canEdit && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => openEditCoupon(row)}
+                                className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                              >
+                                Editar
+                              </button>
 
-                            <button
-                              onClick={() => toggleCouponActive(row)}
-                              className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
-                            >
-                              {row.active ? 'Desativar' : 'Ativar'}
-                            </button>
+                              <button
+                                onClick={() => toggleCouponActive(row)}
+                                className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                              >
+                                {row.active ? 'Desativar' : 'Ativar'}
+                              </button>
 
-                            <button
-                              onClick={() => deleteCoupon(row.id)}
-                              className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
-                            >
-                              Apagar
-                            </button>
-                          </div>
+                              <button
+                                onClick={() => deleteCoupon(row.id)}
+                                className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
+                              >
+                                Apagar
+                              </button>
+                            </div>
+                          )}
                         </Td>
                       </tr>
                     ))
@@ -1519,54 +1822,423 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </table>
             </div>
           )}
+
+          {tab === 'logs' && (
+            <div className="overflow-x-auto rounded-3xl bg-white border">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 text-left">
+                  <tr>
+                    <Th>Data</Th>
+                    <Th>Admin</Th>
+                    <Th>Ação</Th>
+                    <Th>Entidade</Th>
+                    <Th>ID</Th>
+                    <Th>Detalhes</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loadingLogs ? (
+                    <tr><Td colSpan={6}>A carregar logs…</Td></tr>
+                  ) : logs.length === 0 ? (
+                    <tr><Td colSpan={6}>Sem registos.</Td></tr>
+                  ) : (
+                    logs.map((row) => (
+                      <tr key={row.id} className="border-t">
+                        <Td>{formatDatePt(row.created_at)}</Td>
+                        <Td>{row.admin_email}</Td>
+                        <Td><span className="font-mono bg-gray-100 px-1 rounded">{row.action}</span></Td>
+                        <Td>{row.entity_type || '—'}</Td>
+                        <Td><span className="font-mono text-xs text-gray-500">{row.entity_id || '—'}</span></Td>
+                        <Td>
+                          {row.details ? (
+                            <pre className="text-xs text-gray-600 whitespace-pre-wrap max-w-xs">{JSON.stringify(row.details, null, 2)}</pre>
+                          ) : '—'}
+                        </Td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {tab === 'adminUsers' && (
+            <div className="space-y-6">
+              <form onSubmit={saveAdminUser} className="bg-white rounded-3xl border p-6">
+                <h3 className="font-bold text-gray-800 mb-4">Adicionar utilizador</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <input
+                    type="email"
+                    placeholder="Email Google"
+                    value={adminUserForm.email}
+                    onChange={e => setAdminUserForm(f => ({ ...f, email: e.target.value }))}
+                    required
+                    className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Nome (opcional)"
+                    value={adminUserForm.name}
+                    onChange={e => setAdminUserForm(f => ({ ...f, name: e.target.value }))}
+                    className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
+                  />
+                  <select
+                    value={adminUserForm.role}
+                    onChange={e => setAdminUserForm(f => ({ ...f, role: e.target.value as AdminRole }))}
+                    className="rounded-xl border border-gray-300 px-4 py-2 text-sm"
+                  >
+                    <option value="view">View</option>
+                    <option value="edit">Edit</option>
+                    <option value="superadmin">Super Admin</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingAdminUser}
+                  className="mt-3 rounded-xl bg-brand-darkBlue text-white px-5 py-2 text-sm font-bold disabled:opacity-50"
+                >
+                  {savingAdminUser ? 'A guardar...' : 'Adicionar'}
+                </button>
+              </form>
+
+              <div className="overflow-x-auto rounded-3xl bg-white border">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-gray-50 text-left">
+                    <tr>
+                      <Th>Email</Th>
+                      <Th>Nome</Th>
+                      <Th>Role</Th>
+                      <Th>Estado</Th>
+                      <Th>Ações</Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loadingAdminUsers ? (
+                      <tr><Td colSpan={5}>A carregar...</Td></tr>
+                    ) : adminUsers.length === 0 ? (
+                      <tr><Td colSpan={5}>Sem utilizadores.</Td></tr>
+                    ) : (
+                      adminUsers.map(u => (
+                        <tr key={u.email} className="border-t">
+                          <Td>{u.email}</Td>
+                          <Td>{u.name || '—'}</Td>
+                          <Td>
+                            <select
+                              value={u.role}
+                              disabled={u.email === adminUser?.email}
+                              onChange={e => updateAdminUserRole(u.email, e.target.value as AdminRole)}
+                              className="rounded-lg border border-gray-200 px-2 py-1 text-xs"
+                            >
+                              <option value="view">View</option>
+                              <option value="edit">Edit</option>
+                              <option value="superadmin">Super Admin</option>
+                            </select>
+                          </Td>
+                          <Td>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${u.active ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500'}`}>
+                              {u.active ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </Td>
+                          <Td>
+                            <div className="flex gap-2">
+                              {u.email !== adminUser?.email && (
+                                <>
+                                  <button
+                                    onClick={() => toggleAdminUserActive(u.email, !u.active)}
+                                    className="rounded-lg bg-gray-100 hover:bg-gray-200 px-3 py-1 text-xs font-bold"
+                                  >
+                                    {u.active ? 'Desativar' : 'Ativar'}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteAdminUser(u.email)}
+                                    className="rounded-lg bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1 text-xs font-bold"
+                                  >
+                                    Remover
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </Td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
-        {selectedOrder && (
+        {selectedOrder && (() => {
+          const orderTicket = tickets.find(t => t.order_id === selectedOrder.id);
+          return (
+            <div
+              className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+              onClick={() => setSelectedOrder(null)}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
+                  <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                </div>
+                <dl className="space-y-2 text-sm">
+                  {[
+                    ['Data', formatDatePt(selectedOrder.created_at)],
+                    ['Cliente', selectedOrder.customer_name || '—'],
+                    ['Email', selectedOrder.customer_email || '—'],
+                    ['NIF', orderTicket?.attendee_nif || '—'],
+                    ['País', selectedOrder.customer_country || '—'],
+                    ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
+                    ['Estado', selectedOrder.status || '—'],
+                    ['Nº Fatura', selectedOrder.invoice_number || selectedOrder.invoice_id || 'Pendente'],
+                    ['Stripe Session', selectedOrder.stripe_session_id || '—'],
+                    ['ID', selectedOrder.id],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex gap-2">
+                      <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                      <dd className="text-gray-900 break-all">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+          );
+        })()}
+
+        {selectedTicket && (() => {
+          const ticketOrder = orders.find(o => o.id === selectedTicket.order_id);
+          return (
+            <div
+              className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
+              onClick={() => setSelectedTicket(null)}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-[#003F59]">Detalhes do Ticket</h3>
+                  <button onClick={() => setSelectedTicket(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                </div>
+                <dl className="space-y-2 text-sm">
+                  {([
+                    ['Data', formatDatePt(selectedTicket.created_at)],
+                    ['Nome', selectedTicket.attendee_name || `${selectedTicket.attendee_first_name || ''} ${selectedTicket.attendee_last_name || ''}`.trim() || '—'],
+                    ['Email', selectedTicket.attendee_email || '—'],
+                    ['País', selectedTicket.attendee_country || '—'],
+                    ['NIF', selectedTicket.attendee_nif || '—'],
+                    ['Empresa', selectedTicket.attendee_company || '—'],
+                    ['Cargo', selectedTicket.attendee_job_title || '—'],
+                    ['Função', selectedTicket.attendee_job_function
+                      ? selectedTicket.attendee_job_function + (selectedTicket.attendee_job_function_other ? ` · ${selectedTicket.attendee_job_function_other}` : '')
+                      : '—'],
+                    ['T-Shirt', selectedTicket.attendee_tshirt || '—'],
+                    ['Dados SA', selectedTicket.sa_data_sharing_consent ? 'Sim' : 'Não'],
+                    ['Marketing SA', selectedTicket.sa_marketing_consent ? 'Sim' : 'Não'],
+                    ['Privacidade', selectedTicket.privacy_consent ? 'Sim' : 'Não'],
+                    ['Check-in', selectedTicket.checked_in ? `Sim · ${formatDatePt(selectedTicket.check_in_at)}` : 'Não'],
+                    ['Pagamento', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
+                    ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
+                    ['ID', selectedTicket.id],
+                  ] as [string, string][]).map(([label, value]) => (
+                    <div key={label} className="flex gap-2">
+                      <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                      <dd className="text-gray-900 break-all">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
+                  <div className="mt-4">
+                    <button
+                      onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
+                      disabled={generatingInvoice === ticketOrder.id}
+                      className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
+                    >
+                      {generatingInvoice === ticketOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
+                    </button>
+                    {invoiceError?.orderId === ticketOrder.id && (
+                      <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
+                    )}
+                  </div>
+                )}
+                {isSuperAdmin && ticketOrder?.invoice_id && !ticketOrder.credit_note_id && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedTicket(null);
+                        setCreditNoteMotivo('');
+                        setCreditNoteCustom('');
+                        setCreditNoteError(null);
+                        setCreditNoteModal({
+                          orderId: ticketOrder.id,
+                          orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
+                        });
+                      }}
+                      className="w-full py-2 rounded-lg border border-orange-400 text-orange-600 text-sm font-medium hover:bg-orange-50"
+                    >
+                      Emitir Nota de Crédito
+                    </button>
+                  </div>
+                )}
+                {ticketOrder?.credit_note_id && (
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
+                  </p>
+                )}
+                {isSuperAdmin && ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        setSelectedTicket(null);
+                        setRefundError(null);
+                        setRefundMotivo('');
+                        setRefundCustom('');
+                        setRefundModal({
+                          orderId: ticketOrder.id,
+                          orderLabel: ticketOrder.invoice_number || ticketOrder.invoice_id || ticketOrder.id,
+                          hasCreditNote: !!ticketOrder.credit_note_id,
+                        });
+                      }}
+                      className="w-full py-2 rounded-lg border border-red-400 text-red-600 text-sm font-medium hover:bg-red-50"
+                    >
+                      Emitir Estorno
+                    </button>
+                  </div>
+                )}
+                {ticketOrder?.refunded_at && (
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    Estornado em <span className="font-medium text-gray-700">{new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {creditNoteModal && (
           <div
             className="fixed inset-0 z-[210] bg-black/40 flex items-center justify-center p-4"
-            onClick={() => setSelectedOrder(null)}
+            onClick={() => { if (!generatingCreditNote) setCreditNoteModal(null); }}
           >
             <div
               className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
-                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+                <h3 className="text-lg font-bold text-[#003F59]">Nota de Crédito</h3>
+                <button onClick={() => setCreditNoteModal(null)} disabled={generatingCreditNote} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
               </div>
-              <dl className="space-y-2 text-sm">
-                {[
-                  ['Data', formatDatePt(selectedOrder.created_at)],
-                  ['Cliente', selectedOrder.customer_name || '—'],
-                  ['Email', selectedOrder.customer_email || '—'],
-                  ['NIF', selectedOrder.customer_nif || '—'],
-                  ['País', selectedOrder.customer_country || '—'],
-                  ['Total', formatMoneyEURFromCents(selectedOrder.total_amount)],
-                  ['Estado', selectedOrder.status || '—'],
-                  ['Fatura', selectedOrder.invoice_id || 'Pendente'],
-                  ['Stripe Session', selectedOrder.stripe_session_id || '—'],
-                  ['ID', selectedOrder.id],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex gap-2">
-                    <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
-                    <dd className="text-gray-900 break-all">{value}</dd>
-                  </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Fatura: <span className="font-medium text-gray-700">{creditNoteModal.orderLabel}</span>
+              </p>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm font-medium text-gray-700">Motivo</p>
+                {['Troca / inclusão de NIF', 'Correção de dados do cliente', 'Estorno por desistência da compra', 'Erro no valor faturado', 'Outro'].map((opt) => (
+                  <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="motivo"
+                      value={opt}
+                      checked={creditNoteMotivo === opt}
+                      onChange={() => setCreditNoteMotivo(opt)}
+                    />
+                    {opt}
+                  </label>
                 ))}
-              </dl>
-              {!selectedOrder.invoice_id && (
-                <div className="mt-4">
-                  <button
-                    onClick={async () => { await generateInvoice(selectedOrder.id); setSelectedOrder(null); }}
-                    disabled={generatingInvoice === selectedOrder.id}
-                    className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
-                  >
-                    {generatingInvoice === selectedOrder.id ? 'A gerar fatura…' : 'Gerar Fatura'}
-                  </button>
-                  {invoiceError?.orderId === selectedOrder.id && (
-                    <p className="text-red-600 text-xs mt-2">{invoiceError.msg}</p>
-                  )}
+                {creditNoteMotivo === 'Outro' && (
+                  <textarea
+                    className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    rows={2}
+                    placeholder="Descreve o motivo…"
+                    value={creditNoteCustom}
+                    onChange={(e) => setCreditNoteCustom(e.target.value)}
+                  />
+                )}
+              </div>
+              {creditNoteError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{creditNoteError}</p>
+              )}
+              <button
+                onClick={() => {
+                  const motivo = creditNoteMotivo === 'Outro' ? creditNoteCustom.trim() : creditNoteMotivo;
+                  if (!motivo) return;
+                  generateCreditNote(creditNoteModal.orderId, motivo);
+                }}
+                disabled={generatingCreditNote || !creditNoteMotivo || (creditNoteMotivo === 'Outro' && !creditNoteCustom.trim())}
+                className="w-full py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 disabled:opacity-50"
+              >
+                {generatingCreditNote ? 'A emitir…' : 'Confirmar Nota de Crédito'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {refundModal && (
+          <div
+            className="fixed inset-0 z-[220] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!markingRefund) { setRefundModal(null); setRefundError(null); } }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">Emitir Estorno</h3>
+                <button onClick={() => { setRefundModal(null); setRefundError(null); }} disabled={markingRefund} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-3">
+                Fatura: <span className="font-medium text-gray-700">{refundModal.orderLabel}</span>
+              </p>
+              {!refundModal.hasCreditNote && (
+                <div className="mb-4">
+                  <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                    Não existe nota de crédito para esta fatura. Será criada automaticamente ao validar o estorno no Stripe.
+                  </div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Motivo da nota de crédito</p>
+                  <div className="space-y-2">
+                    {[...MOTIVOS_ESTORNO, 'Outro'].map((opt) => (
+                      <label key={opt} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="radio"
+                          name="refundMotivo"
+                          value={opt}
+                          checked={refundMotivo === opt}
+                          onChange={() => setRefundMotivo(opt)}
+                        />
+                        {opt}
+                      </label>
+                    ))}
+                    {refundMotivo === 'Outro' && (
+                      <textarea
+                        className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        rows={2}
+                        placeholder="Descreve o motivo…"
+                        value={refundCustom}
+                        onChange={(e) => setRefundCustom(e.target.value)}
+                      />
+                    )}
+                  </div>
                 </div>
               )}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800">
+                O sistema irá validar que o estorno foi efetuado no Stripe antes de registar.
+              </div>
+              {refundError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{refundError}</p>
+              )}
+              <button
+                onClick={() => {
+                  const motivo = refundMotivo === 'Outro' ? refundCustom.trim() : refundMotivo;
+                  markAsRefunded(refundModal.orderId, !refundModal.hasCreditNote ? motivo : undefined);
+                }}
+                disabled={markingRefund || (!refundModal.hasCreditNote && (!refundMotivo || (refundMotivo === 'Outro' && !refundCustom.trim())))}
+                className="w-full py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {markingRefund ? 'A validar no Stripe…' : 'Validar e Registar Estorno'}
+              </button>
             </div>
           </div>
         )}

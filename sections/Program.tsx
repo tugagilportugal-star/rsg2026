@@ -2,25 +2,26 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { ArrowRight } from 'lucide-react';
 
-export const Program: React.FC = () => {
+interface ProgramProps {
+  onOpenTicketModal: () => void;
+}
+
+export const Program: React.FC<ProgramProps> = ({ onOpenTicketModal }) => {
   const dimensions =[
     {
       id: "01",
       title: "Liderança & Pessoas",
-      description: "Numa era de aceleração e burnout, voltamos ao essencial: as pessoas. Ferramentas para líderes navegarem a complexidade, gerirem a carga cognitiva das equipas e construírem resiliência emocional.",
-      tags:["Cognitive Load", "Humanity", "Culture"]
+      description: "Numa era de aceleração e burnout, voltamos ao essencial: as pessoas. Ferramentas para líderes navegarem a complexidade, gerirem a carga cognitiva das equipas e construírem resiliência emocional."
     },
     {
       id: "02",
       title: "Fluxo & Design Organizacional",
-      description: "Como estruturar organizações para o fluxo rápido? Da gestão de dependências às interações entre equipas, desenhamos sistemas para entregar valor contínuo e alinhar estratégia à execução.",
-      tags: ["Fast Flow", "Systems Thinking", "Scale"]
+      description: "Como estruturar organizações para o fluxo rápido? Da gestão de dependências às interações entre equipas, desenhamos sistemas para entregar valor contínuo e alinhar estratégia à execução."
     },
     {
       id: "03",
-      title: "Gestão e Estratégia de Inovação & Qualidade",
-      description: "O mito vs. a realidade. Como a Inteligência Artificial está a redefinir a estratégia de qualidade, automação e engenharia. Casos reais de governança e inovação tecnológica.",
-      tags:["AI Governance", "Modern QA", "Future-Fit"]
+      title: "Gestão e Estratégia de Qualidade & Inovação",
+      description: "O mito vs. a realidade. Como a Inteligência Artificial está a redefinir a estratégia de qualidade, automação e engenharia. Casos reais de governança e inovação tecnológica."
     }
   ];
 
@@ -49,7 +50,7 @@ export const Program: React.FC = () => {
           </div>
         </div>
 
-        {/* Lista de Dimensões */}
+        {/* Lista de Dimensões (Sem as tags) */}
         <div className="grid lg:grid-cols-3 gap-8 mb-16">
           {dimensions.map((item) => (
             <div key={item.id} className="group relative flex flex-col h-full">
@@ -71,28 +72,19 @@ export const Program: React.FC = () => {
                     
                     <div className="h-1 w-12 bg-brand-orange mb-6 rounded-full"></div>
 
-                    <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-8">
+                    <p className="text-gray-300 text-sm md:text-base leading-relaxed">
                       {item.description}
                     </p>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mt-auto">
-                      {item.tags.map((tag) => (
-                        <span key={tag} className="text-[11px] font-bold tracking-wider text-brand-blue uppercase bg-brand-darkBlue/50 border border-brand-blue/30 px-3 py-1.5 rounded-lg">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Call to Action - Garanta o seu lugar (Substitui o bloco do Keynote) */}
+        {/* Call to Action - Abre direto o formulário de bilhetes! */}
         <div className="flex justify-center mt-12">
             <button 
-                onClick={() => document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={onOpenTicketModal}
                 className="group inline-flex items-center gap-3 bg-brand-orange text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-brand-orange transition-all duration-300 shadow-[0_10px_30px_rgba(244,122,32,0.3)] hover:shadow-[0_10px_30px_rgba(255,255,255,0.3)]"
             >
                 Garanta o seu lugar

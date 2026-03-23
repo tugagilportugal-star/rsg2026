@@ -2,20 +2,13 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { issueInvoiceForOrder } from '../../lib/invoicing/index.js';
+import { verifyAdminToken, logAction, canEdit } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-function checkBasicAuth(req: VercelRequest): boolean {
-  const header = req.headers.authorization || '';
-  if (!header.startsWith('Basic ')) return false;
-  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
-  const [user, pass] = decoded.split(':');
-  return user === process.env.ADMIN_USER && pass === process.env.ADMIN_PASS;
-}
 
 function generateInvoiceEmail(d: {
   name: string; ticketName: string; invoiceId: string; total: string; isTest: boolean;
@@ -57,16 +50,16 @@ function generateInvoiceEmail(d: {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!checkBasicAuth(req)) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Admin"');
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+  const admin = await verifyAdminToken(req.headers.authorization || '');
+  if (!admin) return res.status(401).json({ message: 'Unauthorized' });
+  if (admin.role !== 'superadmin') return res.status(403).json({ message: 'Apenas superadmin pode gerar faturas.' });
 
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   const orderId = String(req.body?.order_id || '').trim();
+  const forceTestMode = req.body?.test_mode === true;
   if (!orderId) {
     return res.status(400).json({ message: 'order_id é obrigatório.' });
   }
@@ -82,7 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(404).json({ message: 'Order não encontrada.' });
   }
 
-  if (order.invoice_id) {
+  if (order.invoice_id && !forceTestMode && !order.credit_note_id) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
@@ -96,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const includeRecording = order.include_recording === true;
 
   const amountEuro = (order.total_amount || 0) / 100;
-  const isTest = (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
+  const isTest = forceTestMode || (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
 
   const invoiceResult = await issueInvoiceForOrder({
     isTest,
@@ -114,11 +107,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(502).json({ message: `Erro ao gerar fatura: ${raw}` });
   }
 
-  // Save invoice_id
+  const invoiceLabel = invoiceResult.invoiceNumber || invoiceResult.invoiceId;
+
+  // Save invoice_id and invoice_number
   await supabase
     .from('orders')
-    .update({ invoice_id: invoiceResult.invoiceId })
+    .update({
+      invoice_id: invoiceResult.invoiceId,
+      invoice_number: invoiceResult.invoiceNumber ?? null,
+    })
     .eq('id', orderId);
+
+  await logAction(admin.email, 'gerar_fatura', 'order', orderId, { invoice_number: invoiceResult.invoiceNumber, invoice_id: invoiceResult.invoiceId, is_test: isTest });
 
   // Send PDF email
   if (invoiceResult.pdfBytes) {
@@ -131,12 +131,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ticketName: includeRecording
           ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
           : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026',
-        invoiceId: invoiceResult.invoiceId,
+        invoiceId: invoiceLabel,
         total: invoiceResult.total,
         isTest,
       }),
       attachments: [{
-        filename: `invoice-${invoiceResult.invoiceId}.pdf`,
+        filename: `fatura-${invoiceLabel.replace(/[\s/]/g, '-')}.pdf`,
         content: invoiceResult.pdfBytes.toString('base64'),
       }],
     });
@@ -144,6 +144,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json({
     invoiceId: invoiceResult.invoiceId,
+    invoiceNumber: invoiceResult.invoiceNumber,
     total: invoiceResult.total,
   });
 }

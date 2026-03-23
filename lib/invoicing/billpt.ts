@@ -103,7 +103,7 @@ async function billCreateDocument(params: {
     pais: params.countryIso,
   };
   if (params.customerNif) {
-    contato.contribuinte = params.customerNif;
+    contato.nif = params.customerNif;
   }
 
   const body = {
@@ -165,6 +165,11 @@ async function billGetDocument(params: { baseUrl: string; apiToken: string; id: 
   }
 
   return data;
+}
+
+function extractInvoiceNumber(doc: any): string | null {
+  const n = doc?.invoice_number ?? doc?.invoiceNumber ?? doc?.documento?.invoice_number ?? null;
+  return n ? String(n) : null;
 }
 
 function extractTokenDownload(doc: any): string | null {
@@ -273,6 +278,7 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
   const tokenDownload = extractTokenDownload(doc);
   const status = extractStatus(doc);
   const totalEuro = extractTotalEuro(doc, input.amountEuro);
+  const invoiceNumber = extractInvoiceNumber(doc);
 
   let pdfBytes: Buffer | null = null;
 
@@ -288,6 +294,7 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
   return {
     provider: 'billpt',
     invoiceId,
+    invoiceNumber,
     status,
     permalink,
     pdfBytes,

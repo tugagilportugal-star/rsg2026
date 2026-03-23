@@ -24,9 +24,14 @@ const App: React.FC = () => {
   const[isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
-  if (isAdminRoute) {
-    return <AdminView onClose={() => { window.location.href = '/'; }} />;
+
+  // After Google OAuth, Supabase redirects to site root with #access_token in the hash.
+  // Detect this and redirect to /admin so the AdminView can process the token.
+  if (!isAdminRoute && window.location.hash.includes('access_token=')) {
+    window.location.replace('/admin' + window.location.hash);
+    return null;
   }
+
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get('success')) {
@@ -39,23 +44,26 @@ const App: React.FC = () => {
   }, []); // <--- Aqui estava o erro TS1135 e TS1005
 
   return (
-    <div className="bg-white">
-      <Navbar />
-      <Hero />
-      {/* Secção de Tickets com a função de abrir o Modal */}
-      <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-      <About />
-      <Features />
-      <Program />
-      <Speakers />      
-      <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-      <Recap />
-      <FAQ />
-      <Team />
-      <Footer />
+    <TicketStatusProvider>
+    <>
+      <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
-      {/* Botão Admin Escondido - Agora dentro da div principal */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <main>
+        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <About />
+        <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <WhyAttend />
+        <Speakers />
+        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+        <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Team />
+        <Footer />
+      </main>
+
+      <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => (window.location.href = '/admin')}
           className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"

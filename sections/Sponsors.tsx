@@ -38,7 +38,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
-      logo: "https://i.postimg.cc/wM4pvW8v/Geek-Girls-Portugal.jpg",
+      logo: "https://i.postimg.cc/wM4pvW8v/Geek_Girls_Portugal.jpg",
       url: "https://geekgirlsportugal.pt/"
     },
     {
@@ -153,7 +153,6 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </div>
           </div>
         )}
-
         {/* --- COMMUNITY SUPPORTERS --- */}
         {communitySupporters.length > 0 && (
           <div className="mb-20">
