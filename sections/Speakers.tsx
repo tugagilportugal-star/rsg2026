@@ -32,7 +32,7 @@ export const Speakers: React.FC = () => {
       image: "",
       linkedin: "",
       isRevealed: false
-    }
+    },
   ];
 
   // ==========================================

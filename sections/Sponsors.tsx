@@ -7,7 +7,6 @@ interface SponsorsProps {
     onOpenSponsorModal: () => void;
 }
 
-// Interface para os dados do patrocinador
 interface Sponsor {
   name: string;
   logo: string;
@@ -19,7 +18,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
 
   // --- LISTAS DE PATROCINADORES ---
   
-  const goldSponsors: Sponsor[] = [];
+  const goldSponsors: Sponsor[] =[];
   const silverSponsors: Sponsor[] = [];
 
   const bronzeSponsors: Sponsor[] =[
@@ -34,6 +33,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
   ];
+
   // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {

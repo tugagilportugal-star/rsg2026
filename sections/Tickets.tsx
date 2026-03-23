@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Bell, Check, CheckCircle2, Sparkles, Gift } from 'lucide-react';
 import { useTicketStatus } from '../hooks/useTicketStatus';
@@ -166,16 +166,17 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   ];
 
   return (
-    <Section id="tickets" className="relative overflow-hidden bg-white">
-      <div className="text-center mb-6 md:mb-8">
-        <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue">
-          {showTicketBox ? 'Garanta o seu lugar' : 'Waitlist Oficial'}
+    <Section id="tickets" className="bg-gray-50 py-24 relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+      
+      <div className="text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
+          Garanta o seu lugar
         </h2>
-
-        <p className="mt-3 max-w-3xl mx-auto text-lg md:text-2xl text-gray-500 leading-relaxed">
-          {showTicketBox
-            ? 'Participe de uma das maiores celebrações da agilidade em Portugal. Preço exclusivo para os primeiros inscritos.'
-            : 'Seja o primeiro a saber quando os bilhetes abrirem. Inscreva-se na lista de espera e garanta acesso prioritário.'}
+        <p className="text-gray-500 text-lg max-w-2xl mx-auto">
+          Participe na maior celebração da agilidade em Portugal. 
+          Preço exclusivo para os primeiros inscritos.
         </p>
       </div>
 
@@ -192,13 +193,11 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </div>
             <WaitlistForm />
           </div>
-        )}
 
-        {/* TICKET BOX MODE */}
-        {showTicketBox && (
-          <>
-            <div className="absolute top-0 right-0 z-20 bg-brand-orange text-white font-black text-base md:text-lg px-4 md:px-5 py-2 md:py-3 rounded-bl-2xl rounded-tr-2xl shadow-md">
-              {lotLabel}
+          <div className="p-8 md:p-10 text-center">
+            <div className="inline-flex items-center gap-2 bg-orange-50 text-brand-orange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                <Sparkles className="w-3 h-3" />
+                Early Bird
             </div>
 
             <div className="relative bg-white border-2 border-brand-orange rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-4 md:py-5">
@@ -262,14 +261,19 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               </div>
 
             </div>
-          </>
-        )}
+          </div>
+        </div>
 
-        {/* LOADING */}
-        {statusLoading && (
-          <div className="text-center py-12 text-gray-400">A carregar...</div>
-        )}
+        {/* Efeito de "Sombra" colorida atrás */}
+        <div className="absolute -inset-4 bg-gradient-to-b from-brand-orange/20 to-brand-blue/20 rounded-[2.5rem] blur-xl -z-10"></div>
       </div>
+      
+      {/* Disclaimer Fatura */}
+      <div className="text-center mt-12 flex items-center justify-center gap-2 text-gray-400 text-sm">
+         <Info className="w-4 h-4" />
+         <span>Fatura com contribuinte disponível no momento da compra.</span>
+      </div>
+
     </Section>
   );
 };
