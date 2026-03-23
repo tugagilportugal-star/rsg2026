@@ -181,7 +181,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
         </p>
       </div>
 
-      <div className="max-w-[560px] md:max-w-[620px] mx-auto relative">
+      <div className="max-w-[560px] md:max-w-[860px] mx-auto relative">
 
         {/* WAITLIST MODE */}
         {!showTicketBox && !statusLoading && (
@@ -219,7 +219,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               </div>
 
               {/* Renderização da Nova Lista de Benefícios */}
-              <div className="mt-4 w-full flex flex-col gap-y-3 border-t border-gray-100 pt-6 mb-6">
+              <div className="mt-4 w-full grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-gray-100 pt-6 mb-6">
                 {ticketBenefits.map((item, i) => (
                   <div key={i} className="flex items-start gap-3 text-left">
                     <div className={`rounded-full p-1.5 flex-shrink-0 mt-0.5 ${item.isBonus ? 'bg-orange-100' : 'bg-sky-100'}`}>
