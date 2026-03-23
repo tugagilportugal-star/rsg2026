@@ -18,10 +18,10 @@ import { Settings } from 'lucide-react';
 import { TicketForm } from './components/TicketForm';
 
 const App: React.FC = () => {
-  const[isSponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
-  const [isTicketModalOpen, setTicketModalOpen] = useState(false);
-  const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
+  const[isTicketModalOpen, setTicketModalOpen] = useState(false);
+  const[isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
   if (isAdminRoute) {
@@ -33,5 +33,8 @@ const App: React.FC = () => {
     if (query.get('success')) {
       setSuccessModalOpen(true);
       window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (query.get('canceled')) {
+      alert('A compra foi cancelada.');
     }
   },
