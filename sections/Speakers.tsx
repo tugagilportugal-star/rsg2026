@@ -21,7 +21,6 @@ export const Speakers: React.FC = () => {
       id: "k1",
       name: "Lyssa Adkins",
       role: "Author of Coaching Agile Teams",
-      // Substitua pelo link real da foto da Lyssa
       image: "https://i.postimg.cc/htmyQzQ1/Lyssa-Adkins.png", 
       linkedin: "https://www.linkedin.com/in/lyssaadkins/",
       isRevealed: true
@@ -81,7 +80,7 @@ export const Speakers: React.FC = () => {
       linkedin: "https://www.linkedin.com/in/paulocaroli/",
       isRevealed: false
     },
-    // Placeholders para manter a grelha de 10 speakers planeados
+    // Placeholders para manter a grelha de 10 speakers planeados (total: 4 reais + 6 TBA)
     ...Array.from({ length: 6 }).map((_, i) => ({
       id: `tba-${i+5}`,
       name: "Revealing Soon",
