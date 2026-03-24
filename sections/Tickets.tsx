@@ -29,7 +29,7 @@ const WaitlistForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 mt-5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
         <div><label className="block text-sm font-medium mb-1">Nome <span className="text-red-500">*</span></label><input required type="text" onChange={e => setForm({...form, name: e.target.value})} className="w-full border rounded-lg p-2.5" /></div>
         <div><label className="block text-sm font-medium mb-1">E-mail <span className="text-red-500">*</span></label><input required type="email" onChange={e => setForm({...form, email: e.target.value})} className="w-full border rounded-lg p-2.5" /></div>
         <div><label className="block text-sm font-medium mb-1">WhatsApp <span className="text-red-500">*</span></label><input required type="tel" onChange={e => setForm({...form, phone: e.target.value})} className="w-full border rounded-lg p-2.5" /></div>
