@@ -183,7 +183,8 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             
             <div className="mt-8 pt-6 border-t border-gray-100 space-y-2">
               <p className="text-[10px] text-gray-400"><span className="text-red-500 font-bold">*</span> Gravação disponível por +€10,00.</p>
-              <p className="text-[10px] text-gray-400"><span className="font-bold">**</span> Bónus ativados pelo participante. Zero partilha de dados.</p>
+              <p className="text-[10px] text-gray-400"><span className="font-bold">**</span> Os bónus exclusivos (Agile Academy e Kanban+) são ativados diretamente pelo participante após o evento. <span className="font-semibold text-gray-500">Zero partilha de dados</span> da nossa parte, garantindo a sua total privacidade.
+              </p>
             </div>
           </div>
         )}
