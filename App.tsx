@@ -73,10 +73,11 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      <TicketPurchaseModal 
-        isOpen={isTicketModalOpen} 
-        onClose={() => setTicketModalOpen(false)} 
-      />
+      {isTicketModalOpen && (
+        <TicketPurchaseModal 
+          onClose={() => setTicketModalOpen(false)} 
+        />
+      )}
     </TicketStatusProvider>
   );
 };
