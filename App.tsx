@@ -46,9 +46,8 @@ const App: React.FC = () => {
   }, []); // <--- Aqui estava o erro TS1135 e TS1005
 
   return (
-    <>
+    <TicketStatusProvider>
       <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
-
       <main>
         <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
         <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
@@ -72,8 +71,7 @@ const App: React.FC = () => {
           <Settings size={20} />
         </button>
       </div>
-    </>
+    </TicketStatusProvider>
   );
 };
-
 export default App;
