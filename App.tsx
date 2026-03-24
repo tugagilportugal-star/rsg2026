@@ -74,9 +74,7 @@ const App: React.FC = () => {
       </div>
 
       {isTicketModalOpen && (
-        <TicketPurchaseModal 
-          onClose={() => setTicketModalOpen(false)} 
-        />
+        <TicketPurchaseModal {...({ onClose: () => setTicketModalOpen(false) } as any)} />
       )}
     </TicketStatusProvider>
   );
