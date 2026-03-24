@@ -45,6 +45,7 @@ const App: React.FC = () => {
   }, []); // <--- Aqui estava o erro TS1135 e TS1005
 
   return (
+    <>
       <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
       <main>
@@ -53,7 +54,7 @@ const App: React.FC = () => {
         <About />
         <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
         <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <WhyAttend /> {/* Agora com import, ele deve funcionar */}
+        <WhyAttend />
         <Speakers />
         <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
         <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
@@ -70,6 +71,7 @@ const App: React.FC = () => {
           <Settings size={20} />
         </button>
       </div>
+    </>
   );
 };
 
