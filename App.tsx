@@ -17,6 +17,7 @@ import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
 import { WhyAttend } from './sections/WhyAttend';
+import { TicketStatusProvider } from './hooks/useTicketStatus';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
