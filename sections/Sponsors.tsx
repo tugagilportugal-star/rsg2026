@@ -32,6 +32,11 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        logo: ASSETS.TABAQUEIRA_LOGO,
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
+    {
+      name: "SONAE - MC Digital",
+      logo: "https://i.postimg.cc/C1KwSmF7/SONAE-MC-Digital.png",
+      url: "https://mc.sonae.pt/"
+    },
   ];
 
   // --- COMUNIDADES APOIADORAS ---
@@ -146,7 +151,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                   <img 
                     src={sponsor.logo} 
                     alt={sponsor.name} 
-                    className="h-12 md:h-16 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
+                    className="h-12 md:h-16 w-auto max-w-40 object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
                   />
                 </a>
               ))}
