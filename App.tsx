@@ -16,7 +16,6 @@ import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
-import { TicketStatusProvider } from './context/TicketStatusContext'; 
 import { WhyAttend } from './sections/WhyAttend';
 
 const App: React.FC = () => {
@@ -46,35 +45,31 @@ const App: React.FC = () => {
   }, []); // <--- Aqui estava o erro TS1135 e TS1005
 
   return (
-    <TicketStatusProvider>
-      <>
-        <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
+      <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
-        <main>
-          <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
-          <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-          <About />
-          <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
-          <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
-          <WhyAttend />
-          <Speakers />
-          <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-          <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
-          <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
-          <Team />
-          <Footer />
-        </main>
+      <main>
+        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <About />
+        <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <WhyAttend /> {/* Agora com import, ele deve funcionar */}
+        <Speakers />
+        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+        <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
+        <Team />
+        <Footer />
+      </main>
 
-        <div className="fixed bottom-6 right-6 z-40">
-          <button
-            onClick={() => (window.location.href = '/admin')}
-            className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
-          >
-            <Settings size={20} />
-          </button>
-        </div>
-      </>
-    </TicketStatusProvider>
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          onClick={() => (window.location.href = '/admin')}
+          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
+        >
+          <Settings size={20} />
+        </button>
+      </div>
   );
 };
 
