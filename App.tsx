@@ -71,7 +71,12 @@ const App: React.FC = () => {
           <Settings size={20} />
         </button>
       </div>
+    <TicketPurchaseModal 
+          isOpen={isTicketModalOpen} 
+          onClose={() => setTicketModalOpen(false)} 
+        />
+      </>
     </TicketStatusProvider>
   );
-};
+  
 export default App;
