@@ -45,34 +45,35 @@ const App: React.FC = () => {
 
   return (
     <TicketStatusProvider>
-    <>
-      <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
+      <>
+        <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
-      <main>
-        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <About />
-        <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <WhyAttend />
-        <Speakers />
-        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-        <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Team />
-        <Footer />
-      </main>
+        <main>
+          <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
+          <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
+          <About />
+          <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
+          <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
+          <WhyAttend />
+          <Speakers />
+          <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+          <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
+          <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
+          <Team />
+          <Footer />
+        </main>
 
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => (window.location.href = '/admin')}
-          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
-        >
-          <Settings size={20} />
-        </button>
-      </div>
-    </div> // <--- Fechamento da div principal
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => (window.location.href = '/admin')}
+            className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
+          >
+            <Settings size={20} />
+          </button>
+        </div>
+      </>
+    </TicketStatusProvider>
   );
-}; // <--- Fechamento do componente App
+};
 
 export default App;
