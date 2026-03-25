@@ -2114,7 +2114,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ))}
                   </dl>
                 )}
-                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || ticketOrder.credit_note_id) && (
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.original_invoice_id)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
