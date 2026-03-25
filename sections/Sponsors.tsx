@@ -166,7 +166,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
               alt={sponsor.name} 
               className={`
                 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100
-                ${isAgileAcademy ? 'h-16 w-full scale-[2.0]' : 'h-full w-full'}
+                ${isAgileAcademy ? 'h-16 w-full scale-[3.0]' : 'h-full w-full'}
               `}
             />
           </a>
