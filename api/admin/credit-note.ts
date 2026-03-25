@@ -96,6 +96,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     tipificacao: 'NC',
     contato,
     produtos,
+    motivo,
     observacoes: motivo,
     lingua: 'pt',
     terminado: 1,
