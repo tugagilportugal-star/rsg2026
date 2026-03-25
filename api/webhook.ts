@@ -467,6 +467,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ticketName,
       includeRecording,
       amountEuro,
+      quantity: parsedParticipants.length,
     });
 
     if (invoiceResult?.invoiceId) {

@@ -49,6 +49,7 @@ export async function issueInvoiceForOrder(
     ticketName: input.ticketName,
     includeRecording: input.includeRecording,
     amountEuro: input.amountEuro,
+    quantity: input.quantity ?? 1,
     isTest: input.isTest,
     autoFinalize: input.autoFinalize ?? envAutoFinalize,
   });

@@ -76,6 +76,7 @@ async function billCreateDocument(params: {
   includeRecording?: boolean;
   ticketName: string;
   amountEuro: number;
+  quantity?: number;
 }) {
   const ep = endpoints(params.baseUrl);
 
@@ -83,18 +84,33 @@ async function billCreateDocument(params: {
   const taxPercent = Number(process.env.BILL_TAX_PERCENT ?? 0);
   const isencao = (process.env.BILL_ISENCAO || '').trim().toUpperCase();
 
-  const descricao = params.includeRecording
-    ? 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026, incluindo acesso às gravações das sessões após o evento'
-    : 'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026';
+  const qty = Math.max(1, params.quantity ?? 1);
+  const RECORDING_UNIT = 10.00;
 
-  const produto: Record<string, unknown> = {
-    nome: descricao,
-    quantidade: 1,
-    preco_unitario: money(params.amountEuro),
-    imposto: taxPercent,
+  // Calcula preço unitário do bilhete
+  const recordingTotal = params.includeRecording ? RECORDING_UNIT * qty : 0;
+  const ticketUnitPrice = money((params.amountEuro - recordingTotal) / qty);
+
+  const makeProduto = (nome: string, quantidade: number, preco_unitario: number) => {
+    const p: Record<string, unknown> = { nome, quantidade, preco_unitario: money(preco_unitario), imposto: taxPercent };
+    if (taxPercent === 0 && isencao) p.isencao = isencao;
+    return p;
   };
-  if (taxPercent === 0 && isencao) {
-    produto.isencao = isencao;
+
+  const produtos: Record<string, unknown>[] = [
+    makeProduto(
+      'Bilhete de acesso ao Regional Scrum Gathering Lisbon 2026',
+      qty,
+      ticketUnitPrice,
+    ),
+  ];
+
+  if (params.includeRecording) {
+    produtos.push(makeProduto(
+      'Acesso às gravações das sessões – RSG Lisbon 2026',
+      qty,
+      RECORDING_UNIT,
+    ));
   }
 
   const contato: Record<string, unknown> = {
@@ -109,7 +125,7 @@ async function billCreateDocument(params: {
   const body = {
     tipificacao,
     contato,
-    produtos: [produto],
+    produtos,
     lingua: 'pt',
     // ✅ enviar como inteiro (mais compatível que boolean)
     terminado: 1,
@@ -253,6 +269,7 @@ export async function createInvoiceWithBillpt(input: CreateInvoiceInput): Promis
     includeRecording: input.includeRecording,
     ticketName: input.ticketName,
     amountEuro: input.amountEuro,
+    quantity: input.quantity ?? 1,
   });
 
   if (!created.id) {
