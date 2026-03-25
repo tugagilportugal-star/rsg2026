@@ -45,6 +45,8 @@ type OrderRow = {
   credit_note_id?: string | null;
   credit_note_number?: string | null;
   credit_note_motivo?: string | null;
+  original_invoice_id?: string | null;
+  original_invoice_number?: string | null;
   refunded_at?: string | null;
 };
 
@@ -2087,10 +2089,16 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       ['Total', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
                       ['Gravações', ticketOrder?.include_recording ? 'Sim' : 'Não'],
                       ['Estado', ticketOrder?.status || '—'],
-                      ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
+                      ...(ticketOrder?.original_invoice_number || ticketOrder?.original_invoice_id
+                        ? [['Fatura Anulada', ticketOrder.original_invoice_number || ticketOrder.original_invoice_id || '—'] as [string, string]]
+                        : []),
                       ...(ticketOrder?.credit_note_number || ticketOrder?.credit_note_id
                         ? [['Nota de Crédito', ticketOrder.credit_note_number || ticketOrder.credit_note_id || '—'] as [string, string]]
                         : []),
+                      [
+                        ticketOrder?.original_invoice_id ? 'Nova Fatura' : ticketOrder?.credit_note_id ? 'Fatura Anulada' : 'Nº Fatura',
+                        ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'
+                      ],
                       ...(ticketOrder?.refunded_at
                         ? [['Estornado em', new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')] as [string, string]]
                         : []),
@@ -2104,7 +2112,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ))}
                   </dl>
                 )}
-                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && ticketOrder.refunded_at)) && (
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || ticketOrder.credit_note_id) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
