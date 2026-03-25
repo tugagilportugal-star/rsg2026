@@ -93,7 +93,7 @@ export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTick
               </div>
 
               <button
-                onClick={onOpenTicketModal}
+                onClick={scrollThenOpen}
                 className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
