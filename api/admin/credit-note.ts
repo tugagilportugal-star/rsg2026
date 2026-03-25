@@ -75,6 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const produtos = lancamentos.map((l: any) => {
     const produto: Record<string, unknown> = {
       lancamento_pai_id: l.id,
+      item_id: l.item_id,
       nome: l.nome || l.descricao || 'Bilhete RSG Lisbon 2026',
       quantidade: Number(l.quantidade) || 1,
       preco_unitario: Number(l.preco_unitario) || 0,
