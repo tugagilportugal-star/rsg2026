@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { verifyAdminToken, logAction, canEdit } from '../../lib/admin/auth.js';
+import { verifyAdminToken, logAction } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
@@ -12,9 +12,6 @@ async function safeReadJson(resp: Response): Promise<any> {
   try { return JSON.parse(text); } catch { return { raw: text }; }
 }
 
-function getBillBaseUrl(): boolean {
-  return (process.env.VERCEL_ENV || '').toLowerCase() === 'production';
-}
 
 function withApiToken(url: string, apiToken: string): string {
   const u = new URL(url);
@@ -78,6 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const produtos = lancamentos.map((l: any) => {
     const produto: Record<string, unknown> = {
       lancamento_pai_id: l.id,
+      nome: l.nome || l.descricao || 'Bilhete RSG Lisbon 2026',
       quantidade: Number(l.quantidade) || 1,
       preco_unitario: Number(l.preco_unitario) || 0,
       imposto: taxPercent,
