@@ -282,15 +282,27 @@ export const TicketPurchaseModal: React.FC = () => {
             onChange={e => updateParticipant(activeTab, { lastName: e.target.value })} />
         </div>
 
-        {/* Email */}
-        <Input label="E-mail" type="email" required value={p.email}
-          onChange={e => {
-            updateParticipant(activeTab, { email: e.target.value });
-            if (activeTab === 0) setCouponResult(null);
-          }} />
+        {/* Email + T-Shirt */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input label="E-mail" type="email" required value={p.email}
+            onChange={e => {
+              updateParticipant(activeTab, { email: e.target.value });
+              if (activeTab === 0) setCouponResult(null);
+            }} />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              T-Shirt <span className="text-red-500">*</span>
+            </label>
+            <select required value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
+              className={selectClass}>
+              <option value="" disabled>Tamanho...</option>
+              {TSHIRTS.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
 
         {/* Empresa + Cargo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Empresa</label>
             <input type="text" value={p.company} onChange={e => updateParticipant(activeTab, { company: e.target.value })}
@@ -304,7 +316,7 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
 
         {/* Função + País */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Função</label>
             <select value={p.jobFunction}
@@ -327,18 +339,6 @@ export const TicketPurchaseModal: React.FC = () => {
           <Input label="Qual a sua função?" required value={p.jobFunctionOther}
             onChange={e => updateParticipant(activeTab, { jobFunctionOther: e.target.value })} />
         )}
-
-        {/* T-Shirt */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tamanho T-Shirt <span className="text-red-500">*</span>
-          </label>
-          <select required value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
-            className={selectClass}>
-            <option value="" disabled>Selecione um tamanho...</option>
-            {TSHIRTS.map(s => <option key={s}>{s}</option>)}
-          </select>
-        </div>
 
         {/* Marketing consent (opcional, por participante) */}
         <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
