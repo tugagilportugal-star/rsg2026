@@ -8,5 +8,10 @@
       "source": "/admin",
       "destination": "/"
     }
-  ]
+  ],
+  "functions": {
+    "api/submit.ts": {
+      "includeFiles": "api/email-template.html"
+    }
+  }
 }
