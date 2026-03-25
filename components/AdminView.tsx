@@ -2080,14 +2080,18 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {ticketModalTab === 'pagamento' && (
                   <dl className="space-y-2 text-sm">
                     {([
+                      ['Nome (Stripe)', ticketOrder?.customer_name || '—'],
+                      ['Email (Stripe)', ticketOrder?.customer_email || '—'],
+                      ['País (Stripe)', ticketOrder?.customer_country || '—'],
                       ['Total', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
+                      ['Gravações', ticketOrder?.include_recording ? 'Sim' : 'Não'],
                       ['Estado', ticketOrder?.status || '—'],
                       ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
                       ['Stripe Session', ticketOrder?.stripe_session_id || '—'],
                       ['Order ID', ticketOrder?.id || '—'],
                     ] as [string, string][]).map(([label, value]) => (
                       <div key={label} className="flex gap-2">
-                        <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                        <dt className="w-36 text-gray-500 shrink-0">{label}</dt>
                         <dd className="text-gray-900 break-all">{value}</dd>
                       </div>
                     ))}
