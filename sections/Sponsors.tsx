@@ -141,33 +141,40 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
         )}
 
         {/* --- COMMUNITY SUPPORTERS --- */}
-        {communitySupporters.length > 0 && (
-          <div className="mb-20">
-            <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
-              Community Supporters
-            </span>
-            <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
-              {communitySupporters.map((sponsor, idx) => (
-                <a 
-                  key={idx} 
-                  href={sponsor.url}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  // Reduzimos o padding para p-2 para dar muito mais espaço útil ao logo
-                  className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-2"
-                  title={`Visitar ${sponsor.name}`}
-                >
-                  <img 
-                    src={sponsor.logo} 
-                    alt={sponsor.name} 
-                    // Aumentámos o limite de altura para max-h-16 e adicionámos um transform scale suave para compensar margens brancas da imagem
-                    className="max-h-16 w-full object-contain transform hover:scale-105 grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
+{communitySupporters.length > 0 && (
+  <div className="mb-24 px-4 text-center">
+    <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-12 block">
+      Community Supporters
+    </span>
+    
+    {/* Layout Centralizado: flex-wrap e justify-center garantem o alinhamento ao meio */}
+    <div className="flex flex-wrap items-center justify-center gap-12 max-w-6xl mx-auto">
+      {communitySupporters.map((sponsor, idx) => {
+        const isAgileAcademy = sponsor.name.toLowerCase().includes('agile academy');
+
+        return (
+          <a 
+            key={idx} 
+            href={sponsor.url}
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group flex items-center justify-center w-64 h-24 p-4 transition-transform hover:scale-105"
+            title={`Visitar ${sponsor.name}`}
+          >
+            <img 
+              src={sponsor.logo} 
+              alt={sponsor.name} 
+              className={`
+                object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100
+                ${isAgileAcademy ? 'h-16 w-full scale-[2.0]' : 'h-full w-full'}
+              `}
+            />
+          </a>
+        );
+      })}
+    </div>
+  </div>
+)}
 
         {/* SEPARADOR E OPORTUNIDADES */}
         <div className="mb-16 relative">
