@@ -45,7 +45,7 @@ export const Button: React.FC<ButtonProps> = ({ variant = 'primary', className =
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: ReactNode;
   children: ReactNode;
   size?: 'md' | 'lg';
 }
@@ -63,9 +63,11 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         <div className={`relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${maxWidth} w-full`}>
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl leading-6 font-bold text-brand-darkBlue" id="modal-title">
-                {title}
-              </h3>
+              {title && (
+                <h3 className="text-xl leading-6 font-bold text-brand-darkBlue" id="modal-title">
+                  {title}
+                </h3>
+              )}
               <button
                 type="button"
                 className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"

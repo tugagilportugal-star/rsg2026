@@ -231,19 +231,19 @@ export const TicketPurchaseModal: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="text-left space-y-4">
 
-      {/* Quantidade */}
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-medium text-gray-700 shrink-0">Nº de bilhetes</label>
+      {/* Título + Quantidade */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-bold text-brand-darkBlue">
+          Comprar {quantity > 1 ? 'Bilhetes' : 'Bilhete'}
+        </h3>
         <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500 shrink-0">Qtd:</span>
           <button type="button" onClick={() => handleQuantityChange(quantity - 1)} disabled={quantity <= 1}
             className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand-orange hover:text-brand-orange transition-colors font-bold text-lg leading-none">−</button>
-          <span className="w-6 text-center font-bold text-brand-darkBlue">{quantity}</span>
+          <span className="w-5 text-center font-bold text-brand-darkBlue">{quantity}</span>
           <button type="button" onClick={() => handleQuantityChange(quantity + 1)} disabled={quantity >= 5}
             className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand-orange hover:text-brand-orange transition-colors font-bold text-lg leading-none">+</button>
         </div>
-        {quantity > 1 && (
-          <span className="text-xs text-gray-400">(máx. 5 por compra)</span>
-        )}
       </div>
 
       {/* Tabs de participantes — só quando qty > 1 */}
