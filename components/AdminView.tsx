@@ -1718,7 +1718,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               <div className="space-y-1">
                                 <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
                                 {order.invoice_id
-                                  ? <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                  ? <>
+                                      <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                      {order.credit_note_id && (
+                                        <div className="text-xs text-orange-600 font-medium">NC: {order.credit_note_number || order.credit_note_id}</div>
+                                      )}
+                                    </>
                                   : isSuperAdmin
                                     ? (
                                       <button
@@ -2050,7 +2055,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </div>
                   ))}
                 </dl>
-                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && ticketOrder.refunded_at)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
@@ -2084,9 +2089,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </div>
                 )}
                 {ticketOrder?.credit_note_id && (
-                  <p className="mt-3 text-xs text-center text-gray-500">
-                    NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
-                  </p>
+                  <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-gray-700 space-y-1">
+                    <div className="font-semibold text-orange-700">Nota de Crédito Emitida</div>
+                    <div><span className="text-gray-500">Nº:</span> {ticketOrder.credit_note_number || ticketOrder.credit_note_id}</div>
+                    {ticketOrder.credit_note_motivo && <div><span className="text-gray-500">Motivo:</span> {ticketOrder.credit_note_motivo}</div>}
+                  </div>
                 )}
                 {isSuperAdmin && ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
                   <div className="mt-3">
