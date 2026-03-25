@@ -457,7 +457,8 @@ export const TicketPurchaseModal: React.FC = () => {
       </div>
 
       {(() => {
-        const firstIncomplete = participants.findIndex(pt => !isParticipantComplete(pt));
+        const isEmpty = (pt: ParticipantForm) => !pt.firstName.trim() && !pt.lastName.trim() && !pt.email.trim();
+        const firstIncomplete = participants.findIndex(pt => isEmpty(pt));
         if (firstIncomplete !== -1) {
           return (
             <Button type="button" className="w-full text-lg" variant="secondary"
