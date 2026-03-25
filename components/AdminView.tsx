@@ -2080,6 +2080,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {ticketModalTab === 'pagamento' && (
                   <dl className="space-y-2 text-sm">
                     {([
+                      ['Data Pagamento', ticketOrder ? formatDatePt(ticketOrder.created_at) : '—'],
                       ['Nome (Stripe)', ticketOrder?.customer_name || '—'],
                       ['Email (Stripe)', ticketOrder?.customer_email || '—'],
                       ['País (Stripe)', ticketOrder?.customer_country || '—'],
@@ -2087,6 +2088,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       ['Gravações', ticketOrder?.include_recording ? 'Sim' : 'Não'],
                       ['Estado', ticketOrder?.status || '—'],
                       ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
+                      ...(ticketOrder?.credit_note_number || ticketOrder?.credit_note_id
+                        ? [['Nota de Crédito', ticketOrder.credit_note_number || ticketOrder.credit_note_id || '—'] as [string, string]]
+                        : []),
+                      ...(ticketOrder?.refunded_at
+                        ? [['Estornado em', new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')] as [string, string]]
+                        : []),
                       ['Stripe Session', ticketOrder?.stripe_session_id || '—'],
                       ['Order ID', ticketOrder?.id || '—'],
                     ] as [string, string][]).map(([label, value]) => (
