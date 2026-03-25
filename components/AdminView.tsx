@@ -2087,7 +2087,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       ['Total', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
                       ['Gravações', ticketOrder?.include_recording ? 'Sim' : 'Não'],
                       ['Estado', ticketOrder?.status || '—'],
-                      ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
+                      [ticketOrder?.credit_note_id ? 'Fatura Original' : 'Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
                       ...(ticketOrder?.credit_note_number || ticketOrder?.credit_note_id
                         ? [['Nota de Crédito', ticketOrder.credit_note_number || ticketOrder.credit_note_id || '—'] as [string, string]]
                         : []),
@@ -2104,7 +2104,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ))}
                   </dl>
                 )}
-                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && ticketOrder.refunded_at)) && (
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || ticketOrder.credit_note_id) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
