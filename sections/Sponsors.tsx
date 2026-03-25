@@ -140,7 +140,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
           </div>
         )}
 
-        {/* --- COMMUNITY SUPPORTERS (Tamanhos Padronizados) --- */}
+        {/* --- COMMUNITY SUPPORTERS --- */}
         {communitySupporters.length > 0 && (
           <div className="mb-20">
             <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
@@ -153,13 +153,15 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                   href={sponsor.url}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-4"
+                  // Reduzimos o padding para p-2 para dar muito mais espaço útil ao logo
+                  className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-2"
                   title={`Visitar ${sponsor.name}`}
                 >
                   <img 
                     src={sponsor.logo} 
                     alt={sponsor.name} 
-                    className="h-14 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
+                    // Aumentámos o limite de altura para max-h-16 e adicionámos um transform scale suave para compensar margens brancas da imagem
+                    className="max-h-16 w-full object-contain transform hover:scale-105 grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
                   />
                 </a>
               ))}
