@@ -174,6 +174,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketRow | null>(null);
+  const [ticketModalTab, setTicketModalTab] = useState<'ticket' | 'pagamento'>('ticket');
   const [creditNoteModal, setCreditNoteModal] = useState<{ orderId: string; orderLabel: string } | null>(null);
   const [creditNoteMotivo, setCreditNoteMotivo] = useState('');
   const [creditNoteCustom, setCreditNoteCustom] = useState('');
@@ -1685,7 +1686,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     tickets.map((row) => {
                       const order = orders.find(o => o.id === row.order_id);
                       return (
-                        <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedTicket(row)}>
+                        <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedTicket(row); setTicketModalTab('ticket'); }}>
                           <Td>{formatDatePt(row.created_at)}</Td>
                           <Td>
                             <div className="font-medium text-gray-900">
@@ -1718,7 +1719,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                               <div className="space-y-1">
                                 <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
                                 {order.invoice_id
-                                  ? <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                  ? <>
+                                      <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                      {order.credit_note_id && (
+                                        <div className="text-xs text-orange-600 font-medium">NC: {order.credit_note_number || order.credit_note_id}</div>
+                                      )}
+                                    </>
                                   : isSuperAdmin
                                     ? (
                                       <button
@@ -2023,34 +2029,82 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <h3 className="text-lg font-bold text-[#003F59]">Detalhes do Ticket</h3>
                   <button onClick={() => setSelectedTicket(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
                 </div>
-                <dl className="space-y-2 text-sm">
-                  {([
-                    ['Data', formatDatePt(selectedTicket.created_at)],
-                    ['Nome', selectedTicket.attendee_name || `${selectedTicket.attendee_first_name || ''} ${selectedTicket.attendee_last_name || ''}`.trim() || '—'],
-                    ['Email', selectedTicket.attendee_email || '—'],
-                    ['País', selectedTicket.attendee_country || '—'],
-                    ['NIF', selectedTicket.attendee_nif || '—'],
-                    ['Empresa', selectedTicket.attendee_company || '—'],
-                    ['Cargo', selectedTicket.attendee_job_title || '—'],
-                    ['Função', selectedTicket.attendee_job_function
-                      ? selectedTicket.attendee_job_function + (selectedTicket.attendee_job_function_other ? ` · ${selectedTicket.attendee_job_function_other}` : '')
-                      : '—'],
-                    ['T-Shirt', selectedTicket.attendee_tshirt || '—'],
-                    ['Dados SA', selectedTicket.sa_data_sharing_consent ? 'Sim' : 'Não'],
-                    ['Marketing SA', selectedTicket.sa_marketing_consent ? 'Sim' : 'Não'],
-                    ['Privacidade', selectedTicket.privacy_consent ? 'Sim' : 'Não'],
-                    ['Check-in', selectedTicket.checked_in ? `Sim · ${formatDatePt(selectedTicket.check_in_at)}` : 'Não'],
-                    ['Pagamento', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
-                    ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
-                    ['ID', selectedTicket.id],
-                  ] as [string, string][]).map(([label, value]) => (
-                    <div key={label} className="flex gap-2">
-                      <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
-                      <dd className="text-gray-900 break-all">{value}</dd>
-                    </div>
+
+                {/* Tabs */}
+                <div className="flex border-b border-gray-200 mb-4">
+                  {(['ticket', 'pagamento'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setTicketModalTab(tab)}
+                      className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${
+                        ticketModalTab === tab
+                          ? 'border-[#003F59] text-[#003F59]'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {tab === 'ticket' ? 'Ticket' : 'Pagamento'}
+                    </button>
                   ))}
-                </dl>
-                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.refunded_at)) && (
+                </div>
+
+                {/* Tab: Ticket */}
+                {ticketModalTab === 'ticket' && (
+                  <dl className="space-y-2 text-sm">
+                    {([
+                      ['Data', formatDatePt(selectedTicket.created_at)],
+                      ['Nome', selectedTicket.attendee_name || `${selectedTicket.attendee_first_name || ''} ${selectedTicket.attendee_last_name || ''}`.trim() || '—'],
+                      ['Email', selectedTicket.attendee_email || '—'],
+                      ['País', selectedTicket.attendee_country || '—'],
+                      ['NIF', selectedTicket.attendee_nif || '—'],
+                      ['Empresa', selectedTicket.attendee_company || '—'],
+                      ['Cargo', selectedTicket.attendee_job_title || '—'],
+                      ['Função', selectedTicket.attendee_job_function
+                        ? selectedTicket.attendee_job_function + (selectedTicket.attendee_job_function_other ? ` · ${selectedTicket.attendee_job_function_other}` : '')
+                        : '—'],
+                      ['T-Shirt', selectedTicket.attendee_tshirt || '—'],
+                      ['Dados SA', selectedTicket.sa_data_sharing_consent ? 'Sim' : 'Não'],
+                      ['Marketing SA', selectedTicket.sa_marketing_consent ? 'Sim' : 'Não'],
+                      ['Privacidade', selectedTicket.privacy_consent ? 'Sim' : 'Não'],
+                      ['Check-in', selectedTicket.checked_in ? `Sim · ${formatDatePt(selectedTicket.check_in_at)}` : 'Não'],
+                      ['ID', selectedTicket.id],
+                    ] as [string, string][]).map(([label, value]) => (
+                      <div key={label} className="flex gap-2">
+                        <dt className="w-28 text-gray-500 shrink-0">{label}</dt>
+                        <dd className="text-gray-900 break-all">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+
+                {/* Tab: Pagamento */}
+                {ticketModalTab === 'pagamento' && (
+                  <dl className="space-y-2 text-sm">
+                    {([
+                      ['Data Pagamento', ticketOrder ? formatDatePt(ticketOrder.created_at) : '—'],
+                      ['Nome (Stripe)', ticketOrder?.customer_name || '—'],
+                      ['Email (Stripe)', ticketOrder?.customer_email || '—'],
+                      ['País (Stripe)', ticketOrder?.customer_country || '—'],
+                      ['Total', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
+                      ['Gravações', ticketOrder?.include_recording ? 'Sim' : 'Não'],
+                      ['Estado', ticketOrder?.status || '—'],
+                      ['Nº Fatura', ticketOrder?.invoice_number || ticketOrder?.invoice_id || 'Pendente'],
+                      ...(ticketOrder?.credit_note_number || ticketOrder?.credit_note_id
+                        ? [['Nota de Crédito', ticketOrder.credit_note_number || ticketOrder.credit_note_id || '—'] as [string, string]]
+                        : []),
+                      ...(ticketOrder?.refunded_at
+                        ? [['Estornado em', new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')] as [string, string]]
+                        : []),
+                      ['Stripe Session', ticketOrder?.stripe_session_id || '—'],
+                      ['Order ID', ticketOrder?.id || '—'],
+                    ] as [string, string][]).map(([label, value]) => (
+                      <div key={label} className="flex gap-2">
+                        <dt className="w-36 text-gray-500 shrink-0">{label}</dt>
+                        <dd className="text-gray-900 break-all">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && ticketOrder.refunded_at)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
@@ -2084,9 +2138,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </div>
                 )}
                 {ticketOrder?.credit_note_id && (
-                  <p className="mt-3 text-xs text-center text-gray-500">
-                    NC emitida: <span className="font-medium text-gray-700">{ticketOrder.credit_note_number || ticketOrder.credit_note_id}</span>
-                  </p>
+                  <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-gray-700 space-y-1">
+                    <div className="font-semibold text-orange-700">Nota de Crédito Emitida</div>
+                    <div><span className="text-gray-500">Nº:</span> {ticketOrder.credit_note_number || ticketOrder.credit_note_id}</div>
+                    {ticketOrder.credit_note_motivo && <div><span className="text-gray-500">Motivo:</span> {ticketOrder.credit_note_motivo}</div>}
+                  </div>
                 )}
                 {isSuperAdmin && ticketOrder?.invoice_id && !ticketOrder.refunded_at && (
                   <div className="mt-3">
