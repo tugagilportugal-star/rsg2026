@@ -4,10 +4,9 @@ import { ASSETS } from '../config';
 import { Download } from 'lucide-react';
 
 interface SponsorsProps {
-    onOpenSponsorModal: () => void;
+    onOpenSponsorModal?: () => void;
 }
 
-// Interface para os dados do patrocinador
 interface Sponsor {
   name: string;
   logo: string;
@@ -18,9 +17,8 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
   // --- LISTAS DE PATROCINADORES ---
-  
-  const goldSponsors: Sponsor[] = [];
-  const silverSponsors: Sponsor[] = [];
+  const goldSponsors: Sponsor[] =[];
+  const silverSponsors: Sponsor[] =[];
 
   const bronzeSponsors: Sponsor[] =[
     { 
@@ -33,17 +31,23 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        logo: ASSETS.TABAQUEIRA_LOGO,
        url: "https://www.pmi.com/markets/portugal/pt/sobre-nos-portugal/"  
     },
+    {
+       name: "Sonae - MC Digital", 
+       logo: "https://i.postimg.cc/C1KwSmF7/SONAE_MC_Digital.png",
+       url: "https://mc.sonae.pt/"  
+    }
   ];
+
   // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
-      logo: "https://i.postimg.cc/wM4pvW8v/Geek_Girls_Portugal.jpg",
+      logo: "https://i.postimg.cc/y8HJw0xb/Geek-Girls-Portugal.jpg",
       url: "https://geekgirlsportugal.pt/"
     },
     {
       name: "Agile Academy",
-      logo: "https://i.postimg.cc/02mCfzjY/Agile-Academy.png", 
+      logo: "https://i.postimg.cc/TwRMc8f9/Agile_Academy.png", 
       url: "https://www.agile-academy.com/pt/" 
     }
   ];
@@ -83,18 +87,8 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </span>
             <div className="flex flex-wrap justify-center gap-12 items-center">
               {goldSponsors.map((sponsor, idx) => (
-                <a 
-                  key={idx} 
-                  href={sponsor.url}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="group"
-                >
-                  <img 
-                    src={sponsor.logo} 
-                    alt={sponsor.name} 
-                    className="h-20 md:h-24 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105"
-                  />
+                <a key={idx} href={sponsor.url} target="_blank" rel="noopener noreferrer" className="group">
+                  <img src={sponsor.logo} alt={sponsor.name} className="h-20 md:h-24 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105" />
                 </a>
               ))}
             </div>
@@ -109,72 +103,36 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </span>
             <div className="flex flex-wrap justify-center gap-10 items-center">
               {silverSponsors.map((sponsor, idx) => (
-                <a 
-                  key={idx} 
-                  href={sponsor.url}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="group"
-                >
-                  <img 
-                    src={sponsor.logo} 
-                    alt={sponsor.name} 
-                    className="h-16 md:h-20 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105"
-                  />
+                <a key={idx} href={sponsor.url} target="_blank" rel="noopener noreferrer" className="group">
+                  <img src={sponsor.logo} alt={sponsor.name} className="h-16 md:h-20 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105" />
                 </a>
               ))}
             </div>
           </div>
         )}
 
-        {/* --- BRONZE SPONSORS --- */}
+        {/* --- BRONZE SPONSORS (Tamanhos Padronizados) --- */}
         {bronzeSponsors.length > 0 && (
           <div className="mb-20">
             <span className="text-xs font-bold tracking-[0.2em] text-orange-700 uppercase mb-8 block">
               Bronze Sponsors
             </span>
-            <div className="flex flex-wrap justify-center gap-8 items-center">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-8 items-center">
               {bronzeSponsors.map((sponsor, idx) => (
                 <a 
                   key={idx} 
                   href={sponsor.url}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group bg-white p-4 rounded-xl hover:shadow-lg transition-all duration-300 border border-transparent hover:border-gray-100"
+                  // Cartão fixo: h-28 w-56
+                  className="group bg-white rounded-xl hover:shadow-lg transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-28 w-56 p-6"
                   title={`Visitar ${sponsor.name}`}
                 >
                   <img 
                     src={sponsor.logo} 
                     alt={sponsor.name} 
-                    className="h-12 md:h-16 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-        {/* --- COMMUNITY SUPPORTERS --- */}
-        {communitySupporters.length > 0 && (
-          <div className="mb-20">
-            <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
-              Community Supporters
-            </span>
-            <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
-              {communitySupporters.map((sponsor, idx) => (
-                <a 
-                  key={idx} 
-                  href={sponsor.url}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  /* FIXAMOS o tamanho do cartão: h-24 (altura) e w-48 (largura) para todos serem iguais */
-                  className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-4"
-                  title={`Visitar ${sponsor.name}`}
-                >
-                  <img 
-                    src={sponsor.logo} 
-                    alt={sponsor.name} 
-                    /* FIXAMOS a imagem para ocupar o espaço total uniformemente */
-                    className="h-14 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
+                    // Imagem forçada a conter-se no espaço uniformemente
+                    className="h-16 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
                   />
                 </a>
               ))}
@@ -182,7 +140,43 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
           </div>
         )}
 
-        {/* SEPARADOR */}
+        {/* --- COMMUNITY SUPPORTERS --- */}
+{communitySupporters.length > 0 && (
+  <div className="mb-24 px-4 text-center">
+    <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-12 block">
+      Community Supporters
+    </span>
+    
+    {/* Layout Centralizado: flex-wrap e justify-center garantem o alinhamento ao meio */}
+    <div className="flex flex-wrap items-center justify-center gap-12 max-w-6xl mx-auto">
+      {communitySupporters.map((sponsor, idx) => {
+        const isAgileAcademy = sponsor.name.toLowerCase().includes('agile academy');
+
+        return (
+          <a 
+            key={idx} 
+            href={sponsor.url}
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group flex items-center justify-center w-64 h-24 p-4 transition-transform hover:scale-105"
+            title={`Visitar ${sponsor.name}`}
+          >
+            <img 
+              src={sponsor.logo} 
+              alt={sponsor.name} 
+              className={`
+                object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100
+                ${isAgileAcademy ? 'h-16 w-full scale-[2.0]' : 'h-full w-full'}
+              `}
+            />
+          </a>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+        {/* SEPARADOR E OPORTUNIDADES */}
         <div className="mb-16 relative">
             <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-gray-200"></div>
@@ -192,7 +186,6 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             </div>
         </div>
 
-        {/* CARTÃO "QUER A SUA EMPRESA AQUI?" */}
         <div className="p-8 md:p-12 bg-gradient-to-br from-brand-darkBlue to-brand-blue rounded-3xl shadow-2xl text-white max-w-5xl mx-auto overflow-hidden relative">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
             
@@ -213,12 +206,14 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                     <span className="font-medium">Consulte o nosso Media Kit e descubra as vantagens de ser parceiro</span>
                 </a>
 
-                <button 
-                    onClick={onOpenSponsorModal}
-                    className="px-10 py-4 bg-brand-orange hover:bg-white hover:text-brand-orange text-white text-lg md:text-xl font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-                >
-                    Torne-se um Patrocinador do RSG Lisbon 2026
-                </button>
+                {onOpenSponsorModal && (
+                  <button 
+                      onClick={onOpenSponsorModal}
+                      className="px-10 py-4 bg-brand-orange hover:bg-white hover:text-brand-orange text-white text-lg md:text-xl font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                      Torne-se um Patrocinador do RSG Lisbon 2026
+                  </button>
+                )}
             </div>
         </div>
       </div>
