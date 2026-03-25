@@ -150,7 +150,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
           unit_amount: finalRecordingPrice,
         },
-        quantity: 1,
+        quantity,
       });
     }
 
@@ -194,7 +194,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',
         include_recording: String(includeRecording),
         original_price: String(originalPrice),
-        final_price: String(finalTicketPrice * quantity + (includeRecording ? finalRecordingPrice : 0)),
+        final_price: String(finalTicketPrice * quantity + (includeRecording ? finalRecordingPrice * quantity : 0)),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#ticket-form`,

@@ -110,7 +110,7 @@ export const TicketPurchaseModal: React.FC = () => {
     return p;
   }, [originalPrice, couponResult]);
 
-  const recordingPrice = useMemo(() => {
+  const recordingPricePerPerson = useMemo(() => {
     if (!includeRecording) return 0;
     let p = RECORDING_PRICE;
     if (couponResult?.valid && couponResult.recordingOnly) {
@@ -123,6 +123,7 @@ export const TicketPurchaseModal: React.FC = () => {
     return p;
   }, [includeRecording, couponResult, originalPrice]);
 
+  const recordingPrice = recordingPricePerPerson * quantity;
   const totalPrice = pricePerTicket * quantity + recordingPrice;
 
   const handleApplyCoupon = async () => {
@@ -368,7 +369,13 @@ export const TicketPurchaseModal: React.FC = () => {
           <span className="flex items-center gap-1 font-semibold text-gray-800">
             <Video className="w-3.5 h-3.5 text-brand-orange" /> Acesso à Gravação do Evento
           </span>
-          <span className="text-gray-500">Vídeos de todas as sessões <span className="font-bold text-brand-orange">+€10,00</span></span>
+          <span className="text-gray-500">
+            Vídeos de todas as sessões{' '}
+            <span className="font-bold text-brand-orange">+€10,00/pessoa</span>
+            {quantity > 1 && (
+              <span className="text-gray-400"> = {ticketData ? formatCurrency(recordingPricePerPerson * quantity, ticketData.currency) : ''}</span>
+            )}
+          </span>
         </label>
       </div>
 
