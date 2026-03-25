@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { issueInvoiceForOrder } from '../../lib/invoicing/index.js';
-import { verifyAdminToken, logAction, canEdit } from '../../lib/admin/auth.js';
+import { verifyAdminToken, logAction } from '../../lib/admin/auth.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL as string,
@@ -110,13 +110,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const invoiceLabel = invoiceResult.invoiceNumber || invoiceResult.invoiceId;
 
   // Save invoice_id and invoice_number
-  await supabase
-    .from('orders')
-    .update({
-      invoice_id: invoiceResult.invoiceId,
-      invoice_number: invoiceResult.invoiceNumber ?? null,
-    })
-    .eq('id', orderId);
+  // If replacing after a credit note, preserve original invoice reference
+  const invoiceUpdate: Record<string, unknown> = {
+    invoice_id: invoiceResult.invoiceId,
+    invoice_number: invoiceResult.invoiceNumber ?? null,
+  };
+  if (order.invoice_id && order.credit_note_id) {
+    invoiceUpdate.original_invoice_id = order.invoice_id;
+    invoiceUpdate.original_invoice_number = order.invoice_number ?? order.invoice_id;
+  }
+  await supabase.from('orders').update(invoiceUpdate).eq('id', orderId);
 
   await logAction(admin.email, 'gerar_fatura', 'order', orderId, { invoice_number: invoiceResult.invoiceNumber, invoice_id: invoiceResult.invoiceId, is_test: isTest });
 
