@@ -85,7 +85,7 @@ export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTick
                   <a
                     key={link.label}
                     href={link.href}
-                    className="text-sm font-bold text-white uppercase tracking-wider hover:text-brand-orange transition-colors"
+                    className="text-base font-bold text-white uppercase tracking-wider hover:text-brand-orange transition-colors"
                   >
                     {link.label}
                   </a>
@@ -94,7 +94,7 @@ export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTick
 
               <button
                 onClick={scrollThenOpen}
-                className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+                className="bg-brand-orange text-white text-base font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
               </button>
@@ -160,7 +160,7 @@ export const Navbar: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTick
 
             <button
                 onClick={() => { setIsMobileMenuOpen(false); scrollThenOpen(); }}
-                className="bg-brand-orange text-white text-sm font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+                className="bg-brand-orange text-white text-base font-black uppercase tracking-widest px-8 py-3 rounded-full hover:bg-orange-600 transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
               >
                 {hasActiveLot ? <><Ticket className="w-4 h-4" /> Buy Ticket</> : <><Bell className="w-4 h-4" /> Waitlist</>}
               </button>
