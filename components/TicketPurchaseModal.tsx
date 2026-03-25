@@ -327,37 +327,16 @@ export const TicketPurchaseModal: React.FC = () => {
             onChange={e => updateParticipant(activeTab, { jobFunctionOther: e.target.value })} />
         )}
 
-        {/* T-Shirt + Gravação */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tamanho T-Shirt <span className="text-red-500">*</span>
-            </label>
-            <select required value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
-              className={selectClass}>
-              <option value="" disabled>Selecione um tamanho...</option>
-              {TSHIRTS.map(s => <option key={s}>{s}</option>)}
-            </select>
-          </div>
-
-          {/* Recording — só no primeiro participante (é por order) */}
-          {activeTab === 0 && (
-            <div onClick={() => setIncludeRecording(v => !v)}
-              className={`cursor-pointer flex items-start gap-3 rounded-lg border p-3 mt-0 md:mt-6 transition-colors ${
-                includeRecording ? 'border-brand-orange bg-orange-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
-              }`}>
-              <input id="includeRecording" type="checkbox" checked={includeRecording}
-                onChange={e => setIncludeRecording(e.target.checked)}
-                onClick={e => e.stopPropagation()}
-                className="mt-0.5 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange" />
-              <label htmlFor="includeRecording" className="cursor-pointer text-sm text-gray-700 leading-snug">
-                <span className="flex items-center gap-1 font-semibold text-gray-800">
-                  <Video className="w-3.5 h-3.5 text-brand-orange" /> Acesso à Gravação
-                </span>
-                <span className="text-gray-500">Vídeos de todas as sessões <span className="font-bold text-brand-orange">+€10,00</span></span>
-              </label>
-            </div>
-          )}
+        {/* T-Shirt */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tamanho T-Shirt <span className="text-red-500">*</span>
+          </label>
+          <select required value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
+            className={selectClass}>
+            <option value="" disabled>Selecione um tamanho...</option>
+            {TSHIRTS.map(s => <option key={s}>{s}</option>)}
+          </select>
         </div>
 
         {/* Marketing consent (opcional, por participante) */}
@@ -375,7 +354,23 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
       </div>
 
-      {/* Secção partilhada — valor, cupão, NIF */}
+      {/* Secção partilhada — gravação, valor, cupão, NIF */}
+      <div onClick={() => setIncludeRecording(v => !v)}
+        className={`cursor-pointer flex items-start gap-3 rounded-lg border p-3 transition-colors ${
+          includeRecording ? 'border-brand-orange bg-orange-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+        }`}>
+        <input id="includeRecording" type="checkbox" checked={includeRecording}
+          onChange={e => setIncludeRecording(e.target.checked)}
+          onClick={e => e.stopPropagation()}
+          className="mt-0.5 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange" />
+        <label htmlFor="includeRecording" className="cursor-pointer text-sm text-gray-700 leading-snug">
+          <span className="flex items-center gap-1 font-semibold text-gray-800">
+            <Video className="w-3.5 h-3.5 text-brand-orange" /> Acesso à Gravação do Evento
+          </span>
+          <span className="text-gray-500">Vídeos de todas as sessões <span className="font-bold text-brand-orange">+€10,00</span></span>
+        </label>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           label="Valor total"
