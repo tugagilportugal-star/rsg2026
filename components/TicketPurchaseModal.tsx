@@ -456,11 +456,24 @@ export const TicketPurchaseModal: React.FC = () => {
         <p className="text-sm text-gray-600">Pagamento seguro via Stripe</p>
       </div>
 
-      <Button type="submit" isLoading={buyStatus === 'loading'} className="w-full text-lg"
-        variant="secondary" disabled={!ticketData.active}>
-        <Ticket className="w-5 h-5 mr-2" />
-        {ticketData.active ? 'Avançar para Pagamento' : 'Lote Indisponível'}
-      </Button>
+      {(() => {
+        const firstIncomplete = participants.findIndex(pt => !isParticipantComplete(pt));
+        if (firstIncomplete !== -1) {
+          return (
+            <Button type="button" className="w-full text-lg" variant="secondary"
+              onClick={() => setActiveTab(firstIncomplete)}>
+              Preencher Participante {firstIncomplete + 1}
+            </Button>
+          );
+        }
+        return (
+          <Button type="submit" isLoading={buyStatus === 'loading'} className="w-full text-lg"
+            variant="secondary" disabled={!ticketData.active}>
+            <Ticket className="w-5 h-5 mr-2" />
+            {ticketData.active ? 'Avançar para Pagamento' : 'Lote Indisponível'}
+          </Button>
+        );
+      })()}
     </form>
   );
 };
