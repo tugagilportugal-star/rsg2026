@@ -16,8 +16,6 @@ import { Modal, SuccessState } from './components/UIComponents';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
-import { WhyAttend } from './sections/WhyAttend';
-import { TicketStatusProvider } from './hooks/useTicketStatus';
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
@@ -43,10 +41,11 @@ const App: React.FC = () => {
     if (query.get('canceled')) {
       alert('A compra foi cancelada.');
     }
-  }, []);
+  }, []); // <--- Aqui estava o erro TS1135 e TS1005
 
   return (
     <TicketStatusProvider>
+    <>
       <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
 
       <main>
@@ -72,16 +71,8 @@ const App: React.FC = () => {
           <Settings size={20} />
         </button>
       </div>
-
-      <Modal 
-        isOpen={isTicketModalOpen} 
-        onClose={() => setTicketModalOpen(false)}
-        title="Finalizar Compra"
-      >
-        <TicketPurchaseModal />
-      </Modal>
-    </TicketStatusProvider>
+    </div> // <--- Fechamento da div principal
   );
-};
+}; // <--- Fechamento do componente App
 
 export default App;
