@@ -66,6 +66,11 @@ export const TicketPurchaseModal: React.FC = () => {
   const [includeRecording, setIncludeRecording] = useState(true);
   const [couponCode, setCouponCode] = useState('');
   const [billingNif, setBillingNif] = useState('');
+  const [billingNameType, setBillingNameType] = useState<'participant' | 'company'>('participant');
+  const [billingNameIndex, setBillingNameIndex] = useState(0);
+  const [billingNameCompany, setBillingNameCompany] = useState('');
+  const [billingEmailIndex, setBillingEmailIndex] = useState(0);
+  const [billingEmailOther, setBillingEmailOther] = useState('');
   const [saDataSharingConsent, setSaDataSharingConsent] = useState(false);
   const [privacyConsent, setPrivacyConsent] = useState(false);
 
@@ -196,6 +201,8 @@ export const TicketPurchaseModal: React.FC = () => {
             include_recording: includeRecording,
             coupon_code: couponResult?.valid ? couponCode.trim().toUpperCase() : '',
             billing_nif: billingNif.trim(),
+            billing_name: resolvedBillingName,
+            billing_email: resolvedBillingEmail,
             sa_data_sharing_consent: saDataSharingConsent,
             privacy_consent: privacyConsent,
           },
@@ -222,6 +229,14 @@ export const TicketPurchaseModal: React.FC = () => {
   );
 
   const p = participants[activeTab] || participants[0];
+
+  // Valores resolvidos para faturação
+  const resolvedBillingName = billingNameType === 'company'
+    ? billingNameCompany
+    : `${participants[billingNameIndex]?.firstName || ''} ${participants[billingNameIndex]?.lastName || ''}`.trim();
+  const resolvedBillingEmail = billingEmailIndex < participants.length
+    ? participants[billingEmailIndex]?.email || ''
+    : billingEmailOther;
 
   const isParticipantComplete = (pt: ParticipantForm) => {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim());
@@ -308,6 +323,18 @@ export const TicketPurchaseModal: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700">Empresa</label>
             <input type="text" value={p.company} onChange={e => updateParticipant(activeTab, { company: e.target.value })}
               className={fieldClass} />
+            {/* Copiar empresa de outro participante */}
+            {participants.some((pt, i) => i !== activeTab && pt.company.trim()) && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {participants.map((pt, i) => i !== activeTab && pt.company.trim() ? (
+                  <button key={i} type="button"
+                    onClick={() => updateParticipant(activeTab, { company: pt.company })}
+                    className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 hover:bg-brand-orange hover:text-white transition-colors">
+                    ↩ {pt.firstName || `P${i + 1}`}: {pt.company}
+                  </button>
+                ) : null)}
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Cargo</label>
@@ -407,15 +434,66 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
       </div>
 
-      {/* NIF para faturação */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          NIF / Tax ID para fatura <span className="text-gray-400 text-xs">(opcional)</span>
-        </label>
-        <input type="text" value={billingNif} onChange={e => setBillingNif(e.target.value)}
-          placeholder="Ex: 808392190"
-          className={fieldClass} />
-        <p className="mt-1 text-xs text-gray-400">Pode também preencher ou alterar no Stripe durante o pagamento.</p>
+      {/* Dados de faturação */}
+      <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+        <div className="text-sm font-semibold text-brand-darkBlue">Dados para Fatura</div>
+
+        {/* Nome na fatura */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nome na fatura</label>
+          <div className="flex gap-2 mb-2">
+            <button type="button" onClick={() => setBillingNameType('participant')}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'participant' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              Pessoa física
+            </button>
+            <button type="button" onClick={() => setBillingNameType('company')}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'company' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+              Empresa
+            </button>
+          </div>
+          {billingNameType === 'participant' ? (
+            <select value={billingNameIndex} onChange={e => setBillingNameIndex(Number(e.target.value))} className={selectClass}>
+              {participants.map((pt, i) => (
+                <option key={i} value={i}>
+                  {`${pt.firstName} ${pt.lastName}`.trim() || `Participante ${i + 1}`}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input type="text" value={billingNameCompany} onChange={e => setBillingNameCompany(e.target.value)}
+              placeholder="Nome da empresa" className={fieldClass} />
+          )}
+        </div>
+
+        {/* Email para fatura */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email para fatura</label>
+          <select
+            value={billingEmailIndex < participants.length ? billingEmailIndex : participants.length}
+            onChange={e => setBillingEmailIndex(Number(e.target.value))}
+            className={selectClass}>
+            {participants.map((pt, i) => (
+              <option key={i} value={i}>
+                {pt.email || `Participante ${i + 1}`}{i === 0 ? ' (principal)' : ''}
+              </option>
+            ))}
+            <option value={participants.length}>Outro email…</option>
+          </select>
+          {billingEmailIndex >= participants.length && (
+            <input type="email" value={billingEmailOther} onChange={e => setBillingEmailOther(e.target.value)}
+              placeholder="email@exemplo.com" className={`${fieldClass} mt-2`} />
+          )}
+        </div>
+
+        {/* NIF */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            NIF / Tax ID <span className="text-gray-400 text-xs">(opcional)</span>
+          </label>
+          <input type="text" value={billingNif} onChange={e => setBillingNif(e.target.value)}
+            placeholder="Ex: 808392190" className={fieldClass} />
+          <p className="mt-1 text-xs text-gray-400">Pode também preencher ou alterar no Stripe durante o pagamento.</p>
+        </div>
       </div>
 
       {/* Termos & Privacidade */}

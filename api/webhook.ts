@@ -393,7 +393,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       tickets.push(ticket);
     }
 
-    const ticket = tickets[0]; // used below for legacy single-ticket email
 
     // 2.1) Atualizar contador do lote e ativar próximo (se esgotou)
     if (ticketTypeId) {
@@ -458,10 +457,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const amountEuro = (order.total_amount || 0) / 100;
     const isTest = stripeIsTestMode();
 
+    const billingName = meta.billing_name || order.customer_name || attendeeName || 'Participante RSG';
+    const billingEmail = meta.billing_email || order.customer_email;
+
     const invoiceResult = await issueInvoiceForOrder({
       isTest,
-      customerName: order.customer_name || attendeeName || 'Participante RSG',
-      customerEmail: order.customer_email,
+      customerName: billingName,
+      customerEmail: billingEmail,
       countryIso: customerCountryIso,
       customerNif: resolvedNif,
       ticketName,

@@ -89,11 +89,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const includeRecording = Boolean(shared?.include_recording);
     const couponCode = String(shared?.coupon_code || '').trim().toUpperCase();
     const billingNif = truncate(shared?.billing_nif, 20);
+    const billingName = truncate(shared?.billing_name, 100);
+    const billingEmail = truncate(shared?.billing_email, 254);
     const saDataSharingConsent = Boolean(shared?.sa_data_sharing_consent);
     const privacyConsent = Boolean(shared?.privacy_consent);
 
-    // Use first participant email for coupon validation
+    // Billing email: use explicit billing_email if provided, else first participant
     const firstEmail = truncate(participants[0].email, 254);
+    const stripeEmail = (billingEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingEmail)) ? billingEmail : firstEmail;
 
     const originalPrice = Number(ticketType.price);
     let finalTicketPrice = originalPrice;
@@ -176,7 +179,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      customer_email: firstEmail,
+      customer_email: stripeEmail,
       tax_id_collection: { enabled: true },
       billing_address_collection: 'required',
       metadata: {
@@ -184,6 +187,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         participants_count: String(quantity),
         ...participantsMeta,
         billing_nif: billingNif,
+        billing_name: billingName,
+        billing_email: billingEmail,
         sa_data_sharing_consent: String(saDataSharingConsent),
         privacy_consent: String(privacyConsent),
         coupon_id: appliedCoupon?.id || '',
