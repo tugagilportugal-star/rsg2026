@@ -67,8 +67,7 @@ export const TicketPurchaseModal: React.FC = () => {
   const [couponCode, setCouponCode] = useState('');
   const [billingNif, setBillingNif] = useState('');
   const [billingNameType, setBillingNameType] = useState<'participant' | 'company'>('participant');
-  const [billingNameIndex, setBillingNameIndex] = useState(0);
-  const [billingNameCompany, setBillingNameCompany] = useState('');
+  const [billingNameValue, setBillingNameValue] = useState('');
   const [billingEmailIndex, setBillingEmailIndex] = useState(0);
   const [billingEmailOther, setBillingEmailOther] = useState('');
   const [saDataSharingConsent, setSaDataSharingConsent] = useState(false);
@@ -79,6 +78,16 @@ export const TicketPurchaseModal: React.FC = () => {
   const [couponResult, setCouponResult] = useState<CouponState | null>(null);
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
+
+  // Pré-preenche o nome de faturação com o primeiro participante
+  useEffect(() => {
+    if (billingNameType === 'participant') {
+      const p0 = participants[0];
+      const name = `${p0?.firstName || ''} ${p0?.lastName || ''}`.trim();
+      if (name) setBillingNameValue(name);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [participants[0]?.firstName, participants[0]?.lastName]);
 
   useEffect(() => {
     fetch('/api/get-ticket')
@@ -231,9 +240,7 @@ export const TicketPurchaseModal: React.FC = () => {
   const p = participants[activeTab] || participants[0];
 
   // Valores resolvidos para faturação
-  const resolvedBillingName = billingNameType === 'company'
-    ? billingNameCompany
-    : `${participants[billingNameIndex]?.firstName || ''} ${participants[billingNameIndex]?.lastName || ''}`.trim();
+  const resolvedBillingName = billingNameValue;
   const resolvedBillingEmail = billingEmailIndex < participants.length
     ? participants[billingEmailIndex]?.email || ''
     : billingEmailOther;
@@ -445,35 +452,27 @@ export const TicketPurchaseModal: React.FC = () => {
               Empresa
             </button>
           </div>
-          {billingNameType === 'participant' ? (
-            <>
-              <input type="text" list="billing-names-list" value={resolvedBillingName}
-                onChange={e => {
-                  // tenta corresponder a um participante, senão usa como texto livre (index -1 → company mode)
-                  const match = participants.findIndex(pt => `${pt.firstName} ${pt.lastName}`.trim() === e.target.value.trim());
-                  if (match !== -1) { setBillingNameIndex(match); }
-                  else { setBillingNameType('company'); setBillingNameCompany(e.target.value); }
-                }}
-                placeholder="Nome do participante" className={fieldClass} />
-              <datalist id="billing-names-list">
-                {participants.map((pt, i) => {
+          <input type="text" list="billing-names-list" value={billingNameValue}
+            onChange={e => {
+              const val = e.target.value;
+              setBillingNameValue(val);
+              // Muda automaticamente para "Empresa" só se coincidir com uma empresa já cadastrada
+              const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
+              if (companies.includes(val.trim())) setBillingNameType('company');
+            }}
+            placeholder={billingNameType === 'participant' ? 'Nome do participante' : 'Nome da empresa'}
+            className={fieldClass} />
+          <datalist id="billing-names-list">
+            {billingNameType === 'participant'
+              ? participants.map((pt, i) => {
                   const name = `${pt.firstName} ${pt.lastName}`.trim();
                   return name ? <option key={i} value={name} /> : null;
-                })}
-              </datalist>
-            </>
-          ) : (
-            <>
-              <input type="text" list="billing-companies-list" value={billingNameCompany}
-                onChange={e => setBillingNameCompany(e.target.value)}
-                placeholder="Nome da empresa" className={fieldClass} />
-              <datalist id="billing-companies-list">
-                {[...new Set(participants.map(pt => pt.company).filter(Boolean))].map(c => (
+                })
+              : [...new Set(participants.map(pt => pt.company).filter(Boolean))].map(c => (
                   <option key={c} value={c} />
-                ))}
-              </datalist>
-            </>
-          )}
+                ))
+            }
+          </datalist>
         </div>
 
         {/* Email para fatura */}
