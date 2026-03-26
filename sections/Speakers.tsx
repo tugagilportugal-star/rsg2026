@@ -76,7 +76,7 @@ export const Speakers: React.FC = () => {
       name: "Patrícia Sousa",
       role: "Talent & People Transformation Leader",
       image: "https://i.postimg.cc/KYS4nyCh/Patricia-Sousa.png",
-      linkedin: "https://www.linkedin.com/in/patriciaalvessousa//",
+      linkedin: "https://www.linkedin.com/in/patriciaalvessousa/",
       isRevealed: true
     },
     // Placeholders para manter a grelha de 10 speakers planeados (total: 4 reais + 6 TBA)
