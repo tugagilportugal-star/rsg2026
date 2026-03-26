@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input } from './UIComponents';
 import { CheckCircle2, Lock, ShieldCheck, Ticket, Video } from 'lucide-react';
 
@@ -58,6 +58,58 @@ const emptyParticipant = (): ParticipantForm => ({
 const fieldClass = 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-blue focus:border-brand-blue';
 const selectClass = `${fieldClass} bg-white text-gray-900`;
 
+// Dropdown customizado com fallback para todas as opções quando sem correspondência
+type ComboInputProps = {
+  value: string;
+  onChange: (val: string) => void;
+  onSelect?: (val: string) => void;
+  onBlurEmpty?: () => void;
+  options: string[];
+  placeholder?: string;
+  className?: string;
+  type?: string;
+};
+const ComboInput: React.FC<ComboInputProps> = ({
+  value, onChange, onSelect, onBlurEmpty, options, placeholder, className, type = 'text',
+}) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const filtered = value.trim()
+    ? options.filter(o => o.toLowerCase().includes(value.toLowerCase()))
+    : options;
+  const shown = filtered.length > 0 ? filtered : options;
+
+  return (
+    <div ref={containerRef} className="relative">
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={e => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => { if (options.length > 0) setOpen(true); }}
+        onBlur={e => {
+          if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+          setOpen(false);
+          if (!value.trim()) onBlurEmpty?.();
+        }}
+        className={className}
+      />
+      {open && shown.length > 0 && (
+        <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
+          {shown.map((opt, i) => (
+            <li key={i}
+              onMouseDown={e => { e.preventDefault(); onChange(opt); onSelect?.(opt); setOpen(false); }}
+              className="px-3 py-2 text-sm cursor-pointer hover:bg-orange-50 hover:text-brand-orange">
+              {opt}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 export const TicketPurchaseModal: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [participants, setParticipants] = useState<ParticipantForm[]>([emptyParticipant()]);
@@ -78,16 +130,6 @@ export const TicketPurchaseModal: React.FC = () => {
   const [couponResult, setCouponResult] = useState<CouponState | null>(null);
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
-
-  // Pré-preenche o nome de faturação com o primeiro participante
-  useEffect(() => {
-    if (billingNameType === 'participant') {
-      const p0 = participants[0];
-      const name = `${p0?.firstName || ''} ${p0?.lastName || ''}`.trim();
-      if (name) setBillingNameValue(name);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [participants[0]?.firstName, participants[0]?.lastName]);
 
   useEffect(() => {
     fetch('/api/get-ticket')
@@ -240,7 +282,13 @@ export const TicketPurchaseModal: React.FC = () => {
   const p = participants[activeTab] || participants[0];
 
   // Valores resolvidos para faturação
-  const resolvedBillingName = billingNameValue;
+  const billingNameSuggestion = billingNameType === 'participant'
+    ? `${participants[0]?.firstName || ''} ${participants[0]?.lastName || ''}`.trim()
+    : participants.map(pt => pt.company.trim()).filter(Boolean)[0] || '';
+  const billingNameOptions = billingNameType === 'participant'
+    ? participants.map(pt => `${pt.firstName} ${pt.lastName}`.trim()).filter(Boolean)
+    : [...new Set(participants.map(pt => pt.company).filter(Boolean))];
+  const resolvedBillingName = billingNameValue || billingNameSuggestion;
   const resolvedBillingEmail = billingEmailIndex < participants.length
     ? participants[billingEmailIndex]?.email || ''
     : billingEmailOther;
@@ -328,14 +376,12 @@ export const TicketPurchaseModal: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Empresa</label>
-            <input type="text" list="companies-list" value={p.company}
-              onChange={e => updateParticipant(activeTab, { company: e.target.value })}
-              className={fieldClass} />
-            <datalist id="companies-list">
-              {[...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))].map(c => (
-                <option key={c} value={c} />
-              ))}
-            </datalist>
+            <ComboInput
+              value={p.company}
+              onChange={val => updateParticipant(activeTab, { company: val })}
+              options={[...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))]}
+              className={fieldClass}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Cargo</label>
@@ -443,53 +489,48 @@ export const TicketPurchaseModal: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nome na fatura</label>
           <div className="flex gap-2 mb-2">
-            <button type="button" onClick={() => setBillingNameType('participant')}
+            <button type="button" onClick={() => { setBillingNameType('participant'); setBillingNameValue(''); }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'participant' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               Pessoa física
             </button>
-            <button type="button" onClick={() => setBillingNameType('company')}
+            <button type="button" onClick={() => { setBillingNameType('company'); setBillingNameValue(''); }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'company' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               Empresa
             </button>
           </div>
-          <input type="text" list="billing-names-list" value={billingNameValue}
-            onChange={e => {
-              const val = e.target.value;
+          <ComboInput
+            value={billingNameValue}
+            onChange={val => {
               setBillingNameValue(val);
-              // Muda automaticamente para "Empresa" só se coincidir com uma empresa já cadastrada
               const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
               if (companies.includes(val.trim())) setBillingNameType('company');
             }}
-            placeholder={billingNameType === 'participant' ? 'Nome do participante' : 'Nome da empresa'}
-            className={fieldClass} />
-          <datalist id="billing-names-list">
-            {billingNameType === 'participant'
-              ? participants.map((pt, i) => {
-                  const name = `${pt.firstName} ${pt.lastName}`.trim();
-                  return name ? <option key={i} value={name} /> : null;
-                })
-              : [...new Set(participants.map(pt => pt.company).filter(Boolean))].map(c => (
-                  <option key={c} value={c} />
-                ))
-            }
-          </datalist>
+            onSelect={val => {
+              const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
+              if (companies.includes(val.trim())) setBillingNameType('company');
+            }}
+            onBlurEmpty={() => { if (billingNameSuggestion) setBillingNameValue(billingNameSuggestion); }}
+            options={billingNameOptions}
+            placeholder={billingNameSuggestion || (billingNameType === 'participant' ? 'Nome do participante' : 'Nome da empresa')}
+            className={fieldClass}
+          />
         </div>
 
         {/* Email para fatura */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email para fatura</label>
-          <input type="email" list="billing-emails-list" value={resolvedBillingEmail}
-            onChange={e => {
-              const match = participants.findIndex(pt => pt.email.trim() === e.target.value.trim());
+          <ComboInput
+            type="email"
+            value={resolvedBillingEmail}
+            onChange={val => {
+              const match = participants.findIndex(pt => pt.email.trim() === val.trim());
               if (match !== -1) { setBillingEmailIndex(match); }
-              else { setBillingEmailIndex(participants.length); setBillingEmailOther(e.target.value); }
+              else { setBillingEmailIndex(participants.length); setBillingEmailOther(val); }
             }}
-            placeholder="email@exemplo.com" className={fieldClass} />
-          <datalist id="billing-emails-list">
-            {participants.filter(pt => pt.email.trim()).map((pt, i) => (
-              <option key={i} value={pt.email} />
-            ))}
-          </datalist>
+            options={participants.filter(pt => pt.email.trim()).map(pt => pt.email)}
+            placeholder="email@exemplo.com"
+            className={fieldClass}
+          />
         </div>
 
         {/* NIF */}
