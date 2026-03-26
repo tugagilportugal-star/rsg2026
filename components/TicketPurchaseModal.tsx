@@ -321,20 +321,14 @@ export const TicketPurchaseModal: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Empresa</label>
-            <input type="text" value={p.company} onChange={e => updateParticipant(activeTab, { company: e.target.value })}
+            <input type="text" list="companies-list" value={p.company}
+              onChange={e => updateParticipant(activeTab, { company: e.target.value })}
               className={fieldClass} />
-            {/* Copiar empresa de outro participante */}
-            {participants.some((pt, i) => i !== activeTab && pt.company.trim()) && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {participants.map((pt, i) => i !== activeTab && pt.company.trim() ? (
-                  <button key={i} type="button"
-                    onClick={() => updateParticipant(activeTab, { company: pt.company })}
-                    className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 hover:bg-brand-orange hover:text-white transition-colors">
-                    ↩ {pt.firstName || `P${i + 1}`}: {pt.company}
-                  </button>
-                ) : null)}
-              </div>
-            )}
+            <datalist id="companies-list">
+              {[...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))].map(c => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Cargo</label>
@@ -452,37 +446,51 @@ export const TicketPurchaseModal: React.FC = () => {
             </button>
           </div>
           {billingNameType === 'participant' ? (
-            <select value={billingNameIndex} onChange={e => setBillingNameIndex(Number(e.target.value))} className={selectClass}>
-              {participants.map((pt, i) => (
-                <option key={i} value={i}>
-                  {`${pt.firstName} ${pt.lastName}`.trim() || `Participante ${i + 1}`}
-                </option>
-              ))}
-            </select>
+            <>
+              <input type="text" list="billing-names-list" value={resolvedBillingName}
+                onChange={e => {
+                  // tenta corresponder a um participante, senão usa como texto livre (index -1 → company mode)
+                  const match = participants.findIndex(pt => `${pt.firstName} ${pt.lastName}`.trim() === e.target.value.trim());
+                  if (match !== -1) { setBillingNameIndex(match); }
+                  else { setBillingNameType('company'); setBillingNameCompany(e.target.value); }
+                }}
+                placeholder="Nome do participante" className={fieldClass} />
+              <datalist id="billing-names-list">
+                {participants.map((pt, i) => {
+                  const name = `${pt.firstName} ${pt.lastName}`.trim();
+                  return name ? <option key={i} value={name} /> : null;
+                })}
+              </datalist>
+            </>
           ) : (
-            <input type="text" value={billingNameCompany} onChange={e => setBillingNameCompany(e.target.value)}
-              placeholder="Nome da empresa" className={fieldClass} />
+            <>
+              <input type="text" list="billing-companies-list" value={billingNameCompany}
+                onChange={e => setBillingNameCompany(e.target.value)}
+                placeholder="Nome da empresa" className={fieldClass} />
+              <datalist id="billing-companies-list">
+                {[...new Set(participants.map(pt => pt.company).filter(Boolean))].map(c => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </>
           )}
         </div>
 
         {/* Email para fatura */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email para fatura</label>
-          <select
-            value={billingEmailIndex < participants.length ? billingEmailIndex : participants.length}
-            onChange={e => setBillingEmailIndex(Number(e.target.value))}
-            className={selectClass}>
-            {participants.map((pt, i) => (
-              <option key={i} value={i}>
-                {pt.email || `Participante ${i + 1}`}{i === 0 ? ' (principal)' : ''}
-              </option>
+          <input type="email" list="billing-emails-list" value={resolvedBillingEmail}
+            onChange={e => {
+              const match = participants.findIndex(pt => pt.email.trim() === e.target.value.trim());
+              if (match !== -1) { setBillingEmailIndex(match); }
+              else { setBillingEmailIndex(participants.length); setBillingEmailOther(e.target.value); }
+            }}
+            placeholder="email@exemplo.com" className={fieldClass} />
+          <datalist id="billing-emails-list">
+            {participants.filter(pt => pt.email.trim()).map((pt, i) => (
+              <option key={i} value={pt.email} />
             ))}
-            <option value={participants.length}>Outro email…</option>
-          </select>
-          {billingEmailIndex >= participants.length && (
-            <input type="email" value={billingEmailOther} onChange={e => setBillingEmailOther(e.target.value)}
-              placeholder="email@exemplo.com" className={`${fieldClass} mt-2`} />
-          )}
+          </datalist>
         </div>
 
         {/* NIF */}
