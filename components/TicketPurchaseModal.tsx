@@ -131,6 +131,14 @@ export const TicketPurchaseModal: React.FC = () => {
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
 
+  // Auto-comuta para "Empresa" se o valor actual de faturação coincidir com uma empresa entretanto preenchida
+  useEffect(() => {
+    if (billingNameType === 'participant' && billingNameValue.trim()) {
+      const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
+      if (companies.includes(billingNameValue.trim())) setBillingNameType('company');
+    }
+  }, [participants.map(pt => pt.company).join('\x00')]);
+
   useEffect(() => {
     fetch('/api/get-ticket')
       .then(r => r.ok ? r.json() : null)
