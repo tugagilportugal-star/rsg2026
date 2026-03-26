@@ -376,12 +376,20 @@ export const TicketPurchaseModal: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Empresa</label>
-            <ComboInput
-              value={p.company}
-              onChange={val => updateParticipant(activeTab, { company: val })}
-              options={[...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))]}
-              className={fieldClass}
-            />
+            {(() => {
+              const otherCompanies = [...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))];
+              const companySuggestion = otherCompanies[0] || '';
+              return (
+                <ComboInput
+                  value={p.company}
+                  onChange={val => updateParticipant(activeTab, { company: val })}
+                  onBlurEmpty={() => { if (companySuggestion) updateParticipant(activeTab, { company: companySuggestion }); }}
+                  options={otherCompanies}
+                  placeholder={companySuggestion}
+                  className={fieldClass}
+                />
+              );
+            })()}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Cargo</label>
