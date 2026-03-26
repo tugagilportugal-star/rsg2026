@@ -55,6 +55,8 @@ const emptyParticipant = (): ParticipantForm => ({
   tshirt: '', saMarketingConsent: false,
 });
 
+const iMatch = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
 const fieldClass = 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm focus:ring-brand-blue focus:border-brand-blue';
 const selectClass = `${fieldClass} bg-white text-gray-900`;
 
@@ -135,7 +137,7 @@ export const TicketPurchaseModal: React.FC = () => {
   useEffect(() => {
     if (billingNameType === 'participant' && billingNameValue.trim()) {
       const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
-      if (companies.includes(billingNameValue.trim())) setBillingNameType('company');
+      if (companies.some(c => iMatch(c, billingNameValue))) setBillingNameType('company');
     }
   }, [participants.map(pt => pt.company).join('\x00')]);
 
@@ -509,7 +511,7 @@ export const TicketPurchaseModal: React.FC = () => {
               setBillingNameType('participant');
               // Limpa só se o valor era claramente um nome de empresa de um participante
               const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
-              if (companies.includes(billingNameValue.trim())) setBillingNameValue('');
+              if (companies.some(c => iMatch(c, billingNameValue))) setBillingNameValue('');
             }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'participant' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               Pessoa física
@@ -518,7 +520,7 @@ export const TicketPurchaseModal: React.FC = () => {
               setBillingNameType('company');
               // Limpa só se o valor era claramente um nome de pessoa dos participantes
               const names = participants.map(pt => `${pt.firstName} ${pt.lastName}`.trim()).filter(Boolean);
-              if (names.includes(billingNameValue.trim())) setBillingNameValue('');
+              if (names.some(n => iMatch(n, billingNameValue))) setBillingNameValue('');
             }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'company' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               Empresa
@@ -529,11 +531,11 @@ export const TicketPurchaseModal: React.FC = () => {
             onChange={val => {
               setBillingNameValue(val);
               const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
-              if (companies.includes(val.trim())) setBillingNameType('company');
+              if (companies.some(c => iMatch(c, val))) setBillingNameType('company');
             }}
             onSelect={val => {
               const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
-              if (companies.includes(val.trim())) setBillingNameType('company');
+              if (companies.some(c => iMatch(c, val))) setBillingNameType('company');
             }}
             onBlurEmpty={() => { if (billingNameSuggestion) setBillingNameValue(billingNameSuggestion); }}
             options={billingNameOptions}
