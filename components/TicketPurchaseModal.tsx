@@ -489,11 +489,21 @@ export const TicketPurchaseModal: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nome na fatura</label>
           <div className="flex gap-2 mb-2">
-            <button type="button" onClick={() => { setBillingNameType('participant'); setBillingNameValue(''); }}
+            <button type="button" onClick={() => {
+              setBillingNameType('participant');
+              // Limpa só se o valor era claramente um nome de empresa de um participante
+              const companies = participants.map(pt => pt.company.trim()).filter(Boolean);
+              if (companies.includes(billingNameValue.trim())) setBillingNameValue('');
+            }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'participant' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               Pessoa física
             </button>
-            <button type="button" onClick={() => { setBillingNameType('company'); setBillingNameValue(''); }}
+            <button type="button" onClick={() => {
+              setBillingNameType('company');
+              // Limpa só se o valor era claramente um nome de pessoa dos participantes
+              const names = participants.map(pt => `${pt.firstName} ${pt.lastName}`.trim()).filter(Boolean);
+              if (names.includes(billingNameValue.trim())) setBillingNameValue('');
+            }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${billingNameType === 'company' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
               Empresa
             </button>
