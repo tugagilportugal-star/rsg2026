@@ -136,16 +136,28 @@ export const TicketPurchaseModal: React.FC = () => {
   const [scrollTick, setScrollTick] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Após mudar de tab ou activar erros, rola e foca o primeiro campo com problema
+  // Após mudar de tab ou activar erros, rola para o primeiro campo com problema
   useEffect(() => {
     if (!scrollTick) return;
     const timer = setTimeout(() => {
       const first = formRef.current?.querySelector<HTMLElement>('.border-red-500');
-      if (first) {
-        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if (first.tagName === 'INPUT') first.focus();
-      }
-    }, 60);
+      if (!first) return;
+      // Encontra o ancestral scrollável mais próximo
+      const getScrollParent = (el: HTMLElement): HTMLElement => {
+        let p = el.parentElement;
+        while (p && p !== document.body) {
+          const ov = getComputedStyle(p).overflowY;
+          if (ov === 'auto' || ov === 'scroll') return p;
+          p = p.parentElement;
+        }
+        return document.documentElement;
+      };
+      const scrollParent = getScrollParent(first);
+      const pRect = scrollParent.getBoundingClientRect();
+      const eRect = first.getBoundingClientRect();
+      scrollParent.scrollTo({ top: scrollParent.scrollTop + eRect.top - pRect.top - 80, behavior: 'smooth' });
+      if (first.tagName === 'INPUT') first.focus();
+    }, 80);
     return () => clearTimeout(timer);
   }, [scrollTick]);
 
@@ -388,6 +400,16 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Banner de erro — campos em falta no tab activo */}
+      {showErrors && !isParticipantComplete(p) && (
+        <div className="bg-red-50 border border-red-400 rounded-lg px-3 py-2 flex items-center gap-2">
+          <span className="text-red-600 text-sm font-medium">
+            Preenche os campos obrigatórios assinalados a vermelho
+            {quantity > 1 ? ` do Participante ${activeTab + 1}` : ''}.
+          </span>
+        </div>
+      )}
 
       {/* Formulário do participante activo */}
       <div className="space-y-4">
