@@ -133,18 +133,16 @@ export const TicketPurchaseModal: React.FC = () => {
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
   const [showErrors, setShowErrors] = useState(false);
-  const [scrollTick, setScrollTick] = useState(0);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [scrollTarget, setScrollTarget] = useState<string | null>(null);
 
-  // Após mudar de tab ou activar erros, rola para o primeiro campo com problema
+  // Quando scrollTarget muda, aguarda re-render e centra o campo no ecrã
   useEffect(() => {
-    if (!scrollTick) return;
+    if (!scrollTarget) return;
     const timer = setTimeout(() => {
-      const first = formRef.current?.querySelector<HTMLElement>('.border-red-500');
-      if (!first) return;
-      // Encontra o ancestral scrollável mais próximo
-      const getScrollParent = (el: HTMLElement): HTMLElement => {
-        let p = el.parentElement;
+      const el = document.getElementById(scrollTarget);
+      if (!el) return;
+      const getScrollParent = (node: HTMLElement): HTMLElement => {
+        let p = node.parentElement;
         while (p && p !== document.body) {
           const ov = getComputedStyle(p).overflowY;
           if (ov === 'auto' || ov === 'scroll') return p;
@@ -152,14 +150,15 @@ export const TicketPurchaseModal: React.FC = () => {
         }
         return document.documentElement;
       };
-      const scrollParent = getScrollParent(first);
-      const pRect = scrollParent.getBoundingClientRect();
-      const eRect = first.getBoundingClientRect();
-      scrollParent.scrollTo({ top: scrollParent.scrollTop + eRect.top - pRect.top - 80, behavior: 'smooth' });
-      if (first.tagName === 'INPUT') first.focus();
+      const sp = getScrollParent(el);
+      const spRect = sp.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      sp.scrollTo({ top: Math.max(0, sp.scrollTop + elRect.top - spRect.top - spRect.height / 2 + elRect.height / 2), behavior: 'smooth' });
+      el.focus();
+      setScrollTarget(null);
     }, 80);
     return () => clearTimeout(timer);
-  }, [scrollTick]);
+  }, [scrollTarget]);
 
   // Auto-comuta para "Empresa" se o valor actual de faturação coincidir com uma empresa entretanto preenchida
   useEffect(() => {
@@ -261,20 +260,28 @@ export const TicketPurchaseModal: React.FC = () => {
     }
   };
 
+  // Sequência ordenada de campos obrigatórios — retorna o primeiro inválido
+  const getFirstInvalidField = (): { id: string; tab: number } | null => {
+    for (let i = 0; i < participants.length; i++) {
+      const pt = participants[i];
+      if (!pt.firstName.trim())                                          return { id: `p${i}-firstName`,       tab: i };
+      if (!pt.lastName.trim())                                           return { id: `p${i}-lastName`,        tab: i };
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim()))         return { id: `p${i}-email`,           tab: i };
+      if (!pt.tshirt)                                                    return { id: `p${i}-tshirt`,          tab: i };
+      if (pt.jobFunction === 'Outros' && !pt.jobFunctionOther.trim())   return { id: `p${i}-jobFunctionOther`, tab: i };
+    }
+    if (!saDataSharingConsent) return { id: 'saConsent1', tab: -1 };
+    if (!privacyConsent)       return { id: 'privacy',    tab: -1 };
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 1. Valida todos os participantes
-    const firstBad = participants.findIndex(pt => !isParticipantComplete(pt));
-    if (firstBad !== -1) {
+    const invalid = getFirstInvalidField();
+    if (invalid) {
       setShowErrors(true);
-      setActiveTab(firstBad);
-      setScrollTick(t => t + 1);
-      return;
-    }
-    // 2. Valida consentimentos obrigatórios
-    if (!saDataSharingConsent || !privacyConsent) {
-      setShowErrors(true);
-      setScrollTick(t => t + 1);
+      if (invalid.tab !== -1) setActiveTab(invalid.tab);
+      setScrollTarget(invalid.id);
       return;
     }
     setBuyStatus('loading');
@@ -360,7 +367,7 @@ export const TicketPurchaseModal: React.FC = () => {
     : fieldClass;
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="text-left space-y-4">
+    <form onSubmit={handleSubmit} className="text-left space-y-4">
 
       {/* Linha 1: título centralizado (X fica absoluto via Modal) */}
       <h3 className="text-xl font-bold text-brand-darkBlue text-center pr-8 mb-3">
@@ -423,13 +430,13 @@ export const TicketPurchaseModal: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome <span className="text-red-500">*</span></label>
-            <input value={p.firstName} onChange={e => updateParticipant(activeTab, { firstName: e.target.value })}
+            <input id={`p${activeTab}-firstName`} value={p.firstName} onChange={e => updateParticipant(activeTab, { firstName: e.target.value })}
               className={errClass(showErrors && !p.firstName.trim())} />
             {showErrors && !p.firstName.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Apelido <span className="text-red-500">*</span></label>
-            <input value={p.lastName} onChange={e => updateParticipant(activeTab, { lastName: e.target.value })}
+            <input id={`p${activeTab}-lastName`} value={p.lastName} onChange={e => updateParticipant(activeTab, { lastName: e.target.value })}
               className={errClass(showErrors && !p.lastName.trim())} />
             {showErrors && !p.lastName.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
@@ -439,7 +446,7 @@ export const TicketPurchaseModal: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">E-mail <span className="text-red-500">*</span></label>
-            <input type="email" value={p.email}
+            <input id={`p${activeTab}-email`} type="email" value={p.email}
               onChange={e => { updateParticipant(activeTab, { email: e.target.value }); if (activeTab === 0) setCouponResult(null); }}
               className={errClass(showErrors && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email.trim()))} />
             {showErrors && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email.trim()) && <p className="text-xs text-red-500 mt-1">Email inválido</p>}
@@ -448,7 +455,7 @@ export const TicketPurchaseModal: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               T-Shirt <span className="text-red-500">*</span>
             </label>
-            <select value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
+            <select id={`p${activeTab}-tshirt`} value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
               className={showErrors && !p.tshirt ? `${selectClass} border-red-500 focus:ring-red-500 focus:border-red-500` : selectClass}>
               <option value="" disabled>Tamanho...</option>
               {TSHIRTS.map(s => <option key={s}>{s}</option>)}
@@ -506,7 +513,7 @@ export const TicketPurchaseModal: React.FC = () => {
         {p.jobFunction === 'Outros' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Qual a sua função? <span className="text-red-500">*</span></label>
-            <input value={p.jobFunctionOther} onChange={e => updateParticipant(activeTab, { jobFunctionOther: e.target.value })}
+            <input id={`p${activeTab}-jobFunctionOther`} value={p.jobFunctionOther} onChange={e => updateParticipant(activeTab, { jobFunctionOther: e.target.value })}
               className={errClass(showErrors && !p.jobFunctionOther.trim())} />
             {showErrors && !p.jobFunctionOther.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
@@ -703,12 +710,17 @@ export const TicketPurchaseModal: React.FC = () => {
       </div>
 
       {(() => {
-        // Participante incompleto noutro tab (não o activo) → navega para lá
+        // Se há participante incompleto noutro tab, guia directamente para lá
         const firstOtherBad = participants.findIndex((pt, i) => i !== activeTab && !isParticipantComplete(pt));
         if (firstOtherBad !== -1) {
           return (
             <Button type="button" className="w-full text-lg" variant="secondary"
-              onClick={() => { setShowErrors(true); setActiveTab(firstOtherBad); }}>
+              onClick={() => {
+                setShowErrors(true);
+                setActiveTab(firstOtherBad);
+                const inv = getFirstInvalidField();
+                if (inv) setScrollTarget(inv.id);
+              }}>
               Completar Participante {firstOtherBad + 1}
             </Button>
           );
