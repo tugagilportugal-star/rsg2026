@@ -132,6 +132,7 @@ export const TicketPurchaseModal: React.FC = () => {
   const [couponResult, setCouponResult] = useState<CouponState | null>(null);
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
+  const [showErrors, setShowErrors] = useState(false);
 
   // Auto-comuta para "Empresa" se o valor actual de faturação coincidir com uma empresa entretanto preenchida
   useEffect(() => {
@@ -234,6 +235,13 @@ export const TicketPurchaseModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Valida todos os participantes antes de avançar
+    const firstBad = participants.findIndex(pt => !isParticipantComplete(pt));
+    if (firstBad !== -1) {
+      setShowErrors(true);
+      setActiveTab(firstBad);
+      return;
+    }
     setBuyStatus('loading');
     try {
       if (!ticketData?.id) {
@@ -309,6 +317,13 @@ export const TicketPurchaseModal: React.FC = () => {
       (pt.jobFunction !== 'Outros' || pt.jobFunctionOther.trim());
   };
 
+  const participantHasData = (pt: ParticipantForm) =>
+    !!(pt.firstName.trim() || pt.lastName.trim() || pt.email.trim() || pt.tshirt || pt.company.trim());
+
+  const errClass = (invalid: boolean) => invalid
+    ? 'mt-1 block w-full border border-red-500 rounded-md shadow-sm p-2 text-sm focus:ring-red-500 focus:border-red-500'
+    : fieldClass;
+
   return (
     <form onSubmit={handleSubmit} className="text-left space-y-4">
 
@@ -331,18 +346,22 @@ export const TicketPurchaseModal: React.FC = () => {
         {/* Tabs dos participantes à direita da quantidade */}
         {quantity > 1 && (
           <div className="flex gap-1 overflow-x-auto flex-1">
-            {participants.map((pt, i) => (
-              <button key={i} type="button" onClick={() => setActiveTab(i)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${
-                  i === activeTab
-                    ? 'bg-brand-orange text-white'
-                    : isParticipantComplete(pt)
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}>
-                {isParticipantComplete(pt) ? '✓ ' : ''}{pt.firstName || `P${i + 1}`}
-              </button>
-            ))}
+            {participants.map((pt, i) => {
+              const complete = isParticipantComplete(pt);
+              const hasData = participantHasData(pt);
+              const tabCls = i === activeTab ? 'bg-brand-orange text-white'
+                : complete ? 'bg-green-100 text-green-700'
+                : hasData && showErrors ? 'bg-red-100 text-red-700'
+                : hasData ? 'bg-amber-100 text-amber-700'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200';
+              const prefix = complete ? '✓ ' : hasData ? '! ' : '';
+              return (
+                <button key={i} type="button" onClick={() => setActiveTab(i)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${tabCls}`}>
+                  {prefix}{pt.firstName || `P${i + 1}`}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -357,28 +376,39 @@ export const TicketPurchaseModal: React.FC = () => {
 
         {/* Nome + Apelido */}
         <div className="grid grid-cols-2 gap-4">
-          <Input label="Nome" required value={p.firstName}
-            onChange={e => updateParticipant(activeTab, { firstName: e.target.value })} />
-          <Input label="Apelido" required value={p.lastName}
-            onChange={e => updateParticipant(activeTab, { lastName: e.target.value })} />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nome <span className="text-red-500">*</span></label>
+            <input value={p.firstName} onChange={e => updateParticipant(activeTab, { firstName: e.target.value })}
+              className={errClass(showErrors && !p.firstName.trim())} />
+            {showErrors && !p.firstName.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Apelido <span className="text-red-500">*</span></label>
+            <input value={p.lastName} onChange={e => updateParticipant(activeTab, { lastName: e.target.value })}
+              className={errClass(showErrors && !p.lastName.trim())} />
+            {showErrors && !p.lastName.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+          </div>
         </div>
 
         {/* Email + T-Shirt */}
         <div className="grid grid-cols-2 gap-4">
-          <Input label="E-mail" type="email" required value={p.email}
-            onChange={e => {
-              updateParticipant(activeTab, { email: e.target.value });
-              if (activeTab === 0) setCouponResult(null);
-            }} />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail <span className="text-red-500">*</span></label>
+            <input type="email" value={p.email}
+              onChange={e => { updateParticipant(activeTab, { email: e.target.value }); if (activeTab === 0) setCouponResult(null); }}
+              className={errClass(showErrors && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email.trim()))} />
+            {showErrors && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email.trim()) && <p className="text-xs text-red-500 mt-1">Email inválido</p>}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               T-Shirt <span className="text-red-500">*</span>
             </label>
-            <select required value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
-              className={selectClass}>
+            <select value={p.tshirt} onChange={e => updateParticipant(activeTab, { tshirt: e.target.value })}
+              className={showErrors && !p.tshirt ? `${selectClass} border-red-500 focus:ring-red-500 focus:border-red-500` : selectClass}>
               <option value="" disabled>Tamanho...</option>
               {TSHIRTS.map(s => <option key={s}>{s}</option>)}
             </select>
+            {showErrors && !p.tshirt && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
         </div>
 
@@ -429,8 +459,12 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
 
         {p.jobFunction === 'Outros' && (
-          <Input label="Qual a sua função?" required value={p.jobFunctionOther}
-            onChange={e => updateParticipant(activeTab, { jobFunctionOther: e.target.value })} />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Qual a sua função? <span className="text-red-500">*</span></label>
+            <input value={p.jobFunctionOther} onChange={e => updateParticipant(activeTab, { jobFunctionOther: e.target.value })}
+              className={errClass(showErrors && !p.jobFunctionOther.trim())} />
+            {showErrors && !p.jobFunctionOther.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+          </div>
         )}
 
         {/* Marketing consent (opcional, por participante) */}
@@ -614,13 +648,13 @@ export const TicketPurchaseModal: React.FC = () => {
       </div>
 
       {(() => {
-        const isEmpty = (pt: ParticipantForm) => !pt.firstName.trim() && !pt.lastName.trim() && !pt.email.trim();
-        const firstIncomplete = participants.findIndex(pt => isEmpty(pt));
-        if (firstIncomplete !== -1) {
+        // Participante incompleto noutro tab (não o activo) → navega para lá
+        const firstOtherBad = participants.findIndex((pt, i) => i !== activeTab && !isParticipantComplete(pt));
+        if (firstOtherBad !== -1) {
           return (
             <Button type="button" className="w-full text-lg" variant="secondary"
-              onClick={() => setActiveTab(firstIncomplete)}>
-              Preencher Participante {firstIncomplete + 1}
+              onClick={() => { setShowErrors(true); setActiveTab(firstOtherBad); }}>
+              Completar Participante {firstOtherBad + 1}
             </Button>
           );
         }
