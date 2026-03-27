@@ -133,6 +133,21 @@ export const TicketPurchaseModal: React.FC = () => {
   const [ticketData, setTicketData] = useState<TicketTypeData | null>(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
   const [showErrors, setShowErrors] = useState(false);
+  const [scrollTick, setScrollTick] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Após mudar de tab ou activar erros, rola e foca o primeiro campo com problema
+  useEffect(() => {
+    if (!scrollTick) return;
+    const timer = setTimeout(() => {
+      const first = formRef.current?.querySelector<HTMLElement>('.border-red-500');
+      if (first) {
+        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (first.tagName === 'INPUT') first.focus();
+      }
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [scrollTick]);
 
   // Auto-comuta para "Empresa" se o valor actual de faturação coincidir com uma empresa entretanto preenchida
   useEffect(() => {
@@ -158,6 +173,7 @@ export const TicketPurchaseModal: React.FC = () => {
       return prev.slice(0, clamped);
     });
     if (activeTab >= clamped) setActiveTab(clamped - 1);
+    setShowErrors(false);
   };
 
   const updateParticipant = (index: number, patch: Partial<ParticipantForm>) =>
@@ -235,11 +251,18 @@ export const TicketPurchaseModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Valida todos os participantes antes de avançar
+    // 1. Valida todos os participantes
     const firstBad = participants.findIndex(pt => !isParticipantComplete(pt));
     if (firstBad !== -1) {
       setShowErrors(true);
       setActiveTab(firstBad);
+      setScrollTick(t => t + 1);
+      return;
+    }
+    // 2. Valida consentimentos obrigatórios
+    if (!saDataSharingConsent || !privacyConsent) {
+      setShowErrors(true);
+      setScrollTick(t => t + 1);
       return;
     }
     setBuyStatus('loading');
@@ -325,7 +348,7 @@ export const TicketPurchaseModal: React.FC = () => {
     : fieldClass;
 
   return (
-    <form onSubmit={handleSubmit} className="text-left space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="text-left space-y-4">
 
       {/* Linha 1: título centralizado (X fica absoluto via Modal) */}
       <h3 className="text-xl font-bold text-brand-darkBlue text-center pr-8 mb-3">
@@ -613,31 +636,41 @@ export const TicketPurchaseModal: React.FC = () => {
           Termos & Privacidade
         </div>
         <div className="space-y-3">
-          <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
-            <input id="saConsent1" type="checkbox" required checked={saDataSharingConsent}
+          <div className={`flex items-start p-3 rounded-lg border transition-colors ${showErrors && !saDataSharingConsent ? 'bg-red-50 border-red-400 border-red-500' : 'bg-gray-50 border-gray-200'}`}>
+            <input id="saConsent1" type="checkbox" checked={saDataSharingConsent}
               onChange={e => setSaDataSharingConsent(e.target.checked)}
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange flex-shrink-0" />
-            <label htmlFor="saConsent1" className="ml-3 text-xs text-gray-600 leading-relaxed">
-              <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil)
-              pode partilhar as informações pessoais dos participantes com a Scrum Alliance exclusivamente
-              para fins de análise de dados internos e emissão de SEUs. Consulte a{' '}
-              <a href="https://www.scrumalliance.org/privacy-policy" target="_blank" rel="noopener noreferrer"
-                className="text-brand-blue font-bold hover:underline">Política de Privacidade da Scrum Alliance</a>.
-            </label>
+            <div className="ml-3">
+              <label htmlFor="saConsent1" className="text-xs text-gray-600 leading-relaxed">
+                <span className="font-bold text-red-500">*</span> Concordo que o Organizador (TugÁgil)
+                pode partilhar as informações pessoais dos participantes com a Scrum Alliance exclusivamente
+                para fins de análise de dados internos e emissão de SEUs. Consulte a{' '}
+                <a href="https://www.scrumalliance.org/privacy-policy" target="_blank" rel="noopener noreferrer"
+                  className="text-brand-blue font-bold hover:underline">Política de Privacidade da Scrum Alliance</a>.
+              </label>
+              {showErrors && !saDataSharingConsent && (
+                <p className="text-xs text-red-600 font-medium mt-1">Consentimento obrigatório para continuar.</p>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-start">
-            <input id="privacy" type="checkbox" required checked={privacyConsent}
+          <div className={`flex items-start p-3 rounded-lg border transition-colors ${showErrors && !privacyConsent ? 'bg-red-50 border-red-500' : 'border-transparent'}`}>
+            <input id="privacy" type="checkbox" checked={privacyConsent}
               onChange={e => setPrivacyConsent(e.target.checked)}
               className="mt-1 h-4 w-4 text-brand-orange border-gray-300 rounded focus:ring-brand-orange flex-shrink-0" />
-            <label htmlFor="privacy" className="ml-3 text-sm text-gray-600">
-              <span className="font-bold text-red-500">*</span> Estou de acordo com a{' '}
-              <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing"
-                target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
-                Política de Privacidade de Dados
-              </a>{' '}
-              do evento{quantity > 1 ? ' e confirmo que todos os participantes autorizaram o tratamento dos seus dados' : ''}.
-            </label>
+            <div className="ml-3">
+              <label htmlFor="privacy" className="text-sm text-gray-600">
+                <span className="font-bold text-red-500">*</span> Estou de acordo com a{' '}
+                <a href="https://docs.google.com/document/d/1RQVsJYgjLgXwsFr1g-lpjxfkUTuPk0EaHCpoo9k-boo/edit?usp=sharing"
+                  target="_blank" rel="noopener noreferrer" className="text-brand-blue font-bold hover:underline">
+                  Política de Privacidade de Dados
+                </a>{' '}
+                do evento{quantity > 1 ? ' e confirmo que todos os participantes autorizaram o tratamento dos seus dados' : ''}.
+              </label>
+              {showErrors && !privacyConsent && (
+                <p className="text-xs text-red-600 font-medium mt-1">Consentimento obrigatório para continuar.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
