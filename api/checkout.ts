@@ -91,12 +91,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const billingNif = truncate(shared?.billing_nif, 20);
     const billingName = truncate(shared?.billing_name, 100);
     const billingEmail = truncate(shared?.billing_email, 254);
+    const billingNameType = String(shared?.billing_name_type || 'participant'); // 'participant' | 'company'
     const saDataSharingConsent = Boolean(shared?.sa_data_sharing_consent);
     const privacyConsent = Boolean(shared?.privacy_consent);
 
     // Billing email: use explicit billing_email if provided, else first participant
     const firstEmail = truncate(participants[0].email, 254);
     const stripeEmail = (billingEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingEmail)) ? billingEmail : firstEmail;
+
+    // Pré-criar Customer no Stripe para pré-preencher nome no Checkout
+    let stripeCustomerId: string | undefined;
+    if (billingName) {
+      const customer = await stripe.customers.create({
+        name: billingName,
+        email: stripeEmail,
+        metadata: { billing_name_type: billingNameType },
+      });
+      stripeCustomerId = customer.id;
+    }
 
     const originalPrice = Number(ticketType.price);
     let finalTicketPrice = originalPrice;
@@ -179,10 +191,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      customer_email: stripeEmail,
+      // Se pré-criámos um Customer, usamo-lo para pré-preencher nome; senão só o email
+      ...(stripeCustomerId
+        ? { customer: stripeCustomerId, customer_update: { name: 'auto', address: 'auto' } }
+        : { customer_email: stripeEmail }),
       tax_id_collection: { enabled: true },
       billing_address_collection: 'required',
       metadata: {
+        billing_name_type: billingNameType,
         ticket_type_id: String(ticketType.id),
         participants_count: String(quantity),
         ...participantsMeta,

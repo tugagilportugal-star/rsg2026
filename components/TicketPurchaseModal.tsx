@@ -313,6 +313,7 @@ export const TicketPurchaseModal: React.FC = () => {
             coupon_code: couponResult?.valid ? couponCode.trim().toUpperCase() : '',
             billing_nif: billingNif.trim(),
             billing_name: resolvedBillingName,
+            billing_name_type: billingNameType,
             billing_email: resolvedBillingEmail,
             sa_data_sharing_consent: saDataSharingConsent,
             privacy_consent: privacyConsent,
