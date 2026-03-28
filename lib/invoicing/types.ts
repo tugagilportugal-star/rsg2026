@@ -15,6 +15,7 @@ export type CreateInvoiceInput = {
   ticketName: string;
   includeRecording?: boolean;
   amountEuro: number;
+  quantity?: number;
   isTest: boolean;
   autoFinalize: boolean;
 };
@@ -45,6 +46,7 @@ export type IssueInvoiceInput = {
   ticketName: string;
   includeRecording?: boolean;
   amountEuro: number;
+  quantity?: number;
   isTest: boolean;
 
   // opcional para não quebrar chamadas antigas
