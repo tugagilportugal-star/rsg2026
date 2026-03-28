@@ -182,6 +182,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         jf: truncate(p.job_function, 60),
         jo: truncate(p.job_function_other, 60),
         jt: truncate(p.job_title, 80),
+        iy: truncate(p.industry, 80),
         ts: truncate(p.tshirt, 5),
         mc: Boolean(p.sa_marketing_consent),
       });

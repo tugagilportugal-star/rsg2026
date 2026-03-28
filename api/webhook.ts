@@ -311,7 +311,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     type ParsedParticipant = {
       firstName: string; lastName: string; email: string; country: string;
       company: string; jobFunction: string; jobFunctionOther: string;
-      jobTitle: string; tshirt: string; saMarketingConsent: boolean;
+      jobTitle: string; industry: string; tshirt: string; saMarketingConsent: boolean;
     };
 
     const parsedParticipants: ParsedParticipant[] = [];
@@ -322,8 +322,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           parsedParticipants.push({
             firstName: raw.fn || '', lastName: raw.ln || '', email: raw.em || '',
             country: raw.co || '', company: raw.cp || '', jobFunction: raw.jf || '',
-            jobFunctionOther: raw.jo || '', jobTitle: raw.jt || '', tshirt: raw.ts || '',
-            saMarketingConsent: Boolean(raw.mc),
+            jobFunctionOther: raw.jo || '', jobTitle: raw.jt || '', industry: raw.iy || '',
+            tshirt: raw.ts || '', saMarketingConsent: Boolean(raw.mc),
           });
         } catch {
           console.warn(`⚠️ Failed to parse participant p_${i}`);
@@ -336,7 +336,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         email: session.customer_details?.email || '', country: attendeeCountry || '',
         company: attendeeCompany || '', jobFunction: attendeeJobFunction || '',
         jobFunctionOther: attendeeJobFunctionOther || '', jobTitle: attendeeJobTitle || '',
-        tshirt: attendeeTshirt || '', saMarketingConsent,
+        industry: '', tshirt: attendeeTshirt || '', saMarketingConsent,
       });
     }
 
@@ -378,6 +378,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           attendee_country: p.country || null,
           attendee_job_function: p.jobFunction || null,
           attendee_job_function_other: p.jobFunctionOther || null,
+          attendee_industry: p.industry || null,
           attendee_nif: resolvedNif,
           attendee_job_title: p.jobTitle || null,
           attendee_tshirt: p.tshirt || null,

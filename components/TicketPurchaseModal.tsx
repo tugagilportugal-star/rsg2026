@@ -31,6 +31,7 @@ type ParticipantForm = {
   jobTitle: string;
   jobFunction: string;
   jobFunctionOther: string;
+  industry: string;
   tshirt: string;
   saMarketingConsent: boolean;
 };
@@ -42,8 +43,7 @@ const JOB_FUNCTIONS = [
   'Recursos Humanos', 'Tecnologia da Informação', 'Jurídico',
   'Marketing e Vendas', 'Operações', 'Gestão de Produtos',
   'Serviços Profissionais', 'Gerenciamento de projetos', 'Pesquisa',
-  'Cadeia de suprimentos e manufatura', 'Treinamento e Educação',
-  'Indústria de trabalho', 'Outros',
+  'Cadeia de suprimentos e manufatura', 'Treinamento e Educação', 'Outros',
 ];
 
 const COUNTRIES = ['Portugal', 'Espanha', 'França', 'Alemanha', 'Reino Unido', 'Brasil', 'Estados Unidos', 'Outro'];
@@ -52,7 +52,7 @@ const TSHIRTS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const emptyParticipant = (): ParticipantForm => ({
   firstName: '', lastName: '', email: '', country: 'Portugal',
   company: '', jobTitle: '', jobFunction: '', jobFunctionOther: '',
-  tshirt: '', saMarketingConsent: false,
+  industry: '', tshirt: '', saMarketingConsent: false,
 });
 
 const iMatch = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -264,11 +264,14 @@ export const TicketPurchaseModal: React.FC = () => {
   const getFirstInvalidField = (): { id: string; tab: number } | null => {
     for (let i = 0; i < participants.length; i++) {
       const pt = participants[i];
-      if (!pt.firstName.trim())                                          return { id: `p${i}-firstName`,       tab: i };
-      if (!pt.lastName.trim())                                           return { id: `p${i}-lastName`,        tab: i };
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim()))         return { id: `p${i}-email`,           tab: i };
-      if (!pt.tshirt)                                                    return { id: `p${i}-tshirt`,          tab: i };
+      if (!pt.firstName.trim())                                          return { id: `p${i}-firstName`,        tab: i };
+      if (!pt.lastName.trim())                                           return { id: `p${i}-lastName`,         tab: i };
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim()))         return { id: `p${i}-email`,            tab: i };
+      if (!pt.tshirt)                                                    return { id: `p${i}-tshirt`,           tab: i };
+      if (!pt.jobFunction)                                               return { id: `p${i}-jobFunction`,      tab: i };
       if (pt.jobFunction === 'Outros' && !pt.jobFunctionOther.trim())   return { id: `p${i}-jobFunctionOther`, tab: i };
+      if (!pt.industry.trim())                                           return { id: `p${i}-industry`,         tab: i };
+      if (!pt.country)                                                   return { id: `p${i}-country`,          tab: i };
     }
     if (!saDataSharingConsent) return { id: 'saConsent1', tab: -1 };
     if (!privacyConsent)       return { id: 'privacy',    tab: -1 };
@@ -305,6 +308,7 @@ export const TicketPurchaseModal: React.FC = () => {
             job_function: p.jobFunction,
             job_function_other: p.jobFunction === 'Outros' ? p.jobFunctionOther.trim() : '',
             job_title: p.jobTitle.trim(),
+            industry: p.industry.trim(),
             tshirt: p.tshirt,
             sa_marketing_consent: p.saMarketingConsent,
           })),
@@ -357,6 +361,7 @@ export const TicketPurchaseModal: React.FC = () => {
   const isParticipantComplete = (pt: ParticipantForm) => {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim());
     return pt.firstName.trim() && pt.lastName.trim() && emailOk && pt.tshirt &&
+      pt.jobFunction && pt.industry.trim() && pt.country &&
       (pt.jobFunction !== 'Outros' || pt.jobFunctionOther.trim());
   };
 
@@ -494,17 +499,19 @@ export const TicketPurchaseModal: React.FC = () => {
         {/* Função + País */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Função</label>
-            <select value={p.jobFunction}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Função <span className="text-red-500">*</span></label>
+            <select id={`p${activeTab}-jobFunction`} value={p.jobFunction}
               onChange={e => updateParticipant(activeTab, { jobFunction: e.target.value, jobFunctionOther: '' })}
-              className={selectClass}>
+              className={showErrors && !p.jobFunction ? `${selectClass} border-red-500 focus:ring-red-500 focus:border-red-500` : selectClass}>
               <option value="">Seleciona…</option>
               {JOB_FUNCTIONS.map(f => <option key={f}>{f}</option>)}
             </select>
+            {showErrors && !p.jobFunction && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">País</label>
-            <select value={p.country} onChange={e => updateParticipant(activeTab, { country: e.target.value })}
+            <label className="block text-sm font-medium text-gray-700 mb-1">País <span className="text-red-500">*</span></label>
+            <select id={`p${activeTab}-country`} value={p.country}
+              onChange={e => updateParticipant(activeTab, { country: e.target.value })}
               className={selectClass}>
               {COUNTRIES.map(c => <option key={c}>{c}</option>)}
             </select>
@@ -519,6 +526,16 @@ export const TicketPurchaseModal: React.FC = () => {
             {showErrors && !p.jobFunctionOther.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
           </div>
         )}
+
+        {/* Indústria */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Indústria <span className="text-red-500">*</span></label>
+          <input id={`p${activeTab}-industry`} type="text" value={p.industry}
+            onChange={e => updateParticipant(activeTab, { industry: e.target.value })}
+            placeholder="Ex: Tecnologia, Saúde, Educação…"
+            className={errClass(showErrors && !p.industry.trim())} />
+          {showErrors && !p.industry.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+        </div>
 
         {/* Marketing consent (opcional, por participante) */}
         <div className="flex items-start bg-gray-50 p-3 rounded-lg border border-gray-200">
