@@ -88,7 +88,6 @@ const App: React.FC = () => {
       <Modal
         isOpen={isTicketModalOpen}
         onClose={() => setTicketModalOpen(false)}
-        title="Comprar Bilhete"
         size="lg"
       >
         <TicketPurchaseModal />

@@ -59,68 +59,72 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { ticketTypeId, quantity = 1, formData, couponCode, includeRecording = false } = req.body;
+    const { ticketTypeId, participants, shared } = req.body;
 
-    if (!ticketTypeId) {
-      return res.status(400).json({ message: 'Ticket Type ID obrigatório' });
+    if (!ticketTypeId || !Array.isArray(participants) || participants.length === 0) {
+      return res.status(400).json({ message: 'Dados obrigatórios em falta.' });
     }
 
+    const quantity = participants.length;
+    if (quantity > 5) return res.status(400).json({ message: 'Máximo de 5 bilhetes por compra.' });
+
     const { data: ticketType, error } = await supabase
-      .from('ticket_types')
-      .select('*')
-      .eq('id', ticketTypeId)
-      .single();
+      .from('ticket_types').select('*').eq('id', ticketTypeId).single();
 
     if (error || !ticketType || !ticketType.active) {
       return res.status(404).json({ message: 'Bilhete indisponível ou esgotado.' });
     }
 
     const truncate = (val: unknown, max = 100) => String(val || '').trim().slice(0, max);
-
-    const attendeeFirstName = truncate(formData?.attendee_first_name);
-    const attendeeLastName = truncate(formData?.attendee_last_name);
-    const attendeeName = `${attendeeFirstName} ${attendeeLastName}`.trim() || 'Participante RSG';
-    const attendeeEmail = truncate(formData?.attendee_email, 254);
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!attendeeEmail || !emailRegex.test(attendeeEmail)) {
-      return res.status(400).json({ message: 'Email do participante inválido.' });
+
+    // Validate all participant emails
+    for (const p of participants) {
+      const email = truncate(p.email, 254);
+      if (!email || !emailRegex.test(email)) {
+        return res.status(400).json({ message: `Email inválido: ${p.email}` });
+      }
     }
 
-    const attendeeCountry = truncate(formData?.attendee_country, 2) || 'PT';
-    const attendeeJobFunction = truncate(formData?.attendee_job_function);
-    const attendeeJobFunctionOther = truncate(formData?.attendee_job_function_other);
+    const includeRecording = Boolean(shared?.include_recording);
+    const couponCode = String(shared?.coupon_code || '').trim().toUpperCase();
+    const billingNif = truncate(shared?.billing_nif, 20);
+    const billingName = truncate(shared?.billing_name, 100);
+    const billingEmail = truncate(shared?.billing_email, 254);
+    const billingNameType = String(shared?.billing_name_type || 'participant'); // 'participant' | 'company'
+    const saDataSharingConsent = Boolean(shared?.sa_data_sharing_consent);
+    const privacyConsent = Boolean(shared?.privacy_consent);
 
-    const attendeeNif = truncate(formData?.attendee_nif, 20);
-    const attendeeCompany = truncate(formData?.attendee_company);
-    const attendeeJobTitle = truncate(formData?.attendee_job_title);
-    const attendeeTshirt = truncate(formData?.attendee_tshirt, 10);
+    // Billing email: use explicit billing_email if provided, else first participant
+    const firstEmail = truncate(participants[0].email, 254);
+    const stripeEmail = (billingEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingEmail)) ? billingEmail : firstEmail;
 
-    const saDataSharingConsent = Boolean(formData?.sa_data_sharing_consent);
-    const saMarketingConsent = Boolean(formData?.sa_marketing_consent);
-    const privacyConsent = Boolean(formData?.privacy_consent);
+    // Pré-criar Customer no Stripe para pré-preencher nome no Checkout
+    let stripeCustomerId: string | undefined;
+    if (billingName) {
+      const customer = await stripe.customers.create({
+        name: billingName,
+        email: stripeEmail,
+        metadata: { billing_name_type: billingNameType },
+      });
+      stripeCustomerId = customer.id;
+    }
 
     const originalPrice = Number(ticketType.price);
     let finalTicketPrice = originalPrice;
     let finalRecordingPrice = RECORDING_PRICE;
     let appliedCoupon: CouponRow | null = null;
 
-    const normalizedCouponCode = String(couponCode || '').trim().toUpperCase();
-
-    if (normalizedCouponCode) {
-      appliedCoupon = await findValidCoupon(normalizedCouponCode, attendeeEmail);
-
-      if (!appliedCoupon) {
-        return res.status(400).json({ message: 'Cupão inválido para este email.' });
-      }
+    if (couponCode) {
+      appliedCoupon = await findValidCoupon(couponCode, firstEmail);
+      if (!appliedCoupon) return res.status(400).json({ message: 'Cupão inválido para este email.' });
 
       if (appliedCoupon.recording_only) {
         if (includeRecording) {
           if (appliedCoupon.discount_amount != null) {
             finalRecordingPrice = Math.max(0, RECORDING_PRICE - appliedCoupon.discount_amount);
           } else if (appliedCoupon.discount_percent != null) {
-            const total = originalPrice + RECORDING_PRICE;
-            const rawDiscount = Math.round(total * appliedCoupon.discount_percent / 100);
+            const rawDiscount = Math.round((originalPrice + RECORDING_PRICE) * appliedCoupon.discount_percent / 100);
             finalRecordingPrice = Math.max(0, RECORDING_PRICE - Math.min(rawDiscount, RECORDING_PRICE));
           }
         }
@@ -161,7 +165,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           },
           unit_amount: finalRecordingPrice,
         },
-        quantity: 1,
+        quantity,
+      });
+    }
+
+    // Encode participants as p_0, p_1, ... in metadata (max 500 chars each)
+    const participantsMeta: Record<string, string> = {};
+    for (let i = 0; i < participants.length; i++) {
+      const p = participants[i];
+      participantsMeta[`p_${i}`] = JSON.stringify({
+        fn: truncate(p.first_name, 50),
+        ln: truncate(p.last_name, 50),
+        em: truncate(p.email, 100),
+        co: truncate(p.country, 30),
+        cp: truncate(p.company, 80),
+        jf: truncate(p.job_function, 60),
+        jo: truncate(p.job_function_other, 60),
+        jt: truncate(p.job_title, 80),
+        iy: truncate(p.industry, 80),
+        ts: truncate(p.tshirt, 5),
+        mc: Boolean(p.sa_marketing_consent),
       });
     }
 
@@ -169,27 +192,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      customer_email: attendeeEmail,
+      // Se pré-criámos um Customer, usamo-lo para pré-preencher nome; senão só o email
+      ...(stripeCustomerId
+        ? { customer: stripeCustomerId, customer_update: { name: 'auto', address: 'auto' } }
+        : { customer_email: stripeEmail }),
       tax_id_collection: { enabled: true },
       billing_address_collection: 'required',
       metadata: {
+        billing_name_type: billingNameType,
         ticket_type_id: String(ticketType.id),
-        attendee_name: attendeeName,
-        attendee_email: attendeeEmail,
-        attendee_first_name: attendeeFirstName,
-        attendee_last_name: attendeeLastName,
-        attendee_country: attendeeCountry,
-        attendee_job_function: attendeeJobFunction,
-        attendee_job_function_other: attendeeJobFunctionOther,
-        
-        attendee_nif: attendeeNif,
-        attendee_company: attendeeCompany,
-        attendee_job_title: attendeeJobTitle,
-        attendee_tshirt: attendeeTshirt,
+        participants_count: String(quantity),
+        ...participantsMeta,
+        billing_nif: billingNif,
+        billing_name: billingName,
+        billing_email: billingEmail,
         sa_data_sharing_consent: String(saDataSharingConsent),
-        sa_marketing_consent: String(saMarketingConsent),
         privacy_consent: String(privacyConsent),
-        
         coupon_id: appliedCoupon?.id || '',
         coupon_code: appliedCoupon?.code || '',
         coupon_discount_percent: appliedCoupon?.discount_percent != null ? String(appliedCoupon.discount_percent) : '',
@@ -198,7 +216,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         coupon_single_use: appliedCoupon ? String(appliedCoupon.single_use) : '',
         include_recording: String(includeRecording),
         original_price: String(originalPrice),
-        final_price: String(finalTicketPrice + (includeRecording ? finalRecordingPrice : 0)),
+        final_price: String(finalTicketPrice * quantity + (includeRecording ? finalRecordingPrice * quantity : 0)),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}?canceled=true#ticket-form`,
