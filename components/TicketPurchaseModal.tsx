@@ -136,24 +136,13 @@ export const TicketPurchaseModal: React.FC = () => {
   const [scrollTarget, setScrollTarget] = useState<string | null>(null);
 
   // Quando scrollTarget muda, aguarda re-render e centra o campo no ecrã
+  // Quando scrollTarget muda, aguarda re-render, centra o campo e foca-o
   useEffect(() => {
     if (!scrollTarget) return;
     const timer = setTimeout(() => {
       const el = document.getElementById(scrollTarget);
       if (!el) return;
-      const getScrollParent = (node: HTMLElement): HTMLElement => {
-        let p = node.parentElement;
-        while (p && p !== document.body) {
-          const ov = getComputedStyle(p).overflowY;
-          if (ov === 'auto' || ov === 'scroll') return p;
-          p = p.parentElement;
-        }
-        return document.documentElement;
-      };
-      const sp = getScrollParent(el);
-      const spRect = sp.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      sp.scrollTo({ top: Math.max(0, sp.scrollTop + elRect.top - spRect.top - spRect.height / 2 + elRect.height / 2), behavior: 'smooth' });
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.focus();
       setScrollTarget(null);
     }, 80);
