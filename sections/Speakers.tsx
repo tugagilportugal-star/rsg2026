@@ -79,6 +79,14 @@ export const Speakers: React.FC = () => {
       linkedin: "https://www.linkedin.com/in/patriciaalvessousa/",
       isRevealed: true
     },
+    {
+      id: "s6",
+      name: "Ricardo Fernandes",
+      role: "Enterprise Consultant",
+      image: "https://i.postimg.cc/DyjJCJXS/Ricardo-Fernandes.png",
+      linkedin: "https://www.linkedin.com/in/ricardo-fernandes-agile/",
+      isRevealed: true
+    },
     // Placeholders para manter a grelha de 10 speakers planeados (total: 4 reais + 6 TBA)
     ...Array.from({ length: 6 }).map((_, i) => ({
       id: `tba-${i+5}`,
