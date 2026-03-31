@@ -120,3 +120,4 @@ const App: React.FC = () => {
     </TicketStatusProvider>
   );
 };
+export default App;
