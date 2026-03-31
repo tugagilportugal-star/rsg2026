@@ -37,6 +37,7 @@ type OrderRow = {
   customer_email?: string | null;
   customer_name?: string | null;
   customer_country?: string | null;
+  customer_tax_id?: string | null;
   total_amount?: number | null;
   include_recording?: boolean | null;
   status?: string | null;
@@ -2086,6 +2087,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       ['Nome (Stripe)', ticketOrder?.customer_name || '—'],
                       ['Email (Stripe)', ticketOrder?.customer_email || '—'],
                       ['País (Stripe)', ticketOrder?.customer_country || '—'],
+                      ...(ticketOrder?.customer_tax_id ? [['NIF / Tax ID', ticketOrder.customer_tax_id] as [string, string]] : []),
                       ['Total', ticketOrder ? formatMoneyEURFromCents(ticketOrder.total_amount) : '—'],
                       ['Gravações', ticketOrder?.include_recording ? 'Sim' : 'Não'],
                       ['Estado', ticketOrder?.status || '—'],
@@ -2112,7 +2114,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     ))}
                   </dl>
                 )}
-                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || ticketOrder.credit_note_id) && (
+                {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.original_invoice_id)) && (
                   <div className="mt-4">
                     <button
                       onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}

@@ -45,7 +45,7 @@ export const Button: React.FC<ButtonProps> = ({ variant = 'primary', className =
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: ReactNode;
   children: ReactNode;
   size?: 'md' | 'lg';
 }
@@ -62,19 +62,19 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div className={`relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${maxWidth} w-full`}>
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl leading-6 font-bold text-brand-darkBlue" id="modal-title">
+            <button
+              type="button"
+              className="absolute top-4 right-4 bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none z-10"
+              onClick={onClose}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            {title && (
+              <h3 className="text-xl leading-6 font-bold text-brand-darkBlue mb-4 pr-8" id="modal-title">
                 {title}
               </h3>
-              <button
-                type="button"
-                className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
-                onClick={onClose}
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="mt-2">
+            )}
+            <div className={title ? '' : 'mt-0'}>
               {children}
             </div>
           </div>

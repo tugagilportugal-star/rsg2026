@@ -360,6 +360,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       session.customer_details?.name ||
       null;
 
+    // NIF priority: Stripe tax_id > billing_nif from form > attendee_nif (legacy)
+    const stripeTaxId = (session.customer_details as any)?.tax_ids?.[0]?.value || null;
+    const billingNif = meta.billing_nif || null;
+    const resolvedNif = stripeTaxId || billingNif || attendeeNif || null;
+
+    // Parse multi-participant metadata (new format) or fall back to single-participant (legacy)
+    const participantsCount = Number(meta.participants_count || 1);
+    const isMulti = !!(meta.participants_count);
+
+    type ParsedParticipant = {
+      firstName: string; lastName: string; email: string; country: string;
+      company: string; jobFunction: string; jobFunctionOther: string;
+      jobTitle: string; industry: string; tshirt: string; saMarketingConsent: boolean;
+    };
+
+    const parsedParticipants: ParsedParticipant[] = [];
+    if (isMulti) {
+      for (let i = 0; i < participantsCount; i++) {
+        try {
+          const raw = JSON.parse(meta[`p_${i}`] || '{}');
+          parsedParticipants.push({
+            firstName: raw.fn || '', lastName: raw.ln || '', email: raw.em || '',
+            country: raw.co || '', company: raw.cp || '', jobFunction: raw.jf || '',
+            jobFunctionOther: raw.jo || '', jobTitle: raw.jt || '', industry: raw.iy || '',
+            tshirt: raw.ts || '', saMarketingConsent: Boolean(raw.mc),
+          });
+        } catch {
+          console.warn(`⚠️ Failed to parse participant p_${i}`);
+        }
+      }
+    } else {
+      // Legacy single-participant format
+      parsedParticipants.push({
+        firstName: attendeeFirstName || '', lastName: attendeeLastName || '',
+        email: session.customer_details?.email || '', country: attendeeCountry || '',
+        company: attendeeCompany || '', jobFunction: attendeeJobFunction || '',
+        jobFunctionOther: attendeeJobFunctionOther || '', jobTitle: attendeeJobTitle || '',
+        industry: '', tshirt: attendeeTshirt || '', saMarketingConsent,
+      });
+    }
+
     // 1) Salvar Order
     const { data: order, error: orderErr } = await supabase
       .from('orders')
@@ -368,6 +409,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         customer_email: session.customer_details?.email,
         customer_name: session.customer_details?.name,
         customer_country: customerCountryIso,
+        customer_tax_id: resolvedNif,
         total_amount: session.amount_total,
         include_recording: includeRecording,
         status: 'paid',
@@ -379,35 +421,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error(`DB Order Error: ${orderErr.message}`);
     }
 
-    // 2) Salvar Ticket
-    const { data: ticket, error: ticketErr } = await supabase
-      .from('tickets')
-      .insert({
-        order_id: order.id,
-        ticket_type_id: ticketTypeId,
-        attendee_name: attendeeName,
-        attendee_email: session.customer_details?.email,
-        attendee_company: attendeeCompany,
-        attendee_phone: attendeePhone,
-        attendee_first_name: attendeeFirstName,
-        attendee_last_name: attendeeLastName,
-        attendee_country: attendeeCountry,
-        attendee_job_function: attendeeJobFunction,
-        attendee_job_function_other: attendeeJobFunctionOther,
-        attendee_nif: attendeeNif,
-        attendee_job_title: attendeeJobTitle,
-        attendee_tshirt: attendeeTshirt,
-        sa_data_sharing_consent: saDataSharingConsent,
-        sa_marketing_consent: saMarketingConsent,
-        privacy_consent: privacyConsent,
-        checked_in: false,
-      })
-      .select()
-      .single();
+    // 2) Salvar Tickets (um por participante)
+    const tickets: any[] = [];
+    for (const p of parsedParticipants) {
+      const fullName = `${p.firstName} ${p.lastName}`.trim() || p.email || 'Participante RSG';
+      const { data: ticket, error: ticketErr } = await supabase
+        .from('tickets')
+        .insert({
+          order_id: order.id,
+          ticket_type_id: ticketTypeId,
+          attendee_name: fullName,
+          attendee_email: p.email || session.customer_details?.email,
+          attendee_company: p.company || null,
+          attendee_phone: attendeePhone,
+          attendee_first_name: p.firstName || null,
+          attendee_last_name: p.lastName || null,
+          attendee_country: p.country || null,
+          attendee_job_function: p.jobFunction || null,
+          attendee_job_function_other: p.jobFunctionOther || null,
+          attendee_industry: p.industry || null,
+          attendee_nif: resolvedNif,
+          attendee_job_title: p.jobTitle || null,
+          attendee_tshirt: p.tshirt || null,
+          sa_data_sharing_consent: saDataSharingConsent,
+          sa_marketing_consent: p.saMarketingConsent,
+          privacy_consent: privacyConsent,
+          checked_in: false,
+        })
+        .select()
+        .single();
 
-    if (ticketErr) {
-      throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+      if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+      tickets.push(ticket);
     }
+
 
     // 2.1) Atualizar contador do lote e ativar próximo (se esgotou)
     if (ticketTypeId) {
@@ -472,15 +519,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const amountEuro = (order.total_amount || 0) / 100;
     const isTest = stripeIsTestMode();
 
+    const billingName = meta.billing_name || order.customer_name || attendeeName || 'Participante RSG';
+    const billingEmail = meta.billing_email || order.customer_email;
+
     const invoiceResult = await issueInvoiceForOrder({
       isTest,
-      customerName: order.customer_name || attendeeName || 'Participante RSG',
-      customerEmail: order.customer_email,
+      customerName: billingName,
+      customerEmail: billingEmail,
       countryIso: customerCountryIso,
-      customerNif: attendeeNif || null,
+      customerNif: resolvedNif,
       ticketName,
       includeRecording,
       amountEuro,
+      quantity: parsedParticipants.length,
     });
 
     if (invoiceResult?.invoiceId) {
@@ -511,27 +562,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // 5) Email do bilhete
-    const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(
-      ticket.qr_code_secret
-    )}&dark=003F59&size=300&margin=1`;
-
-    const emailRes = await resend.emails.send({
-      from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
-      to: session.customer_details?.email as string,
-      subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
-      html: generateTicketEmail(
-        attendeeName || 'Participante',
-        ticketName,
-        qrUrl,
-        ticket.id
-      ),
-    });
-
-    if (emailRes.error) {
-      console.error('⚠️ Resend Error:', emailRes.error);
-    } else {
-      console.log('📧 Email enviado.');
+    // 5) Email do bilhete (um por participante)
+    for (const t of tickets) {
+      const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(t.qr_code_secret)}&dark=003F59&size=300&margin=1`;
+      const recipientEmail = t.attendee_email || (session.customer_details?.email as string);
+      const recipientName = t.attendee_name || 'Participante';
+      const emailRes = await resend.emails.send({
+        from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
+        to: recipientEmail,
+        subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
+        html: generateTicketEmail(recipientName, ticketName, qrUrl, t.id),
+      });
+      if (emailRes.error) {
+        console.error(`⚠️ Resend Error (ticket ${t.id}):`, emailRes.error);
+      } else {
+        console.log(`📧 Email enviado para ${recipientEmail}.`);
+      }
     }
 
     return res.json({ received: true });
