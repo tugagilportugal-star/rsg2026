@@ -460,34 +460,32 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Empresa */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Empresa <span className="text-red-500">*</span></label>
-          {(() => {
-            const otherCompanies = [...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))];
-            const companySuggestion = otherCompanies[0] || '';
-            const isInvalid = showErrors && !p.company.trim();
-            return (
-              <>
-                <ComboInput
-                  id={`p${activeTab}-company`}
-                  value={p.company}
-                  onChange={val => updateParticipant(activeTab, { company: val })}
-                  onBlurEmpty={() => { if (companySuggestion) updateParticipant(activeTab, { company: companySuggestion }); }}
-                  options={otherCompanies}
-                  placeholder={companySuggestion || 'Nome da empresa'}
-                  className={isInvalid
-                    ? 'mt-1 block w-full border border-red-500 rounded-md shadow-sm p-2 text-sm focus:ring-red-500 focus:border-red-500'
-                    : fieldClass}
-                />
-                {isInvalid && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
-              </>
-            );
-          })()}
-        </div>
-
-        {/* Função + País */}
+        {/* Empresa + Função */}
         <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Empresa <span className="text-red-500">*</span></label>
+            {(() => {
+              const otherCompanies = [...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))];
+              const companySuggestion = otherCompanies[0] || '';
+              const isInvalid = showErrors && !p.company.trim();
+              return (
+                <>
+                  <ComboInput
+                    id={`p${activeTab}-company`}
+                    value={p.company}
+                    onChange={val => updateParticipant(activeTab, { company: val })}
+                    onBlurEmpty={() => { if (companySuggestion) updateParticipant(activeTab, { company: companySuggestion }); }}
+                    options={otherCompanies}
+                    placeholder={companySuggestion || 'Nome da empresa'}
+                    className={isInvalid
+                      ? 'mt-1 block w-full border border-red-500 rounded-md shadow-sm p-2 text-sm focus:ring-red-500 focus:border-red-500'
+                      : fieldClass}
+                  />
+                  {isInvalid && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+                </>
+              );
+            })()}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Função <span className="text-red-500">*</span></label>
             <select id={`p${activeTab}-jobFunction`} value={p.jobFunction}
@@ -497,14 +495,6 @@ export const TicketPurchaseModal: React.FC = () => {
               {JOB_FUNCTIONS.map(f => <option key={f}>{f}</option>)}
             </select>
             {showErrors && !p.jobFunction && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">País <span className="text-red-500">*</span></label>
-            <select id={`p${activeTab}-country`} value={p.country}
-              onChange={e => updateParticipant(activeTab, { country: e.target.value })}
-              className={selectClass}>
-              {COUNTRIES.map(c => <option key={c}>{c}</option>)}
-            </select>
           </div>
         </div>
 
@@ -517,14 +507,24 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         )}
 
-        {/* Indústria */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Indústria <span className="text-red-500">*</span></label>
-          <input id={`p${activeTab}-industry`} type="text" value={p.industry}
-            onChange={e => updateParticipant(activeTab, { industry: e.target.value })}
-            placeholder="Ex: Tecnologia, Saúde, Educação…"
-            className={errClass(showErrors && !p.industry.trim())} />
-          {showErrors && !p.industry.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+        {/* Indústria + País */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Indústria <span className="text-red-500">*</span></label>
+            <input id={`p${activeTab}-industry`} type="text" value={p.industry}
+              onChange={e => updateParticipant(activeTab, { industry: e.target.value })}
+              placeholder="Ex: Tecnologia, Saúde…"
+              className={errClass(showErrors && !p.industry.trim())} />
+            {showErrors && !p.industry.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">País <span className="text-red-500">*</span></label>
+            <select id={`p${activeTab}-country`} value={p.country}
+              onChange={e => updateParticipant(activeTab, { country: e.target.value })}
+              className={selectClass}>
+              {COUNTRIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
         </div>
 
         {/* Marketing consent (opcional, por participante) */}
