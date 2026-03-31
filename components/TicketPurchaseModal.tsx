@@ -28,7 +28,6 @@ type ParticipantForm = {
   email: string;
   country: string;
   company: string;
-  jobTitle: string;
   jobFunction: string;
   jobFunctionOther: string;
   industry: string;
@@ -51,7 +50,7 @@ const TSHIRTS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const emptyParticipant = (): ParticipantForm => ({
   firstName: '', lastName: '', email: '', country: 'Portugal',
-  company: '', jobTitle: '', jobFunction: '', jobFunctionOther: '',
+  company: '', jobFunction: '', jobFunctionOther: '',
   industry: '', tshirt: '', saMarketingConsent: false,
 });
 
@@ -70,9 +69,10 @@ type ComboInputProps = {
   placeholder?: string;
   className?: string;
   type?: string;
+  id?: string;
 };
 const ComboInput: React.FC<ComboInputProps> = ({
-  value, onChange, onSelect, onBlurEmpty, options, placeholder, className, type = 'text',
+  value, onChange, onSelect, onBlurEmpty, options, placeholder, className, type = 'text', id,
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -95,6 +95,7 @@ const ComboInput: React.FC<ComboInputProps> = ({
           setOpen(false);
           if (!value.trim()) onBlurEmpty?.();
         }}
+        id={id}
         className={className}
       />
       {open && shown.length > 0 && (
@@ -257,6 +258,7 @@ export const TicketPurchaseModal: React.FC = () => {
       if (!pt.lastName.trim())                                           return { id: `p${i}-lastName`,         tab: i };
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim()))         return { id: `p${i}-email`,            tab: i };
       if (!pt.tshirt)                                                    return { id: `p${i}-tshirt`,           tab: i };
+      if (!pt.company.trim())                                            return { id: `p${i}-company`,          tab: i };
       if (!pt.jobFunction)                                               return { id: `p${i}-jobFunction`,      tab: i };
       if (pt.jobFunction === 'Outros' && !pt.jobFunctionOther.trim())   return { id: `p${i}-jobFunctionOther`, tab: i };
       if (!pt.industry.trim())                                           return { id: `p${i}-industry`,         tab: i };
@@ -296,7 +298,6 @@ export const TicketPurchaseModal: React.FC = () => {
             company: p.company.trim(),
             job_function: p.jobFunction,
             job_function_other: p.jobFunction === 'Outros' ? p.jobFunctionOther.trim() : '',
-            job_title: p.jobTitle.trim(),
             industry: p.industry.trim(),
             tshirt: p.tshirt,
             sa_marketing_consent: p.saMarketingConsent,
@@ -350,7 +351,7 @@ export const TicketPurchaseModal: React.FC = () => {
   const isParticipantComplete = (pt: ParticipantForm) => {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim());
     return pt.firstName.trim() && pt.lastName.trim() && emailOk && pt.tshirt &&
-      pt.jobFunction && pt.industry.trim() && pt.country &&
+      pt.company.trim() && pt.jobFunction && pt.industry.trim() && pt.country &&
       (pt.jobFunction !== 'Outros' || pt.jobFunctionOther.trim());
   };
 
@@ -459,30 +460,30 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Empresa + Cargo */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Empresa</label>
-            {(() => {
-              const otherCompanies = [...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))];
-              const companySuggestion = otherCompanies[0] || '';
-              return (
+        {/* Empresa */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Empresa <span className="text-red-500">*</span></label>
+          {(() => {
+            const otherCompanies = [...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))];
+            const companySuggestion = otherCompanies[0] || '';
+            const isInvalid = showErrors && !p.company.trim();
+            return (
+              <>
                 <ComboInput
+                  id={`p${activeTab}-company`}
                   value={p.company}
                   onChange={val => updateParticipant(activeTab, { company: val })}
                   onBlurEmpty={() => { if (companySuggestion) updateParticipant(activeTab, { company: companySuggestion }); }}
                   options={otherCompanies}
-                  placeholder={companySuggestion}
-                  className={fieldClass}
+                  placeholder={companySuggestion || 'Nome da empresa'}
+                  className={isInvalid
+                    ? 'mt-1 block w-full border border-red-500 rounded-md shadow-sm p-2 text-sm focus:ring-red-500 focus:border-red-500'
+                    : fieldClass}
                 />
-              );
-            })()}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Cargo</label>
-            <input type="text" value={p.jobTitle} onChange={e => updateParticipant(activeTab, { jobTitle: e.target.value })}
-              className={fieldClass} />
-          </div>
+                {isInvalid && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+              </>
+            );
+          })()}
         </div>
 
         {/* Função + País */}
