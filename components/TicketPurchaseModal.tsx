@@ -415,9 +415,11 @@ export const TicketPurchaseModal: React.FC = () => {
       )}
 
       {/* Formulário do participante activo */}
-      <div className="space-y-4">
+      <div className={quantity > 1
+        ? 'space-y-4 border border-orange-200 rounded-xl p-4 bg-orange-50/20'
+        : 'space-y-4'}>
         {quantity > 1 && (
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+          <p className="text-xs font-semibold text-brand-orange uppercase tracking-wide">
             Participante {activeTab + 1} de {quantity}
           </p>
         )}
