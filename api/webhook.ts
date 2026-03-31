@@ -6,7 +6,7 @@ import { issueInvoiceForOrder } from '../lib/invoicing/index.js';
 import type { InvoiceEmailData } from '../lib/invoicing/types.js';
 
 // ==================================================================
-// 1) EMAIL - BILHETE
+// 1) EMAIL - BILHETE (Com o novo layout e informações)
 // ==================================================================
 const generateTicketEmail = (
   name: string,
@@ -15,44 +15,105 @@ const generateTicketEmail = (
   ticketId: string
 ) => `<!DOCTYPE html>
 <html lang="pt">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>O teu bilhete RSG Lisbon 2026</title></head>
-<body style="margin:0;padding:0;background:#f4f6f8;font-family:sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:40px 0;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
-        <!-- Header -->
-        <tr><td style="background:#003F59;padding:32px 40px;text-align:center;">
-          <p style="margin:0;color:#ffffff;font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.8;">Regional Scrum Gathering</p>
-          <h1 style="margin:8px 0 0;color:#ffffff;font-size:28px;font-weight:700;">RSG Lisbon 2026</h1>
-        </td></tr>
-        <!-- Body -->
-        <tr><td style="padding:40px;">
-          <h2 style="margin:0 0 8px;color:#003F59;font-size:22px;">O teu lugar está garantido! 🎉</h2>
-          <p style="margin:0 0 24px;color:#555;font-size:16px;">Olá, <strong>${name}</strong>! O teu bilhete para o RSG Lisbon 2026 foi confirmado.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Inscrição confirmada - RSG Lisbon 2026</title>
+</head>
+<body style="background-color: #f6f9fc; font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Ubuntu,sans-serif; margin: 0; padding: 0;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f6f9fc; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #e6ebf1; border-radius: 12px; overflow: hidden;">
+                    <!-- Header da Marca -->
+                    <tr>
+                        <td align="center" style="background-color: #003F59; padding: 32px 40px;">
+                            <p style="margin:0;color:#ffffff;font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.8;">Regional Scrum Gathering</p>
+                            <h1 style="margin:8px 0 0;color:#ffffff;font-size:28px;font-weight:700;">RSG Lisbon 2026</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Conteúdo Principal -->
+                    <tr>
+                        <td style="padding: 40px 32px;">
+                            <h2 style="font-size: 24px; font-weight: bold; color: #003F59; margin-top: 0;">Olá, ${name},</h2>
+                            <p style="font-size: 16px; line-height: 26px; color: #3c4858;">
+                                O teu lugar no <a href="https://www.rsglisbon.com" style="color: #F47A20; font-weight: bold; text-decoration: none;">Regional Scrum Gathering Lisbon 2026</a> está oficialmente confirmado. 🥳
+                            </p>
+                            <p style="font-size: 16px; line-height: 26px; color: #3c4858;">
+                                Estamos muito felizes por contar contigo neste grande encontro da comunidade ágil em Portugal. O teu bilhete (<strong>${ticketName}</strong>) garante-te acesso a uma experiência única focada em Agilidade, Inovação e Inteligência Artificial.
+                            </p>
 
-          <!-- Ticket card -->
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7fb;border:2px solid #003F59;border-radius:10px;margin-bottom:32px;">
-            <tr><td style="padding:24px;text-align:center;">
-              <p style="margin:0 0 4px;color:#003F59;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Tipo de bilhete</p>
-              <p style="margin:0 0 20px;color:#003F59;font-size:20px;font-weight:700;">${ticketName}</p>
-              <img src="${qrUrl}" alt="QR Code" width="180" height="180" style="display:block;margin:0 auto 16px;border-radius:8px;" />
-              <p style="margin:0 0 4px;color:#888;font-size:12px;">ID do bilhete</p>
-              <p style="margin:0;color:#003F59;font-size:13px;font-family:monospace;word-break:break-all;">${ticketId}</p>
-            </td></tr>
-          </table>
+                            <hr style="border: none; border-top: 1px solid #e6ebf1; margin: 32px 0;" />
 
-          <p style="margin:0 0 12px;color:#555;font-size:15px;">📍 Apresenta o QR code na entrada do evento.</p>
-          <p style="margin:0 0 32px;color:#555;font-size:15px;">🧾 A tua fatura foi emitida e enviada num e-mail separado.</p>
+                            <!-- Secção do Bilhete -->
+                            <div style="text-align: center; background:#f0f7fb; border:2px solid #003F59; border-radius:10px; padding: 24px; margin-bottom: 32px;">
+                                <h2 style="font-size: 20px; font-weight: bold; color: #003F59; margin: 0 0 16px;">🎟️ O Teu Bilhete</h2>
+                                <p style="margin:0 0 20px;color:#003F59;font-size:18px;font-weight:700;">${ticketName}</p>
+                                
+                                <!-- QR CODE REAL GERADO PELO SISTEMA -->
+                                <img src="${qrUrl}" alt="QR Code do Bilhete" width="180" height="180" style="display:block; margin:0 auto 16px; border-radius:8px;" />
+                                
+                                <p style="margin:0 0 4px;color:#888;font-size:12px;">ID do Bilhete</p>
+                                <p style="margin:0;color:#003F59;font-size:13px;font-family:monospace;word-break:break-all;">${ticketId}</p>
+                            </div>
+                            
+                            <p style="font-size: 15px; line-height: 24px; color: #555; text-align: center;">
+                                No dia do evento, apresenta este QR code juntamente com o teu documento de identificação para validar a tua entrada.
+                            </p>
 
-          <p style="margin:0;color:#888;font-size:13px;text-align:center;">Estamos ansiosos para te ver em Lisboa!</p>
-        </td></tr>
-        <!-- Footer -->
-        <tr><td style="background:#f4f6f8;padding:20px 40px;text-align:center;border-top:1px solid #e0e0e0;">
-          <p style="margin:0;color:#aaa;font-size:12px;">TugÁgil • RSG Lisbon 2026</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
+                            <hr style="border: none; border-top: 1px solid #e6ebf1; margin: 32px 0;" />
+
+                            <!-- Informações do Evento -->
+                            <div>
+                                <h2 style="font-size: 20px; font-weight: bold; color: #003F59; margin: 0 0 16px;">📍 Informações Práticas</h2>
+                                <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 16px; line-height: 26px; color: #3c4858;">
+                                    <tr><td width="80" style="font-weight:bold; padding-bottom:8px;">Data:</td><td style="padding-bottom:8px;">21 de Maio de 2026</td></tr>
+                                    <tr><td width="80" style="font-weight:bold; padding-bottom:8px;">Horário:</td><td style="padding-bottom:8px;">9h00 às 20h00 <br><span style="font-size:13px; color:#888;">(Recomendamos chegada às 8h30 para credenciação)</span></td></tr>
+                                    <tr><td width="80" style="font-weight:bold; vertical-align:top;">Local:</td><td><strong>Auditório Alto dos Moinhos</strong><br>Rua João de Freitas Branco, 1500-359<br>Lisboa, Portugal</td></tr>
+                                </table>
+                                
+                                <p style="font-size: 14px; line-height: 26px; color: #009FDA; font-weight: bold; text-align: center; margin-top: 24px; background: #e6f6fc; padding: 12px; border-radius: 8px;">
+                                    🚇 Metro Linha Azul à porta &nbsp;|&nbsp; 🅿️ Estacionamento facilitado
+                                </p>
+                            </div>
+
+                            <hr style="border: none; border-top: 1px solid #e6ebf1; margin: 32px 0;" />
+
+                            <!-- Adicionar à Agenda & Canva -->
+                            <div style="text-align: center;">
+                                <h2 style="font-size: 20px; font-weight: bold; color: #003F59; margin: 0 0 16px;">Prepara a tua chegada</h2>
+                                
+                                <a href="https://evt.to/fcblxmtsb7bm" style="background-color: #003F59; border-radius: 6px; color: #fff; font-size: 15px; font-weight: bold; text-decoration: none; display: inline-block; padding: 12px 24px; margin: 8px;">
+                                    📅 Adicionar ao Calendário
+                                </a>
+                                
+                                <a href="https://www.canva.com/design/DAHDA-8uvms/wn8Qsg2n53rO1_MCgtZK7w/edit" style="background-color: #F47A20; border-radius: 6px; color: #fff; font-size: 15px; font-weight: bold; text-decoration: none; display: inline-block; padding: 12px 24px; margin: 8px;">
+                                    📣 Kit Redes Sociais (Canva)
+                                </a>
+                            </div>
+
+                            <hr style="border: none; border-top: 1px solid #e6ebf1; margin: 32px 0;" />
+
+                            <p style="font-size: 15px; line-height: 24px; color: #555; text-align: center; margin: 0;">
+                                Se tiveres alguma dúvida, basta responderes a este e-mail ou escrever para <a href="mailto:tuga@tugagil.com" style="color: #009FDA; font-weight: bold; text-decoration: none;">tuga@tugagil.com</a>.<br><br>Até breve! 👋🏼
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Rodapé -->
+                    <tr>
+                        <td style="background:#f4f6f8; padding:24px 32px; border-top:1px solid #e6ebf1; text-align:center;">
+                            <p style="margin:0; color:#8898aa; font-size:12px; line-height:20px;">
+                                <strong>TugÁgil • Comunidade de Práticas</strong><br>
+                                Organizadora Oficial do RSG Lisbon 2026
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>`;
 
@@ -65,7 +126,7 @@ const generateInvoiceEmail = (d: InvoiceEmailData) => `<!DOCTYPE html>
 <body style="margin:0;padding:0;background:#f4f6f8;font-family:sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:40px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;width:100%; border: 1px solid #e6ebf1;">
         <!-- Header -->
         <tr><td style="background:#003F59;padding:32px 40px;text-align:center;">
           <p style="margin:0;color:#ffffff;font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.8;">Regional Scrum Gathering</p>
@@ -74,12 +135,12 @@ const generateInvoiceEmail = (d: InvoiceEmailData) => `<!DOCTYPE html>
         <!-- Body -->
         <tr><td style="padding:40px;">
           <h2 style="margin:0 0 8px;color:#003F59;font-size:22px;">A tua fatura está pronta 🧾</h2>
-          <p style="margin:0 0 24px;color:#555;font-size:16px;">Olá, <strong>${d.name}</strong>! Segue em anexo a fatura referente à tua compra.</p>
+          <p style="margin:0 0 24px;color:#555;font-size:16px;">Olá, <strong>${d.name}</strong>! Segue em anexo o documento PDF com a fatura referente à compra do teu bilhete para o evento no dia 21 de Maio de 2026.</p>
 
           <!-- Summary card -->
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7fb;border:1px solid #cde3ef;border-radius:10px;margin-bottom:24px;">
             <tr><td style="padding:24px;">
-              <p style="margin:0 0 12px;color:#003F59;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Resumo</p>
+              <p style="margin:0 0 12px;color:#003F59;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Resumo da Transação</p>
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="color:#555;font-size:15px;padding-bottom:8px;">Bilhete</td>
@@ -90,7 +151,7 @@ const generateInvoiceEmail = (d: InvoiceEmailData) => `<!DOCTYPE html>
                   <td style="color:#003F59;font-size:15px;font-weight:600;text-align:right;padding-bottom:8px;">#${d.invoiceId}</td>
                 </tr>
                 <tr style="border-top:1px solid #cde3ef;">
-                  <td style="color:#003F59;font-size:16px;font-weight:700;padding-top:12px;">Total</td>
+                  <td style="color:#003F59;font-size:16px;font-weight:700;padding-top:12px;">Total Pago</td>
                   <td style="color:#003F59;font-size:16px;font-weight:700;text-align:right;padding-top:12px;">${d.total} €</td>
                 </tr>
               </table>
@@ -99,7 +160,7 @@ const generateInvoiceEmail = (d: InvoiceEmailData) => `<!DOCTYPE html>
 
           ${d.isTest ? '<p style="margin:0 0 16px;color:#e67e22;font-size:13px;background:#fef9f0;border:1px solid #f5c97a;border-radius:6px;padding:12px;">⚠️ Documento gerado em ambiente de testes — sem validade fiscal.</p>' : ''}
 
-          <p style="margin:0 0 0;color:#888;font-size:14px;">Se tiveres alguma dúvida, responde a este email.</p>
+          <p style="margin:0 0 0;color:#888;font-size:14px;">O bilhete com o QR Code de entrada foi enviado num e-mail separado. Se tiveres alguma dúvida, basta responderes a este e-mail.</p>
         </td></tr>
         <!-- Footer -->
         <tr><td style="background:#f4f6f8;padding:20px 40px;text-align:center;border-top:1px solid #e0e0e0;">
@@ -273,11 +334,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       meta.nif ||
       null;
 
-    const attendeeJobTitle =
-      meta.attendee_job_title ||
-      meta.jobTitle ||
-      null;
-
     const attendeeTshirt =
       meta.attendee_tshirt ||
       meta.tshirt ||
@@ -311,7 +367,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     type ParsedParticipant = {
       firstName: string; lastName: string; email: string; country: string;
       company: string; jobFunction: string; jobFunctionOther: string;
-      jobTitle: string; industry: string; tshirt: string; saMarketingConsent: boolean;
+      industry: string; tshirt: string; saMarketingConsent: boolean;
     };
 
     const parsedParticipants: ParsedParticipant[] = [];
@@ -322,7 +378,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           parsedParticipants.push({
             firstName: raw.fn || '', lastName: raw.ln || '', email: raw.em || '',
             country: raw.co || '', company: raw.cp || '', jobFunction: raw.jf || '',
-            jobFunctionOther: raw.jo || '', jobTitle: raw.jt || '', industry: raw.iy || '',
+            jobFunctionOther: raw.jo || '', industry: raw.iy || '',
             tshirt: raw.ts || '', saMarketingConsent: Boolean(raw.mc),
           });
         } catch {
@@ -335,7 +391,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         firstName: attendeeFirstName || '', lastName: attendeeLastName || '',
         email: session.customer_details?.email || '', country: attendeeCountry || '',
         company: attendeeCompany || '', jobFunction: attendeeJobFunction || '',
-        jobFunctionOther: attendeeJobFunctionOther || '', jobTitle: attendeeJobTitle || '',
+        jobFunctionOther: attendeeJobFunctionOther || '',
         industry: '', tshirt: attendeeTshirt || '', saMarketingConsent,
       });
     }
@@ -380,7 +436,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           attendee_job_function_other: p.jobFunctionOther || null,
           attendee_industry: p.industry || null,
           attendee_nif: resolvedNif,
-          attendee_job_title: p.jobTitle || null,
+          attendee_job_title: null,
           attendee_tshirt: p.tshirt || null,
           sa_data_sharing_consent: saDataSharingConsent,
           sa_marketing_consent: p.saMarketingConsent,

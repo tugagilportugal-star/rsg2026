@@ -7,6 +7,7 @@ interface SponsorsProps {
     onOpenSponsorModal?: () => void;
 }
 
+// Interface para os dados do patrocinador
 interface Sponsor {
   name: string;
   logo: string;
@@ -17,8 +18,9 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const MEDIA_KIT_URL = "https://drive.google.com/file/d/162ktlhFkYjvE90nH3ZAiW_kLQGrdI04o/view?usp=sharing";
 
   // --- LISTAS DE PATROCINADORES ---
-  const goldSponsors: Sponsor[] =[];
-  const silverSponsors: Sponsor[] =[];
+  
+  const goldSponsors: Sponsor[] = [];
+  const silverSponsors: Sponsor[] = [];
 
   const bronzeSponsors: Sponsor[] =[
     { 
@@ -37,7 +39,6 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        url: "https://mc.sonae.pt/"  
     }
   ];
-
   // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {
