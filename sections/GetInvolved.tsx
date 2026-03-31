@@ -81,7 +81,7 @@ export const SponsorForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const MEDIA_KIT_URL =
-    'https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing';
+    'https://drive.google.com/file/d/162ktlhFkYjvE90nH3ZAiW_kLQGrdI04o/view?usp=sharing';
 
   const [formData, setFormData] = useState<SponsorFormData>({
     name: '',
