@@ -86,7 +86,36 @@ const App: React.FC = () => {
       </div>
 
       {isTicketModalOpen && (
-        <TicketPurchaseModal/>
+        <div className="fixed inset-0 z-[100] overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            
+            {/* Fundo escuro (fecha o modal ao clicar fora) */}
+            <div 
+              className="fixed inset-0 transition-opacity bg-brand-darkBlue/80 backdrop-blur-sm" 
+              onClick={() => setTicketModalOpen(false)}
+            ></div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+            {/* Caixa do Modal - max-w-4xl para dar muito espaço ao formulário! */}
+            <div className="relative inline-block w-full max-w-4xl align-bottom transition-all transform bg-white rounded-[2rem] shadow-2xl sm:my-8 sm:align-middle text-left">
+              
+              {/* Botão Fechar (X) */}
+              <button
+                onClick={() => setTicketModalOpen(false)}
+                className="absolute top-6 right-6 z-50 flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+
+              {/* O formulário do staff fica aqui dentro, com scroll caso o ecrã seja pequeno */}
+              <div className="p-6 sm:p-10 max-h-[90vh] overflow-y-auto">
+                <TicketPurchaseModal />
+              </div>
+
+            </div>
+          </div>
+        </div>
       )}
 
       <Modal
