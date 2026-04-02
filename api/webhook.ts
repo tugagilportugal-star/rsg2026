@@ -223,6 +223,68 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
+// ==================================================================
+// NOTIFICAÇÃO INTERNA — admins
+// ==================================================================
+type StepResult = { step: string; ok: boolean; detail?: string };
+const adminEmails = (process.env.ADMIN_NOTIFICATION_EMAILS || '')
+  .split(',').map(e => e.trim()).filter(Boolean);
+
+async function notifyAdmins(steps: StepResult[], ctx: {
+  sessionId: string; buyerName: string; buyerEmail: string;
+  qty: number; totalCents: number; currency: string;
+  participants: { name: string; email: string }[];
+  isError: boolean;
+}) {
+  if (!adminEmails.length) return;
+  const total = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: (ctx.currency || 'eur').toUpperCase() })
+    .format(ctx.totalCents / 100);
+  const icon = ctx.isError ? '🚨' : '✅';
+  const subject = `${icon} RSG 2026 — ${ctx.isError ? 'ERRO' : 'Nova Venda'}: ${ctx.buyerName} · ${ctx.qty} bilhete${ctx.qty !== 1 ? 's' : ''} · ${total}`;
+
+  const stepsHtml = steps.map(s => `
+    <tr>
+      <td style="padding:7px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;">${s.ok ? '✅' : '❌'}&nbsp;${s.step}</td>
+      <td style="padding:7px 14px;border-bottom:1px solid #f0f0f0;font-size:12px;color:${s.ok ? '#16a34a' : '#dc2626'};">${s.detail || ''}</td>
+    </tr>`).join('');
+
+  const participantsHtml = ctx.participants.map(p =>
+    `<li style="margin-bottom:4px;">${p.name} — <a href="mailto:${p.email}" style="color:#003F59;">${p.email}</a></li>`
+  ).join('');
+
+  const html = `<div style="font-family:sans-serif;max-width:620px;margin:0 auto;color:#1f2937;">
+    <div style="background:#003F59;padding:20px 28px;border-radius:10px 10px 0 0;">
+      <p style="margin:0;color:#fff;font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.65;">Regional Scrum Gathering</p>
+      <h2 style="margin:4px 0 0;color:#fff;font-size:20px;">${ctx.isError ? '🚨 Erro no Processamento' : '🎟️ Nova Venda'}</h2>
+    </div>
+    <div style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;padding:20px 28px;">
+      <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:14px;">
+        <tr><td style="padding:5px 0;font-weight:600;width:130px;color:#6b7280;">Comprador</td><td>${ctx.buyerName} &lt;${ctx.buyerEmail}&gt;</td></tr>
+        <tr><td style="padding:5px 0;font-weight:600;color:#6b7280;">Bilhetes</td><td>${ctx.qty}</td></tr>
+        <tr><td style="padding:5px 0;font-weight:600;color:#6b7280;">Total</td><td><strong>${total}</strong></td></tr>
+        <tr><td style="padding:5px 0;font-weight:600;color:#6b7280;">Stripe Session</td><td style="font-size:11px;color:#9ca3af;">${ctx.sessionId}</td></tr>
+      </table>
+      ${ctx.participants.length > 0 ? `<p style="font-weight:600;margin:0 0 6px;">Participantes:</p><ul style="margin:0 0 18px;padding-left:20px;font-size:13px;">${participantsHtml}</ul>` : ''}
+      <p style="font-weight:600;margin:0 0 8px;">Passos do processamento:</p>
+      <table style="width:100%;border-collapse:collapse;background:#f9fafb;border-radius:8px;overflow:hidden;">
+        ${stepsHtml}
+      </table>
+    </div>
+  </div>`;
+
+  try {
+    await resend.emails.send({
+      from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
+      to: adminEmails,
+      subject,
+      html,
+    });
+    console.log(`📬 Notificação admin enviada para: ${adminEmails.join(', ')}`);
+  } catch (e: any) {
+    console.error('⚠️ Admin notification error:', e.message);
+  }
+}
+
 function stripeIsTestMode(): boolean {
   const key = process.env.STRIPE_SECRET_KEY || '';
   return key.startsWith('sk_test_');
@@ -266,6 +328,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const session = event.data.object as Stripe.Checkout.Session;
   console.log(`🧾 Processando Order: ${session.id}`);
+
+  const steps: StepResult[] = [];
+  const notifyCtx = {
+    sessionId: session.id,
+    buyerName: session.customer_details?.name || 'Desconhecido',
+    buyerEmail: session.customer_details?.email || '',
+    qty: 1,
+    totalCents: session.amount_total || 0,
+    currency: session.currency || 'eur',
+    participants: [] as { name: string; email: string }[],
+    isError: false,
+  };
 
   try {
     const meta = (session.metadata || {}) as Record<string, string | undefined>;
@@ -360,6 +434,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const billingNif = meta.billing_nif || null;
     const resolvedNif = stripeTaxId || billingNif || attendeeNif || null;
 
+    notifyCtx.qty = Number(meta.quantity || 1);
+
     // Parse multi-participant metadata (new format) or fall back to single-participant (legacy)
     const participantsCount = Number(meta.participants_count || 1);
     const isMulti = !!(meta.participants_count);
@@ -396,6 +472,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Preencher participantes no contexto de notificação
+    notifyCtx.participants = parsedParticipants.map(p => ({
+      name: `${p.firstName} ${p.lastName}`.trim() || p.email,
+      email: p.email,
+    }));
+
     // 1) Salvar Order
     const { data: order, error: orderErr } = await supabase
       .from('orders')
@@ -413,8 +495,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (orderErr) {
+      steps.push({ step: 'Gravar Order (DB)', ok: false, detail: orderErr.message });
       throw new Error(`DB Order Error: ${orderErr.message}`);
     }
+    steps.push({ step: 'Gravar Order (DB)', ok: true, detail: `order_id: ${order.id}` });
 
     // 2) Salvar Tickets (um por participante)
     const tickets: any[] = [];
@@ -446,7 +530,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select()
         .single();
 
-      if (ticketErr) throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+      if (ticketErr) {
+        steps.push({ step: `Gravar Ticket (${fullName})`, ok: false, detail: ticketErr.message });
+        throw new Error(`DB Ticket Error: ${ticketErr.message}`);
+      }
+      steps.push({ step: `Gravar Ticket (${fullName})`, ok: true, detail: `ticket_id: ${ticket.id}` });
       tickets.push(ticket);
     }
 
@@ -463,13 +551,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (consumeErr) {
         console.error('⚠️ consume_ticket_type RPC error:', consumeErr.message);
+        steps.push({ step: 'Atualizar contador de bilhetes', ok: false, detail: consumeErr.message });
       } else {
         console.log('🎟️ consume_ticket_type result:', consumeRes);
+        steps.push({ step: 'Atualizar contador de bilhetes', ok: true });
       }
     } else {
-      console.warn(
-        '⚠️ ticket_type_id não encontrado no metadata; não atualizei quantity_sold.'
-      );
+      console.warn('⚠️ ticket_type_id não encontrado no metadata; não atualizei quantity_sold.');
+      steps.push({ step: 'Atualizar contador de bilhetes', ok: false, detail: 'ticket_type_id em falta' });
     }
 
     // 2.2) Desativar cupão single_use após pagamento confirmado
@@ -483,15 +572,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         })
         .eq('active', true);
 
-      // Prefere match por ID (atómico), fallback por código
       const { error: couponErr } = couponId
         ? await query.eq('id', couponId)
         : await query.eq('code', couponCode);
 
       if (couponErr) {
         console.error('⚠️ Coupon deactivate error:', couponErr.message);
+        steps.push({ step: `Desativar cupão (${couponCode})`, ok: false, detail: couponErr.message });
       } else {
         console.log(`✅ Cupão ${couponCode} desativado após pagamento confirmado.`);
+        steps.push({ step: `Desativar cupão (${couponCode})`, ok: true });
       }
     }
 
@@ -517,18 +607,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const billingName = meta.billing_name || order.customer_name || attendeeName || 'Participante RSG';
     const billingEmail = meta.billing_email || order.customer_email;
 
-    const invoiceResult = await issueInvoiceForOrder({
-      isTest,
-      customerName: billingName,
-      customerEmail: billingEmail,
-      countryIso: customerCountryIso,
-      customerNif: resolvedNif,
-      ticketName,
-      includeRecording,
-      amountEuro,
-      quantity: parsedParticipants.length,
-    });
-
+    let invoiceResult: Awaited<ReturnType<typeof issueInvoiceForOrder>>;
+    try {
+      invoiceResult = await issueInvoiceForOrder({
+        isTest,
+        customerName: billingName,
+        customerEmail: billingEmail,
+        countryIso: customerCountryIso,
+        customerNif: resolvedNif,
+        ticketName,
+        includeRecording,
+        amountEuro,
+        quantity: parsedParticipants.length,
+      });
+    } catch (e: any) {
+      steps.push({ step: 'Emitir fatura', ok: false, detail: e.message });
+      invoiceResult = null as any;
+    }
     if (invoiceResult?.invoiceId) {
       await supabase
         .from('orders')
@@ -537,24 +632,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           invoice_number: invoiceResult.invoiceNumber ?? null,
         })
         .eq('id', order.id);
+      steps.push({ step: 'Emitir fatura', ok: true, detail: invoiceResult.invoiceNumber || invoiceResult.invoiceId });
 
       if (invoiceResult.pdfBytes) {
-        const sendRes = await sendInvoicePdfByEmailResend({
-          to: order.customer_email,
-          pdfBytes: invoiceResult.pdfBytes,
-          invoiceId: invoiceResult.invoiceNumber || invoiceResult.invoiceId,
-          name: order.customer_name || attendeeName || 'Participante',
-          ticketName,
-          total: invoiceResult.total,
-          isTest,
-        });
-
-        if ((sendRes as any)?.error) {
-          console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
-        } else {
-          console.log('📧 Email com PDF da fatura enviado.');
+        try {
+          const sendRes = await sendInvoicePdfByEmailResend({
+            to: order.customer_email,
+            pdfBytes: invoiceResult.pdfBytes,
+            invoiceId: invoiceResult.invoiceNumber || invoiceResult.invoiceId,
+            name: order.customer_name || attendeeName || 'Participante',
+            ticketName,
+            total: invoiceResult.total,
+            isTest,
+          });
+          if ((sendRes as any)?.error) {
+            console.error('⚠️ Resend invoice PDF error:', (sendRes as any).error);
+            steps.push({ step: 'Email da fatura (PDF)', ok: false, detail: String((sendRes as any).error) });
+          } else {
+            console.log('📧 Email com PDF da fatura enviado.');
+            steps.push({ step: 'Email da fatura (PDF)', ok: true, detail: `→ ${order.customer_email}` });
+          }
+        } catch (e: any) {
+          steps.push({ step: 'Email da fatura (PDF)', ok: false, detail: e.message });
         }
       }
+    } else {
+      steps.push({ step: 'Emitir fatura', ok: false, detail: 'Sem invoiceId retornado' });
     }
 
     // 5) Email do bilhete (um por participante)
@@ -562,22 +665,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(t.qr_code_secret)}&dark=003F59&size=300&margin=1`;
       const recipientEmail = t.attendee_email || (session.customer_details?.email as string);
       const recipientName = t.attendee_name || 'Participante';
-      const emailRes = await resend.emails.send({
-        from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
-        to: recipientEmail,
-        subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
-        html: generateTicketEmail(recipientName, ticketName, qrUrl, t.id),
-      });
-      if (emailRes.error) {
-        console.error(`⚠️ Resend Error (ticket ${t.id}):`, emailRes.error);
-      } else {
-        console.log(`📧 Email enviado para ${recipientEmail}.`);
+      try {
+        const emailRes = await resend.emails.send({
+          from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
+          to: recipientEmail,
+          subject: 'O teu bilhete RSG Lisbon 2026 🎟️',
+          html: generateTicketEmail(recipientName, ticketName, qrUrl, t.id),
+        });
+        if (emailRes.error) {
+          console.error(`⚠️ Resend Error (ticket ${t.id}):`, emailRes.error);
+          steps.push({ step: `Email bilhete (${recipientName})`, ok: false, detail: String(emailRes.error) });
+        } else {
+          console.log(`📧 Email enviado para ${recipientEmail}.`);
+          steps.push({ step: `Email bilhete (${recipientName})`, ok: true, detail: `→ ${recipientEmail}` });
+        }
+      } catch (e: any) {
+        steps.push({ step: `Email bilhete (${recipientName})`, ok: false, detail: e.message });
       }
     }
 
+    await notifyAdmins(steps, notifyCtx);
     return res.json({ received: true });
   } catch (err: any) {
     console.error('❌ Critical Error:', err.message);
+    notifyCtx.isError = true;
+    steps.push({ step: 'Erro crítico', ok: false, detail: err.message });
+    await notifyAdmins(steps, notifyCtx);
     return res.status(500).send('Internal Server Error');
   }
 }
