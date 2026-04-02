@@ -18,7 +18,8 @@
       "WebSearch",
       "Bash(npx tsc:*)",
       "WebFetch(domain:bill.pt)",
-      "WebFetch(domain:api.bill.pt)"
+      "WebFetch(domain:api.bill.pt)",
+      "Bash(git merge:*)"
     ]
   }
 }
