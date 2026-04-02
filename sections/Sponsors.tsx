@@ -11,10 +11,11 @@ interface Sponsor {
   name: string;
   logo: string;
   url: string;
+  customClass?: string;
 }
 
 export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
-  const MEDIA_KIT_URL = "https://drive.google.com/file/d/162ktlhFkYjvE90nH3ZAiW_kLQGrdI04o/view?usp=sharing";
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
 
   // --- LISTAS DE PATROCINADORES ---
   const goldSponsors: Sponsor[] =[];
@@ -35,10 +36,14 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        name: "Sonae - MC Digital", 
        logo: "https://i.postimg.cc/C1KwSmF7/SONAE_MC_Digital.png",
        url: "https://mc.sonae.pt/"  
+    },
+    {
+       name: "Noesis Portugal", 
+       logo: "https://i.postimg.cc/430SJC55/Noesis.jpg",
+       url: "https://www.noesis.pt/"  
     }
   ];
 
-  // --- COMUNIDADES APOIADORAS ---
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
@@ -47,8 +52,14 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
     },
     {
       name: "Agile Academy",
-      logo: "https://i.postimg.cc/TwRMc8f9/Agile_Academy.png", 
-      url: "https://www.agile-academy.com/pt/" 
+      logo: "https://i.postimg.cc/TwRMc8f9/Agile-Academy.png",
+      url: "https://www.agile-academy.com/pt/",
+      customClass: "scale-[2.5] group-hover:scale-[2.6]"
+    },
+    {
+      name: "Ladies that UX Lisbon",
+      logo: "https://i.postimg.cc/59z2Wb3L/Ladies_that_UX_Lisbon.png",
+      url: "https://ladiesthatux.com/lisbon/"
     }
   ];
 
@@ -88,7 +99,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             <div className="flex flex-wrap justify-center gap-12 items-center">
               {goldSponsors.map((sponsor, idx) => (
                 <a key={idx} href={sponsor.url} target="_blank" rel="noopener noreferrer" className="group">
-                  <img src={sponsor.logo} alt={sponsor.name} className="h-20 md:h-24 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105" />
+                  <img src={sponsor.logo} alt={sponsor.name} className={`h-20 md:h-24 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105 ${sponsor.customClass || ''}`} />
                 </a>
               ))}
             </div>
@@ -104,7 +115,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             <div className="flex flex-wrap justify-center gap-10 items-center">
               {silverSponsors.map((sponsor, idx) => (
                 <a key={idx} href={sponsor.url} target="_blank" rel="noopener noreferrer" className="group">
-                  <img src={sponsor.logo} alt={sponsor.name} className="h-16 md:h-20 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105" />
+                  <img src={sponsor.logo} alt={sponsor.name} className={`h-16 md:h-20 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-80 group-hover:opacity-100 hover:scale-105 ${sponsor.customClass || ''}`} />
                 </a>
               ))}
             </div>
@@ -124,15 +135,13 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
                   href={sponsor.url}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  // Cartão fixo: h-28 w-56
                   className="group bg-white rounded-xl hover:shadow-lg transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-28 w-56 p-6"
                   title={`Visitar ${sponsor.name}`}
                 >
                   <img 
                     src={sponsor.logo} 
                     alt={sponsor.name} 
-                    // Imagem forçada a conter-se no espaço uniformemente
-                    className="h-16 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
+                    className={`h-16 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100 ${sponsor.customClass || ''}`}
                   />
                 </a>
               ))}
@@ -140,41 +149,35 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
           </div>
         )}
 
-        {/* --- COMMUNITY SUPPORTERS --- */}
-{communitySupporters.length > 0 && (
-  <div className="mb-24 px-4 text-center">
-    <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-12 block">
-      Community Supporters
-    </span>
-    
-    {/* Layout Centralizado: flex-wrap e justify-center garantem o alinhamento ao meio */}
-    <div className="flex flex-wrap items-center justify-center gap-12 max-w-6xl mx-auto">
-      {communitySupporters.map((sponsor, idx) => {
-        const isAgileAcademy = sponsor.name.toLowerCase().includes('agile academy');
-
-        return (
-          <a 
-            key={idx} 
-            href={sponsor.url}
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="group flex items-center justify-center w-64 h-24 p-4 transition-transform hover:scale-105"
-            title={`Visitar ${sponsor.name}`}
-          >
-            <img 
-              src={sponsor.logo} 
-              alt={sponsor.name} 
-              className={`
-                object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100
-                ${isAgileAcademy ? 'h-16 w-full scale-[2.0]' : 'h-full w-full'}
-              `}
-            />
-          </a>
-        );
-      })}
-    </div>
-  </div>
-)}
+        {/* --- COMMUNITY SUPPORTERS (Tamanhos Padronizados) --- */}
+        {communitySupporters.length > 0 && (
+          <div className="mb-20">
+            <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">
+              Community Supporters
+            </span>
+            <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
+              {communitySupporters.map((sponsor, idx) => (
+                <a 
+                  key={idx} 
+                  href={sponsor.url}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-2 overflow-hidden"
+                  title={`Visitar ${sponsor.name}`}
+                >
+                  <img 
+                    src={sponsor.logo} 
+                    alt={sponsor.name} 
+                    className={`max-h-16 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100 ${
+                      // Se tiver customClass, usa-a. Se não, usa a escala normal de hover.
+                      sponsor.customClass ? sponsor.customClass : 'transform hover:scale-105'
+                    }`}
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* SEPARADOR E OPORTUNIDADES */}
         <div className="mb-16 relative">
