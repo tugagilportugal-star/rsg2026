@@ -268,6 +268,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const session = event.data.object as Stripe.Checkout.Session;
   console.log(`🧾 Processando Order: ${session.id}`);
 
+  // Idempotência — ignorar se já foi processado
+  const { data: existing } = await supabase
+    .from('orders')
+    .select('id, invoice_id')
+    .eq('stripe_session_id', session.id)
+    .maybeSingle();
+
+  if (existing) {
+    console.log(`⏭️ Session ${session.id} já processada (order ${existing.id}) — a ignorar retry.`);
+    return res.json({ received: true, skipped: true, orderId: existing.id });
+  }
+
   const steps: StepResult[] = [];
   const notifyCtx = {
     sessionId: session.id,
