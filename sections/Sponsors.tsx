@@ -43,6 +43,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
        url: "https://www.noesis.pt/"  
     }
   ];
+
   const communitySupporters: Sponsor[] =[
     {
       name: "Geek Girls Portugal",
@@ -52,7 +53,8 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
     {
       name: "Agile Academy",
       logo: "https://i.postimg.cc/TwRMc8f9/Agile-Academy.png", 
-      url: "https://www.agile-academy.com/pt/" 
+      url: "https://www.agile-academy.com/pt/",
+      customClass: "scale-[2.5] group-hover:scale-[2.6]" 
     },
     {
       name: "Ladies that UX Lisbon",
@@ -105,7 +107,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
           </div>
         )}
 
-        {/* --- BRONZE SPONSORS (Tamanho Fixo: h-28 w-56 p-6) --- */}
+        {/* --- BRONZE SPONSORS --- */}
         {bronzeSponsors.length > 0 && (
           <div className="mb-20">
             <span className="text-xs font-bold tracking-[0.2em] text-orange-700 uppercase mb-8 block">Bronze Sponsors</span>
@@ -119,14 +121,21 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
           </div>
         )}
 
-        {/* --- COMMUNITY SUPPORTERS (Tamanho Fixo: h-24 w-48 p-2) --- */}
+        {/* --- COMMUNITY SUPPORTERS --- */}
         {communitySupporters.length > 0 && (
           <div className="mb-20">
             <span className="text-xs font-bold tracking-[0.2em] text-brand-blue uppercase mb-8 block">Community Supporters</span>
             <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center">
               {communitySupporters.map((sponsor, idx) => (
                 <a key={idx} href={sponsor.url} target="_blank" rel="noopener noreferrer" className="group bg-white rounded-xl hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 flex items-center justify-center h-24 w-48 p-2 overflow-hidden">
-                  <img src={sponsor.logo} alt={sponsor.name} className={`max-h-16 w-full object-contain transform hover:scale-105 grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100 ${sponsor.customClass || ''}`} />
+                  <img 
+                    src={sponsor.logo} 
+                    alt={sponsor.name} 
+                    className={`max-h-16 w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100 ${
+                      // Aplica a classe custom (como o scale-[2.5]) OU o hover normal
+                      sponsor.customClass ? sponsor.customClass : 'transform hover:scale-105'
+                    }`} 
+                  />
                 </a>
               ))}
             </div>
