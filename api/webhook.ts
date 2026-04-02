@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { issueInvoiceForOrder } from '../lib/invoicing/index.js';
 import type { InvoiceEmailData } from '../lib/invoicing/types.js';
-import { notifyAdmins, type StepResult, type NotifyCtx } from '../lib/notify.js';
+import { notifyAdmins, type StepResult } from '../lib/notify.js';
 
 // ==================================================================
 // 1) EMAIL - BILHETE (Com o novo layout e informações)
@@ -268,7 +268,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const session = event.data.object as Stripe.Checkout.Session;
   console.log(`🧾 Processando Order: ${session.id}`);
 
-  // Idempotência — ignorar se já foi processado
+  // Idempotência — só saltar se o order já tem tickets (processo completo)
+  // Se existe order sem tickets, foi um processo interrompido a meio — apagar e reprocessar
   const { data: existing } = await supabase
     .from('orders')
     .select('id, invoice_id')
@@ -276,8 +277,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .maybeSingle();
 
   if (existing) {
-    console.log(`⏭️ Session ${session.id} já processada (order ${existing.id}) — a ignorar retry.`);
-    return res.json({ received: true, skipped: true, orderId: existing.id });
+    const { count } = await supabase
+      .from('tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('order_id', existing.id);
+
+    if (count && count > 0) {
+      console.log(`⏭️ Session ${session.id} já processada (order ${existing.id}, ${count} ticket(s)) — a ignorar retry.`);
+      return res.json({ received: true, skipped: true, orderId: existing.id });
+    }
+
+    // Order incompleto (sem tickets) — apagar para reprocessar limpo
+    console.log(`🔄 Session ${session.id} tem order incompleto (${existing.id}, sem tickets) — a apagar e reprocessar.`);
+    await supabase.from('orders').delete().eq('id', existing.id);
   }
 
   const steps: StepResult[] = [];
