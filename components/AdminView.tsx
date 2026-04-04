@@ -2484,12 +2484,23 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
                     Válido até <span className="text-gray-400 font-normal normal-case">(opcional)</span>
                   </div>
-                  <input
-                    type="date"
-                    value={couponForm.expires_at}
-                    onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })}
-                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={couponForm.expires_at}
+                      onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })}
+                      className="flex-1 rounded-2xl border border-gray-300 px-4 py-3"
+                    />
+                    {couponForm.expires_at && (
+                      <button
+                        type="button"
+                        onClick={() => setCouponForm({ ...couponForm, expires_at: '' })}
+                        className="rounded-2xl border border-gray-300 px-3 text-gray-400 hover:text-gray-600 hover:border-gray-400"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
