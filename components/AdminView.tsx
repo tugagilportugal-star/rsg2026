@@ -83,6 +83,7 @@ type CouponRow = {
   recording_only: boolean;
   single_use: boolean;
   active: boolean;
+  expires_at?: string | null;
   created_at?: string | null;
   used_at?: string | null;
   used_by_order_id?: string | null;
@@ -213,6 +214,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     recording_only: false,
     single_use: true,
     active: true,
+    expires_at: '',
   });
 
   const [session, setSession] = useState<any>(null);
@@ -698,6 +700,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       recording_only: false,
       single_use: true,
       active: true,
+      expires_at: '',
     });
   }
 
@@ -718,6 +721,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       recording_only: Boolean(row.recording_only),
       single_use: Boolean(row.single_use),
       active: Boolean(row.active),
+      expires_at: row.expires_at ? row.expires_at.slice(0, 10) : '',
     });
     setCouponModalOpen(true);
   }
@@ -737,6 +741,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         recording_only: couponForm.recording_only,
         single_use: couponForm.single_use,
         active: couponForm.active,
+        expires_at: couponForm.expires_at || null,
       };
 
       const res = await fetch('/api/admin/coupons', {
@@ -1767,6 +1772,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <Th>Gravação</Th>
                     <Th>Single Use</Th>
                     <Th>Ativo</Th>
+                    <Th>Válido até</Th>
                     <Th>Usado em</Th>
                     <Th>Data de uso</Th>
                     <Th>Ações</Th>
@@ -1775,11 +1781,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <tbody>
                   {loadingCoupons ? (
                     <tr>
-                      <Td colSpan={9}>A carregar coupons…</Td>
+                      <Td colSpan={10}>A carregar coupons…</Td>
                     </tr>
                   ) : coupons.length === 0 ? (
                     <tr>
-                      <Td colSpan={9}>Sem coupons.</Td>
+                      <Td colSpan={10}>Sem coupons.</Td>
                     </tr>
                   ) : (
                     coupons.map((row) => (
@@ -1796,6 +1802,13 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{row.recording_only ? 'Sim' : 'Não'}</Td>
                         <Td>{row.single_use ? 'Sim' : 'Não'}</Td>
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
+                        <Td>
+                          {row.expires_at
+                            ? <span className={new Date(row.expires_at) < new Date() ? 'text-red-500 font-medium' : ''}>
+                                {formatDatePt(row.expires_at)}
+                              </span>
+                            : '—'}
+                        </Td>
                         <Td>{row.used_by_order_id || '—'}</Td>
                         <Td>{row.used_at ? formatDatePt(row.used_at) : '—'}</Td>
                         <Td>
@@ -2460,6 +2473,18 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   />
                   <span className="text-sm font-medium text-gray-700">Ativo</span>
                 </label>
+
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+                    Válido até <span className="text-gray-400 font-normal normal-case">(opcional)</span>
+                  </div>
+                  <input
+                    type="date"
+                    value={couponForm.expires_at}
+                    onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })}
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3"
+                  />
+                </div>
               </div>
 
               <div className="mt-6 flex justify-end gap-3">

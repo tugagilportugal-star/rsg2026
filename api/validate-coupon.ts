@@ -15,6 +15,7 @@ type CouponRow = {
   discount_amount: number | null;
   recording_only: boolean;
   single_use: boolean;
+  expires_at: string | null;
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -35,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (rawEmail) {
       const { data: emailCoupon, error: emailError } = await supabase
         .from('discount_coupons')
-        .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
+        .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use, expires_at')
         .eq('code', rawCode)
         .eq('email', rawEmail)
         .eq('active', true)
@@ -53,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!coupon) {
       const { data: genericCoupon, error: genericError } = await supabase
         .from('discount_coupons')
-        .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use')
+        .select('id, code, email, active, discount_percent, discount_amount, recording_only, single_use, expires_at')
         .eq('code', rawCode)
         .is('email', null)
         .eq('active', true)
@@ -70,6 +71,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!coupon) {
       return res.status(404).json({ valid: false, message: 'Cupão inválido.' });
+    }
+
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+      return res.status(200).json({ valid: false, message: 'Este cupão já expirou.' });
     }
 
     return res.status(200).json({
