@@ -73,8 +73,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ valid: false, message: 'Cupão inválido.' });
     }
 
-    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
-      return res.status(200).json({ valid: false, message: 'Este cupão já expirou.' });
+    if (coupon.expires_at) {
+      const expiry = new Date(coupon.expires_at);
+      expiry.setHours(23, 59, 59, 999);
+      if (expiry < new Date()) {
+        return res.status(200).json({ valid: false, message: 'Este cupão já expirou.' });
+      }
     }
 
     return res.status(200).json({

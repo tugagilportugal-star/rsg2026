@@ -1804,9 +1804,15 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{row.active ? 'Ativo' : 'Inativo'}</Td>
                         <Td>
                           {row.expires_at
-                            ? <span className={new Date(row.expires_at) < new Date() ? 'text-red-500 font-medium' : ''}>
-                                {formatDatePt(row.expires_at)}
-                              </span>
+                            ? (() => {
+                                const expiry = new Date(row.expires_at);
+                                expiry.setHours(23, 59, 59, 999);
+                                return (
+                                  <span className={expiry < new Date() ? 'text-red-500 font-medium' : ''}>
+                                    {formatDatePt(row.expires_at)}
+                                  </span>
+                                );
+                              })()
                             : '—'}
                         </Td>
                         <Td>{row.used_by_order_id || '—'}</Td>
