@@ -15,7 +15,7 @@ interface Sponsor {
 }
 
 export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
-  const MEDIA_KIT_URL = "https://drive.google.com/file/d/1fBqF56U6BRa2dBEzGHWfwseAW4sQCkgx/view?usp=sharing";
+  const MEDIA_KIT_URL = "https://drive.google.com/file/d/162ktlhFkYjvE90nH3ZAiW_kLQGrdI04o/view?usp=sharing";
 
   // --- LISTAS DE PATROCINADORES ---
   const goldSponsors: Sponsor[] =[];
