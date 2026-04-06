@@ -43,6 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         recording_only = false,
         single_use = true,
         active = true,
+        expires_at,
       } = req.body || {};
 
       const normalizedCode = normalizeCode(code);
@@ -85,6 +86,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           recording_only: Boolean(recording_only),
           single_use: Boolean(single_use),
           active: Boolean(active),
+          expires_at: expires_at || null,
         })
         .select()
         .single();
@@ -108,6 +110,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         recording_only,
         single_use,
         active,
+        expires_at,
       } = req.body || {};
 
       if (!id) {
@@ -143,6 +146,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (recording_only !== undefined) payload.recording_only = Boolean(recording_only);
       if (single_use !== undefined) payload.single_use = Boolean(single_use);
       if (active !== undefined) payload.active = Boolean(active);
+      if (expires_at !== undefined) payload.expires_at = expires_at || null;
 
       const { data: before } = await supabase
         .from('discount_coupons')

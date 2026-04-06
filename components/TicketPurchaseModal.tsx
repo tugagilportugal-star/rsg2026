@@ -28,7 +28,6 @@ type ParticipantForm = {
   email: string;
   country: string;
   company: string;
-  jobTitle: string;
   jobFunction: string;
   jobFunctionOther: string;
   industry: string;
@@ -51,7 +50,7 @@ const TSHIRTS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const emptyParticipant = (): ParticipantForm => ({
   firstName: '', lastName: '', email: '', country: 'Portugal',
-  company: '', jobTitle: '', jobFunction: '', jobFunctionOther: '',
+  company: '', jobFunction: '', jobFunctionOther: '',
   industry: '', tshirt: '', saMarketingConsent: false,
 });
 
@@ -70,9 +69,10 @@ type ComboInputProps = {
   placeholder?: string;
   className?: string;
   type?: string;
+  id?: string;
 };
 const ComboInput: React.FC<ComboInputProps> = ({
-  value, onChange, onSelect, onBlurEmpty, options, placeholder, className, type = 'text',
+  value, onChange, onSelect, onBlurEmpty, options, placeholder, className, type = 'text', id,
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -95,6 +95,7 @@ const ComboInput: React.FC<ComboInputProps> = ({
           setOpen(false);
           if (!value.trim()) onBlurEmpty?.();
         }}
+        id={id}
         className={className}
       />
       {open && shown.length > 0 && (
@@ -257,6 +258,7 @@ export const TicketPurchaseModal: React.FC = () => {
       if (!pt.lastName.trim())                                           return { id: `p${i}-lastName`,         tab: i };
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim()))         return { id: `p${i}-email`,            tab: i };
       if (!pt.tshirt)                                                    return { id: `p${i}-tshirt`,           tab: i };
+      if (!pt.company.trim())                                            return { id: `p${i}-company`,          tab: i };
       if (!pt.jobFunction)                                               return { id: `p${i}-jobFunction`,      tab: i };
       if (pt.jobFunction === 'Outros' && !pt.jobFunctionOther.trim())   return { id: `p${i}-jobFunctionOther`, tab: i };
       if (!pt.industry.trim())                                           return { id: `p${i}-industry`,         tab: i };
@@ -296,7 +298,6 @@ export const TicketPurchaseModal: React.FC = () => {
             company: p.company.trim(),
             job_function: p.jobFunction,
             job_function_other: p.jobFunction === 'Outros' ? p.jobFunctionOther.trim() : '',
-            job_title: p.jobTitle.trim(),
             industry: p.industry.trim(),
             tshirt: p.tshirt,
             sa_marketing_consent: p.saMarketingConsent,
@@ -350,7 +351,7 @@ export const TicketPurchaseModal: React.FC = () => {
   const isParticipantComplete = (pt: ParticipantForm) => {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pt.email.trim());
     return pt.firstName.trim() && pt.lastName.trim() && emailOk && pt.tshirt &&
-      pt.jobFunction && pt.industry.trim() && pt.country &&
+      pt.company.trim() && pt.jobFunction && pt.industry.trim() && pt.country &&
       (pt.jobFunction !== 'Outros' || pt.jobFunctionOther.trim());
   };
 
@@ -369,40 +370,6 @@ export const TicketPurchaseModal: React.FC = () => {
         Comprar {quantity > 1 ? 'Bilhetes' : 'Bilhete'}
       </h3>
 
-      {/* Linha 2: quantidade à esquerda + tabs à direita */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-sm text-gray-500">Qtd:</span>
-          <button type="button" onClick={() => handleQuantityChange(quantity - 1)} disabled={quantity <= 1}
-            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand-orange hover:text-brand-orange transition-colors font-bold text-lg leading-none">−</button>
-          <span className="w-5 text-center font-bold text-brand-darkBlue">{quantity}</span>
-          <button type="button" onClick={() => handleQuantityChange(quantity + 1)} disabled={quantity >= 5}
-            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand-orange hover:text-brand-orange transition-colors font-bold text-lg leading-none">+</button>
-        </div>
-
-        {/* Tabs dos participantes à direita da quantidade */}
-        {quantity > 1 && (
-          <div className="flex gap-1 overflow-x-auto flex-1">
-            {participants.map((pt, i) => {
-              const complete = isParticipantComplete(pt);
-              const hasData = participantHasData(pt);
-              const tabCls = i === activeTab ? 'bg-brand-orange text-white'
-                : complete ? 'bg-green-100 text-green-700'
-                : hasData && showErrors ? 'bg-red-100 text-red-700'
-                : hasData ? 'bg-amber-100 text-amber-700'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200';
-              const prefix = complete ? '✓ ' : hasData ? '! ' : '';
-              return (
-                <button key={i} type="button" onClick={() => setActiveTab(i)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors whitespace-nowrap ${tabCls}`}>
-                  {prefix}{pt.firstName || `P${i + 1}`}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {/* Banner de erro — campos em falta no tab activo */}
       {showErrors && !isParticipantComplete(p) && (
         <div className="bg-red-50 border border-red-400 rounded-lg px-3 py-2 flex items-center gap-2">
@@ -413,13 +380,49 @@ export const TicketPurchaseModal: React.FC = () => {
         </div>
       )}
 
-      {/* Formulário do participante activo */}
-      <div className="space-y-4">
-        {quantity > 1 && (
-          <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-            Participante {activeTab + 1} de {quantity}
-          </p>
-        )}
+      {/* Pasta: qty + tabs + conteúdo sem gap entre eles */}
+      <div>
+        <div className="flex items-end gap-3">
+          <div className="flex items-center gap-1.5 shrink-0 pb-1.5">
+            <span className="text-sm text-gray-500">Qtd:</span>
+            <button type="button" onClick={() => handleQuantityChange(quantity - 1)} disabled={quantity <= 1}
+              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand-orange hover:text-brand-orange transition-colors font-bold text-lg leading-none">−</button>
+            <span className="w-5 text-center font-bold text-brand-darkBlue">{quantity}</span>
+            <button type="button" onClick={() => handleQuantityChange(quantity + 1)} disabled={quantity >= 5}
+              className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand-orange hover:text-brand-orange transition-colors font-bold text-lg leading-none">+</button>
+          </div>
+
+          {quantity > 1 && (
+            <div className="flex gap-1 flex-1 overflow-x-auto">
+              {participants.map((pt, i) => {
+                const complete = isParticipantComplete(pt);
+                const hasData = participantHasData(pt);
+                const isActive = i === activeTab;
+                const prefix = complete ? '✓ ' : hasData ? '! ' : '';
+                const tabCls = isActive
+                  ? 'bg-white border-orange-200 text-brand-orange z-10'
+                  : complete
+                    ? 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'
+                    : hasData && showErrors
+                      ? 'bg-red-50 border-red-200 text-red-600'
+                      : hasData
+                        ? 'bg-amber-50 border-amber-200 text-amber-600'
+                        : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100';
+                return (
+                  <button key={i} type="button" onClick={() => setActiveTab(i)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-t-lg border-t border-l border-r -mb-px transition-colors whitespace-nowrap relative ${tabCls}`}>
+                    {prefix}{pt.firstName || `P${i + 1}`}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Conteúdo do participante — directamente a seguir (sem margin-top) */}
+        <div className={quantity > 1
+          ? 'space-y-4 border border-orange-200 rounded-b-xl rounded-tr-xl p-4 bg-white'
+          : 'space-y-4'}>
 
         {/* Nome + Apelido */}
         <div className="grid grid-cols-2 gap-4">
@@ -459,34 +462,32 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Empresa + Cargo */}
+        {/* Empresa + Função */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Empresa</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Empresa <span className="text-red-500">*</span></label>
             {(() => {
               const otherCompanies = [...new Set(participants.filter((_, i) => i !== activeTab).map(pt => pt.company).filter(Boolean))];
               const companySuggestion = otherCompanies[0] || '';
+              const isInvalid = showErrors && !p.company.trim();
               return (
-                <ComboInput
-                  value={p.company}
-                  onChange={val => updateParticipant(activeTab, { company: val })}
-                  onBlurEmpty={() => { if (companySuggestion) updateParticipant(activeTab, { company: companySuggestion }); }}
-                  options={otherCompanies}
-                  placeholder={companySuggestion}
-                  className={fieldClass}
-                />
+                <>
+                  <ComboInput
+                    id={`p${activeTab}-company`}
+                    value={p.company}
+                    onChange={val => updateParticipant(activeTab, { company: val })}
+                    onBlurEmpty={() => { if (companySuggestion) updateParticipant(activeTab, { company: companySuggestion }); }}
+                    options={otherCompanies}
+                    placeholder={companySuggestion || 'Nome da empresa'}
+                    className={isInvalid
+                      ? 'mt-1 block w-full border border-red-500 rounded-md shadow-sm p-2 text-sm focus:ring-red-500 focus:border-red-500'
+                      : fieldClass}
+                  />
+                  {isInvalid && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+                </>
               );
             })()}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Cargo</label>
-            <input type="text" value={p.jobTitle} onChange={e => updateParticipant(activeTab, { jobTitle: e.target.value })}
-              className={fieldClass} />
-          </div>
-        </div>
-
-        {/* Função + País */}
-        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Função <span className="text-red-500">*</span></label>
             <select id={`p${activeTab}-jobFunction`} value={p.jobFunction}
@@ -496,14 +497,6 @@ export const TicketPurchaseModal: React.FC = () => {
               {JOB_FUNCTIONS.map(f => <option key={f}>{f}</option>)}
             </select>
             {showErrors && !p.jobFunction && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">País <span className="text-red-500">*</span></label>
-            <select id={`p${activeTab}-country`} value={p.country}
-              onChange={e => updateParticipant(activeTab, { country: e.target.value })}
-              className={selectClass}>
-              {COUNTRIES.map(c => <option key={c}>{c}</option>)}
-            </select>
           </div>
         </div>
 
@@ -516,14 +509,24 @@ export const TicketPurchaseModal: React.FC = () => {
           </div>
         )}
 
-        {/* Indústria */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Indústria <span className="text-red-500">*</span></label>
-          <input id={`p${activeTab}-industry`} type="text" value={p.industry}
-            onChange={e => updateParticipant(activeTab, { industry: e.target.value })}
-            placeholder="Ex: Tecnologia, Saúde, Educação…"
-            className={errClass(showErrors && !p.industry.trim())} />
-          {showErrors && !p.industry.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+        {/* Indústria + País */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Indústria <span className="text-red-500">*</span></label>
+            <input id={`p${activeTab}-industry`} type="text" value={p.industry}
+              onChange={e => updateParticipant(activeTab, { industry: e.target.value })}
+              placeholder="Ex: Tecnologia, Saúde…"
+              className={errClass(showErrors && !p.industry.trim())} />
+            {showErrors && !p.industry.trim() && <p className="text-xs text-red-500 mt-1">Campo obrigatório</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">País <span className="text-red-500">*</span></label>
+            <select id={`p${activeTab}-country`} value={p.country}
+              onChange={e => updateParticipant(activeTab, { country: e.target.value })}
+              className={selectClass}>
+              {COUNTRIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
         </div>
 
         {/* Marketing consent (opcional, por participante) */}
@@ -539,6 +542,7 @@ export const TicketPurchaseModal: React.FC = () => {
               className="text-brand-blue font-bold hover:underline">Política de Privacidade da Scrum Alliance</a>.
           </label>
         </div>
+      </div>
       </div>
 
       {/* Secção partilhada — gravação, valor, cupão, NIF */}
