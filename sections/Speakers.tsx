@@ -55,25 +55,7 @@ export const Speakers: React.FC = () => {
       isRevealed: true
     },
     {
-      id: "s2",
-      name: "Patrícia Sousa",
-      role: "Agile Leader", // Pode ajustar depois
-      company: "TBA",       // Pode ajustar depois
-      image: "/assets/Patricia-Sousa.png",
-      linkedin: "#", 
-      isRevealed: true
-    },
-    {
       id: "s3",
-      name: "Coca Pitzer",
-      role: "Enterprise Agile Strategist",
-      company: "Agile & Digital Transformation",
-      image: "/assets/Coca-Pitzer.png",
-      linkedin: "https://www.linkedin.com/in/cocapitzer/",
-      isRevealed: true 
-    },
-    {
-      id: "s4",
       name: "Joana Silva",
       role: "Director of Quality Assurance",
       company: "TBA",
@@ -82,7 +64,7 @@ export const Speakers: React.FC = () => {
       isRevealed: true 
     },
     {
-      id: "s5",
+      id: "s3",
       name: "Manuel Pais",
       role: "Co-author of Team Topologies",
       company: "IT Revolution",
@@ -91,12 +73,38 @@ export const Speakers: React.FC = () => {
       isRevealed: true 
     },
     {
-      id: "s6",
+      id: "s4",
       name: "Paulo Caroli",
-      role: "Author of Lean Inception",
+      role: "Author of Lean Inception & Team OKRs",
       company: "Thoughtworks",
       image: "/assets/Paulo-Caroli.png", 
       linkedin: "https://www.linkedin.com/in/paulocaroli/",
+      isRevealed: true 
+    },
+    {
+      id: "s5",
+      name: "Patrícia Sousa",
+      role: "Talent & People Transformation Leader",
+      image: "/assets/Patricia-Sousa.png",
+      linkedin: "https://www.linkedin.com/in/patriciaalvessousa/", 
+      isRevealed: true
+    },
+    {
+      id: "s6",
+      name: "Ricardo Fernandes",
+      role: "Enterprise Agile Strategist",
+      company: "Enterprise Consultant",
+      image: "/assets/Ricardo-Fernandes.png",
+      linkedin: "https://www.linkedin.com/in/ricardofernandes/",
+      isRevealed: true 
+    },
+    {
+      id: "s7",
+      name: "Coca Pitzer",
+      role: "Enterprise Agile Strategist",
+      company: "Agile & Digital Transformation",
+      image: "/assets/Coca-Pitzer.png",
+      linkedin: "https://www.linkedin.com/in/cocapitzer/",
       isRevealed: true 
     },
     // Placeholders para manter a grelha simétrica até termos os 10 speakers
