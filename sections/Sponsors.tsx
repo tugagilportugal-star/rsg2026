@@ -31,7 +31,7 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
     { 
       name: "ISQe", 
       logo: "/assets/ISQe.png", 
-      url: "https://isqe.pt/",
+      url: "https://isqe.com/",
       logoClass: "max-h-8 md:max-h-9" 
     }
   ];
