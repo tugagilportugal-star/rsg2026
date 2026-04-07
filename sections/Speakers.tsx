@@ -43,7 +43,7 @@ export const Speakers: React.FC = () => {
       id: "s1",
       name: "Ricardo Caldas",
       role: "Product Owner",
-      image: "https://i.postimg.cc/SxbL5Zjk/Ricardo-Caldas-(1).png",
+      image: "/assets/Ricardo-Caldas.png",
       linkedin: "https://www.linkedin.com/in/ricardo-caldas/",
       isRevealed: true
     },
@@ -51,7 +51,7 @@ export const Speakers: React.FC = () => {
       id: "s2",
       name: "Joana Silva",
       role: "Director of Quality Assurance",
-      image: "https://i.postimg.cc/Gpwcvy73/Joana-Silva.png",
+      image: "/assets/Joana-Silva.png",
       linkedin: "https://www.linkedin.com/in/joanacssilva/",
       isRevealed: true
     },
@@ -59,7 +59,7 @@ export const Speakers: React.FC = () => {
       id: "s3",
       name: "Manuel Pais",
       role: "Co-author of Team Topologies",
-      image: "https://i.postimg.cc/zvdsnp0t/Manuel-Pais.png",
+      image: "/assets/Manuel-Pais.png",
       linkedin: "https://www.linkedin.com/in/manuelpais/",
       isRevealed: true
     },
@@ -67,7 +67,7 @@ export const Speakers: React.FC = () => {
       id: "s4",
       name: "Paulo Caroli",
       role: "Author of Lean Inception & Team OKRs",
-      image: "https://i.postimg.cc/NjDKxV5z/Paulo-Caroli.png",
+      image: "/assets/Paulo-Caroli.png",
       linkedin: "https://www.linkedin.com/in/paulocaroli/",
       isRevealed: true
     },
@@ -75,7 +75,7 @@ export const Speakers: React.FC = () => {
       id: "s5",
       name: "Patrícia Sousa",
       role: "Talent & People Transformation Leader",
-      image: "https://i.postimg.cc/KYS4nyCh/Patricia-Sousa.png",
+      image: "/assets/Patricia-Sousa.png",
       linkedin: "https://www.linkedin.com/in/patriciaalvessousa/",
       isRevealed: true
     },
@@ -83,7 +83,7 @@ export const Speakers: React.FC = () => {
       id: "s6",
       name: "Ricardo Fernandes",
       role: "Enterprise Consultant",
-      image: "https://i.postimg.cc/DyjJCJXS/Ricardo-Fernandes.png",
+      image: "/assets/Ricardo-Fernandes.png",
       linkedin: "https://www.linkedin.com/in/ricardo-fernandes-agile/",
       isRevealed: true
     },
