@@ -26,11 +26,11 @@ export const Speakers: React.FC = () => {
     },
     {
       id: "k2",
-      name: "A anunciar",
-      role: "Keynote Speaker",
-      image: "",
-      isRevealed: false,
-      isEnglish: true
+      name: "Nadia Miranda",
+      role: "IT Director & Digital Transformation Leader",
+      image: "/assets/Nadia-Miranda.png",
+      linkedin: "https://www.linkedin.com/in/n%C3%A1dia-miranda-phd-master-managt-b1b30367/",
+      isRevealed: true
     }
   ];
 
