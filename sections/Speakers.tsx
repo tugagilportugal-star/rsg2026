@@ -87,7 +87,7 @@ export const Speakers: React.FC = () => {
     {
       id: "s7",
       name: "Coca Pitzer",
-      role: "Enterprise Agile Strategist",
+      role: "Enterprise Agile Consultant",
       image: "/assets/Coca-Pitzer.png",
       linkedin: "https://www.linkedin.com/in/cocapitzer/",
       isRevealed: true 
@@ -103,28 +103,22 @@ export const Speakers: React.FC = () => {
   ];
 
   const KeynoteCard = ({ data }: { data: SpeakerData }) => {
-    if (!data.isRevealed) {
-      return (
-        <div className="relative overflow-hidden rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-200 aspect-[3/4] w-full max-w-[320px] mx-auto flex flex-col items-center justify-center text-center p-6 transition-all duration-300">
-           <UserCircle2 className="w-8 h-8 text-gray-400 mb-4" />
-           <h3 className="text-lg font-black text-gray-400 mb-2">Keynote</h3>
-           <p className="text-gray-400 text-xs font-medium uppercase tracking-widest">A anunciar brevemente</p>
-        </div>
-      );
-    }
+    if (!data.isRevealed) return null;
 
     return (
       <div className="group relative overflow-hidden rounded-[2rem] aspect-[3/4] w-full max-w-[320px] mx-auto shadow-xl bg-brand-darkBlue">
+        {/* Keynote: Sempre Colorida */}
         <img 
           src={data.image} 
           alt={data.name} 
-          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-darkBlue via-brand-darkBlue/40 to-transparent opacity-90"></div>
         
+        {/* Tag English: Visual e Profissional */}
         {data.isEnglish && (
-            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 border border-white/20">
-                <span className="text-2xl">🇬🇧</span>
+            <div className="absolute top-4 right-4 bg-[#012169] border border-white/20 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-xl z-20 transition-transform group-hover:scale-110">
+                <span className="text-[10px] font-black text-white uppercase tracking-widest">English</span>
             </div>
         )}
 
@@ -174,9 +168,8 @@ export const Speakers: React.FC = () => {
           </div>
         </div>
         
-        {/* FONTES ORIGINAIS RESTAURADAS AQUI */}
         <h4 className="font-bold text-lg text-brand-darkBlue mb-1">{data.name}</h4>
-        <p className="text-xs font-medium text-brand-orange mb-1">{data.role}</p>
+        <p className="text-xs font-medium text-brand-orange mb-1 leading-tight">{data.role}</p>
       </div>
     );
   };
@@ -185,17 +178,17 @@ export const Speakers: React.FC = () => {
     <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-20">
-          <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">O Line-Up</span>
+          <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
           <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">Speakers 2026</h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
-            As mentes que estão a redefinir a agilidade, liderança e engenharia a nível global.
-            <br/> <span className="text-brand-blue font-semibold">Mais oradores anunciados em breve.</span>
+            Grandes nomes da agilidade, inovação e inteligência artificial.
+            <br/> <span className="text-brand-blue font-semibold">Mais oradores serão anunciados em breve.</span>
           </p>
         </div>
 
         <div className="mb-24">
-            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3">
-                <Sparkles className="text-brand-orange w-6 h-6" /> Featured Keynotes
+            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 tracking-tighter">
+                <Sparkles className="text-brand-orange w-6 h-6" /> Keynotes
             </h3>
             <div className="flex flex-wrap justify-center gap-6 md:gap-8">
                 {keynotes.map(keynote => (
@@ -205,7 +198,9 @@ export const Speakers: React.FC = () => {
         </div>
 
         <div>
-            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left">Speakers & Panelists</h3>
+            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left tracking-tighter">
+                Speakers
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">
                 {speakers.map(speaker => (
                     <SpeakerCard key={speaker.id} data={speaker} />
