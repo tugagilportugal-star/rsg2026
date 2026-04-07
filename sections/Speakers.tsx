@@ -178,7 +178,7 @@ export const Speakers: React.FC = () => {
     <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-20">
-          <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">O Line-Up</span>
+          <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
           <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">Speakers 2026</h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
             Grandes nomes da agilidade, inovação e inteligência artificial.
@@ -187,7 +187,7 @@ export const Speakers: React.FC = () => {
         </div>
 
         <div className="mb-24">
-            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 uppercase tracking-tighter">
+            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 tracking-tighter">
                 <Sparkles className="text-brand-orange w-6 h-6" /> Keynotes
             </h3>
             <div className="flex flex-wrap justify-center gap-6 md:gap-8">
@@ -198,7 +198,7 @@ export const Speakers: React.FC = () => {
         </div>
 
         <div>
-            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left uppercase tracking-tighter">
+            <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left tracking-tighter">
                 Speakers
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">
