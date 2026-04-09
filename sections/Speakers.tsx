@@ -26,11 +26,11 @@ export const Speakers: React.FC = () => {
     },
     {
       id: "k2",
-      name: "A anunciar",
-      role: "Keynote Speaker",
-      image: "",
-      isRevealed: false,
-      isEnglish: true
+      name: "Nadia Miranda",
+      role: "IT Director & Digital Transformation Leader",
+      image: "/assets/Nadia-Miranda.png",
+      linkedin: "https://www.linkedin.com/in/n%C3%A1dia-miranda-phd-master-managt-b1b30367/",
+      isRevealed: false
     }
   ];
 
@@ -43,7 +43,8 @@ export const Speakers: React.FC = () => {
     { id: "s6", name: "Ricardo Fernandes", role: "Enterprise Consultant", image: "/assets/Ricardo-Fernandes.png", linkedin: "https://www.linkedin.com/in/ricardofernandes/", isRevealed: true },
     { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/Coca-Pitzer.png", linkedin: "https://www.linkedin.com/in/cocapitzer/", isRevealed: true },
     { id: "s8", name: "David Anderson", role: "Originator of the Kanban Method", image: "/assets/David-Anderson.png", linkedin: "https://www.linkedin.com/in/agilemanagement/", isRevealed: true, isEnglish: true },
-    
+    { id: "s9", name: "César Ribeiro", role: "Head of IT Governance", image: "/assets/Cesar-Ribeiro.png", linkedin: "https://www.linkedin.com/in/cesar-ribeiro-b07aa14b/", isRevealed: true },
+        
     ...Array.from({ length: 2 }).map((_, i) => ({
       id: `tba-${i+9}`,
       name: "Revealing Soon",
