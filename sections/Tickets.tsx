@@ -136,7 +136,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
     { 
       text: (
         <span>
-          Bónus Exclusivos (Agile Academy & Kanban+).{' '}
+          Bónus Exclusivos.{' '}
           <button 
             type="button"
             onClick={(e) => {
