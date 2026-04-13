@@ -154,12 +154,12 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   ];
 
   return (
-    <Section id="tickets" className="relative overflow-hidden bg-white">
+    <Section id="tickets" className="relative overflow-hidden bg-brand-darkBlue">
       <div className="text-center mb-6 md:mb-8">
-        <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue">
+        <h2 className="text-4xl md:text-6xl font-black text-white">
           {showTicketBox ? 'Garanta o seu lugar' : 'Waitlist Oficial'}
         </h2>
-        <p className="mt-3 max-w-3xl mx-auto text-lg md:text-2xl text-gray-500 leading-relaxed">
+        <p className="mt-3 max-w-3xl mx-auto text-lg md:text-2xl text-blue-100 leading-relaxed">
           {showTicketBox
             ? 'Participe de uma das maiores celebrações da agilidade em Portugal. Preço exclusivo para os primeiros inscritos.'
             : 'Seja o primeiro a saber quando os bilhetes abrirem. Inscreva-se na lista de espera e garanta acesso prioritário.'}
@@ -168,9 +168,9 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
 
       <div className="max-w-[560px] md:max-w-[860px] mx-auto relative">
         {!showTicketBox && !statusLoading && (
-          <div className="relative bg-white border-2 border-brand-darkBlue rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.08)] px-7 md:px-8 py-6">
+          <div className="relative bg-white/10 border-2 border-white/30 rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.2)] px-7 md:px-8 py-6">
             <div className="flex justify-center mb-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-brand-darkBlue px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 text-white px-4 py-1.5 text-sm md:text-base font-black tracking-wide">
                 <Bell className="w-4 h-4" /> Waitlist Oficial
               </div>
             </div>
@@ -228,7 +228,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
           </>
         )}
 
-        {statusLoading && <div className="text-center py-12 text-gray-400">A carregar...</div>}
+        {statusLoading && <div className="text-center py-12 text-white/50">A carregar...</div>}
       </div>
 
       <BonusModal 
