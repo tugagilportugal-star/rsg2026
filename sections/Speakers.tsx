@@ -79,8 +79,8 @@ export const Speakers: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-darkBlue via-brand-darkBlue/40 to-transparent opacity-90"></div>
         
         {data.isEnglish && (
-          <div className="absolute top-4 right-4 bg-[#012169] border border-white/20 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-xl z-20 transition-transform group-hover:scale-110">
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">English</span>
+          <div className="absolute top-4 right-4 bg-[#012169] border border-white/30 px-3 py-1 rounded-full shadow-xl z-20 transition-transform group-hover:scale-110">
+            <span className="text-xs font-black text-white tracking-wide">EN</span>
           </div>
         )}
 
@@ -118,8 +118,8 @@ export const Speakers: React.FC = () => {
         <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-4 shadow-md border border-gray-100 bg-gray-100">
           {/* TAG ENGLISH NOS SPEAKERS */}
           {data.isEnglish && (
-            <div className="absolute top-2 right-2 bg-[#012169] border border-white/20 px-2 py-1 rounded-full z-20 shadow-md">
-              <span className="text-[8px] font-black text-white uppercase tracking-tighter">English</span>
+            <div className="absolute top-2 right-2 bg-[#012169] border border-white/30 px-2 py-1 rounded-full z-20 shadow-md">
+              <span className="text-xs font-black text-white tracking-wide">EN</span>
             </div>
           )}
           <img 
