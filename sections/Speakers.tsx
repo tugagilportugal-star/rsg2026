@@ -80,7 +80,7 @@ export const Speakers: React.FC = () => {
         
         {data.isEnglish && (
           <div className="absolute top-4 right-4 bg-[#012169] border border-white/30 px-3 py-1 rounded-full shadow-xl z-20 transition-transform group-hover:scale-110">
-            <span className="text-xs font-black text-white tracking-wide">EN</span>
+            <span className="text-sm">🇬🇧</span>
           </div>
         )}
 
@@ -119,7 +119,7 @@ export const Speakers: React.FC = () => {
           {/* TAG ENGLISH NOS SPEAKERS */}
           {data.isEnglish && (
             <div className="absolute top-2 right-2 bg-[#012169] border border-white/30 px-2 py-1 rounded-full z-20 shadow-md">
-              <span className="text-xs font-black text-white tracking-wide">EN</span>
+              <span className="text-sm">🇬🇧</span>
             </div>
           )}
           <img 
