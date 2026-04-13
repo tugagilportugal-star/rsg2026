@@ -79,8 +79,8 @@ export const Speakers: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-darkBlue via-brand-darkBlue/40 to-transparent opacity-90"></div>
         
         {data.isEnglish && (
-          <div className="absolute top-4 right-4 bg-[#012169] border border-white/30 px-3 py-1 rounded-full shadow-xl z-20 transition-transform group-hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-6 h-3 rounded-sm"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clipPath="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" strokeWidth="6"/><path d="M0 0l60 30m0-30L0 30" clipPath="url(#b)" stroke="#C8102E" strokeWidth="4"/><path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" strokeWidth="6"/></g></svg>
+          <div className="absolute top-4 right-4 w-8 h-8 rounded-full overflow-hidden shadow-xl z-20 transition-transform group-hover:scale-110 border-2 border-white/60">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" className="w-full h-full"><rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#C8102E" strokeWidth="8"/><path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="20"/><path d="M30 0v60M0 30h60" stroke="#C8102E" strokeWidth="12"/></svg>
           </div>
         )}
 
@@ -118,8 +118,8 @@ export const Speakers: React.FC = () => {
         <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-4 shadow-md border border-gray-100 bg-gray-100">
           {/* TAG ENGLISH NOS SPEAKERS */}
           {data.isEnglish && (
-            <div className="absolute top-2 right-2 bg-[#012169] border border-white/30 px-2 py-1 rounded-full z-20 shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-6 h-3 rounded-sm"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clipPath="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" strokeWidth="6"/><path d="M0 0l60 30m0-30L0 30" clipPath="url(#b)" stroke="#C8102E" strokeWidth="4"/><path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" strokeWidth="6"/></g></svg>
+            <div className="absolute top-2 right-2 w-7 h-7 rounded-full overflow-hidden shadow-md z-20 border-2 border-white/60">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" className="w-full h-full"><rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#C8102E" strokeWidth="8"/><path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="20"/><path d="M30 0v60M0 30h60" stroke="#C8102E" strokeWidth="12"/></svg>
             </div>
           )}
           <img 
