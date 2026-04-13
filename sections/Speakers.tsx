@@ -80,7 +80,7 @@ export const Speakers: React.FC = () => {
         
         {data.isEnglish && (
           <div className="absolute top-4 right-4 bg-[#012169] border border-white/30 px-3 py-1 rounded-full shadow-xl z-20 transition-transform group-hover:scale-110">
-            <span className="text-sm">🇬🇧</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-6 h-3 rounded-sm"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clipPath="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" strokeWidth="6"/><path d="M0 0l60 30m0-30L0 30" clipPath="url(#b)" stroke="#C8102E" strokeWidth="4"/><path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" strokeWidth="6"/></g></svg>
           </div>
         )}
 
@@ -119,7 +119,7 @@ export const Speakers: React.FC = () => {
           {/* TAG ENGLISH NOS SPEAKERS */}
           {data.isEnglish && (
             <div className="absolute top-2 right-2 bg-[#012169] border border-white/30 px-2 py-1 rounded-full z-20 shadow-md">
-              <span className="text-sm">🇬🇧</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-6 h-3 rounded-sm"><clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clipPath="url(#a)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" strokeWidth="6"/><path d="M0 0l60 30m0-30L0 30" clipPath="url(#b)" stroke="#C8102E" strokeWidth="4"/><path d="M30 0v30M0 15h60" stroke="#fff" strokeWidth="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" strokeWidth="6"/></g></svg>
             </div>
           )}
           <img 
