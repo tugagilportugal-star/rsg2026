@@ -79,8 +79,13 @@ export const Speakers: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-darkBlue via-brand-darkBlue/40 to-transparent opacity-90"></div>
         
         {data.isEnglish && (
-          <div className="absolute top-4 right-4 w-8 h-8 rounded-full overflow-hidden shadow-xl z-20 transition-transform group-hover:scale-110 border-2 border-white/60">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" className="w-full h-full"><rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#C8102E" strokeWidth="8"/><path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="20"/><path d="M30 0v60M0 30h60" stroke="#C8102E" strokeWidth="12"/></svg>
+          <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-1 group/flag">
+            <div className="w-8 h-8 rounded-full overflow-hidden shadow-xl transition-transform group-hover/flag:scale-110 border-2 border-white/60">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" className="w-full h-full"><rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#C8102E" strokeWidth="8"/><path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="20"/><path d="M30 0v60M0 30h60" stroke="#C8102E" strokeWidth="12"/></svg>
+            </div>
+            <span className="opacity-0 group-hover/flag:opacity-100 transition-opacity duration-200 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap pointer-events-none">
+              Talk em Inglês
+            </span>
           </div>
         )}
 
