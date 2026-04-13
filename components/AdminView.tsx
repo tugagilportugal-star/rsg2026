@@ -1347,6 +1347,27 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     );
   }
 
+  // ── Dashboard stats (tickets tab) ──────────────────────────────────────
+  const validOrderIds = new Set(
+    orders.filter(o => !o.is_duplicate && !o.is_test).map(o => o.id)
+  );
+  const validTickets = tickets.filter(t => t.order_id && validOrderIds.has(t.order_id));
+  const totalTicketsSold = validTickets.length;
+  const totalRevenueCents = orders
+    .filter(o => validOrderIds.has(o.id))
+    .reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
+  const totalRecordingOrders = orders.filter(o => validOrderIds.has(o.id) && o.include_recording).length;
+
+  const perLote = ticketTypes
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map(tt => {
+      const sold = validTickets.filter(t => t.ticket_type_id === tt.id).length;
+      const capacity = tt.quantity_total ?? 0;
+      return { id: tt.id, name: tt.name, sold, capacity };
+    })
+    .filter(lt => lt.capacity > 0 || lt.sold > 0);
+
   return (
     <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm">
       <div className="absolute inset-4 rounded-3xl bg-gray-50 shadow-2xl overflow-hidden flex flex-col">
@@ -1723,6 +1744,51 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   )}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {tab === 'tickets' && !loadingTickets && !loadingOrders && tickets.length > 0 && (
+            <div className="bg-white rounded-3xl border p-5 space-y-5">
+              {/* KPI cards */}
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Bilhetes vendidos', value: String(totalTicketsSold) },
+                  { label: 'Receita total', value: formatMoneyEURFromCents(totalRevenueCents) },
+                  { label: 'Acessos vídeo', value: String(totalRecordingOrders) },
+                ].map(({ label, value }) => (
+                  <div key={label} className="rounded-2xl bg-gray-50 border px-4 py-3">
+                    <div className="text-xs text-gray-500 mb-1">{label}</div>
+                    <div className="text-2xl font-black text-[#003F59]">{value}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Per-lote bars */}
+              {perLote.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Por lote</div>
+                  <div className="space-y-2.5">
+                    {perLote.map(({ id, name, sold, capacity }) => {
+                      const pct = capacity > 0 ? Math.min((sold / capacity) * 100, 100) : 0;
+                      const full = pct >= 100;
+                      return (
+                        <div key={id} className="flex items-center gap-3 text-sm">
+                          <div className="w-36 text-gray-600 truncate shrink-0 text-right">{name}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${full ? 'bg-red-500' : 'bg-[#003F59]'}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <div className="w-20 text-gray-700 font-medium shrink-0">
+                            {sold}{capacity > 0 ? ` / ${capacity}` : ''}
+                            {full && <span className="ml-1 text-xs text-red-500 font-bold">CHEIO</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
