@@ -42,17 +42,17 @@ export const WhyAttend: React.FC = () => {
   ];
 
   return (
-    <Section className="bg-white relative overflow-hidden">
+    <Section className="bg-brand-darkBlue relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        
+
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
+
           {/* COLUNA DA ESQUERDA: QUEM DEVE IR */}
           <div>
-            <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 leading-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
               Para quem é este evento
             </h2>
-            <p className="text-gray-500 text-lg mb-10 leading-relaxed">
+            <p className="text-blue-100 text-lg mb-10 leading-relaxed">
               O RSG Lisbon não é para quem procura receitas mágicas. É para profissionais que querem elevar o nível da agilidade e criar impacto real nas suas organizações.
             </p>
 
@@ -60,13 +60,13 @@ export const WhyAttend: React.FC = () => {
               {audience.map((item, idx) => (
                 <div key={idx} className="flex gap-4 group">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="w-6 h-6 rounded-full bg-brand-blue/10 flex items-center justify-center group-hover:bg-brand-blue group-hover:text-white transition-colors">
-                      <CheckCircle2 className="w-4 h-4 text-brand-blue group-hover:text-white" />
+                    <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-orange transition-colors">
+                      <CheckCircle2 className="w-4 h-4 text-white" />
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-bold text-brand-darkBlue text-lg">{item.role}</h4>
-                    <p className="text-gray-500 text-sm leading-relaxed">{item.goal}</p>
+                    <h4 className="font-bold text-white text-lg">{item.role}</h4>
+                    <p className="text-blue-100 text-sm leading-relaxed">{item.goal}</p>
                   </div>
                 </div>
               ))}
@@ -76,9 +76,9 @@ export const WhyAttend: React.FC = () => {
           {/* COLUNA DA DIREITA: PORQUÊ PARTICIPAR (Cards) */}
           <div className="relative">
             {/* Elemento Decorativo de Fundo */}
-            <div className="absolute inset-0 bg-gray-50 rounded-[40px] -rotate-3 transform scale-95 -z-10"></div>
-            
-            <div className="bg-brand-darkBlue rounded-[40px] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-white/5 rounded-[40px] -rotate-3 transform scale-95 -z-10"></div>
+
+            <div className="bg-white/10 border border-white/20 rounded-[40px] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
                 {/* Círculo decorativo */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
