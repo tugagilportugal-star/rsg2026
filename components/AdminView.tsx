@@ -177,6 +177,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
   const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
   const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
+  const [resendingEmail, setResendingEmail] = useState<'ticket' | 'invoice' | null>(null);
+  const [resendMsg, setResendMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
@@ -492,6 +494,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setError('Erro inesperado ao carregar pagamentos');
     } finally {
       setLoadingOrders(false);
+    }
+  }
+
+  async function resendEmail(orderId: string, type: 'ticket' | 'invoice') {
+    if (!authHeader) return;
+    setResendingEmail(type);
+    setResendMsg(null);
+    try {
+      const res = await fetch('/api/admin/resend-email', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, type }),
+      });
+      const json = await res.json();
+      setResendMsg({ ok: res.ok, text: json.message || (res.ok ? 'Enviado!' : 'Erro desconhecido') });
+    } catch (e: any) {
+      setResendMsg({ ok: false, text: e?.message || 'Erro de rede' });
+    } finally {
+      setResendingEmail(null);
     }
   }
 
@@ -2359,6 +2380,32 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <p className="mt-3 text-xs text-center text-gray-500">
                     Estornado em <span className="font-medium text-gray-700">{new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')}</span>
                   </p>
+                )}
+                {ticketOrder && (
+                  <div className="mt-4 border-t pt-4 space-y-2">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reenviar Emails</p>
+                    <button
+                      onClick={() => { setResendMsg(null); resendEmail(ticketOrder.id, 'ticket'); }}
+                      disabled={resendingEmail !== null}
+                      className="w-full py-2 rounded-lg border border-sky-400 text-sky-600 text-sm font-medium hover:bg-sky-50 disabled:opacity-50"
+                    >
+                      {resendingEmail === 'ticket' ? 'A enviar…' : '✉️ Reenviar Bilhete'}
+                    </button>
+                    {ticketOrder.invoice_id && (
+                      <button
+                        onClick={() => { setResendMsg(null); resendEmail(ticketOrder.id, 'invoice'); }}
+                        disabled={resendingEmail !== null}
+                        className="w-full py-2 rounded-lg border border-sky-400 text-sky-600 text-sm font-medium hover:bg-sky-50 disabled:opacity-50"
+                      >
+                        {resendingEmail === 'invoice' ? 'A enviar…' : '🧾 Reenviar Fatura'}
+                      </button>
+                    )}
+                    {resendMsg && (
+                      <p className={`text-xs mt-1 text-center ${resendMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                        {resendMsg.text}
+                      </p>
+                    )}
+                  </div>
                 )}
                 {canEdit && ticketOrder && (
                   <div className="mt-4 border-t pt-4">
