@@ -154,7 +154,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   ];
 
   return (
-    <Section id="tickets" className="relative overflow-hidden bg-white">
+    <Section id="tickets" className="relative overflow-hidden bg-gray-50">
       <div className="text-center mb-6 md:mb-8">
         <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue">
           {showTicketBox ? 'Garanta o seu lugar' : 'Waitlist Oficial'}

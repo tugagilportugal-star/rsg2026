@@ -154,7 +154,7 @@ export const Speakers: React.FC = () => {
   return (
     <Section id="speakers" className="bg-gray-50 py-24">
       <div className="max-w-7xl mx-auto px-4">
-        
+
         {/* Título da Secção */}
         <div className="text-center mb-20">
           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
