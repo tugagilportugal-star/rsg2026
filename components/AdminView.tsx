@@ -1736,7 +1736,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <Td>{safe(row.status)}</Td>
                         <Td>
                           {row.invoice_id
-                            ? <span className="text-green-600 font-medium">Emitida</span>
+                            ? <span className="text-green-600 font-medium">{row.invoice_number || row.invoice_id}</span>
                             : <span className="text-orange-500">Pendente</span>}
                         </Td>
                       </tr>
@@ -1858,7 +1858,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
                                 {order.invoice_id
                                   ? <>
-                                      <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                      <span className="text-xs text-green-600 font-medium">{order.invoice_number || order.invoice_id}</span>
                                       {order.credit_note_id && (
                                         <div className="text-xs text-orange-600 font-medium">NC: {order.credit_note_number || order.credit_note_id}</div>
                                       )}
