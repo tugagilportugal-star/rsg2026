@@ -44,9 +44,9 @@ export const Speakers: React.FC = () => {
     { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/Coca-Pitzer.png", linkedin: "https://www.linkedin.com/in/cocapitzer/", isRevealed: true },
     { id: "s8", name: "David Anderson", role: "Originator of the Kanban Method", image: "/assets/David-Anderson.png", linkedin: "https://www.linkedin.com/in/agilemanagement/", isRevealed: true, isEnglish: true },
     { id: "s9", name: "César Ribeiro", role: "Head of IT Governance", image: "/assets/Cesar-Ribeiro.png", linkedin: "https://www.linkedin.com/in/cesar-ribeiro-b07aa14b/", isRevealed: true },
-    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true},
+    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true },
     { id: "s11", name: "Anabela Ferreira", role: "Agile Coach", image: "/assets/Anabela-Ferreira.png", linkedin: "https://www.linkedin.com/in/anabelaferreira/", isRevealed: true },
-        
+
     ...Array.from({ length: 2 }).map((_, i) => ({
       id: `tba-${i+9}`,
       name: "Revealing Soon",
@@ -154,9 +154,9 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
+    <Section id="speakers" className="bg-gray-50 py-24">
       <div className="max-w-7xl mx-auto px-4">
-        
+
         {/* Título da Secção */}
         <div className="text-center mb-20">
           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
