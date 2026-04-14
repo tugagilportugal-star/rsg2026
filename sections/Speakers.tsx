@@ -44,6 +44,8 @@ export const Speakers: React.FC = () => {
     { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/Coca-Pitzer.png", linkedin: "https://www.linkedin.com/in/cocapitzer/", isRevealed: true },
     { id: "s8", name: "David Anderson", role: "Originator of the Kanban Method", image: "/assets/David-Anderson.png", linkedin: "https://www.linkedin.com/in/agilemanagement/", isRevealed: true, isEnglish: true },
     { id: "s9", name: "César Ribeiro", role: "Head of IT Governance", image: "/assets/Cesar-Ribeiro.png", linkedin: "https://www.linkedin.com/in/cesar-ribeiro-b07aa14b/", isRevealed: true },
+    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true},
+    { id: "s11", name: "Anabela Ferreira", role: "Agile Coach", image: "/assets/Anabela-Ferreira.png", linkedin: "https://www.linkedin.com/in/anabelaferreira/", isRevealed: true },
         
     ...Array.from({ length: 2 }).map((_, i) => ({
       id: `tba-${i+9}`,
@@ -79,8 +81,13 @@ export const Speakers: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-darkBlue via-brand-darkBlue/40 to-transparent opacity-90"></div>
         
         {data.isEnglish && (
-          <div className="absolute top-4 right-4 bg-[#012169] border border-white/20 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-xl z-20 transition-transform group-hover:scale-110">
-            <span className="text-[10px] font-black text-white uppercase tracking-widest">English</span>
+          <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-1 group/flag">
+            <div className="w-8 h-8 rounded-full overflow-hidden shadow-xl transition-transform group-hover/flag:scale-110 border-2 border-white/60">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" className="w-full h-full"><rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#C8102E" strokeWidth="8"/><path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="20"/><path d="M30 0v60M0 30h60" stroke="#C8102E" strokeWidth="12"/></svg>
+            </div>
+            <span className="opacity-0 group-hover/flag:opacity-100 transition-opacity duration-200 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap pointer-events-none">
+              Talk em Inglês
+            </span>
           </div>
         )}
 
@@ -118,8 +125,13 @@ export const Speakers: React.FC = () => {
         <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-4 shadow-md border border-gray-100 bg-gray-100">
           {/* TAG ENGLISH NOS SPEAKERS */}
           {data.isEnglish && (
-            <div className="absolute top-2 right-2 bg-[#012169] border border-white/20 px-2 py-1 rounded-full z-20 shadow-md">
-              <span className="text-[8px] font-black text-white uppercase tracking-tighter">English</span>
+            <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1 group/flag">
+              <div className="w-7 h-7 rounded-full overflow-hidden shadow-md transition-transform group-hover/flag:scale-110 border-2 border-white/60">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" className="w-full h-full"><rect width="60" height="60" fill="#012169"/><path d="M0 0l60 60M60 0L0 60" stroke="#fff" strokeWidth="12"/><path d="M0 0l60 60M60 0L0 60" stroke="#C8102E" strokeWidth="8"/><path d="M30 0v60M0 30h60" stroke="#fff" strokeWidth="20"/><path d="M30 0v60M0 30h60" stroke="#C8102E" strokeWidth="12"/></svg>
+              </div>
+              <span className="opacity-0 group-hover/flag:opacity-100 transition-opacity duration-200 bg-black/80 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap pointer-events-none">
+                Talk em Inglês
+              </span>
             </div>
           )}
           <img 
