@@ -46,7 +46,7 @@ export const FAQ: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketM
         {
             question: "O evento dispõe de serviço de bengaleiro?",
             answer: "Para garantir a máxima agilidade e segurança de todos os participantes, o evento não dispõe de serviço de bengaleiro. Recomendamos que evite trazer volumes desnecessários ou de grandes dimensões, uma vez que a organização não se responsabiliza por objetos de caráter pessoal ou bens deixados nas áreas comuns do recinto."
-        }
+     }
     ];
 
     return (
