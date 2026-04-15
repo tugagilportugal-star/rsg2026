@@ -250,18 +250,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // ORDERS
     // =========================
     if (resource === 'orders') {
-      if (req.method !== 'GET') {
-        return res.status(405).json({ message: 'Method not allowed' });
+      if (req.method === 'GET') {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(500);
+        if (error) return res.status(500).json({ message: error.message });
+        return res.status(200).json(data || []);
       }
 
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
+      if (req.method === 'PATCH') {
+        if (!canEdit(admin.role)) return res.status(403).json({ message: 'Sem permissão de edição.' });
+        const { id, is_duplicate, is_test, credit_note_ref } = req.body || {};
+        if (!id) return res.status(400).json({ message: 'ID é obrigatório.' });
 
-      if (error) return res.status(500).json({ message: error.message });
-      return res.status(200).json(data || []);
+        const payload: Record<string, unknown> = {};
+        if (is_duplicate !== undefined) payload.is_duplicate = Boolean(is_duplicate);
+        if (is_test !== undefined) payload.is_test = Boolean(is_test);
+        if (credit_note_ref !== undefined) payload.credit_note_ref = credit_note_ref || null;
+
+        const { data, error } = await supabase
+          .from('orders')
+          .update(payload)
+          .eq('id', id)
+          .select()
+          .single();
+        if (error) return res.status(500).json({ message: error.message });
+        await logAction(admin.email, 'marcar_duplicado', 'order', id, payload);
+        return res.status(200).json(data);
+      }
+
+      return res.status(405).json({ message: 'Method not allowed' });
     }
 
     // =========================

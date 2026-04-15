@@ -49,6 +49,9 @@ type OrderRow = {
   original_invoice_id?: string | null;
   original_invoice_number?: string | null;
   refunded_at?: string | null;
+  is_duplicate?: boolean | null;
+  is_test?: boolean | null;
+  credit_note_ref?: string | null;
 };
 
 type TicketRow = {
@@ -174,6 +177,8 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
   const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
   const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
+  const [resendingEmail, setResendingEmail] = useState<'ticket' | 'invoice' | null>(null);
+  const [resendMsg, setResendMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
@@ -189,6 +194,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [refundCustom, setRefundCustom] = useState('');
   const [markingRefund, setMarkingRefund] = useState(false);
   const [refundError, setRefundError] = useState<string | null>(null);
+
+  const [showHidden, setShowHidden] = useState(false);
+  const [duplicateModal, setDuplicateModal] = useState<{ orderId: string; currentRef: string; isDuplicate: boolean; markType: 'duplicate' | 'test' } | null>(null);
+  const [duplicateCreditNoteRef, setDuplicateCreditNoteRef] = useState('');
+  const [markingDuplicate, setMarkingDuplicate] = useState(false);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   const [coupons, setCoupons] = useState<CouponRow[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
@@ -486,6 +497,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
+  async function resendEmail(orderId: string, type: 'ticket' | 'invoice') {
+    if (!authHeader) return;
+    setResendingEmail(type);
+    setResendMsg(null);
+    try {
+      const res = await fetch('/api/admin/resend-email', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, type }),
+      });
+      const json = await res.json();
+      setResendMsg({ ok: res.ok, text: json.message || (res.ok ? 'Enviado!' : 'Erro desconhecido') });
+    } catch (e: any) {
+      setResendMsg({ ok: false, text: e?.message || 'Erro de rede' });
+    } finally {
+      setResendingEmail(null);
+    }
+  }
+
   async function generateInvoice(orderId: string) {
     if (!authHeader) return;
     setGeneratingInvoice(orderId);
@@ -562,6 +592,40 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setRefundError(e?.message || 'Erro de rede');
     } finally {
       setMarkingRefund(false);
+    }
+  }
+
+  async function markOrderAsDuplicate(orderId: string, markType: 'duplicate' | 'test', active: boolean, creditNoteRef: string) {
+    if (!authHeader) return;
+    setMarkingDuplicate(true);
+    setDuplicateError(null);
+    try {
+      const body: Record<string, unknown> = { id: orderId };
+      if (markType === 'duplicate') {
+        body.is_duplicate = active;
+        body.credit_note_ref = active ? (creditNoteRef || null) : null;
+        if (active) body.is_test = false;
+      } else {
+        body.is_test = active;
+        if (active) body.is_duplicate = false;
+      }
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setDuplicateError(json.message || 'Erro ao guardar');
+        return;
+      }
+      setDuplicateModal(null);
+      setDuplicateCreditNoteRef('');
+      await fetchOrders();
+    } catch (e: any) {
+      setDuplicateError(e?.message || 'Erro de rede');
+    } finally {
+      setMarkingDuplicate(false);
     }
   }
 
@@ -1138,11 +1202,14 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         'customer_country',
         'customer_nif',
         'invoice_id',
+        'is_duplicate',
+        'credit_note_ref',
       ];
 
+      const exportRows = showHidden ? orders : orders.filter(o => !o.is_duplicate && !o.is_test);
       const lines = [
         headers.join(','),
-        ...orders.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
+        ...exportRows.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
       ];
 
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -1179,9 +1246,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         'check_in_at',
       ];
 
+      const exportTickets = showHidden ? tickets : tickets.filter(t => { const o = orders.find(ord => ord.id === t.order_id); return !o?.is_duplicate && !o?.is_test; });
       const lines = [
         headers.join(','),
-        ...tickets.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
+        ...exportTickets.map((row) => headers.map((h) => escape((row as any)[h])).join(',')),
       ];
 
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -1300,6 +1368,27 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     );
   }
 
+  // ── Dashboard stats (tickets tab) ──────────────────────────────────────
+  const validOrderIds = new Set(
+    orders.filter(o => !o.is_duplicate && !o.is_test).map(o => o.id)
+  );
+  const validTickets = tickets.filter(t => t.order_id && validOrderIds.has(t.order_id));
+  const totalTicketsSold = validTickets.length;
+  const totalRevenueCents = orders
+    .filter(o => validOrderIds.has(o.id))
+    .reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
+  const totalRecordingOrders = orders.filter(o => validOrderIds.has(o.id) && o.include_recording).length;
+
+  const perLote = ticketTypes
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map(tt => {
+      const sold = validTickets.filter(t => t.ticket_type_id === tt.id).length;
+      const capacity = tt.quantity_total ?? 0;
+      return { id: tt.id, name: tt.name, sold, capacity };
+    })
+    .filter(lt => lt.capacity > 0 || lt.sold > 0);
+
   return (
     <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm">
       <div className="absolute inset-4 rounded-3xl bg-gray-50 shadow-2xl overflow-hidden flex flex-col">
@@ -1327,6 +1416,15 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               >
                 <Plus className="w-4 h-4" />
                 Novo coupon
+              </button>
+            )}
+
+            {(tab === 'orders' || tab === 'tickets') && (
+              <button
+                onClick={() => setShowHidden(v => !v)}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${showHidden ? 'bg-red-100 text-red-700' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+              >
+                {showHidden ? 'Ocultar testes/duplicados' : 'Mostrar testes/duplicados'}
               </button>
             )}
 
@@ -1646,16 +1744,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       <Td colSpan={6}>Sem orders.</Td>
                     </tr>
                   ) : (
-                    orders.map((row) => (
-                      <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedOrder(row)}>
+                    orders.filter(o => showHidden || (!o.is_duplicate && !o.is_test)).map((row) => (
+                      <tr key={row.id} className={`border-t hover:bg-gray-50 cursor-pointer ${(row.is_duplicate || row.is_test) ? 'opacity-50' : ''}`} onClick={() => setSelectedOrder(row)}>
                         <Td>{formatDatePt(row.created_at)}</Td>
-                        <Td>{safe(row.customer_name)}</Td>
+                        <Td>
+                          {safe(row.customer_name)}
+                          {row.is_duplicate && <span className="ml-2 text-xs font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">DUP</span>}
+                          {row.is_test && <span className="ml-2 text-xs font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">TESTE</span>}
+                        </Td>
                         <Td>{safe(row.customer_email)}</Td>
                         <Td>{formatMoneyEURFromCents(row.total_amount)}</Td>
                         <Td>{safe(row.status)}</Td>
                         <Td>
                           {row.invoice_id
-                            ? <span className="text-green-600 font-medium">Emitida</span>
+                            ? <span className="text-green-600 font-medium">{row.invoice_number || row.invoice_id}</span>
                             : <span className="text-orange-500">Pendente</span>}
                         </Td>
                       </tr>
@@ -1663,6 +1765,51 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   )}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {tab === 'tickets' && !loadingTickets && !loadingOrders && tickets.length > 0 && (
+            <div className="bg-white rounded-3xl border p-5 space-y-5">
+              {/* KPI cards */}
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Bilhetes vendidos', value: String(totalTicketsSold) },
+                  { label: 'Receita total', value: formatMoneyEURFromCents(totalRevenueCents) },
+                  { label: 'Acessos vídeo', value: String(totalRecordingOrders) },
+                ].map(({ label, value }) => (
+                  <div key={label} className="rounded-2xl bg-gray-50 border px-4 py-3">
+                    <div className="text-xs text-gray-500 mb-1">{label}</div>
+                    <div className="text-2xl font-black text-[#003F59]">{value}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Per-lote bars */}
+              {perLote.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Por lote</div>
+                  <div className="space-y-2.5">
+                    {perLote.map(({ id, name, sold, capacity }) => {
+                      const pct = capacity > 0 ? Math.min((sold / capacity) * 100, 100) : 0;
+                      const full = pct >= 100;
+                      return (
+                        <div key={id} className="flex items-center gap-3 text-sm">
+                          <div className="w-36 text-gray-600 truncate shrink-0 text-right">{name}</div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${full ? 'bg-red-500' : 'bg-[#003F59]'}`}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <div className="w-20 text-gray-700 font-medium shrink-0">
+                            {sold}{capacity > 0 ? ` / ${capacity}` : ''}
+                            {full && <span className="ml-1 text-xs text-red-500 font-bold">CHEIO</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1691,16 +1838,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       <Td colSpan={8}>Sem tickets.</Td>
                     </tr>
                   ) : (
-                    tickets.map((row) => {
+                    tickets.filter(t => { const o = orders.find(ord => ord.id === t.order_id); return showHidden || (!o?.is_duplicate && !o?.is_test); }).map((row) => {
                       const order = orders.find(o => o.id === row.order_id);
+                      const isDuplicate = Boolean(order?.is_duplicate);
+                      const isTest = Boolean(order?.is_test);
                       return (
-                        <tr key={row.id} className="border-t hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedTicket(row); setTicketModalTab('ticket'); }}>
+                        <tr key={row.id} className={`border-t hover:bg-gray-50 cursor-pointer ${(isDuplicate || isTest) ? 'opacity-50' : ''}`} onClick={() => { setSelectedTicket(row); setTicketModalTab('ticket'); }}>
                           <Td>{formatDatePt(row.created_at)}</Td>
                           <Td>
                             <div className="font-medium text-gray-900">
                               {safe(row.attendee_name) ||
                                 `${safe(row.attendee_first_name)} ${safe(row.attendee_last_name)}`.trim() ||
                                 '—'}
+                              {isDuplicate && <span className="ml-2 text-xs font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">DUP</span>}
+                              {isTest && <span className="ml-2 text-xs font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">TESTE</span>}
                             </div>
                             <div className="text-xs text-gray-500">{safe(row.attendee_email) || '—'}</div>
                             <div className="text-xs text-gray-500">{safe(row.attendee_country) || '—'}</div>
@@ -1728,7 +1879,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
                                 {order.invoice_id
                                   ? <>
-                                      <span className="text-xs text-green-600 font-medium">Fatura emitida</span>
+                                      <span className="text-xs text-green-600 font-medium">{order.invoice_number || order.invoice_id}</span>
                                       {order.credit_note_id && (
                                         <div className="text-xs text-orange-600 font-medium">NC: {order.credit_note_number || order.credit_note_id}</div>
                                       )}
@@ -2012,6 +2163,12 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <h3 className="text-lg font-bold text-[#003F59]">Detalhes da Order</h3>
                   <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
                 </div>
+                {selectedOrder.is_duplicate && (
+                  <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-2 text-xs">
+                    <span className="font-bold text-red-700">Duplicado</span>
+                    {selectedOrder.credit_note_ref && <span className="text-gray-600 ml-2">NC: {selectedOrder.credit_note_ref}</span>}
+                  </div>
+                )}
                 <dl className="space-y-2 text-sm">
                   {[
                     ['Data', formatDatePt(selectedOrder.created_at)],
@@ -2031,6 +2188,32 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     </div>
                   ))}
                 </dl>
+                {canEdit && (
+                  <div className="mt-4 border-t pt-4 flex flex-col gap-2">
+                    {selectedOrder.is_duplicate ? (
+                      <button
+                        onClick={() => { setDuplicateCreditNoteRef(selectedOrder.credit_note_ref || ''); setDuplicateError(null); setDuplicateModal({ orderId: selectedOrder.id, currentRef: selectedOrder.credit_note_ref || '', isDuplicate: true, markType: 'duplicate' }); setSelectedOrder(null); }}
+                        className="w-full py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50"
+                      >Editar / Anular Duplicado</button>
+                    ) : selectedOrder.is_test ? (
+                      <button
+                        onClick={() => { setDuplicateCreditNoteRef(''); setDuplicateError(null); setDuplicateModal({ orderId: selectedOrder.id, currentRef: '', isDuplicate: true, markType: 'test' }); setSelectedOrder(null); }}
+                        className="w-full py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50"
+                      >Editar / Anular Teste</button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => { setDuplicateCreditNoteRef(''); setDuplicateError(null); setDuplicateModal({ orderId: selectedOrder.id, currentRef: '', isDuplicate: false, markType: 'duplicate' }); setSelectedOrder(null); }}
+                          className="w-full py-2 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50"
+                        >Marcar como Duplicado</button>
+                        <button
+                          onClick={() => { setDuplicateCreditNoteRef(''); setDuplicateError(null); setDuplicateModal({ orderId: selectedOrder.id, currentRef: '', isDuplicate: false, markType: 'test' }); setSelectedOrder(null); }}
+                          className="w-full py-2 rounded-lg border border-purple-300 text-purple-600 text-sm font-medium hover:bg-purple-50"
+                        >Marcar como Teste</button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -2198,6 +2381,77 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     Estornado em <span className="font-medium text-gray-700">{new Date(ticketOrder.refunded_at).toLocaleDateString('pt-PT')}</span>
                   </p>
                 )}
+                {ticketOrder && (
+                  <div className="mt-4 border-t pt-4 space-y-2">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reenviar Emails</p>
+                    <button
+                      onClick={() => { setResendMsg(null); resendEmail(ticketOrder.id, 'ticket'); }}
+                      disabled={resendingEmail !== null}
+                      className="w-full py-2 rounded-lg border border-sky-400 text-sky-600 text-sm font-medium hover:bg-sky-50 disabled:opacity-50"
+                    >
+                      {resendingEmail === 'ticket' ? 'A enviar…' : '✉️ Reenviar Bilhete'}
+                    </button>
+                    {ticketOrder.invoice_id && (
+                      <button
+                        onClick={() => { setResendMsg(null); resendEmail(ticketOrder.id, 'invoice'); }}
+                        disabled={resendingEmail !== null}
+                        className="w-full py-2 rounded-lg border border-sky-400 text-sky-600 text-sm font-medium hover:bg-sky-50 disabled:opacity-50"
+                      >
+                        {resendingEmail === 'invoice' ? 'A enviar…' : '🧾 Reenviar Fatura'}
+                      </button>
+                    )}
+                    {resendMsg && (
+                      <p className={`text-xs mt-1 text-center ${resendMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                        {resendMsg.text}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {canEdit && ticketOrder && (
+                  <div className="mt-4 border-t pt-4">
+                    {ticketOrder.is_duplicate ? (
+                      <div className="space-y-2">
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-gray-700">
+                          <div className="font-bold text-red-700 mb-1">Marcado como Duplicado</div>
+                          {ticketOrder.credit_note_ref && <div><span className="text-gray-500">NC: </span>{ticketOrder.credit_note_ref}</div>}
+                        </div>
+                        <button
+                          onClick={() => { setSelectedTicket(null); setDuplicateCreditNoteRef(ticketOrder.credit_note_ref || ''); setDuplicateError(null); setDuplicateModal({ orderId: ticketOrder.id, currentRef: ticketOrder.credit_note_ref || '', isDuplicate: true, markType: 'duplicate' }); }}
+                          className="w-full py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50"
+                        >
+                          Editar / Anular Duplicado
+                        </button>
+                      </div>
+                    ) : ticketOrder.is_test ? (
+                      <div className="space-y-2">
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-xs text-gray-700">
+                          <div className="font-bold text-purple-700 mb-1">Marcado como Teste</div>
+                        </div>
+                        <button
+                          onClick={() => { setSelectedTicket(null); setDuplicateCreditNoteRef(''); setDuplicateError(null); setDuplicateModal({ orderId: ticketOrder.id, currentRef: '', isDuplicate: true, markType: 'test' }); }}
+                          className="w-full py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50"
+                        >
+                          Editar / Anular Teste
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => { setSelectedTicket(null); setDuplicateCreditNoteRef(''); setDuplicateError(null); setDuplicateModal({ orderId: ticketOrder.id, currentRef: '', isDuplicate: false, markType: 'duplicate' }); }}
+                          className="w-full py-2 rounded-lg border border-red-300 text-red-600 text-sm font-medium hover:bg-red-50"
+                        >
+                          Marcar como Duplicado
+                        </button>
+                        <button
+                          onClick={() => { setSelectedTicket(null); setDuplicateCreditNoteRef(''); setDuplicateError(null); setDuplicateModal({ orderId: ticketOrder.id, currentRef: '', isDuplicate: false, markType: 'test' }); }}
+                          className="w-full py-2 rounded-lg border border-purple-300 text-purple-600 text-sm font-medium hover:bg-purple-50"
+                        >
+                          Marcar como Teste
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -2324,6 +2578,61 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               >
                 {markingRefund ? 'A validar no Stripe…' : 'Validar e Registar Estorno'}
               </button>
+            </div>
+          </div>
+        )}
+
+        {duplicateModal && (
+          <div
+            className="fixed inset-0 z-[220] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!markingDuplicate) { setDuplicateModal(null); setDuplicateError(null); } }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#003F59]">
+                  {duplicateModal.isDuplicate
+                    ? (duplicateModal.markType === 'test' ? 'Editar Teste' : 'Editar Duplicado')
+                    : (duplicateModal.markType === 'test' ? 'Marcar como Teste' : 'Marcar como Duplicado')}
+                </h3>
+                <button onClick={() => setDuplicateModal(null)} disabled={markingDuplicate} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Este registo será ocultado dos relatórios por defeito.
+              </p>
+              {duplicateModal.markType === 'duplicate' && (
+                <>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Referência Nota de Crédito</label>
+                  <input
+                    type="text"
+                    placeholder="ex: FR BILL/33"
+                    value={duplicateCreditNoteRef}
+                    onChange={e => setDuplicateCreditNoteRef(e.target.value)}
+                    className="w-full rounded-xl border border-gray-300 px-4 py-2 text-sm mb-4"
+                  />
+                </>
+              )}
+              {duplicateError && <p className="text-red-600 text-xs mb-3">{duplicateError}</p>}
+              <div className="flex gap-2">
+                {duplicateModal.isDuplicate && (
+                  <button
+                    onClick={() => markOrderAsDuplicate(duplicateModal.orderId, duplicateModal.markType, false, '')}
+                    disabled={markingDuplicate}
+                    className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {duplicateModal.markType === 'test' ? 'Anular Teste' : 'Anular Duplicado'}
+                  </button>
+                )}
+                <button
+                  onClick={() => markOrderAsDuplicate(duplicateModal.orderId, duplicateModal.markType, true, duplicateCreditNoteRef)}
+                  disabled={markingDuplicate}
+                  className={`flex-1 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50 ${duplicateModal.markType === 'test' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-red-600 hover:bg-red-700'}`}
+                >
+                  {markingDuplicate ? 'A guardar…' : duplicateModal.isDuplicate ? 'Guardar' : 'Confirmar'}
+                </button>
+              </div>
             </div>
           </div>
         )}

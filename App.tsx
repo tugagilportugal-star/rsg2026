@@ -1,125 +1,125 @@
-import React, { useEffect, useState } from 'react';
-import { Settings } from 'lucide-react';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/NavBar';
-import { TicketStatusProvider } from './hooks/useTicketStatus';
-import { Modal, SuccessState } from './components/UIComponents';
-import { AdminView } from './components/AdminView';
-import { TicketPurchaseModal } from './components/TicketPurchaseModal';
-
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';
 import { Features } from './sections/Features';
-import { Speakers } from './sections/Speakers';
-import { Sponsors } from './sections/Sponsors';
-import { Recap } from './sections/Recap';
+import { Program } from './sections/Program';
+import { WhyAttend } from './sections/WhyAttend';
 import { Tickets } from './sections/Tickets';
+import { Sponsors } from './sections/Sponsors';
+import { Speakers } from './sections/Speakers';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
+import { Recap } from './sections/Recap';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
-import { Program } from './sections/Program';
-import { WhyAttend } from './sections/WhyAttend';
+import { Modal, SuccessState } from './components/UIComponents';
+import { AdminView } from './components/AdminView';
+import { Settings } from 'lucide-react';
+import { TicketPurchaseModal } from './components/TicketPurchaseModal';
+import { TicketStatusProvider } from './hooks/useTicketStatus';
 
 const App: React.FC = () => {
-  const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
-  const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
+  const[isSponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const[isSupporterModalOpen, setSupporterModalOpen] = useState(false);
   const [isTicketModalOpen, setTicketModalOpen] = useState(false);
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
 
-  // After Google OAuth, Supabase redirects to site root with #access_token in the hash.
-  // Detect this and redirect to /admin so the AdminView can process the token.
   if (!isAdminRoute && window.location.hash.includes('access_token=')) {
     window.location.replace('/admin' + window.location.hash);
     return null;
   }
 
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-
-    if (query.get('success')) {
-      setSuccessModalOpen(true);
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-
-    if (query.get('canceled')) {
-      alert('A compra foi cancelada.');
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, []);
-
   if (isAdminRoute) {
     return <AdminView onClose={() => { window.location.href = '/'; }} />;
   }
 
+  const checkUrl = useCallback(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('success')) {
+      setSuccessModalOpen(true);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    if (query.get('canceled')) {
+      alert('A compra foi cancelada.');
+    }
+  }, []);
+
+  useEffect(() => {
+    checkUrl();
+  },[checkUrl]);
+
+  // Função simplificada para abrir o modal sem repetir código
+  const openTicket = () => setTicketModalOpen(true);
+
   return (
     <TicketStatusProvider>
-    <>
-      <Navbar onOpenTicketModal={() => setTicketModalOpen(true)} />
+      <div className="bg-white">
+        <Navbar onOpenTicketModal={openTicket} />
 
-      <main>
-        <Hero onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Tickets onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <About />
-        <Features onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Program onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <WhyAttend />
-        <Speakers />
-        <Recap onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-        <FAQ onOpenTicketModal={() => setTicketModalOpen(true)} />
-        <Team />
+        <main>
+          <Hero onOpenTicketModal={openTicket} />
+          <Tickets onOpenTicketModal={openTicket} />
+          <About />
+          <Features onOpenTicketModal={openTicket} />
+          <Program onOpenTicketModal={openTicket} />
+          <WhyAttend />
+          <Speakers />
+          <Recap onOpenTicketModal={openTicket} />
+          <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+          <FAQ onOpenTicketModal={openTicket} />
+          <Team />
+        </main>
+
         <Footer />
-      </main>
 
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => { window.location.href = '/admin'; }}
-          className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white transition flex items-center justify-center opacity-50 hover:opacity-100 shadow-sm"
-          aria-label="Admin"
-          title="Admin Area"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
+        {/* Botão Admin Escondido */}
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => (window.location.href = '/admin')}
+            className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
+          >
+            <Settings size={20} />
+          </button>
+        </div>
+
+        {/* Modals Secundários */}
+        <Modal isOpen={isSponsorModalOpen} onClose={() => setSponsorModalOpen(false)} title="Patrocinador">
+          <SponsorForm />
+        </Modal>
+
+        <Modal isOpen={isSupporterModalOpen} onClose={() => setSupporterModalOpen(false)} title="Apoiador">
+          <SupporterForm />
+        </Modal>
+
+        <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
+          <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
+        </Modal>
+
+        {/* Modal CUSTOMIZADO para a Venda de Bilhetes (Tamanho corrigido: max-w-2xl) */}
+        {isTicketModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Fundo escuro */}
+            <div className="fixed inset-0 transition-opacity bg-brand-darkBlue/80 backdrop-blur-sm" onClick={() => setTicketModalOpen(false)}></div>
+            
+            {/* Caixa do formulário com tamanho ajustado */}
+            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+              
+              <button onClick={() => setTicketModalOpen(false)} className="absolute top-4 right-4 z-50 flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full text-gray-500 hover:bg-brand-darkBlue hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+              
+              <div className="overflow-y-auto p-6 md:p-8 w-full">
+                <TicketPurchaseModal />
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
-
-      <Modal
-        isOpen={isTicketModalOpen}
-        onClose={() => setTicketModalOpen(false)}
-        size="lg"
-      >
-        <TicketPurchaseModal />
-      </Modal>
-
-      <Modal
-        isOpen={isSponsorModalOpen}
-        onClose={() => setSponsorModalOpen(false)}
-        title="Torne-se um Patrocinador"
-      >
-        <SponsorForm />
-      </Modal>
-
-      <Modal
-        isOpen={isSupporterModalOpen}
-        onClose={() => setSupporterModalOpen(false)}
-        title="Torne-se um Apoiador"
-      >
-        <SupporterForm />
-      </Modal>
-
-      <Modal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setSuccessModalOpen(false)}
-        title="Pagamento Confirmado!"
-      >
-        <SuccessState
-          message="O seu pagamento foi confirmado com sucesso. Verifique o seu e-mail para os próximos detalhes."
-          onReset={() => setSuccessModalOpen(false)}
-        />
-      </Modal>
-    </>
     </TicketStatusProvider>
   );
 };

@@ -268,28 +268,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const session = event.data.object as Stripe.Checkout.Session;
   console.log(`🧾 Processando Order: ${session.id}`);
 
-  // Idempotência — só saltar se o order já tem tickets (processo completo)
-  // Se existe order sem tickets, foi um processo interrompido a meio — apagar e reprocessar
-  const { data: existing } = await supabase
+  // Idempotência — buscar TODOS os orders com este stripe_session_id
+  const { data: existingOrders } = await supabase
     .from('orders')
     .select('id, invoice_id')
-    .eq('stripe_session_id', session.id)
-    .maybeSingle();
+    .eq('stripe_session_id', session.id);
 
-  if (existing) {
-    const { count } = await supabase
-      .from('tickets')
-      .select('id', { count: 'exact', head: true })
-      .eq('order_id', existing.id);
+  if (existingOrders && existingOrders.length > 0) {
+    // Verificar se algum já tem tickets (processo completo)
+    for (const ord of existingOrders) {
+      const { count } = await supabase
+        .from('tickets')
+        .select('id', { count: 'exact', head: true })
+        .eq('order_id', ord.id);
 
-    if (count && count > 0) {
-      console.log(`⏭️ Session ${session.id} já processada (order ${existing.id}, ${count} ticket(s)) — a ignorar retry.`);
-      return res.json({ received: true, skipped: true, orderId: existing.id });
+      if (count && count > 0) {
+        console.log(`⏭️ Session ${session.id} já processada (order ${ord.id}, ${count} ticket(s)) — a ignorar retry.`);
+        // Apagar os outros orders incompletos do mesmo session_id (limpeza)
+        const incompleteIds = existingOrders.filter(o => o.id !== ord.id).map(o => o.id);
+        if (incompleteIds.length > 0) {
+          await supabase.from('orders').delete().in('id', incompleteIds);
+          console.log(`🗑️ Apagados ${incompleteIds.length} order(s) incompleto(s) do mesmo session_id.`);
+        }
+        return res.json({ received: true, skipped: true, orderId: ord.id });
+      }
     }
 
-    // Order incompleto (sem tickets) — apagar para reprocessar limpo
-    console.log(`🔄 Session ${session.id} tem order incompleto (${existing.id}, sem tickets) — a apagar e reprocessar.`);
-    await supabase.from('orders').delete().eq('id', existing.id);
+    // Nenhum tem tickets — apagar todos e reprocessar limpo
+    const allIds = existingOrders.map(o => o.id);
+    console.log(`🔄 Session ${session.id} tem ${allIds.length} order(s) incompleto(s) — a apagar todos e reprocessar.`);
+    await supabase.from('orders').delete().in('id', allIds);
   }
 
   const steps: StepResult[] = [];
