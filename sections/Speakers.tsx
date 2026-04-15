@@ -30,7 +30,7 @@ export const Speakers: React.FC = () => {
       role: "IT Director & Digital Transformation Leader",
       image: "/assets/Nadia-Miranda.png",
       linkedin: "https://www.linkedin.com/in/n%C3%A1dia-miranda-phd-master-managt-b1b30367/",
-      isRevealed: false
+      isRevealed: true
     }
   ];
 
@@ -38,15 +38,16 @@ export const Speakers: React.FC = () => {
     { id: "s1", name: "Ricardo Caldas", role: "Product Owner", image: "/assets/Ricardo-Caldas.png", linkedin: "https://www.linkedin.com/in/ricardo-caldas/", isRevealed: true },
     { id: "s2", name: "Joana Silva", role: "Director of Quality Assurance", image: "/assets/Joana-Silva.png", linkedin: "https://www.linkedin.com/in/joanacssilva/", isRevealed: true },
     { id: "s3", name: "Manuel Pais", role: "Co-author of Team Topologies", image: "/assets/Manuel-Pais.png", linkedin: "https://www.linkedin.com/in/manuelpais/", isRevealed: true },
-    { id: "s4", name: "Paulo Caroli", role: "Author of Lean Inception", image: "/assets/Paulo-Caroli.png", linkedin: "https://www.linkedin.com/in/paulocaroli/", isRevealed: true },
+    { id: "s4", name: "Paulo Caroli", role: "Author of Lean Inception and Team OKRs", image: "/assets/Paulo-Caroli.png", linkedin: "https://www.linkedin.com/in/paulocaroli/", isRevealed: true },
     { id: "s5", name: "Patrícia Sousa", role: "Talent & People Transformation Leader", image: "/assets/Patricia-Sousa.png", linkedin: "https://www.linkedin.com/in/patriciaalvessousa/", isRevealed: true },
     { id: "s6", name: "Ricardo Fernandes", role: "Enterprise Consultant", image: "/assets/Ricardo-Fernandes.png", linkedin: "https://www.linkedin.com/in/ricardofernandes/", isRevealed: true },
     { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/Coca-Pitzer.png", linkedin: "https://www.linkedin.com/in/cocapitzer/", isRevealed: true },
     { id: "s8", name: "David Anderson", role: "Originator of the Kanban Method", image: "/assets/David-Anderson.png", linkedin: "https://www.linkedin.com/in/agilemanagement/", isRevealed: true, isEnglish: true },
     { id: "s9", name: "César Ribeiro", role: "Head of IT Governance", image: "/assets/Cesar-Ribeiro.png", linkedin: "https://www.linkedin.com/in/cesar-ribeiro-b07aa14b/", isRevealed: true },
-    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true },
+    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true},
     { id: "s11", name: "Anabela Ferreira", role: "Agile Coach", image: "/assets/Anabela-Ferreira.png", linkedin: "https://www.linkedin.com/in/anabelaferreira/", isRevealed: true },
-
+    { id: "s12", name: "Matheus Haddad", role: "Author of Feedback Canvas", image: "/assets/Matheus.png", linkedin: "https://www.linkedin.com/in/matheushaddad/", isRevealed: true },
+        
     ...Array.from({ length: 2 }).map((_, i) => ({
       id: `tba-${i+9}`,
       name: "Revealing Soon",
@@ -154,9 +155,9 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-gray-50 py-24">
+    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4">
-
+        
         {/* Título da Secção */}
         <div className="text-center mb-20">
           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
