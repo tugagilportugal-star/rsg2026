@@ -155,7 +155,7 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
+    <Section id="speakers" className="bg-gray-50 py-24">
       <div className="max-w-7xl mx-auto px-4">
         
         {/* Título da Secção */}
