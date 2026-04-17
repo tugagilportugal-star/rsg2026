@@ -310,6 +310,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     currency: session.currency || 'eur',
     participants: [] as { name: string; email: string }[],
     isError: false,
+    invoice: null as { number: string; email: string; name: string } | null,
   };
 
   try {
@@ -604,6 +605,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         })
         .eq('id', order.id);
       steps.push({ step: 'Emitir fatura', ok: true, detail: invoiceResult.invoiceNumber || invoiceResult.invoiceId });
+      notifyCtx.invoice = {
+        number: invoiceResult.invoiceNumber || invoiceResult.invoiceId,
+        email: billingEmail,
+        name: billingName,
+      };
 
       if (invoiceResult.pdfBytes) {
         try {
