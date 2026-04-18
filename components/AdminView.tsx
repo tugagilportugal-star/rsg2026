@@ -1377,7 +1377,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const totalRevenueCents = orders
     .filter(o => validOrderIds.has(o.id))
     .reduce((sum, o) => sum + (o.total_amount ?? 0), 0);
-  const totalRecordingOrders = orders.filter(o => validOrderIds.has(o.id) && o.include_recording).length;
+  const totalRecordingTickets = validTickets.filter(t => orders.find(o => o.id === t.order_id)?.include_recording).length;
+  const ticketsPerOrder = tickets.reduce((acc, t) => {
+    if (t.order_id) acc[t.order_id] = (acc[t.order_id] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   const perLote = ticketTypes
     .slice()
@@ -1775,7 +1779,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {[
                   { label: 'Bilhetes vendidos', value: String(totalTicketsSold) },
                   { label: 'Receita total', value: formatMoneyEURFromCents(totalRevenueCents) },
-                  { label: 'Acessos vídeo', value: String(totalRecordingOrders) },
+                  { label: 'Acessos vídeo', value: String(totalRecordingTickets) },
                 ].map(({ label, value }) => (
                   <div key={label} className="rounded-2xl bg-gray-50 border px-4 py-3">
                     <div className="text-xs text-gray-500 mb-1">{label}</div>
@@ -1876,7 +1880,16 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                           <Td>
                             {order ? (
                               <div className="space-y-1">
-                                <div className="text-xs text-gray-500">{formatMoneyEURFromCents(order.total_amount)}</div>
+                                <div className="text-xs text-gray-500">
+                                  {formatMoneyEURFromCents(
+                                    order.total_amount != null && (ticketsPerOrder[order.id] ?? 1) > 1
+                                      ? Math.round(order.total_amount / (ticketsPerOrder[order.id] ?? 1))
+                                      : order.total_amount
+                                  )}
+                                  {(ticketsPerOrder[order.id] ?? 1) > 1 && (
+                                    <span className="ml-1 text-gray-400">(order: {formatMoneyEURFromCents(order.total_amount)})</span>
+                                  )}
+                                </div>
                                 {order.invoice_id
                                   ? <>
                                       <span className="text-xs text-green-600 font-medium">{order.invoice_number || order.invoice_id}</span>
