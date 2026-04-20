@@ -47,15 +47,7 @@ export const Speakers: React.FC = () => {
     { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true},
     { id: "s11", name: "Anabela Ferreira", role: "Agile Coach", image: "/assets/Anabela-Ferreira.png", linkedin: "https://www.linkedin.com/in/anabelaferreira/", isRevealed: true },
     { id: "s12", name: "Matheus Haddad", role: "Author of Feedback Canvas", image: "/assets/Matheus.png", linkedin: "https://www.linkedin.com/in/matheushaddad/", isRevealed: true },
-        
-    ...Array.from({ length: 2 }).map((_, i) => ({
-      id: `tba-${i+9}`,
-      name: "Revealing Soon",
-      role: "Agile Practitioner",
-      image: "",
-      linkedin: "",
-      isRevealed: false
-    }))
+    { id: "s13", name: "Sara Cruz", role: "Head of Product", image: "/assets/Sara-Cruz.png", linkedin: "https://www.linkedin.com/in/sara-md-cruz/", isRevealed: true },
   ];
 
   const KeynoteCard = ({ data }: { data: SpeakerData }) => {
@@ -155,7 +147,7 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-gray-50 py-24">
+    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4">
         
         {/* Título da Secção */}

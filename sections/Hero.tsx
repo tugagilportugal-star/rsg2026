@@ -10,7 +10,7 @@ interface HeroProps {
 
 // A tipagem HeroProps
 export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
-  const timeLeft = useCountdown('2026-05-21T00:00:00');
+  const timeLeft = useCountdown('2026-05-21T08:30:00+01:00');
 
   const scrollThenOpen = () => {
     document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' });
