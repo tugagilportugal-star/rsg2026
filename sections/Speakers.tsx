@@ -200,7 +200,8 @@ export const Speakers: React.FC = () => {
   
   {/* Reduzimos o tamanho do texto e a margem */}
   <p className="text-gray-600 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
-    Quer partilhar a sua experiência, caso de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? Já estamos a construir a próxima edição e queremos ouvir a sua história.
+    Quer partilhar a sua experiência, caso de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? 
+    Já estamos a construir a próxima edição e queremos ouvir a sua história.
   </p>
   
   {/* Reduzimos o botão ligeiramente */}
