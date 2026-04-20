@@ -92,7 +92,7 @@ export const Speakers: React.FC = () => {
           <p className="text-brand-orange font-bold text-xs mb-1">{data.role}</p>
           
           {data.linkedin && (
-            <a href={data.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white mt-16">
+            <a href={data.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white mt-2">
               <Linkedin className="w-4 h-4" />
             </a>
           )}
@@ -183,28 +183,34 @@ export const Speakers: React.FC = () => {
             ))}
           </div>
         </div>
+
         {/* Banner Call for Speakers 2027 */}
-<div className="mt-16 p-8 md:p-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-[32px] text-center max-w-4xl mx-auto">
-  <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm mb-6">
-    <span className="text-2xl">📢</span>
-    <span className="font-bold text-brand-darkBlue">RSG Lisbon 2027</span>
+{/* Removemos max-w e rounded, reduzimos padding vertical (py-12 em vez de p-12) */}
+<div className="mt-16 py-12 px-6 bg-gray-50 border-t border-b border-gray-100 text-center w-full">
+  
+  {/* Reduzimos o badge */}
+  <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm mb-4 border border-gray-100">
+    <span className="font-bold text-brand-darkBlue text-sm">RSG Lisbon 2027</span>
   </div>
   
-  <h3 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4">
-    Inspirado por estes líderes? O próximo pode ser você.
+  {/* Reduzimos o tamanho do título (text-2xl em vez de text-3xl) e a margem */}
+  <h3 className="text-2xl md:text-3xl font-black text-brand-darkBlue mb-3 tracking-tight">
+    Inspirado por estes líderes? O próximo palco pode ser o seu.
   </h3>
   
-  <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-    Quer partilhar a sua experiência, caso de sucesso ou visão sobre agilidade no RSG Lisbon 2027? Já estamos a construir a próxima edição e queremos ouvir a sua história.
+  {/* Reduzimos o tamanho do texto e a margem */}
+  <p className="text-gray-600 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
+    Quer partilhar a sua experiência, caso de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? Já estamos a construir a próxima edição e queremos ouvir a sua história.
   </p>
   
+  {/* Reduzimos o botão ligeiramente */}
   <a 
-    href="https://forms.gle/4F6p9kMXmGG3Y7M68" 
+    href="https://forms.gle/5VgcGULvP6296NA77"
     target="_blank" 
     rel="noopener noreferrer"
-    className="inline-block bg-brand-orange text-white px-8 py-4 rounded-2xl font-black text-xl shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-transform"
+    className="inline-block bg-brand-orange text-white px-8 py-3.5 rounded-xl font-black text-lg shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-all duration-300"
   >
-    Candidatar-me para 2027 🚀
+    Candidatar-me para 2027
   </a>
 </div>
       </div>
