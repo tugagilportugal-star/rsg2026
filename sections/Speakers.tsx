@@ -92,7 +92,7 @@ export const Speakers: React.FC = () => {
           <p className="text-brand-orange font-bold text-xs mb-1">{data.role}</p>
           
           {data.linkedin && (
-            <a href={data.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white mt-2">
+            <a href={data.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-brand-blue hover:text-white transition-colors text-white mt-16">
               <Linkedin className="w-4 h-4" />
             </a>
           )}
@@ -183,6 +183,30 @@ export const Speakers: React.FC = () => {
             ))}
           </div>
         </div>
+        {/* Banner Call for Speakers 2027 */}
+<div className="mt-16 p-8 md:p-12 bg-gray-50 border-2 border-dashed border-gray-200 rounded-[32px] text-center max-w-4xl mx-auto">
+  <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm mb-6">
+    <span className="text-2xl">📢</span>
+    <span className="font-bold text-brand-darkBlue">RSG Lisbon 2027</span>
+  </div>
+  
+  <h3 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4">
+    Inspirado por estes líderes? O próximo pode ser você.
+  </h3>
+  
+  <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+    Quer partilhar a sua experiência, caso de sucesso ou visão sobre agilidade no RSG Lisbon 2027? Já estamos a construir a próxima edição e queremos ouvir a sua história.
+  </p>
+  
+  <a 
+    href="https://forms.gle/4F6p9kMXmGG3Y7M68" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="inline-block bg-brand-orange text-white px-8 py-4 rounded-2xl font-black text-xl shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-transform"
+  >
+    Candidatar-me para 2027 🚀
+  </a>
+</div>
       </div>
     </Section>
   );
