@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { Section } from '../components/UIComponents';
-import { Bell, Check, CheckCircle2, Gift } from 'lucide-react';
+import { Check, CheckCircle2, Gift } from 'lucide-react';
 import { BonusModal } from '../components/BonusModal';
 
-export const Tickets: React.FC = () => {
+// Esta é a peça que faltava para o Vercel não dar erro:
+interface TicketsProps {
+  onOpenTicketModal?: () => void;
+}
+
+// Adicionamos { onOpenTicketModal } aqui para o App.tsx ficar feliz
+export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', expectations: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
@@ -11,8 +17,16 @@ export const Tickets: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
-    // ... lógica de submissão mantida
-    setTimeout(() => setStatus('success'), 1500); // Simulação para exemplo
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'Priority List Sold Out', ...form }),
+      });
+      setStatus(res.ok ? 'success' : 'error');
+    } catch {
+      setStatus('error');
+    }
   };
 
   const benefits = [
@@ -58,20 +72,20 @@ export const Tickets: React.FC = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input required type="text" placeholder="Nome Completo *" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" onChange={e => setForm({...form, name: e.target.value})} />
-                <input required type="email" placeholder="E-mail *" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" onChange={e => setForm({...form, email: e.target.value})} />
-                <input required type="tel" placeholder="WhatsApp *" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" onChange={e => setForm({...form, phone: e.target.value})} />
-                <input type="text" placeholder="Empresa" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" onChange={e => setForm({...form, company: e.target.value})} />
+                <input required type="text" placeholder="Nome Completo *" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                <input required type="email" placeholder="E-mail *" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                <input required type="tel" placeholder="WhatsApp *" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+                <input type="text" placeholder="Empresa" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange" value={form.company} onChange={e => setForm({...form, company: e.target.value})} />
               </div>
-              <textarea rows={2} placeholder="O que mais esperas encontrar no RSG 2026?" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange resize-none" onChange={e => setForm({...form, expectations: e.target.value})} />
+              <textarea rows={2} placeholder="O que mais esperas encontrar no RSG 2026?" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange resize-none" value={form.expectations} onChange={e => setForm({...form, expectations: e.target.value})} />
               
               <button type="submit" disabled={status === 'loading'} className="w-full bg-brand-orange text-white py-4 rounded-2xl text-lg font-black shadow-lg hover:scale-[1.02] transition-transform">
-                {status === 'loading' ? 'A processar...' : 'Entrar na Priority List'}
+                {status === 'loading' ? 'A processar...' : 'Entrar na Priority List 🚀'}
               </button>
             </form>
           )}
 
-          {/* SECÇÃO DE BENEFÍCIOS (LADO A LADO) */}
+          {/* SECÇÃO DE BENEFÍCIOS */}
           <div className="mt-12 pt-8 border-t border-gray-100">
             <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-6 text-center">
               O que o teu bilhete incluirá:
@@ -85,7 +99,7 @@ export const Tickets: React.FC = () => {
               ))}
               <div className="flex items-center gap-2">
                 <Gift className="w-4 h-4 text-brand-orange flex-shrink-0" />
-                <button onClick={() => setIsBonusModalOpen(true)} className="text-brand-orange text-xs font-bold underline">
+                <button type="button" onClick={() => setIsBonusModalOpen(true)} className="text-brand-orange text-xs font-bold underline hover:text-brand-darkBlue transition-colors">
                   Bónus Exclusivos. Ver mais
                 </button>
               </div>
