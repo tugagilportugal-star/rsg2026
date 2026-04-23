@@ -3,18 +3,15 @@ import { useCountdown } from '../hooks/useCountdown';
 import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
 
-// A interface que diz ao TypeScript que podemos receber esta prop do App.tsx
 interface HeroProps {
   onOpenTicketModal?: () => void;
 }
 
-// A tipagem HeroProps
 export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
   const timeLeft = useCountdown('2026-05-21T08:30:00+01:00');
 
-  const scrollThenOpen = () => {
+  const scrollToPriorityList = () => {
     document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' });
-    setTimeout(() => onOpenTicketModal?.(), 700);
   };
 
   return (
@@ -25,6 +22,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
         backgroundImage: `linear-gradient(to bottom, rgba(0, 31, 63, 0.6), rgba(0, 10, 20, 0.9)), url('${ASSETS.HERO_BG}')`
       }}
     >
+      {/* Badge Superior Original mantido */}
       <div className="absolute top-0 left-0 right-0 p-6 z-20 flex justify-center pointer-events-none">
         <div className="mt-24 bg-brand-darkBlue/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-lg flex items-center gap-2">
            <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
@@ -35,6 +33,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
 
       <div className="relative z-10 text-center px-4 max-w-7xl mx-auto flex flex-col items-center justify-center flex-grow pt-32">
         
+        {/* Logos e Títulos mantidos exatamente como estavam */}
         <div className="flex flex-col items-center mb-6 animate-fade-in-up">
             <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-gray-400 font-bold mb-4">
                 ORGANIZADO POR
@@ -57,6 +56,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
           A maior celebração da agilidade em Portugal. Reserve a data.
         </p>
 
+        {/* Countdown mantido */}
         <div className="grid grid-cols-4 gap-4 md:gap-8 mb-12 w-full md:w-auto">
           {[
             { label: 'Dias', value: timeLeft.days },
@@ -71,31 +71,29 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
           ))}
         </div>
 
-        {/* BLOCO DE LOCALIZAÇÃO COM AJUSTE MOBILE */}
+        {/* Localização mantida */}
         <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-4 md:gap-12 mb-10 bg-white/5 p-5 md:px-12 md:py-4 rounded-3xl md:rounded-full backdrop-blur-md border border-white/10 shadow-inner w-full md:w-auto max-w-md md:max-w-none mx-auto">
-          
           <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
             <Calendar className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
             <span className="text-base md:text-lg font-bold text-left">21 Maio 2026</span>
           </div>
-          
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
-          
           <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
             <MapPin className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
             <span className="text-base md:text-lg font-bold text-left leading-tight">
               Auditório Alto dos Moinhos<br className="md:hidden"/> - Lisboa, Portugal
             </span>
           </div>
-
         </div>
 
-        {/* BOTÃO - Mantém a funcionalidade de scroll como você pediu! */}
+        {/* NOVO BOTÃO SOLD OUT - Estilo Vermelho Impactante */}
         <button 
-          onClick={scrollThenOpen}
-          className="px-10 py-4 bg-brand-orange text-white font-black text-lg uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] hover:bg-orange-500 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-transparent hover:border-orange-300/30 bg-clip-padding mb-24"
+          onClick={scrollToPriorityList}
+          className="px-10 py-5 bg-red-600 text-white font-black text-xl md:text-2xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(220,38,38,0.4)] hover:bg-red-700 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-white/20 mb-24 flex items-center gap-3"
         >
-          Garante o teu Lugar
+          <span>🎫</span>
+          SOLD OUT! Bilhetes Esgotados
+          <span className="hidden md:inline">🎫</span>
         </button>
       </div>
       
