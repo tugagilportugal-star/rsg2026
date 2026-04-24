@@ -43,16 +43,16 @@ export const Features: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTi
   ];
 
   return (
-    <Section id="features" className="bg-brand-darkBlue relative">
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+    <Section id="features" className="bg-white relative">
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
       <div className="text-center mb-20">
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
+        <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">
           O que esperar em 2026?
         </h2>
-        <p className="text-xl md:text-2xl text-blue-100 max-w-5xl mx-auto font-medium leading-relaxed">
+        <p className="text-xl md:text-2xl text-gray-600 max-w-5xl mx-auto font-medium leading-relaxed">
           Estamos a desenhar uma experiência<span className="text-brand-orange font-bold"> feita de pessoas para pessoas</span>.
-          É muito mais do que um evento: é um <span className="text-white font-bold">catalisador de mudança</span> para a sua carreira e para a sua organização.
+          É muito mais do que um evento: é um <span className="text-brand-darkBlue font-bold">catalisador de mudança</span> para a sua carreira e para a sua organização.
         </p>
       </div>
 

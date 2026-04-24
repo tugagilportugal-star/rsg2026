@@ -115,7 +115,7 @@ export const Speakers: React.FC = () => {
 
     return (
       <div className="flex flex-col items-center text-center group">
-        <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-4 shadow-md border border-gray-100 bg-gray-100">
+        <div className="relative w-full aspect-square rounded-2xl overflow-hidden mb-4 shadow-md border border-white/20 bg-white/10">
           {/* TAG ENGLISH NOS SPEAKERS */}
           {data.isEnglish && (
             <div className="absolute top-2 right-2 z-20 flex flex-col items-end gap-1 group/flag">
@@ -140,29 +140,29 @@ export const Speakers: React.FC = () => {
             )}
           </div>
         </div>
-        <h4 className="font-bold text-lg text-brand-darkBlue mb-1">{data.name}</h4>
+        <h4 className="font-bold text-lg text-white mb-1">{data.name}</h4>
         <p className="text-xs font-medium text-brand-orange mb-1 leading-tight">{data.role}</p>
       </div>
     );
   };
 
   return (
-    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
+    <Section id="speakers" className="bg-brand-darkBlue py-24 border-t border-white/10">
       <div className="max-w-7xl mx-auto px-4">
-        
+
         {/* Título da Secção */}
         <div className="text-center mb-20">
           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
-          <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue mb-6 tracking-tight">Speakers 2026</h2>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Speakers 2026</h2>
+          <p className="text-blue-100 text-lg max-w-2xl mx-auto leading-relaxed">
             Grandes nomes da agilidade, inovação e inteligência artificial.
-            <br/> <span className="text-brand-blue font-semibold">Mais oradores serão anunciados em breve.</span>
+            <br/> <span className="text-white font-semibold">Mais oradores serão anunciados em breve.</span>
           </p>
         </div>
 
         {/* SECÇÃO KEYNOTES */}
         <div className="mb-24 w-full">
-          <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 tracking-tighter">
+          <h3 className="text-2xl font-black text-white mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 tracking-tighter">
             <Sparkles className="text-brand-orange w-6 h-6" /> Keynotes
           </h3>
           <div className="flex flex-wrap justify-center items-center gap-8 w-full">
@@ -174,7 +174,7 @@ export const Speakers: React.FC = () => {
 
         {/* SECÇÃO SPEAKERS */}
         <div>
-          <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left tracking-tighter">
+          <h3 className="text-2xl font-black text-white mb-10 text-center md:text-left tracking-tighter">
             Speakers
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">
@@ -186,20 +186,20 @@ export const Speakers: React.FC = () => {
 
         {/* Banner Call for Speakers 2027 */}
 {/* Removemos max-w e rounded, reduzimos padding vertical (py-12 em vez de p-12) */}
-<div className="mt-16 py-12 px-6 bg-gray-50 border-t border-b border-gray-100 text-center w-full">
-  
+<div className="mt-16 py-12 px-6 bg-white/10 border-t border-b border-white/20 text-center w-full">
+
   {/* Reduzimos o badge */}
-  <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm mb-4 border border-gray-100">
-    <span className="font-bold text-brand-darkBlue text-sm">RSG Lisbon 2027</span>
+  <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full shadow-sm mb-4 border border-white/20">
+    <span className="font-bold text-white text-sm">RSG Lisbon 2027</span>
   </div>
-  
+
   {/* Reduzimos o tamanho do título (text-2xl em vez de text-3xl) e a margem */}
-  <h3 className="text-2xl md:text-3xl font-black text-brand-darkBlue mb-3 tracking-tight">
+  <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
     Inspirado por estes líderes? O próximo palco pode ser o seu.
   </h3>
-  
+
   {/* Reduzimos o tamanho do texto e a margem */}
- <p className="text-gray-600 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
+ <p className="text-blue-100 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
   Quer partilhar a sua experiência, casos de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? 
   <br />
   Já estamos a construir a próxima edição e queremos ouvir a sua história.
