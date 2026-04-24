@@ -72,7 +72,6 @@ export const Footer: React.FC = () => {
                 <li><button onClick={() => scrollTo('hero')} className="hover:text-white hover:translate-x-1 transition-all">Início</button></li>
                 <li><button onClick={() => scrollTo('about')} className="hover:text-white hover:translate-x-1 transition-all">Sobre o Evento</button></li>
                 <li><button onClick={() => scrollTo('sponsors')} className="hover:text-white hover:translate-x-1 transition-all">Patrocine</button></li>
-                <li><button onClick={() => scrollTo('tickets')} className="hover:text-white hover:translate-x-1 transition-all">Bilhetes</button></li>
              </ul>
           </div>
 

@@ -75,13 +75,6 @@ export const Features: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTi
         <div className="relative bg-brand-darkBlue rounded-2xl p-8 shadow-lg flex flex-col justify-center items-center text-center text-white overflow-hidden group">
             <div className="absolute inset-0 bg-brand-blue/20 group-hover:bg-brand-blue/30 transition-colors"></div>
             <h3 className="text-2xl font-bold mb-4 relative z-10">E muito mais...</h3>
-            <p className="text-blue-100 mb-6 relative z-10">Surpresas que só quem estiver lá vai viver.</p>
-            <button 
-                onClick={onOpenTicketModal}
-                className="relative z-10 px-6 py-2 border-2 border-brand-orange text-brand-orange font-bold rounded-full hover:bg-brand-orange hover:text-white transition-colors"
-            >
-                Garanta o seu lugar
-            </button>
         </div>
       </div>
     </Section>
