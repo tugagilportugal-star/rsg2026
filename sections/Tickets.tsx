@@ -73,7 +73,7 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               <textarea rows={2} placeholder="O que mais esperas encontrar no RSG 2026?" className="w-full border border-gray-200 rounded-xl p-4 text-sm outline-none focus:border-brand-orange resize-none" value={form.expectations} onChange={e => setForm({...form, expectations: e.target.value})} />
               
               <button type="submit" disabled={status === 'loading'} className="w-full bg-brand-orange text-white py-4 rounded-2xl text-lg font-black shadow-lg hover:scale-[1.02] transition-transform">
-                {status === 'loading' ? 'A processar...' : 'Entrar na Priority List 🚀'}
+                {status === 'loading' ? 'A processar...' : 'Entrar na Priority List'}
               </button>
             </form>
           )}
