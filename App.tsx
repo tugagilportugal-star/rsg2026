@@ -63,8 +63,8 @@ const App: React.FC = () => {
           <Program onOpenTicketModal={openTicket} />
           <WhyAttend />
           <Speakers />
-          <FAQ onOpenTicketModal={openTicket} />
           <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+          <FAQ onOpenTicketModal={openTicket} />
           <Recap onOpenTicketModal={openTicket} />
           <Team />
         </main>
