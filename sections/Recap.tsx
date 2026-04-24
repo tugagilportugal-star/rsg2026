@@ -85,12 +85,11 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
   };
 
   return (
-    // VOLTAMOS AO FUNDO SÓLIDO (bg-brand-darkBlue)
-    <Section id="recap" className="bg-brand-darkBlue text-white overflow-hidden relative">
-      
+    <Section id="recap" className="bg-white text-brand-darkBlue overflow-hidden relative">
+
       {/* --- CABEÇALHO --- */}
       <div className="text-center mb-20 relative z-10 flex flex-col items-center">
-        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight">
+        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight text-brand-darkBlue">
           Como foi o RSG Lisbon 2025?
         </h2>
         
@@ -106,7 +105,7 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
       <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-20 relative z-10">
         {stats.map((stat, idx) => (
           <div key={idx} className="flex flex-col items-center">
-            <div className="flex items-center text-5xl md:text-7xl font-black text-white mb-3 shadow-sm tracking-tighter">
+            <div className="flex items-center text-5xl md:text-7xl font-black text-brand-darkBlue mb-3 shadow-sm tracking-tighter">
                 {stat.value}
             </div>
             <div className="text-sm font-bold tracking-[0.2em] text-brand-blue uppercase">{stat.label}</div>
@@ -117,14 +116,14 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
       <div className="flex flex-col gap-12 relative z-10">
         {/* Video Player */}
         <div className="w-full max-w-5xl mx-auto mb-8">
-             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-white/10 ring-4 ring-brand-orange/20">
+             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-gray-200 ring-4 ring-brand-orange/20">
                 {getVideoContent(ASSETS.RECAP_VIDEO)}
             </div>
         </div>
 
         {/* Gallery */}
         <div className="w-full max-w-5xl mx-auto">
-            <h3 className="text-2xl font-bold mb-6 flex items-center justify-center gap-2 text-white/90">
+            <h3 className="text-2xl font-bold mb-6 flex items-center justify-center gap-2 text-brand-darkBlue">
                 <Star className="text-brand-orange w-6 h-6 fill-current" />
                 Melhores Momentos
             </h3>
@@ -133,7 +132,7 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
                 {galleryImages.map((img, idx) => (
                     <div 
                         key={idx} 
-                        className="relative rounded-xl overflow-hidden shadow-lg cursor-zoom-in group bg-brand-darkBlue/50 aspect-[4/3]"
+                        className="relative rounded-xl overflow-hidden shadow-lg cursor-zoom-in group bg-gray-100 aspect-[4/3]"
                         onClick={() => openLightbox(idx)}
                     >
                         <img 

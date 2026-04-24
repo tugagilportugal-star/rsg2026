@@ -51,16 +51,15 @@ export const Team: React.FC = () => {
   ];
 
   return (
-    <Section id="team" className="bg-gray-50 border-t border-gray-200">
+    <Section id="team" className="bg-brand-darkBlue border-t border-white/20">
       <div className="text-center mb-16">
         <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">
           Quem faz acontecer o RSG Lisbon 2026
         </span>
-        <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4">
+        <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
           Equipa Organizadora
         </h2>
-        {/* Frase Atualizada */}
-        <p className="text-gray-500 max-w-2xl mx-auto">
+        <p className="text-blue-100 max-w-2xl mx-auto">
           Voluntários apaixonados dedicados a trazer a melhor experiência de agilidade e inovação para Lisboa.
         </p>
       </div>
@@ -93,7 +92,7 @@ export const Team: React.FC = () => {
               </a>
             </div>
 
-            <h3 className="text-sm md:text-base font-bold text-brand-darkBlue mb-1 leading-tight px-2">
+            <h3 className="text-sm md:text-base font-bold text-white mb-1 leading-tight px-2">
               {member.name}
             </h3>
           </div>
