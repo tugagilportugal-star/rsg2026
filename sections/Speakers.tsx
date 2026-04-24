@@ -44,18 +44,10 @@ export const Speakers: React.FC = () => {
     { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/Coca-Pitzer.png", linkedin: "https://www.linkedin.com/in/cocapitzer/", isRevealed: true },
     { id: "s8", name: "David Anderson", role: "Originator of the Kanban Method", image: "/assets/David-Anderson.png", linkedin: "https://www.linkedin.com/in/agilemanagement/", isRevealed: true, isEnglish: true },
     { id: "s9", name: "César Ribeiro", role: "Head of IT Governance", image: "/assets/Cesar-Ribeiro.png", linkedin: "https://www.linkedin.com/in/cesar-ribeiro-b07aa14b/", isRevealed: true },
-    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true },
+    { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true},
     { id: "s11", name: "Anabela Ferreira", role: "Agile Coach", image: "/assets/Anabela-Ferreira.png", linkedin: "https://www.linkedin.com/in/anabelaferreira/", isRevealed: true },
     { id: "s12", name: "Matheus Haddad", role: "Author of Feedback Canvas", image: "/assets/Matheus.png", linkedin: "https://www.linkedin.com/in/matheushaddad/", isRevealed: true },
-
-    ...Array.from({ length: 2 }).map((_, i) => ({
-      id: `tba-${i+9}`,
-      name: "Revealing Soon",
-      role: "Agile Practitioner",
-      image: "",
-      linkedin: "",
-      isRevealed: false
-    }))
+    { id: "s13", name: "Sara Cruz", role: "Head of Product", image: "/assets/Sara-Cruz.png", linkedin: "https://www.linkedin.com/in/sara-md-cruz/", isRevealed: true },
   ];
 
   const KeynoteCard = ({ data }: { data: SpeakerData }) => {
@@ -155,9 +147,9 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-gray-50 py-24">
+    <Section id="speakers" className="bg-white py-24 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4">
-
+        
         {/* Título da Secção */}
         <div className="text-center mb-20">
           <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
@@ -191,6 +183,38 @@ export const Speakers: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Banner Call for Speakers 2027 */}
+{/* Removemos max-w e rounded, reduzimos padding vertical (py-12 em vez de p-12) */}
+<div className="mt-16 py-12 px-6 bg-gray-50 border-t border-b border-gray-100 text-center w-full">
+  
+  {/* Reduzimos o badge */}
+  <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm mb-4 border border-gray-100">
+    <span className="font-bold text-brand-darkBlue text-sm">RSG Lisbon 2027</span>
+  </div>
+  
+  {/* Reduzimos o tamanho do título (text-2xl em vez de text-3xl) e a margem */}
+  <h3 className="text-2xl md:text-3xl font-black text-brand-darkBlue mb-3 tracking-tight">
+    Inspirado por estes líderes? O próximo palco pode ser o seu.
+  </h3>
+  
+  {/* Reduzimos o tamanho do texto e a margem */}
+ <p className="text-gray-600 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
+  Quer partilhar a sua experiência, casos de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? 
+  <br />
+  Já estamos a construir a próxima edição e queremos ouvir a sua história.
+</p>
+  
+  {/* Reduzimos o botão ligeiramente */}
+  <a 
+    href="https://forms.gle/5VgcGULvP6296NA77"
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="inline-block bg-brand-orange text-white px-8 py-3.5 rounded-xl font-black text-lg shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-all duration-300"
+  >
+    Candidatar-me para 2027
+  </a>
+</div>
       </div>
     </Section>
   );

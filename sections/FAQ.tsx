@@ -14,10 +14,9 @@ export const FAQ: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketM
             question: "Qual o valor dos ingressos?",
             answer: (
                 <>
-                    Os bilhetes já se encontram disponíveis para compra online! Pode consultar os valores e garantir o seu lugar{' '}
-                    <button onClick={onOpenTicketModal} className="text-brand-blue font-bold hover:underline">aqui</button>.
-                    <br/><br/>
-                    Se pretende trazer a sua equipa ou posicionar a sua empresa num dos maiores eventos de agilidade em Portugal, oferecemos condições especiais para compras em lote e pacotes de patrocínio. Envie-nos uma mensagem através da{' '}
+                    Neste momento os bilhetes se encontram já esgotados!
+
+                    Se pretende posicionar a sua empresa num dos maiores eventos de agilidade em Portugal, oferecemos condições especiais para cotas de patrocínio. Envie-nos uma mensagem através da{' '}
                     <button onClick={() => document.getElementById('sponsors')?.scrollIntoView({ behavior: 'smooth' })} className="text-brand-blue font-bold hover:underline">secção de parcerias</button> 
                     {' '}ou um e-mail diretamente para <a href="mailto:tuga@tugagil.com" className="text-brand-orange font-bold hover:underline">tuga@tugagil.com</a>. Teremos todo o gosto em lhe apresentar nossas condições e desenhar o que melhor enquadra para a sua organização.
                 </>
@@ -46,7 +45,7 @@ export const FAQ: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketM
         {
             question: "O evento dispõe de serviço de bengaleiro?",
             answer: "Para garantir a máxima agilidade e segurança de todos os participantes, o evento não dispõe de serviço de bengaleiro. Recomendamos que evite trazer volumes desnecessários ou de grandes dimensões, uma vez que a organização não se responsabiliza por objetos de caráter pessoal ou bens deixados nas áreas comuns do recinto."
-        }
+     }
     ];
 
     return (
