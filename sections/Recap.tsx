@@ -163,15 +163,6 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
             <button className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white bg-black/50 hover:bg-brand-orange rounded-full transition-all z-[70]" onClick={nextImage}><ChevronRight className="w-8 h-8" /></button>
         </div>
       )}
-      
-      <div className="text-center mt-24 relative z-10">
-        <button
-            onClick={onOpenTicketModal}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 rounded-full backdrop-blur-md border border-white/20 hover:bg-brand-orange hover:border-brand-orange hover:text-white transition-all duration-300 cursor-pointer shadow-lg group"
-        >
-            <span className="font-bold text-white text-lg group-hover:scale-105 transition-transform">Reviva a experiência. Junte-se a nós em 2026.</span>
-        </button>
-      </div>
     </Section>
   );
 };

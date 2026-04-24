@@ -73,18 +73,6 @@ export const Program: React.FC<ProgramProps> = ({ onOpenTicketModal }) => {
             </div>
           ))}
         </div>
-
-        {/* Call to Action - Abre direto o formulário de bilhetes! */}
-        <div className="flex justify-center mt-12">
-            <button 
-                onClick={onOpenTicketModal}
-                className="group inline-flex items-center gap-3 bg-brand-orange text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-brand-orange transition-all duration-300 shadow-[0_10px_30px_rgba(244,122,32,0.3)] hover:shadow-[0_10px_30px_rgba(255,255,255,0.3)]"
-            >
-                Garanta o seu lugar
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-        </div>
-
       </div>
     </Section>
   );
