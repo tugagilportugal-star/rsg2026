@@ -5,7 +5,6 @@ import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Program } from './sections/Program';
 import { WhyAttend } from './sections/WhyAttend';
-import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
 import { Speakers } from './sections/Speakers';
 import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
@@ -22,7 +21,6 @@ import { TicketStatusProvider } from './hooks/useTicketStatus';
 const App: React.FC = () => {
   const[isSponsorModalOpen, setSponsorModalOpen] = useState(false);
   const[isSupporterModalOpen, setSupporterModalOpen] = useState(false);
-  const [isTicketModalOpen, setTicketModalOpen] = useState(false);
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
@@ -51,8 +49,7 @@ const App: React.FC = () => {
     checkUrl();
   },[checkUrl]);
 
-  // Função simplificada para abrir o modal sem repetir código
-  const openTicket = () => setTicketModalOpen(true);
+  const openTicket = () => {}; // tickets sold out — modal disabled
 
   return (
     <TicketStatusProvider>
@@ -60,8 +57,7 @@ const App: React.FC = () => {
         <Navbar onOpenTicketModal={openTicket} />
 
         <main>
-          <Hero onOpenTicketModal={openTicket} />
-          <Tickets onOpenTicketModal={openTicket} />
+          <Hero />
           <About />
           <Features onOpenTicketModal={openTicket} />
           <Program onOpenTicketModal={openTicket} />
@@ -98,26 +94,6 @@ const App: React.FC = () => {
           <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
         </Modal>
 
-        {/* Modal CUSTOMIZADO para a Venda de Bilhetes (Tamanho corrigido: max-w-2xl) */}
-        {isTicketModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Fundo escuro */}
-            <div className="fixed inset-0 transition-opacity bg-brand-darkBlue/80 backdrop-blur-sm" onClick={() => setTicketModalOpen(false)}></div>
-            
-            {/* Caixa do formulário com tamanho ajustado */}
-            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-              
-              <button onClick={() => setTicketModalOpen(false)} className="absolute top-4 right-4 z-50 flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full text-gray-500 hover:bg-brand-darkBlue hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-              </button>
-              
-              <div className="overflow-y-auto p-6 md:p-8 w-full">
-                <TicketPurchaseModal />
-              </div>
-
-            </div>
-          </div>
-        )}
 
       </div>
     </TicketStatusProvider>
