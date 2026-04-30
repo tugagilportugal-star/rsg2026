@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+// 1. Importar as peças do Router
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/NavBar';
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';
@@ -18,23 +20,32 @@ import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
 import { TicketStatusProvider } from './hooks/useTicketStatus';
+import { AgendaPage } from './sections/Agenda';
+
+// Criamos um componente para a Home para não poluir o App.tsx
+const HomePage: React.FC<{ openTicket: () => void, setSponsorModalOpen: (v: boolean) => void }> = ({ openTicket, setSponsorModalOpen }) => (
+  <main>
+    <Hero onOpenTicketModal={openTicket} />
+    <About />
+    <Features onOpenTicketModal={openTicket} />
+    <Program onOpenTicketModal={openTicket} />
+    <WhyAttend />
+    <Tickets onOpenTicketModal={openTicket} />
+    <Speakers />
+    <Recap onOpenTicketModal={openTicket} />
+    <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
+    <FAQ onOpenTicketModal={openTicket} />
+    <Team />
+  </main>
+);
 
 const App: React.FC = () => {
-  const[isSponsorModalOpen, setSponsorModalOpen] = useState(false);
-  const[isSupporterModalOpen, setSupporterModalOpen] = useState(false);
+  const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
   const [isTicketModalOpen, setTicketModalOpen] = useState(false);
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
-
-  if (!isAdminRoute && window.location.hash.includes('access_token=')) {
-    window.location.replace('/admin' + window.location.hash);
-    return null;
-  }
-
-  if (isAdminRoute) {
-    return <AdminView onClose={() => { window.location.href = '/'; }} />;
-  }
 
   const checkUrl = useCallback(() => {
     const query = new URLSearchParams(window.location.search);
@@ -49,77 +60,74 @@ const App: React.FC = () => {
 
   useEffect(() => {
     checkUrl();
-  },[checkUrl]);
+  }, [checkUrl]);
 
-  // Função simplificada para abrir o modal sem repetir código
+  if (!isAdminRoute && window.location.hash.includes('access_token=')) {
+    window.location.replace('/admin' + window.location.hash);
+    return null;
+  }
+
+  if (isAdminRoute) {
+    return <AdminView onClose={() => { window.location.href = '/'; }} />;
+  }
+
   const openTicket = () => setTicketModalOpen(true);
 
   return (
     <TicketStatusProvider>
-      <div className="bg-white">
-        <Navbar onOpenTicketModal={openTicket} />
+      {/* 2. Envolver tudo no Router */}
+      <Router>
+        <div className="bg-white">
+          <Navbar onOpenTicketModal={openTicket} />
 
-        <main>
-          <Hero onOpenTicketModal={openTicket} />
-          <About />
-          <Features onOpenTicketModal={openTicket} />
-          <Program onOpenTicketModal={openTicket} />
-          <WhyAttend />
-          <Tickets onOpenTicketModal={openTicket} />
-          <Speakers />
-          <Recap onOpenTicketModal={openTicket} />
-          <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-          <FAQ onOpenTicketModal={openTicket} />
-          <Team />
-        </main>
+          {/* 3. Definir as Rotas */}
+          <Routes>
+            <Route path="/" element={
+              <HomePage openTicket={openTicket} setSponsorModalOpen={setSponsorModalOpen} />
+            } />
+            <Route path="/agenda" element={<AgendaPage />} />
+          </Routes>
 
-        <Footer />
+          <Footer />
 
-        {/* Botão Admin Escondido */}
-        <div className="fixed bottom-6 right-6 z-40">
-          <button
-            onClick={() => (window.location.href = '/admin')}
-            className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
-          >
-            <Settings size={20} />
-          </button>
-        </div>
-
-        {/* Modals Secundários */}
-        <Modal isOpen={isSponsorModalOpen} onClose={() => setSponsorModalOpen(false)} title="Patrocinador">
-          <SponsorForm />
-        </Modal>
-
-        <Modal isOpen={isSupporterModalOpen} onClose={() => setSupporterModalOpen(false)} title="Apoiador">
-          <SupporterForm />
-        </Modal>
-
-        <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
-          <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
-        </Modal>
-
-        {/* Modal CUSTOMIZADO para a Venda de Bilhetes (Tamanho corrigido: max-w-2xl) */}
-        {isTicketModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            {/* Fundo escuro */}
-            <div className="fixed inset-0 transition-opacity bg-brand-darkBlue/80 backdrop-blur-sm" onClick={() => setTicketModalOpen(false)}></div>
-            
-            {/* Caixa do formulário com tamanho ajustado */}
-            <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-              
-              <button onClick={() => setTicketModalOpen(false)} className="absolute top-4 right-4 z-50 flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full text-gray-500 hover:bg-brand-darkBlue hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-              </button>
-              
-              <div className="overflow-y-auto p-6 md:p-8 w-full">
-                <TicketPurchaseModal />
-              </div>
-
-            </div>
+          {/* Botão Admin Escondido */}
+          <div className="fixed bottom-6 right-6 z-40">
+            <button
+              onClick={() => (window.location.href = '/admin')}
+              className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:bg-brand-darkBlue hover:text-white flex items-center justify-center transition-colors"
+            >
+              <Settings size={20} />
+            </button>
           </div>
-        )}
 
-      </div>
+          {/* Teus Modals mantêm-se exatamente iguais */}
+          <Modal isOpen={isSponsorModalOpen} onClose={() => setSponsorModalOpen(false)} title="Patrocinador">
+            <SponsorForm />
+          </Modal>
+
+          <Modal isOpen={isSupporterModalOpen} onClose={() => setSupporterModalOpen(false)} title="Apoiador">
+            <SupporterForm />
+          </Modal>
+
+          <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
+            <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
+          </Modal>
+
+          {isTicketModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <div className="fixed inset-0 transition-opacity bg-brand-darkBlue/80 backdrop-blur-sm" onClick={() => setTicketModalOpen(false)}></div>
+              <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <button onClick={() => setTicketModalOpen(false)} className="absolute top-4 right-4 z-50 flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full text-gray-500 hover:bg-brand-darkBlue hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+                <div className="overflow-y-auto p-6 md:p-8 w-full">
+                  <TicketPurchaseModal />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </Router>
     </TicketStatusProvider>
   );
 };

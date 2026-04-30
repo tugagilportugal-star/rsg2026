@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ASSETS } from '../config';
 import { Menu, X, ArrowUp } from 'lucide-react';
+import { Link } from 'react-router-dom'; // Importante para a navegação
 
-export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = () => {
+export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTicketModal }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -29,12 +30,13 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = () => {
   };
 
   const navLinks = [
-    { label: 'O EVENTO', href: '#about' },
-    { label: 'EXPERIÊNCIA', href: '#features' },
-    { label: 'PROGRAMA', href: '#program' },
-    { label: 'SPEAKERS', href: '#speakers' },
-    { label: 'RECAP 2025', href: '#recap' },
-    { label: 'FAQ', href: '#faq' },
+    { label: 'O EVENTO', href: '/#about' },
+    { label: 'EXPERIÊNCIA', href: '/#features' },
+    { label: 'PROGRAMA', href: '/#program' },
+    { label: 'SPEAKERS', href: '/#speakers' },
+    { label: 'AGENDA', href: '/agenda', isRoute: true },
+    { label: 'RECAP 2025', href: '/#recap' },
+    { label: 'FAQ', href: '/#faq' },
   ];
 
   return (
@@ -51,31 +53,38 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = () => {
             
             {/* LOGO */}
             <div className="flex items-center">
-              <a 
-                href="https://www.scrumalliance.org/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:scale-105 transition-transform" 
-              >
+              <Link to="/" className="hover:scale-105 transition-transform">
                  <img 
                    src={ASSETS.RSG_LOGO_2026} 
                    alt="RSG Lisbon 2026" 
                    className="h-12 sm:h-16 w-auto object-contain"
                  />
-              </a>
+              </Link>
             </div>
 
             {/* LINKS DE NAVEGAÇÃO (DESKTOP) */}
             <div className="hidden xl:flex items-center gap-10">
               <div className="flex items-center gap-8">
                 {navLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm font-bold text-white uppercase tracking-widest hover:text-brand-orange transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  link.isRoute ? (
+                    /* Link para nova página */
+                    <Link
+                      key={link.label}
+                      to={link.href}
+                      className="text-sm font-bold text-white uppercase tracking-widest hover:text-brand-orange transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    /* Link para âncora na mesma página */
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      className="text-sm font-bold text-white uppercase tracking-widest hover:text-brand-orange transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )
                 ))}
               </div>
             </div>
@@ -111,7 +120,9 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = () => {
         }`}
       >
         <div className="flex justify-between items-center p-6 border-b border-white/10">
-             <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-10 w-auto" />
+             <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+                <img src={ASSETS.RSG_LOGO_2026} alt="RSG Lisbon" className="h-10 w-auto" />
+             </Link>
              <button 
                onClick={() => setIsMobileMenuOpen(false)}
                className="text-white p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -120,16 +131,27 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = () => {
              </button>
         </div>
 
-        <div className="flex-grow flex flex-col items-center justify-center gap-10 p-6">
+        <div className="flex-grow flex flex-col items-center justify-center gap-10 p-6 overflow-y-auto">
             {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-2xl font-bold text-white uppercase tracking-[0.2em] hover:text-brand-orange transition-colors"
-              >
-                {link.label}
-              </a>
+              link.isRoute ? (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-2xl font-bold text-white uppercase tracking-[0.2em] hover:text-brand-orange transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-2xl font-bold text-white uppercase tracking-[0.2em] hover:text-brand-orange transition-colors"
+                >
+                  {link.label}
+                </a>
+              )
             ))}
         </div>
       </div>
