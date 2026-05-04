@@ -42,7 +42,7 @@ export const Speakers: React.FC = () => {
     { id: "s4", name: "Paulo Caroli", role: "Author of Lean Inception and Team OKRs", image: "/assets/Paulo-Caroli.png", linkedin: "https://www.linkedin.com/in/paulocaroli/", isRevealed: true },
     { id: "s5", name: "Patrícia Sousa", role: "Talent & People Transformation Leader", image: "/assets/Patricia-Sousa.png", linkedin: "https://www.linkedin.com/in/patriciaalvessousa/", isRevealed: true },
     { id: "s6", name: "Ricardo Fernandes", role: "Enterprise Consultant", image: "/assets/Ricardo-Fernandes.png", linkedin: "https://www.linkedin.com/in/ricardofernandes/", isRevealed: true },
-    { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/cocapitzer/", isRevealed: true },
+    { id: "s7", name: "Coca Pitzer", role: "Enterprise Agile Consultant", image: "/assets/Coca-Pitzer/", isRevealed: true },
     { id: "s8", name: "David Anderson", role: "Originator of the Kanban Method", image: "/assets/David-Anderson.png", linkedin: "https://www.linkedin.com/in/agilemanagement/", isRevealed: true, isEnglish: true },
     { id: "s9", name: "César Ribeiro", role: "Head of IT Governance", image: "/assets/Cesar-Ribeiro.png", linkedin: "https://www.linkedin.com/in/cesar-ribeiro-b07aa14b/", isRevealed: true },
     { id: "s10", name: "Carlos Paz", role: "Agile Coach", image: "/assets/Carlos-Paz.png", linkedin: "https://www.linkedin.com/in/carloseduardolopespaz/", isRevealed: true},
