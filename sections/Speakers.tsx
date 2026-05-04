@@ -183,25 +183,18 @@ export const Speakers: React.FC = () => {
           </div>
         </div>
 
-        {/* --- NOVO CTA PARA A AGENDA --- */}
-        <div className="mt-20 mb-12 flex flex-col items-center">
-          <Link
-            to="/agenda"
-            className="group relative inline-flex items-center gap-4 px-10 py-5 bg-brand-darkBlue text-white hover:bg-brand-blue transition-all duration-300 rounded-2xl shadow-xl hover:shadow-brand-blue/20 hover:-translate-y-1"
-          >
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-orange mb-0.5">Confira os horários</span>
-              <span className="text-lg font-black tracking-tight">Explorar Agenda Completa</span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-orange transition-colors">
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-          <p className="mt-6 text-gray-400 text-[10px] uppercase tracking-[0.3em] font-bold">
-            Keynotes • Talks • Networking
-          </p>
-        </div>
-        {/* ----------------------------- */}
+        {/* --- CTA PARA A AGENDA AJUSTADO --- */}
+<div className="mt-20 mb-12 flex flex-col items-center">
+  <Link
+    to="/agenda"
+    className="group relative inline-flex items-center gap-6 px-12 py-6 bg-brand-darkBlue text-white hover:bg-brand-blue transition-all duration-300 rounded-2xl shadow-xl hover:shadow-brand-blue/20 hover:-translate-y-1"
+  >
+    <span className="text-xl font-black tracking-tight">Explorar Agenda Completa</span>
+    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-orange transition-colors">
+      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+    </div>
+  </Link>
+</div>
 
         {/* Banner Call for Speakers 2027 */}
         <div className="mt-16 py-12 px-6 bg-gray-50 border-t border-b border-gray-100 text-center w-full">
