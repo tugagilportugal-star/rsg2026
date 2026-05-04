@@ -99,13 +99,8 @@ export const AgendaPage: React.FC = () => {
         { name: "Ricardo Fernandes", bio: "Especialista em agilidade organizacional com foco em métricas de fluxo." }
       ]
     },
-    { time: "12:45",
-      endTime: "13:00", 
-      title: "Fecho da Manhã", 
-      type: 'event',
-    },
     { 
-      time: "13:00", 
+      time: "12:45", 
       endTime: "14:20",
       title: "🍴 Pausa para o Almoço", 
       type: 'event',
@@ -204,7 +199,7 @@ export const AgendaPage: React.FC = () => {
         className="fixed top-8 right-8 z-[110] flex items-center gap-2 bg-brand-darkBlue text-white px-6 py-3 rounded-full shadow-2xl hover:bg-brand-orange transition-all duration-300 group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-        <span className="font-bold text-sm">Voltar</span>
+        <span className="font-bold text-sm">Voltar para Home</span>
       </Link>
 
       <header className="pt-24 pb-16 px-4 text-center">
