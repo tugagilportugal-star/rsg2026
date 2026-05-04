@@ -20,7 +20,7 @@ import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
 import { TicketStatusProvider } from './hooks/useTicketStatus';
-import { Agenda } from './sections/Agenda';
+import { AgendaPage } from './sections/Agenda';
 
 // Criamos um componente para a Home para não poluir o App.tsx
 const HomePage: React.FC<{ openTicket: () => void, setSponsorModalOpen: (v: boolean) => void }> = ({ openTicket, setSponsorModalOpen }) => (
@@ -85,7 +85,7 @@ const App: React.FC = () => {
             <Route path="/" element={
               <HomePage openTicket={openTicket} setSponsorModalOpen={setSponsorModalOpen} />
             } />
-            <Route path="/agenda" element={<Agenda />} />
+            <Route path="/agenda" element={<AgendaPage />} />
           </Routes>
 
           <Footer />
