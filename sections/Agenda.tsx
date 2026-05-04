@@ -84,7 +84,7 @@ export const AgendaPage: React.FC = () => {
       time: "11:55", 
       title: "Mesa Redonda: A IA está a matar ou salvar a agilidade?", 
       speaker: ["Matheus Haddad", "Coca Pitzer", "Anabela Ferreira", "Ricardo Fernandes"],
-      speakerImage: ["/assets/Matheus.png", "/assets/cocapitzer.png", "/assets/Anabela-Ferreira.png", "/assets/Ricardo-Fernandes.png"],
+      speakerImage: ["/assets/Matheus.png", "/assets/Coca-Pitzer.png", "/assets/Anabela-Ferreira.png", "/assets/Ricardo-Fernandes.png"],
       type: 'talk',
       description: "Um debate sem filtros sobre as tensões entre automação e agilidade humana. Será a IA uma ferramenta de libertação ou um novo silo?",
       bios: [
