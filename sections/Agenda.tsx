@@ -47,43 +47,43 @@ export const AgendaPage: React.FC = () => {
   if (footer) footer.style.display = 'none';
 
   const agenda: AgendaSlot[] = [
-    { time: "08:30", title: "Welcome: Check-in & Receção", type: 'event' },
+    { time: "08:30", title: "Check-in & Receção", type: 'event' },
     { 
       time: "09:10", endTime: "09:25", title: "Boas Vindas: Abertura TugÁgil", type: 'talk', 
       speakerImage: "/assets/TugÁgil.png", 
-      description: "O arranque oficial da jornada RSG Lisbon 2026." 
+      description: "O arranque oficial do RSG Lisbon 2026! A equipa do TugÁgil dá as boas-vindas à comunidade. Prepare-se para um dia de conexões e muitos insights!" 
     },
     { 
       time: "09:30", endTime: "10:00", title: "QA na era da IA: o que mudou, e o que continua a falhar?", 
       speaker: "Joana Silva", speakerImage: "/assets/Joana-Silva.png", type: 'talk', language: '🇵🇹',
-      description: "Uma análise crítica sobre como a Inteligência Artificial está a transformar os processos de qualidade.",
-      bios: [{ name: "Joana Silva", bio: "Director of Quality Assurance com vasta experiência em automação." }]
+      description: "O que mudou (de verdade), o que funciona e o que é mito? Uma análise prática com casos reais e ferramentas sobre IA no suporte à estratégia de testes e automação assistida. A Joana irá partilhar sobre a qualidade em produtos com componentes de IA, focando em riscos, governance e nas aprendizagens que realmente trazem resultados em ambientes complexos.",
+      bios: [{ name: "Joana Silva", bio: "Engineering Leader with 8+ years of experience driving software quality across complex systems. She has a proven track record in building high-performing teams, defining tech strategies, and fostering innovation. Expert at aligning technical execution with business goals, she is also a public speaker and academic teacher focused on scalable, reliable solutions." }]
     },
     { 
       time: "10:05", endTime: "10:50", title: "Agilists and our world work: what if we were made for this time?", 
       speaker: "Lyssa Adkins", speakerImage: "/assets/Lyssa-Adkins.png", type: 'talk', 
       isKeynote: true, keynoteType: 'Opening', language: '🇬🇧',
-      description: "Lyssa explora como as competências nativas dos agilistas são o que o mundo mais necessita.",
-      bios: [{ name: "Lyssa Adkins", bio: "Internationally recognized thought leader in Agile Coaching." }]
+      description: "We are in the age of acceleration, facing exponential changes and planetary-scale challenges. As agilists with key super skills and global influence, Lyssa asks: What if we were made for this time? This keynote explores why agility is no accident and how we are uniquely positioned to meet today’s paradigm shifts and make a massively positive impact on the world.",
+      bios: [{ name: "Lyssa Adkins", bio: "Lyssa Adkins is an author, systems coach, and a foundational figure in the agile movement, best known for the industry-defining book <i>Coaching Agile Teams</i>. She specializes in expanding a leader’s cognitive, emotional, and energetic range to navigate high-stakes complexity. Today, she helps leaders become <strong>Future-Fit</strong>, unknotting systemic blockers to allow new growth to take root." }]
     },
     { time: "10:55", endTime: "11:15", title: "☕ Coffee Break & Networking", type: 'event' },
     { 
       time: "11:20", endTime: "11:50", title: "People & Future: Redesenhar o trabalho em equipa fora do mundo tech", 
       speaker: "Patrícia Alves", speakerImage: "/assets/Patricia-Sousa.png", type: 'talk', language: '🇵🇹',
-      description: "E se o futuro do trabalho depender de mais coragem para mudar como pensamos equipas?",
-      bios: [{ name: "Patrícia Alves", bio: "Líder de transformações em People ligando talento e cultura." }]
+      description: "E se o futuro do trabalho depender de coragem para mudar como pensamos equipas? Patrícia traz uma visão real de transformação fora do mundo tech, onde a IA se torna colega e o foco muda de <strong>qual é o meu papel</strong> para <strong>que problemas resolvo</strong>. Uma partilha sobre como relações baseadas em confiança e segurança psicológica são o verdadeiro motor da mudança, provando que o maior risco é continuar a trabalhar como sempre.",
+      bios: [{ name: "Patrícia Alves", bio: "Patrícia lidera transformações em People ligando talento, tecnologia e cultura. Implementou Agile em contextos não tecnológicos, organizando equipas em Sprints e PODs de inovação para posicionar o talento como parceiro estratégico. A sua abordagem combina Product Thinking e foco em mindset, defendendo que o sucesso de qualquer transformação nasce da co-criação e da evolução contínua das pessoas." }]
     },   
     { 
       time: "11:55", endTime: "12:45", title: "Mesa Redonda: A IA está a matar ou salvar a agilidade?", 
       speaker: ["Matheus Haddad", "Coca Pitzer", "Anabela Ferreira", "Ricardo Fernandes"],
       speakerImage: ["/assets/Matheus.png", "/assets/Coca-Pitzer.png", "/assets/Anabela-Ferreira.png", "/assets/Ricardo-Fernandes.png"],
       type: 'talk', language: '🇵🇹',
-      description: "Um debate sem filtros sobre as tensões entre automação e agilidade humana.",
+      description: "Um debate sem filtros sobre as tensões entre automação acelerada e agilidade humana. Estaremos a delegar a nossa capacidade crítica a algoritmos ou a usar a tecnologia para finalmente focar no que é estratégico? Os painelistas irão explorar se a IA é o fim dos métodos tradicionais ou o catalisador que faltava. No fim, quem está realmente a conduzir o fluxo: o humano ou o prompt?",
       bios: [
-        { name: "Matheus Haddad - Moderador", bio: "Fundador da Estratégia Ágil." },
-        { name: "Coca Pitzer", bio: "Enterprise Agile Consultant." },
-        { name: "Anabela Ferreira", bio: "Agile Coach experiente." },
-        { name: "Ricardo Fernandes", bio: "Especialista em agilidade organizacional." }
+        { name: "Matheus Haddad - Moderador", bio: "Autor do livro Feedback Canvas e Fundador do Ateliê de Software. Com foco em alinhar cultura organizacional e resultados de negócio, Matheus apoia líderes na criação de modelos de gestão adaptáveis, combinando visão humanista com eficiência operacional para navegar na complexidade moderna." },
+        { name: "Coca Pitzer", bio: "Enterprise Agile Consultant e mentora de transformações organizacionais. Com vasta experiência em ambientes corporativos de larga escala, a Coca foca-se no redesenho de fluxos de valor e no desenvolvimento de lideranças capazes de sustentar agilidade e inovação contínua." },
+        { name: "Anabela Ferreira", bio: "Anabela trabalha na interseção entre pessoas, tecnologia e mudança, apoiando líderes a navegar em ambientes complexos. Acredita que a verdadeira vantagem competitiva reside na forma como as equipas pensam e colaboram, e não apenas na tecnologia que utilizam." },
+        { name: "Ricardo Fernandes", bio: "Leadership & Team Coach and Founder of Growing Centuries, helping organizations improve focus and decision-making in complex environments. With 15+ years of experience in companies like Nokia, Mercedes-Benz.io and Tekever, he focuses on execution and communication in technical teams." }
       ]
     },
     { time: "13:00", endTime: "14:15", title: "🍴 Almoço", type: 'event' },
