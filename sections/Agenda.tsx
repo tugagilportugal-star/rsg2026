@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Star, Filter, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Star, X } from 'lucide-react';
 
 interface SpeakerBio {
   name: string;
@@ -16,7 +16,8 @@ interface AgendaSlot {
   description?: string;
   type: 'talk' | 'event' | 'break';
   isKeynote?: boolean;
-  language?: '🇵🇹' | '🇬🇧';
+  keynoteType?: 'Opening' | 'Closing';
+  language?: string;
   bios?: SpeakerBio[];
 }
 
@@ -34,9 +35,9 @@ export const AgendaPage: React.FC = () => {
   const agenda: AgendaSlot[] = [
     { time: "08:30", title: "Welcome: Check-in & Receção", type: 'event' },
     { 
-      time: "09:10", endTime: "09:25", title: "Abertura TugÁgil", type: 'talk', 
+      time: "09:10", endTime: "09:25", title: "Boas Vindas: Abertura TugÁgil", type: 'talk', 
       speakerImage: "/assets/TugÁgil.png", 
-      description: "O arranque oficial da jornada RSG Lisbon 2026." 
+      description: "O arranque oficial da jornada RSG Lisbon 2026 pela equipa TugÁgil." 
     },
     { 
       time: "09:30", endTime: "10:00", title: "QA na era da IA: o que mudou, e o que continua a falhar?", 
@@ -46,7 +47,8 @@ export const AgendaPage: React.FC = () => {
     },
     { 
       time: "10:05", endTime: "10:50", title: "Agilists and our world work: what if we were made for this time?", 
-      speaker: "Lyssa Adkins", speakerImage: "/assets/Lyssa-Adkins.png", type: 'talk', isKeynote: true, language: '🇬🇧',
+      speaker: "Lyssa Adkins", speakerImage: "/assets/Lyssa-Adkins.png", type: 'talk', 
+      isKeynote: true, keynoteType: 'Opening', language: '🇬🇧',
       description: "Lyssa explora como as competências nativas dos agilistas são o que o mundo mais necessita.",
       bios: [{ name: "Lyssa Adkins", bio: "Internationally recognized thought leader in Agile Coaching." }]
     },
@@ -114,7 +116,8 @@ export const AgendaPage: React.FC = () => {
     },
     { 
       time: "17:45", endTime: "18:25", title: "Agilidade sem humanos? O futuro da liderança na era da IA", 
-      speaker: "Nadia Miranda", speakerImage: "/assets/Nadia-Miranda.png", type: 'talk', isKeynote: true, language: '🇵🇹',
+      speaker: "Nadia Miranda", speakerImage: "/assets/Nadia-Miranda.png", type: 'talk', 
+      isKeynote: true, keynoteType: 'Closing', language: '🇵🇹',
       description: "O papel do líder quando a tecnologia assume o processamento.",
       bios: [{ name: "Nadia Miranda", bio: "Líder em Transformação Digital e IT Director." }]
     },
@@ -134,14 +137,19 @@ export const AgendaPage: React.FC = () => {
         className="fixed top-8 right-8 z-[110] flex items-center gap-2 bg-brand-darkBlue text-white px-6 py-3 rounded-full shadow-2xl hover:bg-brand-orange transition-all duration-300"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span className="font-bold text-sm">Voltar</span>
+        <span className="font-bold text-sm">Voltar para Home</span>
       </Link>
 
       <header className="pt-24 pb-10 px-4 text-center">
-        <h1 className="text-5xl font-black text-brand-darkBlue mb-4 tracking-tighter">AGENDA <span className="text-brand-orange">2026</span></h1>
+        <h1 className="text-5xl font-black text-brand-darkBlue mb-2 tracking-tighter">AGENDA <span className="text-brand-orange">2026</span></h1>
+        
+        {/* FRASE RECUPERADA */}
+        <p className="text-gray-500 font-medium text-sm max-w-md mx-auto mb-8">
+          Agilidade, Inovação e IA: o impacto no dia a dia das organizações. 
+        </p>
         
         {/* FILTROS E CONTROLES */}
-        <div className="flex flex-wrap justify-center gap-2 mt-8">
+        <div className="flex flex-wrap justify-center gap-2">
           <button onClick={() => setFilter('morning')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'morning' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-500'}`}>MANHÃ</button>
           <button onClick={() => setFilter('afternoon')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'afternoon' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-500'}`}>TARDE</button>
           <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'all' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 text-gray-500'}`}>VER TUDO</button>
@@ -180,11 +188,11 @@ export const AgendaPage: React.FC = () => {
                     <div className="flex-grow overflow-hidden">
                       {slot.isKeynote && (
                         <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-brand-orange mb-1">
-                          <Star className="w-2.5 h-2.5 fill-brand-orange" /> Keynote
+                          <Star className="w-2.5 h-2.5 fill-brand-orange" /> {slot.keynoteType} Keynote
                         </span>
                       )}
                       <h3 className="text-base font-bold leading-tight truncate-2-lines">
-                        {slot.title} {slot.language}
+                        {slot.title} <span className="ml-1 opacity-100">{slot.language}</span>
                       </h3>
                       {slot.speaker && (
                         <p className={`text-xs mt-1 font-bold uppercase tracking-wider ${slot.type === 'talk' ? 'text-brand-orange' : 'text-gray-500'}`}>
@@ -195,10 +203,15 @@ export const AgendaPage: React.FC = () => {
 
                     <div className="flex items-center gap-3 shrink-0">
                       {slot.speakerImage && (
-                        <div className="flex -space-x-3 items-center mr-2">
+                        <div className="flex -space-x-2 items-center mr-1">
                           {Array.isArray(slot.speakerImage) ? (
                             slot.speakerImage.map((img, i) => (
-                              <img key={i} src={img} alt="Speaker" className="w-9 h-9 rounded-full border-2 border-brand-darkBlue object-cover bg-white shadow-sm" />
+                              <img 
+                                key={i} 
+                                src={img} 
+                                alt="Speaker" 
+                                className="w-10 h-10 rounded-full border-2 border-brand-orange object-cover bg-brand-darkBlue shadow-sm" 
+                              />
                             ))
                           ) : (
                             <img 
