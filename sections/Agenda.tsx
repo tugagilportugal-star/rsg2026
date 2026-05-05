@@ -173,8 +173,6 @@ export const AgendaPage: React.FC = () => {
         </div>
       </header>
 
-      if (footer) footer.style.display = 'block';
-
       <div className="max-w-4xl mx-auto px-4 space-y-3">
         {filteredAgenda.map((slot, index) => {
           const isExpandable = slot.description || slot.bios;
