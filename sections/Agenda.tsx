@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, Star, X } from 'lucide-react';
 
+const FlagIcon = ({ lang }: { lang: string }) => {
+  const flagCode = lang === '🇵🇹' ? 'pt' : 'gb';
+  return (
+    <img 
+      src={`https://flagcdn.com/w40/${flagCode}.png`} 
+      alt={lang}
+      className="w-5 h-5 rounded-full object-cover inline-block ml-2 border border-white/20 shadow-sm"
+    />
+  );
+};
+
 interface SpeakerBio {
   name: string;
   bio: string;
@@ -37,7 +48,7 @@ export const AgendaPage: React.FC = () => {
     { 
       time: "09:10", endTime: "09:25", title: "Boas Vindas: Abertura TugÁgil", type: 'talk', 
       speakerImage: "/assets/TugÁgil.png", 
-      description: "O arranque oficial da jornada RSG Lisbon 2026 pela equipa TugÁgil." 
+      description: "O arranque oficial da jornada RSG Lisbon 2026." 
     },
     { 
       time: "09:30", endTime: "10:00", title: "QA na era da IA: o que mudou, e o que continua a falhar?", 
@@ -72,7 +83,7 @@ export const AgendaPage: React.FC = () => {
         { name: "Ricardo Fernandes", bio: "Especialista em agilidade organizacional." }
       ]
     },
-    { time: "13:00", endTime: "14:15", title: "🍴 Pausa para o Almoço", type: 'event' },
+    { time: "13:00", endTime: "14:15", title: "🍴 Almoço", type: 'event' },
     { 
       time: "14:20", endTime: "14:50", title: "Satisficing: How to Succeed at Scale", 
       speaker: "David Anderson", speakerImage: "/assets/David-Anderson.png", type: 'talk', language: '🇬🇧',
@@ -143,12 +154,10 @@ export const AgendaPage: React.FC = () => {
       <header className="pt-24 pb-10 px-4 text-center">
         <h1 className="text-5xl font-black text-brand-darkBlue mb-2 tracking-tighter">AGENDA <span className="text-brand-orange">2026</span></h1>
         
-        {/* FRASE RECUPERADA */}
         <p className="text-gray-500 font-medium text-sm max-w-md mx-auto mb-8">
-          Agilidade, Inovação e IA: o impacto no dia a dia das organizações. 
+          Agilidade, Inovação e IA: o impacto real no dia a dia das organizações.
         </p>
         
-        {/* FILTROS E CONTROLES */}
         <div className="flex flex-wrap justify-center gap-2">
           <button onClick={() => setFilter('morning')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'morning' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-500'}`}>MANHÃ</button>
           <button onClick={() => setFilter('afternoon')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'afternoon' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-500'}`}>TARDE</button>
@@ -191,8 +200,8 @@ export const AgendaPage: React.FC = () => {
                           <Star className="w-2.5 h-2.5 fill-brand-orange" /> {slot.keynoteType} Keynote
                         </span>
                       )}
-                      <h3 className="text-base font-bold leading-tight truncate-2-lines">
-                        {slot.title} <span className="ml-1 opacity-100">{slot.language}</span>
+                      <h3 className="text-base font-bold leading-tight truncate-2-lines flex items-center">
+                        {slot.title} {slot.language && <FlagIcon lang={slot.language} />}
                       </h3>
                       {slot.speaker && (
                         <p className={`text-xs mt-1 font-bold uppercase tracking-wider ${slot.type === 'talk' ? 'text-brand-orange' : 'text-gray-500'}`}>
@@ -217,7 +226,7 @@ export const AgendaPage: React.FC = () => {
                             <img 
                               src={slot.speakerImage} 
                               alt="Logo" 
-                              className={`w-10 h-10 rounded-full border-2 ${slot.title.includes('TugÁgil') ? 'bg-white p-1 border-transparent' : 'border-brand-orange object-cover'}`} 
+                              className={`w-10 h-10 rounded-full border-2 border-brand-orange object-cover ${slot.title.includes('TugÁgil') ? 'bg-white p-1' : 'bg-brand-darkBlue shadow-sm'}`} 
                             />
                           )}
                         </div>
