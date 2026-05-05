@@ -43,6 +43,9 @@ export const AgendaPage: React.FC = () => {
     return () => { if (nav) nav.style.display = 'flex'; };
   }, []);
 
+  const footer = document.querySelector('footer');
+  if (footer) footer.style.display = 'none';
+
   const agenda: AgendaSlot[] = [
     { time: "08:30", title: "Welcome: Check-in & Receção", type: 'event' },
     { 
@@ -169,6 +172,8 @@ export const AgendaPage: React.FC = () => {
           )}
         </div>
       </header>
+
+      if (footer) footer.style.display = 'block';
 
       <div className="max-w-4xl mx-auto px-4 space-y-3">
         {filteredAgenda.map((slot, index) => {
