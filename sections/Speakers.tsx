@@ -146,11 +146,7 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-<<<<<<< HEAD
     <Section id="speakers" className="bg-brand-darkBlue py-24 border-t border-white/10">
-=======
-    <Section id="speakers" className="bg-white py-24 border-t border-white/10">
->>>>>>> origin/preview-test
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Título da Secção */}
@@ -187,41 +183,11 @@ export const Speakers: React.FC = () => {
           </div>
         </div>
 
-<<<<<<< HEAD
-        {/* Banner Call for Speakers 2027 */}
-{/* Removemos max-w e rounded, reduzimos padding vertical (py-12 em vez de p-12) */}
-<div className="mt-16 py-12 px-6 bg-white/10 border-t border-b border-white/20 text-center w-full">
-
-  {/* Reduzimos o badge */}
-  <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full shadow-sm mb-4 border border-white/20">
-    <span className="font-bold text-white text-sm">RSG Lisbon 2027</span>
-  </div>
-
-  {/* Reduzimos o tamanho do título (text-2xl em vez de text-3xl) e a margem */}
-  <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
-    Inspirado por estes líderes? O próximo palco pode ser o seu.
-  </h3>
-
-  {/* Reduzimos o tamanho do texto e a margem */}
- <p className="text-blue-100 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
-  Quer partilhar a sua experiência, casos de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? 
-  <br />
-  Já estamos a construir a próxima edição e queremos ouvir a sua história.
-</p>
-  
-  {/* Reduzimos o botão ligeiramente */}
-  <a 
-    href="https://forms.gle/5VgcGULvP6296NA77"
-    target="_blank" 
-    rel="noopener noreferrer"
-    className="inline-block bg-brand-orange text-white px-8 py-3.5 rounded-xl font-black text-lg shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-all duration-300"
-=======
-        {/* --- CTA PARA A AGENDA AJUSTADO --- */}
+        {/* CTA: Agenda */}
 <div className="mt-20 mb-12 flex flex-col items-center">
   <Link
     to="/agenda"
-    className="group relative inline-flex items-center gap-6 px-12 py-6 bg-brand-darkBlue text-white hover:bg-brand-blue transition-all duration-300 rounded-2xl shadow-xl hover:shadow-brand-blue/20 hover:-translate-y-1"
->>>>>>> origin/preview-test
+    className="group relative inline-flex items-center gap-6 px-12 py-6 bg-white/10 text-white hover:bg-brand-blue transition-all duration-300 rounded-2xl shadow-xl hover:-translate-y-1 border border-white/20"
   >
     <span className="text-xl font-black tracking-tight">Explorar Agenda Completa</span>
     <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-orange transition-colors">
@@ -231,30 +197,27 @@ export const Speakers: React.FC = () => {
 </div>
 
         {/* Banner Call for Speakers 2027 */}
-        <div className="mt-16 py-12 px-6 bg-gray-50 border-t border-b border-gray-100 text-center w-full">
-          <div className="inline-flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm mb-4 border border-gray-100">
-            <span className="font-bold text-brand-darkBlue text-sm">RSG Lisbon 2027</span>
-          </div>
-          
-          <h3 className="text-2xl md:text-3xl font-black text-brand-darkBlue mb-3 tracking-tight">
-            Inspirado por estes líderes? O próximo palco pode ser o seu.
-          </h3>
-          
-         <p className="text-gray-600 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
-          Quer partilhar a sua experiência, casos de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>? 
-          <br />
-          Já estamos a construir a próxima edição e queremos ouvir a sua história.
-        </p>
-          
-          <a 
-            href="https://forms.gle/5VgcGULvP6296NA77"
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-block bg-brand-orange text-white px-8 py-3.5 rounded-xl font-black text-lg shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-all duration-300"
-          >
-            Candidatar-me para 2027
-          </a>
-        </div>
+<div className="mt-16 py-12 px-6 bg-white/10 border-t border-b border-white/20 text-center w-full">
+  <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full shadow-sm mb-4 border border-white/20">
+    <span className="font-bold text-white text-sm">RSG Lisbon 2027</span>
+  </div>
+  <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
+    Inspirado por estes líderes? O próximo palco pode ser o seu.
+  </h3>
+  <p className="text-blue-100 text-base mb-6 max-w-3xl mx-auto leading-relaxed">
+    Quer partilhar a sua experiência, casos de sucesso ou visão sobre agilidade no <strong>RSG Lisbon 2027</strong>?
+    <br />
+    Já estamos a construir a próxima edição e queremos ouvir a sua história.
+  </p>
+  <a
+    href="https://forms.gle/5VgcGULvP6296NA77"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block bg-brand-orange text-white px-8 py-3.5 rounded-xl font-black text-lg shadow-[0_10px_24px_rgba(249,115,22,0.2)] hover:scale-105 transition-all duration-300"
+  >
+    Candidatar-me para 2027
+  </a>
+</div>
       </div>
     </Section>
   );
