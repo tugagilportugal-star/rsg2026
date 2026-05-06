@@ -130,6 +130,7 @@ const App: React.FC = () => {
         )}
 
       </div>
+      </Router>
     </TicketStatusProvider>
   );
 };
