@@ -71,17 +71,32 @@ const App: React.FC = () => {
 
   return (
     <TicketStatusProvider>
-      {/* 2. Envolver tudo no Router */}
       <Router>
-
-          {/* 3. Definir as Rotas */}
+        <div className="bg-white">
+          {/* Se quiseres manter a Navbar global, coloca-a aqui. 
+              Se a Agenda deve ser Full Screen, deixa sem ela. */}
+          
           <Routes>
+            {/* Definimos a Agenda como a rota principal para o preview */}
+            <Route path="/" element={<AgendaPage />} />
+            
+            {/* Mantemos o path /agenda para compatibilidade */}
             <Route path="/agenda" element={<AgendaPage />} />
+
+            {/* A HomePage fica comentada ou num path alternativo para não interferir */}
+            <Route path="/preview-home" element={
+              <HomePage 
+                openTicket={() => {}} 
+                setSponsorModalOpen={setSponsorModalOpen} 
+              />
+            } />
           </Routes>
 
+          {/* O Footer aparece em todas as rotas. 
+              Como a Agenda esconde o footer via DOM, podes mantê-lo aqui. */}
           <Footer />
 
-          {/* Botão Admin Escondido */}
+          {/* Botão Admin e Modals mantêm-se como no teu código */}
           <div className="fixed bottom-6 right-6 z-40">
             <button
               onClick={() => (window.location.href = '/admin')}
@@ -91,14 +106,14 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Teus Modals mantêm-se exatamente iguais */}
           <Modal isOpen={isSponsorModalOpen} onClose={() => setSponsorModalOpen(false)} title="Patrocinador">
             <SponsorForm />
           </Modal>
 
           <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
-            <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
+            <SuccessState message="O seu bilhete está garantido!" />
           </Modal>
+        </div>
       </Router>
     </TicketStatusProvider>
   );
