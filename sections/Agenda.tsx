@@ -64,7 +64,7 @@ export const AgendaPage: React.FC = () => {
       time: "10:05", endTime: "10:50", title: "Agilists and our world work: what if we were made for this time?", 
       speaker: "Lyssa Adkins", speakerImage: "/assets/Lyssa-Adkins.png", type: 'talk', 
       isKeynote: true, keynoteType: 'Opening', language: '🇬🇧',
-      description: "We are in the age of acceleration, facing exponential changes and planetary-scale challenges. As agilists with key super skills and global influence, Lyssa asks: What if we were made for this time? This keynote explores why agility is no accident and how we are uniquely positioned to meet today’s paradigm shifts and make a massively positive impact on the world.",
+      description: "We are in the age of acceleration, facing exponential changes and planetary-scale challenges. As agilists with key super skills and global influence, Lyssa asks: <strong>What if we were made for this time?</strong> This keynote explores why agility is no accident and how we are uniquely positioned to meet today’s paradigm shifts and make a massively positive impact on the world.",
       bios: [{ name: "Lyssa Adkins", bio: "Lyssa Adkins is an author, systems coach, and a foundational figure in the agile movement, best known for the industry-defining book <i>Coaching Agile Teams</i>. She specializes in expanding a leader’s cognitive, emotional, and energetic range to navigate high-stakes complexity. Today, she helps leaders become <strong>Future-Fit</strong>, unknotting systemic blockers to allow new growth to take root." }]
     },
     { time: "10:55", endTime: "11:20", title: "☕ Coffee Break & Networking", type: 'event' },
@@ -92,24 +92,24 @@ export const AgendaPage: React.FC = () => {
     {
       time: "14:35", endTime: "15:05", title: "Satisficing: How to Succeed at Scale", 
       speaker: "David Anderson", speakerImage: "/assets/David-Anderson.png", type: 'talk', language: '🇬🇧',
-      description: "Application of network science and the concept of satisficing.",
-      bios: [{ name: "David Anderson", bio: "Originator of the Kanban Method." }]
+      description: "Optimizing large organizations requires network science and <strong>satisficing</strong>—adapting locally to provide sufficient capability. Instead of rigid scaling frameworks or top-down transformations, view your organization as a network of services. Wire it for adaptation and let it evolve to achieve the best fit for global optimization.",
+      bios: [{ name: "David Anderson", bio: "Originator of the Kanban Method and CEO of Mauvius Group. With 30+ years of experience at companies including IBM and Microsoft, David is a management innovator and co-creator of the Kanban Maturity Model and Fit-for-Purpose Framework, focusing on leadership development for knowledge-driven organizations." }]
     },
     { 
       time: "15:10", endTime: "15:40", title: "Let IT Flow: Delivering More Features using Flight Levels Dependency Management", 
       speaker: "Ricardo Caldas", speakerImage: "/assets/Ricardo-Caldas.png", type: 'talk', language: '🇵🇹',
-      description: "Tratar dependências como um problema de sistema.",
-      bios: [{ name: "Ricardo Caldas", bio: "Focado em outcomes e fluxo de valor." }]
+      description: "Ricardo partilhará aprendizagens reais, desafios e impactos concretos obtidos ao tratar dependências como um problema de sistema e não apenas de equipas. O objetivo é mostrar como desbloquear o fluxo em contextos de escala e como a gestão sistémica pode transformar a previsibilidade e a entrega de valor em ambientes complexos.",
+      bios: [{ name: "Ricardo Caldas", bio: "Ricardo atua na interseção entre produto, agilidade e gestão, com foco em outcomes e melhoria sistémica. Como Product Owner na VWGDS, utiliza práticas avançadas de gestão de fluxo e Flight Levels Dependency Management para otimizar entregas em ambientes de elevada dependência. Possui ampla experiência em liderança de equipas e transformação organizacional em contextos internacionais." }]
     },
     { 
-      time: "15:45", endTime: "16:25", title: "Direction, Flow, and Commitment: Strategy, Team Design, and Team Ownership", 
+      time: "15:45", endTime: "16:25", title: "Direction, Flow, and Commitment: Strategy, Team Design, and Team Ownership must work as One System", 
       speaker: ["Paulo Caroli", "Manuel Pais"],
       speakerImage: ["/assets/Paulo-Caroli.png", "/assets/Manuel-Pais.png"],
       type: 'talk', language: '🇵🇹',
-      description: "Strategic OKRs, Team Topologies, e Team OKRs como um único sistema.",
+      description: "Many organizations define strategy or reorganize teams, yet outcomes don’t improve because strategy, team design, and commitment are often disconnected. Manuel Pais and Paulo Caroli explore how Strategic OKRs, Team Topologies, and Team OKRs connect direction, flow, and ownership to help organizations deliver real outcomes instead of just outputs.",
       bios: [
-        { name: "Paulo Caroli", bio: "Criador da Lean Inception & Team OKRs." },
-        { name: "Manuel Pais", bio: "Co-author of 'Team Topologies'." }
+        { name: "Paulo Caroli", bio: "Paulo Caroli é autor best-seller e criador da Lean Inception e do Team OKRs. Há mais de três décadas ajuda organizações ao redor do mundo a transformar ideias em produtos de valor, conectando estratégia, discovery e delivery através de práticas ágeis e colaborativas que potenciam resultados reais e alinhamento organizacional." },
+        { name: "Manuel Pais", bio: "Co-author of the book Team Topologies, Manuel is on a mission to make work more humane and businesses more valuable. He is an expert in fast flow and has helped Fortune 500 companies via strategic assessments. He also led the creation of the Team Topologies Academy and the Teamperature model for managing team cognitive load." }
       ]
     },
     { time: "16:25", endTime: "16:50", title: "☕ Coffee Break & Networking", type: 'event' },
@@ -118,24 +118,24 @@ export const AgendaPage: React.FC = () => {
       speaker: ["César Ribeiro", "Carlos Paz"],
       speakerImage: ["/assets/Cesar-Ribeiro.png", "/assets/Carlos-Paz.png"],
       type: 'talk', language: '🇵🇹',
-      description: "A jornada de transformação dos CTT.",
+      description: "Transformar os CTT foi além de seguir frameworks; foi navegar tensões reais e decisões imperfeitas. César e Carlos partilharão onde a jornada ganhou tração e onde travou, revelando o impacto de alinhar Flight Levels, produto e governance ao mesmo tempo. Uma talk sem fórmulas mágicas, focada na realidade, aprendizagens e reflexões para quem vive transformações em escala.",
       bios: [
-        { name: "César Ribeiro", bio: "Head of IT Governance nos CTT." },
-        { name: "Carlos Paz", bio: "Especialista em gestão de tecnologia." }
+        { name: "César Ribeiro", bio: "Head of IT Governance nos CTT, é responsável pela definição e evolução do modelo operativo de IT. Com mais de 30 anos de experiência em sistemas de informação, tem liderado iniciativas de transformação organizacional baseadas em princípios Lean e Agile, focadas num modelo estruturado de governação e gestão de portfólio orientado à criação de valor." },
+        { name: "Carlos Paz", bio: "Especialista em gestão de tecnologia, transformação digital e agilidade em escala. Com ampla experiência na evolução de modelos operativos e melhoria de fluxo em ambientes complexos, apoia organizações na criação de formas de trabalho eficazes, conectando estratégia, liderança e entrega de valor de forma prática e sustentável." }
       ]
     },
     { 
       time: "17:30", endTime: "18:00", title: "Real World Product Management", 
       speaker: "Sara Cruz", speakerImage: "/assets/Sara-Cruz.png", type: 'talk', language: '🇵🇹',
-      description: "O gap entre a cultura de produto perfeita e o dia a dia.",
-      bios: [{ name: "Sara Cruz", bio: "Especialista em equipas de produto de alta performance." }]
+      description: "O gap entre a <i>cultura de produto perfeita</i> e a realidade pode ser desafiante, mas o sucesso nasce da evolução incremental. Com exemplos reais de empresas como OutSystems e Farfetch, Sara explora como transformar o caos de wishlists em intenção estratégica através de evidências e factos. Uma sessão para aprender a equilibrar dados e empatia, provando que é possível mover a agulha hoje, sem esperar pelas condições ideais.",
+      bios: [{ name: "Sara Cruz", bio: "Sara soma 15 anos de experiência em Engenharia, Design e Produto, com passagens empresas como OutSystems e Farfetch, gerindo produtos para 4 milhões de utilizadores. Especialista em equipas de alta performance e maturidade digital em contextos complexos, acredita que a cultura de produto é uma conquista diária baseada em dados e empatia." }]
     },
     { 
       time: "18:05", endTime: "18:45", title: "Agilidade sem humanos? O futuro da liderança na era da IA", 
       speaker: "Nadia Miranda", speakerImage: "/assets/Nadia-Miranda.png", type: 'talk', 
       isKeynote: true, keynoteType: 'Closing', language: '🇵🇹',
-      description: "O papel do líder quando a tecnologia assume o processamento.",
-      bios: [{ name: "Nadia Miranda", bio: "Líder em Transformação Digital e IT Director." }]
+      description: "Nádia Miranda convida-nos a olhar para o que resta quando os algoritmos assumem o processamento. Esta sessão conecta as peças soltas da transformação, da estratégia e da IA, elevando o debate para o nível da liderança consciente. Como manter a agilidade viva através da essência humana e qual o papel do líder num futuro onde a eficiência é automatizada, mas o propósito continua a ser uma escolha nossa?",
+      bios: [{ name: "Nadia Miranda", bio: "Doutorada em Engenharia Informática e IT Director com vasta experiência em Transformação Digital e Marketing, Nádia é uma <strong>mulher de fazer acontecer</strong>. Autora de obras como <i>Women in Tech e não só!</i> e mentora no Portuguese Women in Tech, combina o rigor académico com uma liderança dinâmica e multicultural, defendendo que nem o céu é o limite para quem sabe gerir o tempo e cuidar das pessoas." }]
     },
     { time: "18:45", endTime: "18:50", title: "Encerramento", type: 'event' },
   ];
