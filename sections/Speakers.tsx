@@ -1,7 +1,7 @@
 import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Linkedin, Sparkles, UserCircle2, ArrowRight } from 'lucide-react'; // Adicionei ArrowRight
-import { Link } from 'react-router-dom'; // Adicionei Link
+import { Link } from 'react-router-dom';
 
 interface SpeakerData {
   id: string;
@@ -146,7 +146,7 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-brand-darkBlue py-24 border-t border-white/10">
+    <Section id="speakers" className="bg-white py-24 border-t border-white/10">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Título da Secção */}
@@ -185,15 +185,12 @@ export const Speakers: React.FC = () => {
 
         {/* --- CTA PARA A AGENDA AJUSTADO --- */}
 <div className="mt-20 mb-12 flex flex-col items-center">
-  <Link
-    to="/agenda"
-    className="group relative inline-flex items-center gap-6 px-12 py-6 bg-brand-darkBlue text-white hover:bg-brand-blue transition-all duration-300 rounded-2xl shadow-xl hover:shadow-brand-blue/20 hover:-translate-y-1"
-  >
-    <span className="text-xl font-black tracking-tight">Explorar Agenda Completa</span>
-    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-orange transition-colors">
-      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-    </div>
-  </Link>
+  <Link 
+        to="/agenda" 
+        className="inline-block bg-brand-blue text-white px-10 py-4 rounded-full font-black text-lg hover:bg-brand-orange transition-all shadow-xl"
+      >
+        EXPLORAR AGENDA COMPLETA
+      </Link>
 </div>
 
         {/* Banner Call for Speakers 2027 */}
