@@ -7,10 +7,9 @@ import { About } from './sections/About';
 import { Features } from './sections/Features';
 import { Program } from './sections/Program';
 import { WhyAttend } from './sections/WhyAttend';
-import { Tickets } from './sections/Tickets';
 import { Sponsors } from './sections/Sponsors';
 import { Speakers } from './sections/Speakers';
-import { GetInvolved, SponsorForm } from './sections/GetInvolved';
+import { GetInvolved, SponsorForm, SupporterForm } from './sections/GetInvolved';
 import { Recap } from './sections/Recap';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
@@ -30,7 +29,6 @@ const HomePage: React.FC<{ openTicket: () => void, setSponsorModalOpen: (v: bool
     <Features onOpenTicketModal={openTicket} />
     <Program onOpenTicketModal={openTicket} />
     <WhyAttend />
-    <Tickets onOpenTicketModal={openTicket} />
     <Speakers />
     <Recap onOpenTicketModal={openTicket} />
     <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
@@ -41,6 +39,8 @@ const HomePage: React.FC<{ openTicket: () => void, setSponsorModalOpen: (v: bool
 
 const App: React.FC = () => {
   const [isSponsorModalOpen, setSponsorModalOpen] = useState(false);
+  const [isSupporterModalOpen, setSupporterModalOpen] = useState(false);
+  const [isTicketModalOpen, setTicketModalOpen] = useState(false);
   const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
   const isAdminRoute = window.location.pathname === '/admin';
@@ -69,34 +69,26 @@ const App: React.FC = () => {
     return <AdminView onClose={() => { window.location.href = '/'; }} />;
   }
 
+  const openTicket = () => setTicketModalOpen(true);
+
   return (
     <TicketStatusProvider>
+      {/* 2. Envolver tudo no Router */}
       <Router>
         <div className="bg-white">
-          {/* Se quiseres manter a Navbar global, coloca-a aqui. 
-              Se a Agenda deve ser Full Screen, deixa sem ela. */}
-          
-          <Routes>
-            {/* Definimos a Agenda como a rota principal para o preview */}
-            <Route path="/" element={<AgendaPage />} />
-            
-            {/* Mantemos o path /agenda para compatibilidade */}
-            <Route path="/agenda" element={<AgendaPage />} />
+          <Navbar onOpenTicketModal={openTicket} />
 
-            {/* A HomePage fica comentada ou num path alternativo para não interferir */}
-            <Route path="/preview-home" element={
-              <HomePage 
-                openTicket={() => {}} 
-                setSponsorModalOpen={setSponsorModalOpen} 
-              />
+          {/* 3. Definir as Rotas */}
+          <Routes>
+            <Route path="/" element={
+              <HomePage openTicket={openTicket} setSponsorModalOpen={setSponsorModalOpen} />
             } />
+            <Route path="/agenda" element={<AgendaPage />} />
           </Routes>
 
-          {/* O Footer aparece em todas as rotas. 
-              Como a Agenda esconde o footer via DOM, podes mantê-lo aqui. */}
           <Footer />
 
-          {/* Botão Admin e Modals mantêm-se como no teu código */}
+          {/* Botão Admin Escondido */}
           <div className="fixed bottom-6 right-6 z-40">
             <button
               onClick={() => (window.location.href = '/admin')}
@@ -106,13 +98,32 @@ const App: React.FC = () => {
             </button>
           </div>
 
+          {/* Teus Modals mantêm-se exatamente iguais */}
           <Modal isOpen={isSponsorModalOpen} onClose={() => setSponsorModalOpen(false)} title="Patrocinador">
             <SponsorForm />
           </Modal>
 
-          <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
-            <SuccessState message="O seu bilhete está garantido!" />
+          <Modal isOpen={isSupporterModalOpen} onClose={() => setSupporterModalOpen(false)} title="Apoiador">
+            <SupporterForm />
           </Modal>
+
+          <Modal isOpen={isSuccessModalOpen} onClose={() => setSuccessModalOpen(false)} title="Pagamento Confirmado!">
+            <SuccessState message="O seu bilhete está garantido! Você receberá um e-mail com o QR Code e a fatura em breve." />
+          </Modal>
+
+          {isTicketModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <div className="fixed inset-0 transition-opacity bg-brand-darkBlue/80 backdrop-blur-sm" onClick={() => setTicketModalOpen(false)}></div>
+              <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <button onClick={() => setTicketModalOpen(false)} className="absolute top-4 right-4 z-50 flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full text-gray-500 hover:bg-brand-darkBlue hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+                <div className="overflow-y-auto p-6 md:p-8 w-full">
+                  <TicketPurchaseModal />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </Router>
     </TicketStatusProvider>
