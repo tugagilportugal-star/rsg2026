@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual do Speaker · RSG Lisboa 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1a5c3a;
+    --red: #c0392b;
+    --cream: #f5f0e8;
+    --sand: #e8e0d0;
+    --charcoal: #1a1a1a;
+    --mid: #4a4a4a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    line-height: 1.6;
+    padding-bottom: 90px;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    background: var(--green);
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar img.logo-tugagil { height: 36px; width: auto; }
+  .top-bar img.logo-rsg { height: 52px; width: auto; }
+
+  /* HERO */
+  .hero {
+    background: var(--green);
+    color: white;
+    padding: 2.5rem 1.5rem 2rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .hero .hero-label {
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.4rem, 8vw, 4rem);
+    line-height: 1.1; margin-bottom: 0.75rem;
+  }
+  .hero h1 em { font-style: italic; color: rgba(255,255,255,0.75); }
+  .hero p { font-size: 0.95rem; color: rgba(255,255,255,0.75); max-width: 480px; margin-bottom: 1.5rem; }
+  .hero .orgs { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+
+  /* INFO GRID */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 1.5rem 1.5rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--sand);
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .info-item {
+    padding: 1rem 1.1rem;
+    border-bottom: 1px solid var(--sand);
+    border-right: 1px solid var(--sand);
+  }
+  .info-item:nth-child(2n) { border-right: none; }
+  .info-item:nth-last-child(-n+2) { border-bottom: none; }
+  .info-item .info-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); margin-bottom: 0.35rem; }
+  .info-item .info-value { font-size: 0.9rem; font-weight: 500; }
+  .info-item .info-sub { font-size: 0.75rem; color: var(--mid); margin-top: 0.1rem; }
+
+  /* CTA */
+  .cta-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0.75rem; margin: 1.25rem 1.5rem 0;
+  }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    padding: 0.85rem 1rem; border-radius: 10px;
+    font-size: 0.85rem; font-weight: 600; text-decoration: none;
+    border: none; cursor: pointer;
+  }
+  .btn-red { background: var(--red); color: white; }
+  .btn-outline { background: white; color: var(--charcoal); border: 1.5px solid var(--sand); }
+
+  /* SECTIONS — mobile: só uma visível; desktop: todas */
+  .page-section { display: none; margin: 2rem 1.5rem 0; }
+  .page-section.active { display: block; }
+
+  /* SECTION TYPOGRAPHY */
+  .section-tag { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+  .section-sep { margin-top: 2rem; }
+  .section-title { font-family: 'DM Serif Display', serif; font-size: clamp(1.5rem, 5vw, 2.2rem); color: var(--green); line-height: 1.15; margin-bottom: 1rem; }
+  .section-title em { font-style: italic; }
+  .section-body { font-size: 0.9rem; color: var(--mid); line-height: 1.65; margin-bottom: 1rem; }
+
+  /* CARDS */
+  .quote-card { background: var(--charcoal); color: white; border-radius: 12px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+  .quote-card .q { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-style: italic; margin-bottom: 0.4rem; }
+  .quote-card .qsub { font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .info-box { background: white; border-radius: 12px; border: 1px solid var(--sand); padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+  .info-box .box-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.7rem; }
+  .info-box p { font-size: 0.88rem; color: var(--mid); line-height: 1.55; }
+
+  .deadline-card { background: #fffbea; border: 1px solid #e8d88a; border-radius: 12px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+  .deadline-card .dlabel { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #b8860b; margin-bottom: 0.5rem; }
+  .deadline-card p { font-size: 0.88rem; color: var(--mid); margin-bottom: 0.8rem; line-height: 1.55; }
+  .deadline-pill { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--red); color: white; font-size: 0.78rem; font-weight: 600; padding: 0.45rem 0.9rem; border-radius: 20px; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  .stat-card { background: white; border-radius: 12px; padding: 1.1rem; border: 1px solid var(--sand); }
+  .stat-card .num { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--green); line-height: 1; margin-bottom: 0.2rem; }
+  .stat-card .num.red { color: var(--red); }
+  .stat-card .lbl { font-size: 0.78rem; color: var(--mid); }
+
+  /* LISTS */
+  .expect-list { list-style: none; }
+  .expect-list li { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--sand); align-items: flex-start; }
+  .expect-list li:last-child { border-bottom: none; }
+  .expect-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--green); color: white; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .etitle { font-size: 0.9rem; font-weight: 600; color: var(--charcoal); margin-bottom: 0.2rem; }
+  .edesc { font-size: 0.82rem; color: var(--mid); line-height: 1.5; }
+
+  .check-list { list-style: none; }
+  .check-list li { display: flex; gap: 0.75rem; padding: 0.7rem 0; border-bottom: 1px solid var(--sand); font-size: 0.88rem; color: var(--mid); }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list .icon { flex-shrink: 0; color: var(--green); }
+
+  /* AGENDA */
+  .day-tab { display: flex; background: var(--sand); border-radius: 10px; padding: 3px; margin-bottom: 1.2rem; }
+  .day-tab button { flex: 1; border: none; background: transparent; padding: 0.55rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: var(--mid); font-family: 'DM Sans', sans-serif; transition: background 0.2s, color 0.2s; }
+  .day-tab button.active { background: var(--green); color: white; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .agenda { list-style: none; }
+  .agenda-item { display: flex; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--sand); }
+  .agenda-item:last-child { border-bottom: none; }
+  .agenda-time { flex-shrink: 0; font-size: 0.82rem; font-weight: 700; color: var(--green); width: 44px; padding-top: 0.1rem; }
+  .agenda-type { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.15rem; }
+  .agenda-type.keynote { color: var(--red); }
+  .agenda-speaker { font-size: 0.9rem; font-weight: 600; color: var(--charcoal); }
+  .agenda-talk { font-size: 0.8rem; color: var(--mid); margin-top: 0.1rem; line-height: 1.4; }
+  .is-keynote .agenda-content { border-left: 3px solid var(--red); padding-left: 0.75rem; }
+  .is-break .agenda-speaker { color: var(--mid); font-weight: 400; }
+
+  /* CONDUTA */
+  .conduct-block { background: white; border-radius: 12px; border: 1px solid var(--sand); margin-bottom: 1rem; overflow: hidden; }
+  .conduct-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--sand); }
+  .conduct-header.no { background: #fff5f5; }
+  .conduct-header.yes { background: #f0fff4; }
+  .conduct-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+  .conduct-icon.no { background: var(--red); color: white; }
+  .conduct-icon.yes { background: var(--green); color: white; }
+  .conduct-list { list-style: none; }
+  .conduct-list li { padding: 0.75rem 1.2rem; border-bottom: 1px solid var(--sand); font-size: 0.84rem; color: var(--mid); line-height: 1.5; }
+  .conduct-list li:last-child { border-bottom: none; }
+  .conduct-list li strong { color: var(--charcoal); }
+
+  /* EQUIPA */
+  .team-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .team-card { background: white; border-radius: 12px; border: 1px solid var(--sand); padding: 1rem; text-align: center; }
+  .team-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--green); color: white; font-family: 'DM Serif Display', serif; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.6rem; }
+  .team-name { font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+
+  /* CONTACTOS */
+  .contact-list { list-style: none; }
+  .contact-item { display: flex; align-items: center; gap: 1rem; background: white; border-radius: 12px; border: 1px solid var(--sand); padding: 1rem 1.2rem; margin-bottom: 0.75rem; text-decoration: none; color: var(--charcoal); }
+  .contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .contact-icon.phone { background: var(--red); color: white; }
+  .contact-icon.email, .contact-icon.web { background: var(--green); color: white; }
+  .contact-label { font-size: 0.75rem; color: var(--mid); margin-bottom: 0.1rem; }
+  .contact-value { font-size: 0.9rem; font-weight: 600; }
+
+  /* FOOTER */
+  footer { margin-top: 3rem; background: var(--green); color: white; text-align: center; padding: 2.5rem 1.5rem; }
+  footer .heart { font-size: 2rem; margin-bottom: 0.75rem; }
+  footer h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 0.5rem; }
+  footer p { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+  footer .sign { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 1.1rem; color: rgba(255,255,255,0.9); margin-top: 1rem; }
+
+  /* DOCK */
+  .dock-nav {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #1c1c1e; border-radius: 100px; padding: 8px 10px;
+    display: flex; align-items: center; gap: 4px;
+    z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    white-space: nowrap;
+  }
+  .dock-nav a {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 8px 12px; border-radius: 80px;
+    text-decoration: none; color: rgba(255,255,255,0.6);
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer; gap: 2px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .dock-nav a svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .dock-nav a span { font-size: 0.6rem; font-weight: 600; }
+  .dock-nav a:hover { background: rgba(255,255,255,0.1); color: white; }
+  .dock-nav a.active { background: var(--green); color: white; padding: 8px 18px; }
+
+  @media (min-width: 720px) {
+    body { max-width: 860px; margin: 0 auto; }
+    .top-bar { border-radius: 0 0 12px 12px; }
+    .info-grid { margin: 2rem 3rem 0; grid-template-columns: repeat(4, 1fr); }
+    .info-item:nth-child(2n) { border-right: 1px solid var(--sand); }
+    .info-item:nth-child(4n) { border-right: none; }
+    .info-item:nth-last-child(-n+4) { border-bottom: none; }
+    .cta-row { margin: 1.5rem 3rem 0; max-width: 360px; }
+    .page-section { display: block !important; margin: 2.5rem 3rem 0; }
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .team-grid { grid-template-columns: repeat(4, 1fr); }
+    .dock-nav { bottom: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <img class="logo-tugagil" src="/assets/Group-23.png" alt="TugÁgil">
+  <img class="logo-rsg" src="/assets/LISBON-Navigation-bar-logo-Reversed.png" alt="RSG Lisboa 2026">
+</div>
+
+<div class="hero">
+  <div class="hero-label">Scrum Alliance · TugÁgil · 21 Mai 2026</div>
+  <h1>Olá,<br><em>speaker.</em></h1>
+  <p>Obrigado por teres aceitado o convite. A tua participação será fundamental para inspirar e partilhar conhecimento com a comunidade Agile em Portugal.</p>
+  <div class="orgs">Scrum Alliance &nbsp;•&nbsp; TugÁgil &nbsp;•&nbsp; 21 Mai 2026</div>
+</div>
+
+<div class="info-grid">
+  <div class="info-item">
+    <div class="info-label">📅 Data</div>
+    <div class="info-value">21 de Maio de 2026</div>
+    <div class="info-sub">Quinta-feira</div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">📍 Local</div>
+    <div class="info-value">Auditório Alto dos Moinhos</div>
+    <div class="info-sub">R. João de Freitas Branco, Lisboa</div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">🚇 Metro</div>
+    <div class="info-value">Linha Azul</div>
+    <div class="info-sub">Alto dos Moinhos (à porta)</div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">🕐 Check-in</div>
+    <div class="info-value">A partir das 8h30</div>
+    <div class="info-sub">Chega com antecedência</div>
+  </div>
+</div>
+
+<div class="cta-row">
+  <a class="btn btn-red" href="https://maps.google.com/?q=Auditório+Alto+dos+Moinhos+Lisboa" target="_blank">🗺 Indicações</a>
+  <a class="btn btn-outline" href="https://rsglisbon.com" target="_blank">🌐 rsglisbon.com</a>
+</div>
+
+<!-- SECTION: SOBRE -->
+<div class="page-section active" id="sec-sobre">
+  <div class="section-tag">01 · Sobre</div>
+  <h2 class="section-title">Uma celebração da <em>agilidade</em> em Portugal.</h2>
+  <p class="section-body">O RSG Lisboa 2026 fortalece a comunidade Agile em Portugal através da partilha de experiências, ideias e boas práticas. Um espaço de aprendizagem colaborativa, networking e inspiração — onde profissionais de diversas áreas se reúnem para impulsionar a agilidade nas organizações.</p>
+  <div class="quote-card">
+    <div class="q">"Foi ÉPICO. Foi INTENSO."</div>
+    <div class="qsub">Edição 2025 · Universidade Lusófona</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num red">+170</div><div class="lbl">Participantes</div></div>
+    <div class="stat-card"><div class="num">14</div><div class="lbl">Speakers</div></div>
+    <div class="stat-card"><div class="num red">+10</div><div class="lbl">Sessões</div></div>
+    <div class="stat-card"><div class="num">20</div><div class="lbl">Voluntários</div></div>
+  </div>
+  <div class="info-box">
+    <div class="box-label">ℹ Scrum Alliance &amp; TugÁgil</div>
+    <p>Desde 2001, a Scrum Alliance é o nome mais confiável em certificações ágeis — com +247 coaches, 320 provedores de treino e 1,6M de praticantes. O TugÁgil é uma comunidade voluntária que, desde 2022, fomenta a cultura ágil em Portugal: +60 eventos, +20 empresas parceiras e mentorias para profissionais.</p>
+  </div>
+
+  <div class="section-sep">
+    <div class="section-tag">02 · Expectativas</div>
+    <h2 class="section-title">O que esperamos <em>de ti.</em></h2>
+    <ul class="expect-list">
+      <li>
+        <div class="expect-num">01</div>
+        <div><div class="etitle">Conteúdo relevante</div><div class="edesc">Traz exemplos e cases alinhados com a trilha proposta. A tua palestra deve inspirar e agregar valor à comunidade.</div></div>
+      </li>
+      <li>
+        <div class="expect-num">02</div>
+        <div><div class="etitle">Interatividade</div><div class="edesc">Envolve o público com perguntas, dinâmicas ou atividades que promovam a participação ativa.</div></div>
+      </li>
+      <li>
+        <div class="expect-num">03</div>
+        <div><div class="etitle">Respeitar o tempo</div><div class="edesc">30 min (Speaker) · 40 min (Keynote). Sem Q&amp;A na agenda.</div></div>
+      </li>
+      <li>
+        <div class="expect-num">04</div>
+        <div><div class="etitle">Linguagem inclusiva</div><div class="edesc">Utiliza uma linguagem que promova a diversidade e a inclusão, respeitando todas as pessoas.</div></div>
+      </li>
+      <li>
+        <div class="expect-num">05</div>
+        <div><div class="etitle">Evita autopromoção</div><div class="edesc">Mantém o foco no conteúdo. Evita promoção excessiva da tua empresa ou produtos.</div></div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section-sep">
+    <div class="section-tag">02B · Foco</div>
+    <h2 class="section-title">Direto ao <em>conteúdo.</em></h2>
+    <p class="section-body">Para otimizar o tempo da tua apresentação, pedimos que <strong>não faças apresentação pessoal no início da palestra</strong>. A organização fará a tua apresentação, incluindo um mini-currículo antes da tua fala.</p>
+    <div class="info-box">
+      <div class="box-label">✓ Direciona o teu tempo para</div>
+      <ul class="check-list">
+        <li><span class="icon">✓</span> Conhecimentos técnicos e práticos</li>
+        <li><span class="icon">✓</span> Resultados relevantes</li>
+        <li><span class="icon">✓</span> Estudos de caso</li>
+        <li><span class="icon">✓</span> Experiências profissionais aplicáveis</li>
+        <li><span class="icon">✓</span> Conteúdos que gerem valor real para o público</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: ENVIO -->
+<div class="page-section" id="sec-envio">
+  <div class="section-tag">03 · Envio</div>
+  <h2 class="section-title">Envia a tua <em>apresentação.</em></h2>
+  <div class="deadline-card">
+    <div class="dlabel">⏰ Prazo Final</div>
+    <p>Envia para <strong>tugagilportugal@gmail.com</strong> a tua apresentação em PowerPoint <strong>(.pptx)</strong>, usando o template enviado. Design limpo e profissional.</p>
+    <div class="deadline-pill">📅 Até 15 de Maio de 2026</div>
+  </div>
+  <div class="info-box">
+    <div class="box-label">💻 Equipamento &amp; Backup</div>
+    <p>A organização disponibiliza todo o equipamento de projeção. <strong>Traz sempre um backup</strong> da tua apresentação em pendrive e/ou nuvem.</p>
+  </div>
+
+  <div class="section-sep">
+    <div class="section-tag">04 · Dia do Evento</div>
+    <h2 class="section-title">Como vai correr <em>o teu dia.</em></h2>
+    <ul class="expect-list">
+      <li>
+        <div class="expect-num">1</div>
+        <div><div class="etitle">Chegada antecipada</div><div class="edesc">Chega com antecedência ao auditório para garantir que tudo está pronto.</div></div>
+      </li>
+      <li>
+        <div class="expect-num">2</div>
+        <div><div class="etitle">Check-in a partir das 8h30</div><div class="edesc">Procura o teu staff de confiança ao chegares. Estamos aqui para te apoiar!</div></div>
+      </li>
+      <li>
+        <div class="expect-num">3</div>
+        <div><div class="etitle">Teste de equipamento</div><div class="edesc">Chega cedo para testar o equipamento antes da tua sessão.</div></div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION: PROGRAMA -->
+<div class="page-section" id="sec-programa">
+  <div class="section-tag">05 · Programa</div>
+  <h2 class="section-title">21 de Maio de <em>2026.</em></h2>
+  <p class="section-body">Confirma o horário da tua talk com o teu staff de confiança.</p>
+  <div class="day-tab">
+    <button class="active" onclick="showTab('manha', this)">☀ Manhã</button>
+    <button onclick="showTab('tarde', this)">🌙 Tarde</button>
+  </div>
+  <div id="manha" class="tab-content active">
+    <ul class="agenda">
+      <li class="agenda-item">
+        <div class="agenda-time">08:30</div>
+        <div class="agenda-content"><div class="agenda-type">Welcome</div><div class="agenda-speaker">Check-in &amp; Receção</div></div>
+      </li>
+      <li class="agenda-item">
+        <div class="agenda-time">09:15</div>
+        <div class="agenda-content"><div class="agenda-type">Abertura</div><div class="agenda-speaker">TugÁgil</div></div>
+      </li>
+      <li class="agenda-item">
+        <div class="agenda-time">09:30</div>
+        <div class="agenda-content"><div class="agenda-type">Speaker · 30 min</div><div class="agenda-speaker">Joana Silva</div><div class="agenda-talk">QA na Era da IA: O Que Mudou e o Que Continua a Falhar</div></div>
+      </li>
+      <li class="agenda-item is-keynote">
+        <div class="agenda-time">10:00</div>
+        <div class="agenda-content"><div class="agenda-type keynote">★ Keynote · 45 min</div><div class="agenda-speaker">Lyssa Adkins</div><div class="agenda-talk">Agilists and Our World Work: What if we were made for this time?</div></div>
+      </li>
+      <li class="agenda-item is-break">
+        <div class="agenda-time">10:55</div>
+        <div class="agenda-content"><div class="agenda-type">Pausa · 25 min</div><div class="agenda-speaker">☕ Coffee Break</div></div>
+      </li>
+      <li class="agenda-item">
+        <div class="agenda-time">11:20</div>
+        <div class="agenda-content"><div class="agenda-type">Speaker · 30 min</div><div class="agenda-speaker">Patrícia Alves</div><div class="agenda-talk">People &amp; Future: Redesenhar o trabalho em equipa fora do mundo "tech"</div></div>
+      </li>
+      <li class="agenda-item">
+        <div class="agenda-time">12:00</div>
+        <div class="agenda-content"><div class="agenda-type">Mesa Redonda · 50 min</div><div class="agenda-speaker">A IA está a matar ou salvar a agilidade?</div></div>
+      </li>
+      <li class="agenda-item is-break">
+        <div class="agenda-time">13:00</div>
+        <div class="agenda-content"><div class="agenda-type">Pausa</div><div class="agenda-speaker">🍽 Almoço + Café com Networking</div></div>
+      </li>
+    </ul>
+  </div>
+  <div id="tarde" class="tab-content">
+    <div class="info-box" style="text-align:center; padding: 2rem;">
+      <p>Programa da tarde a confirmar em breve.<br>Fala com o teu staff de confiança no dia.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: CONDUTA + EQUIPA + CONTACTOS -->
+<div class="page-section" id="sec-conduta">
+  <div class="section-tag">06 · Código de Conduta</div>
+  <h2 class="section-title">Comunidade <em>respeitosa</em> &amp; livre de assédio.</h2>
+  <p class="section-body">O RSG Lisboa 2026 dedica-se a promover uma comunidade respeitosa e livre de assédio para todos — palestrantes, participantes, voluntários e parceiros.</p>
+  <div class="conduct-block">
+    <div class="conduct-header no"><div class="conduct-icon no">✕</div><span>Não toleramos</span></div>
+    <ul class="conduct-list">
+      <li><strong>Comentários ofensivos</strong> — relacionados a sexo, género, orientação sexual, raça, etnia, religião, deficiência ou idade.</li>
+      <li><strong>Conteúdo inapropriado</strong> — imagens ou materiais sexuais, homofóbicos ou discriminatórios — inclusive em slides.</li>
+      <li><strong>Intimidação e bullying</strong> — perseguição, fotografias que gerem embaraço ou interrupções reiteradas.</li>
+      <li><strong>Contacto inadequado</strong> — contacto físico inadequado ou atenção sexual indesejada.</li>
+    </ul>
+  </div>
+  <div class="conduct-block">
+    <div class="conduct-header yes"><div class="conduct-icon yes">✓</div><span>Esperamos de todos</span></div>
+    <ul class="conduct-list">
+      <li><strong>Gentileza e profissionalismo</strong> com todos os participantes.</li>
+      <li><strong>Espaço seguro</strong> — ajuda a criar um ambiente acolhedor e inclusivo.</li>
+      <li><strong>Cumprimento imediato</strong> de qualquer pedido para interromper comportamento inadequado.</li>
+      <li><strong>Reporte de incidentes</strong> — todo incidente importa. Reporta à organização.</li>
+    </ul>
+  </div>
+
+  <div class="section-sep">
+    <div class="section-tag">07 · Equipa</div>
+    <h2 class="section-title">Estamos aqui <em>para te apoiar.</em></h2>
+    <p class="section-body">Aproveita para os conhecer no dia.</p>
+    <div class="team-grid">
+      <div class="team-card"><div class="team-avatar">R</div><div class="team-name">Raquel Bartz Alves</div></div>
+      <div class="team-card"><div class="team-avatar">S</div><div class="team-name">Sylvia Grec</div></div>
+      <div class="team-card"><div class="team-avatar">M</div><div class="team-name">Marina Bittencourt</div></div>
+      <div class="team-card"><div class="team-avatar">F</div><div class="team-name">Fábio Castro</div></div>
+      <div class="team-card"><div class="team-avatar">C</div><div class="team-name">Cristiane Alves</div></div>
+      <div class="team-card"><div class="team-avatar">A</div><div class="team-name">Alex Seles</div></div>
+      <div class="team-card"><div class="team-avatar">M</div><div class="team-name">Matheus Haddad</div></div>
+    </div>
+  </div>
+
+  <div class="section-sep" id="anchor-contactos">
+    <div class="section-tag">08 · Contactos</div>
+    <h2 class="section-title">Liga ou escreve-nos <em>a qualquer hora.</em></h2>
+    <ul class="contact-list">
+      <li>
+        <a class="contact-item" href="tel:+351936496090">
+          <div class="contact-icon phone">📞</div>
+          <div><div class="contact-label">Raquel Bartz Alves</div><div class="contact-value">+351 936 496 090</div></div>
+        </a>
+      </li>
+      <li>
+        <a class="contact-item" href="tel:+351964692989">
+          <div class="contact-icon phone">📞</div>
+          <div><div class="contact-label">Sylvia Grec</div><div class="contact-value">+351 964 692 989</div></div>
+        </a>
+      </li>
+      <li>
+        <a class="contact-item" href="mailto:tugagilportugal@gmail.com">
+          <div class="contact-icon email">✉</div>
+          <div><div class="contact-label">Email geral</div><div class="contact-value">tugagilportugal@gmail.com</div></div>
+        </a>
+      </li>
+      <li>
+        <a class="contact-item" href="https://rsglisbon.com" target="_blank">
+          <div class="contact-icon web">🌐</div>
+          <div><div class="contact-label">Site oficial</div><div class="contact-value">rsglisbon.com</div></div>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <div class="heart">♥</div>
+  <h2>Obrigado!</h2>
+  <p>Obrigado pela colaboração em tornar o evento mais objetivo,<br>enriquecedor e alinhado às expectativas dos participantes.</p>
+  <div class="sign">Boa palestra! Até 21 de Maio.</div>
+</footer>
+
+<nav class="dock-nav">
+  <a onclick="goTo('sec-sobre', this)" class="active">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <span>Info</span>
+  </a>
+  <a onclick="goTo('sec-envio', this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    <span>Envio</span>
+  </a>
+  <a onclick="goTo('sec-programa', this)">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>Programa</span>
+  </a>
+  <a onclick="goTo('sec-conduta', this)">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Conduta</span>
+  </a>
+  <a onclick="goTo('anchor-contactos', this)">
+    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <span>Contactos</span>
+  </a>
+</nav>
+
+<script>
+  function goTo(id, btn) {
+    var el = document.getElementById(id);
+    if (!el) return;
+
+    // Mobile: show the relevant section before scrolling
+    if (window.innerWidth < 720) {
+      var section = el.classList.contains('page-section')
+        ? el
+        : el.closest('.page-section');
+      if (section) {
+        document.querySelectorAll('.page-section').forEach(function(s) {
+          s.classList.remove('active');
+        });
+        section.classList.add('active');
+      }
+    }
+
+    // Update nav state
+    document.querySelectorAll('.dock-nav a').forEach(function(a) {
+      a.classList.remove('active');
+    });
+    btn.classList.add('active');
+
+    // Scroll after layout settles
+    setTimeout(function() {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
+  function showTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(function(t) {
+      t.classList.remove('active');
+    });
+    document.querySelectorAll('.day-tab button').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
