@@ -100,9 +100,8 @@
   .btn-red { background: var(--red); color: white; }
   .btn-outline { background: white; color: var(--charcoal); border: 1.5px solid var(--sand); }
 
-  /* SECTIONS — mobile: só uma visível; desktop: todas */
-  .page-section { display: none; margin: 2rem 1.5rem 0; }
-  .page-section.active { display: block; }
+  /* SECTIONS — sempre visíveis, rolar para navegar */
+  .page-section { display: block; margin: 2rem 1.5rem 0; }
 
   /* SECTION TYPOGRAPHY */
   .section-tag { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
@@ -530,30 +529,11 @@
   function goTo(id, btn) {
     var el = document.getElementById(id);
     if (!el) return;
-
-    // Mobile: show the relevant section before scrolling
-    if (window.innerWidth < 720) {
-      var section = el.classList.contains('page-section')
-        ? el
-        : el.closest('.page-section');
-      if (section) {
-        document.querySelectorAll('.page-section').forEach(function(s) {
-          s.classList.remove('active');
-        });
-        section.classList.add('active');
-      }
-    }
-
-    // Update nav state
     document.querySelectorAll('.dock-nav a').forEach(function(a) {
       a.classList.remove('active');
     });
     btn.classList.add('active');
-
-    // Scroll after layout settles
-    setTimeout(function() {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function showTab(id, btn) {
