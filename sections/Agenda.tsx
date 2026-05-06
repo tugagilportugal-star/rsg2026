@@ -43,13 +43,14 @@ export const AgendaPage: React.FC = () => {
     return () => { if (nav) nav.style.display = 'flex'; };
   }, []);
 
+  // Nota: Idealmente o footer deve ser controlado via CSS ou estado global para evitar manipulação direta do DOM no render
   const footer = document.querySelector('footer');
   if (footer) footer.style.display = 'none';
 
   const agenda: AgendaSlot[] = [
     { time: "08:30", title: "Check-in & Receção", type: 'event' },
     { 
-      time: "09:10", endTime: "09:25", title: "Boas Vindas: Abertura TugÁgil", type: 'talk', 
+      time: "09:15", endTime: "09:30", title: "Boas Vindas: Abertura TugÁgil", type: 'talk', 
       speakerImage: "/assets/TugÁgil.png", 
       description: "O arranque oficial do RSG Lisbon 2026! A equipa do TugÁgil dá as boas-vindas à comunidade. Prepare-se para um dia de conexões e muitos insights!" 
     },
@@ -66,15 +67,15 @@ export const AgendaPage: React.FC = () => {
       description: "We are in the age of acceleration, facing exponential changes and planetary-scale challenges. As agilists with key super skills and global influence, Lyssa asks: What if we were made for this time? This keynote explores why agility is no accident and how we are uniquely positioned to meet today’s paradigm shifts and make a massively positive impact on the world.",
       bios: [{ name: "Lyssa Adkins", bio: "Lyssa Adkins is an author, systems coach, and a foundational figure in the agile movement, best known for the industry-defining book <i>Coaching Agile Teams</i>. She specializes in expanding a leader’s cognitive, emotional, and energetic range to navigate high-stakes complexity. Today, she helps leaders become <strong>Future-Fit</strong>, unknotting systemic blockers to allow new growth to take root." }]
     },
-    { time: "10:55", endTime: "11:15", title: "☕ Coffee Break & Networking", type: 'event' },
+    { time: "10:55", endTime: "11:20", title: "☕ Coffee Break & Networking", type: 'event' },
     { 
-      time: "11:20", endTime: "11:50", title: "People & Future: Redesenhar o trabalho em equipa fora do mundo tech", 
+      time: "11:25", endTime: "11:55", title: "People & Future: Redesenhar o trabalho em equipa fora do mundo tech", 
       speaker: "Patrícia Alves", speakerImage: "/assets/Patricia-Sousa.png", type: 'talk', language: '🇵🇹',
       description: "E se o futuro do trabalho depender de coragem para mudar como pensamos equipas? Patrícia traz uma visão real de transformação fora do mundo tech, onde a IA se torna colega e o foco muda de <strong>qual é o meu papel</strong> para <strong>que problemas resolvo</strong>. Uma partilha sobre como relações baseadas em confiança e segurança psicológica são o verdadeiro motor da mudança, provando que o maior risco é continuar a trabalhar como sempre.",
       bios: [{ name: "Patrícia Alves", bio: "Patrícia lidera transformações em People ligando talento, tecnologia e cultura. Implementou Agile em contextos não tecnológicos, organizando equipas em Sprints e PODs de inovação para posicionar o talento como parceiro estratégico. A sua abordagem combina Product Thinking e foco em mindset, defendendo que o sucesso de qualquer transformação nasce da co-criação e da evolução contínua das pessoas." }]
     },   
     { 
-      time: "11:55", endTime: "12:45", title: "Mesa Redonda: A IA está a matar ou salvar a agilidade?", 
+      time: "12:00", endTime: "12:50", title: "Mesa Redonda: A IA está a matar ou salvar a agilidade?", 
       speaker: ["Matheus Haddad", "Coca Pitzer", "Anabela Ferreira", "Ricardo Fernandes"],
       speakerImage: ["/assets/Matheus.png", "/assets/Coca-Pitzer.png", "/assets/Anabela-Ferreira.png", "/assets/Ricardo-Fernandes.png"],
       type: 'talk', language: '🇵🇹',
@@ -86,21 +87,22 @@ export const AgendaPage: React.FC = () => {
         { name: "Ricardo Fernandes", bio: "Leadership & Team Coach and Founder of Growing Centuries, helping organizations improve focus and decision-making in complex environments. With 15+ years of experience in companies like Nokia, Mercedes-Benz.io and Tekever, he focuses on execution and communication in technical teams." }
       ]
     },
-    { time: "13:00", endTime: "14:15", title: "🍴 Almoço", type: 'event' },
-    { 
-      time: "14:20", endTime: "14:50", title: "Satisficing: How to Succeed at Scale", 
+    { time: "13:00", endTime: "14:20", title: "🍴 Almoço", type: 'event' }, 
+    { time: "14:20", endTime: "14:30", title: "☕ Coffee & Networking", type: 'event' },
+    {
+      time: "14:35", endTime: "15:05", title: "Satisficing: How to Succeed at Scale", 
       speaker: "David Anderson", speakerImage: "/assets/David-Anderson.png", type: 'talk', language: '🇬🇧',
       description: "Application of network science and the concept of satisficing.",
       bios: [{ name: "David Anderson", bio: "Originator of the Kanban Method." }]
     },
     { 
-      time: "14:55", endTime: "15:25", title: "Let IT Flow: Delivering More Features using Flight Levels Dependency Management", 
+      time: "15:10", endTime: "15:40", title: "Let IT Flow: Delivering More Features using Flight Levels Dependency Management", 
       speaker: "Ricardo Caldas", speakerImage: "/assets/Ricardo-Caldas.png", type: 'talk', language: '🇵🇹',
       description: "Tratar dependências como um problema de sistema.",
       bios: [{ name: "Ricardo Caldas", bio: "Focado em outcomes e fluxo de valor." }]
     },
     { 
-      time: "15:30", endTime: "16:10", title: "Direction, Flow, and Commitment: Strategy, Team Design, and Team Ownership", 
+      time: "15:45", endTime: "16:25", title: "Direction, Flow, and Commitment: Strategy, Team Design, and Team Ownership", 
       speaker: ["Paulo Caroli", "Manuel Pais"],
       speakerImage: ["/assets/Paulo-Caroli.png", "/assets/Manuel-Pais.png"],
       type: 'talk', language: '🇵🇹',
@@ -110,9 +112,9 @@ export const AgendaPage: React.FC = () => {
         { name: "Manuel Pais", bio: "Co-author of 'Team Topologies'." }
       ]
     },
-    { time: "16:10", endTime: "16:30", title: "☕ Coffee Break & Networking", type: 'event' },
+    { time: "16:25", endTime: "16:50", title: "☕ Coffee Break & Networking", type: 'event' },
     { 
-      time: "16:35", endTime: "17:05", title: "Transformar para Entregar: a evolução ágil nos CTT", 
+      time: "16:55", endTime: "17:25", title: "Transformar para Entregar: a evolução ágil nos CTT", 
       speaker: ["César Ribeiro", "Carlos Paz"],
       speakerImage: ["/assets/Cesar-Ribeiro.png", "/assets/Carlos-Paz.png"],
       type: 'talk', language: '🇵🇹',
@@ -123,19 +125,19 @@ export const AgendaPage: React.FC = () => {
       ]
     },
     { 
-      time: "17:10", endTime: "17:40", title: "Real World Product Management", 
+      time: "17:30", endTime: "18:00", title: "Real World Product Management", 
       speaker: "Sara Cruz", speakerImage: "/assets/Sara-Cruz.png", type: 'talk', language: '🇵🇹',
       description: "O gap entre a cultura de produto perfeita e o dia a dia.",
       bios: [{ name: "Sara Cruz", bio: "Especialista em equipas de produto de alta performance." }]
     },
     { 
-      time: "17:45", endTime: "18:25", title: "Agilidade sem humanos? O futuro da liderança na era da IA", 
+      time: "18:05", endTime: "18:45", title: "Agilidade sem humanos? O futuro da liderança na era da IA", 
       speaker: "Nadia Miranda", speakerImage: "/assets/Nadia-Miranda.png", type: 'talk', 
       isKeynote: true, keynoteType: 'Closing', language: '🇵🇹',
       description: "O papel do líder quando a tecnologia assume o processamento.",
       bios: [{ name: "Nadia Miranda", bio: "Líder em Transformação Digital e IT Director." }]
     },
-    { time: "18:25", endTime: "18:30", title: "Encerramento", type: 'event' },
+    { time: "18:45", endTime: "18:50", title: "Encerramento", type: 'event' },
   ];
 
   const filteredAgenda = agenda.filter(slot => {
@@ -166,7 +168,7 @@ export const AgendaPage: React.FC = () => {
           <button onClick={() => setFilter('afternoon')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'afternoon' ? 'bg-brand-orange text-white' : 'bg-gray-100 text-gray-500'}`}>TARDE</button>
           <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${filter === 'all' ? 'bg-brand-darkBlue text-white' : 'bg-gray-100 text-gray-500'}`}>VER TUDO</button>
           {openSlot !== null && (
-            <button onClick={() => setOpenSlot(null)} className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-bold bg-red-50 text-red-500 border border-red-100 transition-all">
+            <button onClick={() => setOpenSlot(null)} className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-bold bg-red-50 text-red-500 border border-red-100">
               <X size={14} /> FECHAR TUDO
             </button>
           )}
@@ -188,6 +190,7 @@ export const AgendaPage: React.FC = () => {
               }`}
             >
               <div className="flex items-center gap-4">
+                {/* Horário */}
                 <div className="flex flex-col min-w-[70px]">
                   <span className="font-bold text-base tabular-nums">{slot.time}</span>
                   {slot.endTime && (
@@ -195,15 +198,18 @@ export const AgendaPage: React.FC = () => {
                   )}
                 </div>
 
+                {/* Conteúdo Principal */}
                 <div className="flex-grow">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-grow overflow-hidden">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    
+                    {/* Título e Orador */}
+                    <div className="flex-grow min-w-0">
                       {slot.isKeynote && (
                         <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-brand-orange mb-1">
                           <Star className="w-2.5 h-2.5 fill-brand-orange" /> {slot.keynoteType} Keynote
                         </span>
                       )}
-                      <h3 className="text-base font-bold leading-tight truncate-2-lines flex items-center">
+                      <h3 className="text-base font-bold leading-tight flex items-center flex-wrap gap-2">
                         {slot.title} {slot.language && <FlagIcon lang={slot.language} />}
                       </h3>
                       {slot.speaker && (
@@ -213,30 +219,31 @@ export const AgendaPage: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 shrink-0">
+                    {/* Imagens e Controle de Expansão */}
+                    <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 mt-2 sm:mt-0">
                       {slot.speakerImage && (
-                        <div className="flex -space-x-2 items-center mr-1">
+                        <div className="flex -space-x-2 items-center">
                           {Array.isArray(slot.speakerImage) ? (
                             slot.speakerImage.map((img, i) => (
-                              <img 
-                                key={i} 
-                                src={img} 
-                                alt="Speaker" 
-                                className="w-10 h-10 rounded-full border-2 border-brand-orange object-cover bg-brand-darkBlue shadow-sm" 
+                              <img
+                                key={i}
+                                src={img}
+                                alt="Speaker"
+                                className="w-10 h-10 rounded-full border-2 border-brand-orange object-cover bg-brand-darkBlue shadow-sm"
                               />
                             ))
                           ) : (
-                            <img 
-                              src={slot.speakerImage} 
-                              alt="Logo" 
-                              className={`w-10 h-10 rounded-full border-2 border-brand-orange object-cover ${slot.title.includes('TugÁgil') ? 'bg-white p-1' : 'bg-brand-darkBlue shadow-sm'}`} 
+                            <img
+                              src={slot.speakerImage}
+                              alt="Logo"
+                              className={`w-10 h-10 rounded-full border-2 border-brand-orange object-cover ${slot.title.includes('TugÁgil') ? 'bg-white p-1' : 'bg-brand-darkBlue'}`}
                             />
                           )}
                         </div>
                       )}
                       
                       {isExpandable && (
-                        <div className={slot.type === 'talk' ? 'text-white/50' : 'text-gray-300'}>
+                        <div className={slot.type === 'talk' ? 'text-white/50' : 'text-gray-400'}>
                           {openSlot === index ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                         </div>
                       )}
@@ -245,12 +252,13 @@ export const AgendaPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Detalhes Expandíveis */}
               {openSlot === index && isExpandable && (
                 <div className="mt-5 pt-5 border-t border-white/10 animate-in fade-in slide-in-from-top-2">
                   {slot.description && (
                     <div className="mb-5">
                       <h4 className="text-[9px] uppercase tracking-widest text-brand-orange font-bold mb-2">Sobre a Sessão</h4>
-                      <p className="text-sm leading-relaxed opacity-80">{slot.description}</p>
+                      <p className="text-sm leading-relaxed opacity-80" dangerouslySetInnerHTML={{ __html: slot.description }} />
                     </div>
                   )}
                   {slot.bios && (
@@ -258,7 +266,7 @@ export const AgendaPage: React.FC = () => {
                       {slot.bios.map((person, i) => (
                         <div key={i} className="bg-white/5 p-3 rounded-xl border border-white/5">
                           <p className="font-bold text-xs text-brand-orange mb-1">{person.name}</p>
-                          <p className="text-[11px] opacity-70 leading-relaxed">{person.bio}</p>
+                          <p className="text-[11px] opacity-70 leading-relaxed" dangerouslySetInnerHTML={{ __html: person.bio }} />
                         </div>
                       ))}
                     </div>
