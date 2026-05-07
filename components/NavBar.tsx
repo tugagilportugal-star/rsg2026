@@ -9,7 +9,6 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Detecta scroll para mudar aparência
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -19,7 +18,6 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Bloqueia scroll do corpo quando menu mobile está aberto
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
   }, [isMobileMenuOpen]);
@@ -27,6 +25,13 @@ export const Navbar: React.FC = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const isHomePage = location.pathname === '/';
+
+  // --- REESTRUTURAÇÃO DO ESTILO DINÂMICO ---
+  const navBgClass = !isHomePage || isScrolled
+    ? 'bg-brand-darkBlue/95 backdrop-blur-md shadow-lg py-2' // Sólido ao rolar ou em subpáginas
+    : 'bg-gradient-to-b from-black/80 to-transparent py-4'; // Gradiente lindo no topo da Home
 
   const navLinks = [
     { label: 'O EVENTO', href: '/#about' },
@@ -38,18 +43,9 @@ export const Navbar: React.FC = () => {
     { label: 'FAQ', href: '/#faq' },
   ];
 
-  // Verifica se estamos na Home para decidir se a Navbar deve ser transparente ou sólida
-  const isHomePage = location.pathname === '/';
-
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 transition-all duration-300 z-[100] ${
-          isScrolled || !isHomePage
-            ? 'bg-brand-darkBlue/95 backdrop-blur-md shadow-lg py-2'
-            : 'bg-brand-darkBlue py-4' // Mantemos sólido para garantir visibilidade no preview
-        }`}
-      >
+      <nav className={`fixed top-0 left-0 right-0 transition-all duration-500 z-[100] ${navBgClass}`}>
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
@@ -64,7 +60,7 @@ export const Navbar: React.FC = () => {
               </Link>
             </div>
 
-            {/* LINKS DE NAVEGAÇÃO (DESKTOP) */}
+            {/* LINKS (DESKTOP) */}
             <div className="hidden xl:flex items-center gap-10">
               <div className="flex items-center gap-8">
                 {navLinks.map((link) => (
@@ -113,7 +109,7 @@ export const Navbar: React.FC = () => {
         <ArrowUp className="w-6 h-6" />
       </button>
 
-      {/* MOBILE MENU OVERLAY */}
+      {/* MOBILE MENU */}
       <div 
         className={`fixed inset-0 z-[110] bg-brand-darkBlue/98 backdrop-blur-xl transition-transform duration-300 ease-in-out flex flex-col ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
