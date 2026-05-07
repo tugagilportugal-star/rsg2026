@@ -75,7 +75,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
         <div className="flex flex-col md:flex-row justify-center items-start md:items-center gap-4 md:gap-12 mb-10 bg-white/5 p-5 md:px-12 md:py-4 rounded-3xl md:rounded-full backdrop-blur-md border border-white/10 shadow-inner w-full md:w-auto max-w-md md:max-w-none mx-auto">
           <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
             <Calendar className="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5 md:mt-0" />
-            <span className="text-base md:text-lg font-bold text-left">21 Maio 2026</span>
+            <span className="text-base md:text-lg font-bold text-left">21 Maio 2026 • 08:30h</span>
           </div>
           <div className="hidden md:block h-5 w-px bg-white/20"></div>
           <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
