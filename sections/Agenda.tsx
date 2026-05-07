@@ -80,10 +80,15 @@ export const AgendaPage: React.FC = () => {
     },
     { time: "10:55", endTime: "11:20", title: "☕ Coffee Break & Networking", type: 'event' },
     { 
-      time: "11:25", endTime: "11:55", title: "People & Future: Redesenhar o trabalho em equipa fora do mundo tech", 
-      speaker: "Patrícia Alves", speakerImage: "/assets/Patricia-Sousa.png", type: 'talk', language: 'pt',
-      description: "E se o futuro do trabalho depender de coragem para mudar como pensamos equipas? Patrícia traz uma visão real de transformação fora do mundo tech, onde a IA se torna colega e o foco muda de <strong>qual é o meu papel</strong> para <strong>que problemas resolvo</strong>. Uma partilha sobre como relações baseadas em confiança e segurança psicológica são o verdadeiro motor da mudança, provando que o maior risco é continuar a trabalhar como sempre.",
-      bios: [{ name: "Patrícia Alves", bio: "Patrícia lidera transformações em People ligando talento, tecnologia e cultura. Implementou Agile em contextos não tecnológicos, organizando equipas em Sprints e PODs de inovação para posicionar o talento como parceiro estratégico. A sua abordagem combina Product Thinking e foco em mindset, defendendo que o sucesso de qualquer transformação nasce da co-criação e da evolução contínua das pessoas." }]
+      time: "11:25", endTime: "11:55", title: "Transformar para Entregar: a evolução ágil nos CTT", 
+      speaker: ["César Ribeiro", "Carlos Paz"],
+      speakerImage: ["/assets/Cesar-Ribeiro.png", "/assets/Carlos-Paz.png"],
+      type: 'talk', language: 'pt',
+      description: "Transformar os CTT foi além de seguir frameworks; foi navegar tensões reais e decisões imperfeitas. César e Carlos partilharão onde a jornada ganhou tração e onde travou, revelando o impacto de alinhar Flight Levels, produto e governance ao mesmo tempo. Uma talk sem fórmulas mágicas, focada na realidade, aprendizagens e reflexões para quem vive transformações em escala.",
+      bios: [
+        { name: "César Ribeiro", bio: "Head of IT Governance nos CTT, é responsável pela definição e evolução do modelo operativo de IT. Com mais de 30 anos de experiência em sistemas de informação, tem liderado iniciativas de transformação organizacional baseadas em princípios Lean e Agile, focadas num modelo estruturado de governação e gestão de portfólio orientado à criação de valor." },
+        { name: "Carlos Paz", bio: "Especialista em gestão de tecnologia, transformação digital e agilidade em escala. Com ampla experiência na evolução de modelos operativos e melhoria de fluxo em ambientes complexos, apoia organizações na criação de formas de trabalho eficazes, conectando estratégia, liderança e entrega de valor de forma prática e sustentável." }
+      ]
     },   
     { 
       time: "12:00", endTime: "12:50", title: "Mesa Redonda: A IA está a matar ou salvar a agilidade?", 
@@ -107,10 +112,10 @@ export const AgendaPage: React.FC = () => {
       bios: [{ name: "David Anderson", bio: "Originator of the Kanban Method and CEO of Mauvius Group. With 30+ years of experience at companies including IBM and Microsoft, David is a management innovator and co-creator of the Kanban Maturity Model and Fit-for-Purpose Framework, focusing on leadership development for knowledge-driven organizations." }]
     },
     { 
-      time: "15:10", endTime: "15:40", title: "Let IT Flow: Delivering More Features using Flight Levels Dependency Management", 
-      speaker: "Ricardo Caldas", speakerImage: "/assets/Ricardo-Caldas.png", type: 'talk', language: 'pt',
-      description: "Ricardo partilhará aprendizagens reais, desafios e impactos concretos obtidos ao tratar dependências como um problema de sistema e não apenas de equipas. O objetivo é mostrar como desbloquear o fluxo em contextos de escala e como a gestão sistémica pode transformar a previsibilidade e a entrega de valor em ambientes complexos.",
-      bios: [{ name: "Ricardo Caldas", bio: "Ricardo atua na interseção entre produto, agilidade e gestão, com foco em outcomes e melhoria sistémica. Como Product Owner na VWGDS, utiliza práticas avançadas de gestão de fluxo e Flight Levels Dependency Management para otimizar entregas em ambientes de elevada dependência. Possui ampla experiência em liderança de equipas e transformação organizacional em contextos internacionais." }]
+      time: "15:10", endTime: "15:40", title: "People & Future: Redesenhar o trabalho em equipa fora do mundo tech", 
+      speaker: "Patrícia Alves", speakerImage: "/assets/Patricia-Sousa.png", type: 'talk', language: 'pt',
+      description: "E se o futuro do trabalho depender de coragem para mudar como pensamos equipas? Patrícia traz uma visão real de transformação fora do mundo tech, onde a IA se torna colega e o foco muda de <strong>qual é o meu papel</strong> para <strong>que problemas resolvo</strong>. Uma partilha sobre como relações baseadas em confiança e segurança psicológica são o verdadeiro motor da mudança, provando que o maior risco é continuar a trabalhar como sempre.",
+      bios: [{ name: "Patrícia Alves", bio: "Patrícia lidera transformações em People ligando talento, tecnologia e cultura. Implementou Agile em contextos não tecnológicos, organizando equipas em Sprints e PODs de inovação para posicionar o talento como parceiro estratégico. A sua abordagem combina Product Thinking e foco em mindset, defendendo que o sucesso de qualquer transformação nasce da co-criação e da evolução contínua das pessoas." }]
     },
     { 
       time: "15:45", endTime: "16:25", title: "Direction, Flow, and Commitment: Strategy, Team Design, and Team Ownership must work as One System", 
@@ -125,15 +130,10 @@ export const AgendaPage: React.FC = () => {
     },
     { time: "16:25", endTime: "16:50", title: "☕ Coffee Break & Networking", type: 'event' },
     { 
-      time: "16:55", endTime: "17:25", title: "Transformar para Entregar: a evolução ágil nos CTT", 
-      speaker: ["César Ribeiro", "Carlos Paz"],
-      speakerImage: ["/assets/Cesar-Ribeiro.png", "/assets/Carlos-Paz.png"],
-      type: 'talk', language: 'pt',
-      description: "Transformar os CTT foi além de seguir frameworks; foi navegar tensões reais e decisões imperfeitas. César e Carlos partilharão onde a jornada ganhou tração e onde travou, revelando o impacto de alinhar Flight Levels, produto e governance ao mesmo tempo. Uma talk sem fórmulas mágicas, focada na realidade, aprendizagens e reflexões para quem vive transformações em escala.",
-      bios: [
-        { name: "César Ribeiro", bio: "Head of IT Governance nos CTT, é responsável pela definição e evolução do modelo operativo de IT. Com mais de 30 anos de experiência em sistemas de informação, tem liderado iniciativas de transformação organizacional baseadas em princípios Lean e Agile, focadas num modelo estruturado de governação e gestão de portfólio orientado à criação de valor." },
-        { name: "Carlos Paz", bio: "Especialista em gestão de tecnologia, transformação digital e agilidade em escala. Com ampla experiência na evolução de modelos operativos e melhoria de fluxo em ambientes complexos, apoia organizações na criação de formas de trabalho eficazes, conectando estratégia, liderança e entrega de valor de forma prática e sustentável." }
-      ]
+      time: "16:55", endTime: "17:25", title: "Let IT Flow: Delivering More Features using Flight Levels Dependency Management", 
+      speaker: "Ricardo Caldas", speakerImage: "/assets/Ricardo-Caldas.png", type: 'talk', language: 'pt',
+      description: "Ricardo partilhará aprendizagens reais, desafios e impactos concretos obtidos ao tratar dependências como um problema de sistema e não apenas de equipas. O objetivo é mostrar como desbloquear o fluxo em contextos de escala e como a gestão sistémica pode transformar a previsibilidade e a entrega de valor em ambientes complexos.",
+      bios: [{ name: "Ricardo Caldas", bio: "Ricardo atua na interseção entre produto, agilidade e gestão, com foco em outcomes e melhoria sistémica. Como Product Owner na VWGDS, utiliza práticas avançadas de gestão de fluxo e Flight Levels Dependency Management para otimizar entregas em ambientes de elevada dependência. Possui ampla experiência em liderança de equipas e transformação organizacional em contextos internacionais." }]
     },
     { 
       time: "17:30", endTime: "18:00", title: "Real World Product Management", 
@@ -169,7 +169,7 @@ export const AgendaPage: React.FC = () => {
 
       <header className="pt-24 pb-10 px-4 text-center">
         <h1 className="text-5xl font-black text-brand-darkBlue mb-2 tracking-tighter">AGENDA <span className="text-brand-orange">2026</span></h1>
-        <p className="text-gray-500 font-medium text-sm max-w-md mx-auto mb-8">Agilidade e IA: o impacto real nas organizações.</p>
+        <p className="text-gray-500 font-medium text-sm max-w-md mx-auto mb-8">Agilidade, Inovação e IA: o impacto real no dia a dia das organizações.</p>
         
         <div className="flex flex-wrap justify-center gap-2">
           {['morning', 'afternoon', 'all'].map((f) => (
