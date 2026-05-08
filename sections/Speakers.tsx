@@ -149,15 +149,28 @@ export const Speakers: React.FC = () => {
     <Section id="speakers" className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4">
 
-        {/* Título da Secção */}
+       {/* Título da Secção */}
 <div className="text-center mb-20">
-  <span className="text-xs font-bold uppercase tracking-widest text-brand-orange block mb-2">
-    Line-Up
-  </span>
-  <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue tracking-tighter">
-    Speakers 2026
-  </h2>
-  <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed mt-4">
+  {/* 1. O Detalhe do Line-Up: Com o "círculo" (badge) para destacar */}
+  <div className="inline-block relative mb-4">
+    <span className="relative z-10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-brand-orange border-2 border-brand-orange/30 rounded-full bg-brand-orange/5">
+      Line-Up
+    </span>
+    {/* Efeito de brilho sutil atrás do Line-Up */}
+    <div className="absolute inset-0 bg-brand-orange/20 blur-xl rounded-full -z-10"></div>
+  </div>
+
+  {/* 2. O Título: Com ícones para preencher o vazio horizontal */}
+  <div className="flex items-center justify-center gap-4 md:gap-6">
+    <Sparkles className="text-brand-orange w-6 h-6 md:w-10 md:h-10 animate-pulse" />
+    <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue tracking-tighter uppercase">
+      Speakers 2026
+    </h2>
+    <Sparkles className="text-brand-orange w-6 h-6 md:w-10 md:h-10 animate-pulse" />
+  </div>
+
+  {/* 3. Subtítulo: Legível no fundo branco */}
+  <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mt-6 font-medium">
     Grandes nomes da agilidade, inovação e inteligência artificial.
   </p>
 </div>
