@@ -8,9 +8,13 @@
       "source": "/admin",
       "destination": "/"
     },
-    { 
-      "source": "/(.*)", 
-      "destination": "/index.html" 
+    {
+      "source": "/speakermanual",
+      "destination": "/speakermanual.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
   "functions": {
