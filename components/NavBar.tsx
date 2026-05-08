@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ASSETS } from '../config';
 import { Menu, X, ArrowUp } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Importante para a navegação
+import { Link, useLocation } from 'react-router-dom';
 
-export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTicketModal }) => {
+export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,16 +19,19 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTic
   }, []);
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'unset';
   }, [isMobileMenuOpen]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const isHomePage = location.pathname === '/';
+
+  // --- REESTRUTURAÇÃO DO ESTILO DINÂMICO ---
+  const navBgClass = !isHomePage || isScrolled
+    ? 'bg-brand-darkBlue/95 backdrop-blur-md shadow-lg py-2' // Sólido ao rolar ou em subpáginas
+    : 'bg-gradient-to-b from-black/80 to-transparent py-4'; // Gradiente lindo no topo da Home
 
   const navLinks = [
     { label: 'O EVENTO', href: '/#about' },
@@ -41,19 +45,13 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTic
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-brand-darkBlue/95 backdrop-blur-md shadow-lg py-2 border-b border-white/10'
-            : 'bg-transparent py-4'
-        }`}
-      >
+      <nav className={`fixed top-0 left-0 right-0 transition-all duration-500 z-[100] ${navBgClass}`}>
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
             {/* LOGO */}
             <div className="flex items-center">
-              <Link to="/" className="hover:scale-105 transition-transform">
+              <Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:scale-105 transition-transform">
                  <img 
                    src={ASSETS.RSG_LOGO_2026} 
                    alt="RSG Lisbon 2026" 
@@ -62,12 +60,11 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTic
               </Link>
             </div>
 
-            {/* LINKS DE NAVEGAÇÃO (DESKTOP) */}
+            {/* LINKS (DESKTOP) */}
             <div className="hidden xl:flex items-center gap-10">
               <div className="flex items-center gap-8">
                 {navLinks.map((link) => (
                   link.isRoute ? (
-                    /* Link para nova página */
                     <Link
                       key={link.label}
                       to={link.href}
@@ -76,7 +73,6 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTic
                       {link.label}
                     </Link>
                   ) : (
-                    /* Link para âncora na mesma página */
                     <a
                       key={link.label}
                       href={link.href}
@@ -106,16 +102,16 @@ export const Navbar: React.FC<{ onOpenTicketModal?: () => void }> = ({ onOpenTic
       {/* BOTÃO VOLTAR AO TOPO */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-8 right-8 z-40 p-3 rounded-full bg-brand-orange text-white shadow-lg transition-all duration-500 transform hover:bg-orange-600 hover:scale-110 ${
+        className={`fixed bottom-8 right-8 z-50 p-3 rounded-full bg-brand-orange text-white shadow-lg transition-all duration-500 transform hover:bg-orange-600 hover:scale-110 ${
           showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
         }`}
       >
         <ArrowUp className="w-6 h-6" />
       </button>
 
-      {/* MOBILE MENU OVERLAY */}
+      {/* MOBILE MENU */}
       <div 
-        className={`fixed inset-0 z-[60] bg-brand-darkBlue/98 backdrop-blur-xl transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed inset-0 z-[110] bg-brand-darkBlue/98 backdrop-blur-xl transition-transform duration-300 ease-in-out flex flex-col ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
