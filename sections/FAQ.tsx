@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Section } from '../components/UIComponents';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-export const FAQ: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
+export const FAQ: React.FC<{ onOpenTicketModal?: () => void }> = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const toggleAccordion = (index: number) => {
@@ -10,22 +10,6 @@ export const FAQ: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketM
     };
 
     const faqData =[
-        {
-            question: "Qual o valor dos ingressos?",
-            answer: (
-                <>
-                    Neste momento os bilhetes se encontram já esgotados!
-
-                    Se pretende posicionar a sua empresa num dos maiores eventos de agilidade em Portugal, oferecemos condições especiais para cotas de patrocínio. Envie-nos uma mensagem através da{' '}
-                    <button onClick={() => document.getElementById('sponsors')?.scrollIntoView({ behavior: 'smooth' })} className="text-brand-blue font-bold hover:underline">secção de parcerias</button> 
-                    {' '}ou um e-mail diretamente para <a href="mailto:tuga@tugagil.com" className="text-brand-orange font-bold hover:underline">tuga@tugagil.com</a>. Teremos todo o gosto em lhe apresentar nossas condições e desenhar o que melhor enquadra para a sua organização.
-                </>
-            )
-        },
-        {
-            question: "Existem descontos para membros da Scrum Alliance?",
-            answer: "Sim! Os membros ativos da Scrum Alliance têm direito a um desconto exclusivo de 10% no valor do bilhete. O código promocional é partilhado diretamente através das comunicações oficiais da Scrum Alliance. Basta inserir o código no campo indicado durante o processo de compra, aqui no site oficial."
-        },
         {
             question: "Onde será o evento?",
             answer: "O evento terá lugar no Auditório Alto dos Moinhos, na vibrante cidade de Lisboa. Escolhemos este espaço para unir a energia de um dos maiores ecossistemas tecnológicos da Europa à máxima conveniência para os nossos participantes: tem a Linha Azul do metro literalmente à porta e facilidade de estacionamento nas imediações."

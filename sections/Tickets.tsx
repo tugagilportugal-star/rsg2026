@@ -3,12 +3,10 @@ import { Section } from '../components/UIComponents';
 import { Check, CheckCircle2, Gift } from 'lucide-react';
 import { BonusModal } from '../components/BonusModal';
 
-// Esta é a peça que faltava para o Vercel não dar erro:
 interface TicketsProps {
   onOpenTicketModal?: () => void;
 }
 
-// Adicionamos { onOpenTicketModal } aqui para o App.tsx ficar feliz
 export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', expectations: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -41,18 +39,14 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
   return (
     <Section id="tickets" className="bg-brand-darkBlue py-20">
       <div className="max-w-3xl mx-auto px-4">
-        
-        {/* CARTÃO ÚNICO DE PRIORITY LIST */}
         <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden relative p-8 md:p-12">
           
-          {/* TAG SOLD OUT */}
           <div className="flex justify-center mb-6">
             <span className="bg-red-600 text-white px-4 py-1 rounded-full font-black text-[10px] uppercase tracking-[0.2em] animate-pulse">
               # SOLD OUT
             </span>
           </div>
 
-          {/* CABEÇALHO */}
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-black text-brand-darkBlue mb-4">
               Priority List
@@ -62,7 +56,6 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </p>
           </div>
 
-          {/* FORMULÁRIO */}
           {status === 'success' ? (
             <div className="text-center py-10">
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
@@ -85,7 +78,6 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
             </form>
           )}
 
-          {/* SECÇÃO DE BENEFÍCIOS */}
           <div className="mt-12 pt-8 border-t border-gray-100">
             <p className="text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-6 text-center">
               O que o teu bilhete incluirá:
@@ -105,13 +97,11 @@ export const Tickets: React.FC<TicketsProps> = ({ onOpenTicketModal }) => {
               </div>
             </div>
           </div>
-          
           <p className="mt-8 text-[9px] text-gray-400 text-center uppercase tracking-widest">
             Limitado à capacidade do auditório
           </p>
         </div>
       </div>
-
       <BonusModal isOpen={isBonusModalOpen} onClose={() => setIsBonusModalOpen(false)} />
     </Section>
   );

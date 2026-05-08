@@ -1,8 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import fs from 'fs';
-import path from 'path';
 
 const SUPABASE_URL = process.env.SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -24,32 +22,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await supabase.from('leads').insert({ type, name, email, phone, company, role, message: message || expectations || null });
 
     // 2. Definir o E-mail
-    let userSubject = 'Inscrição Confirmada! RSG Lisbon 2026 🚀';
+    let userSubject = '';
     let userHtml = '';
 
     if (type === 'Patrocínios e Parcerias') {
         userSubject = 'Interesse em Patrocínio - RSG Lisbon 2026';
         userHtml = `<p>Olá ${name}, obrigado pelo contacto sobre parcerias!</p>`;
+    } else if (type === 'Priority List Sold Out' || type === 'Lista de Interessados') {
+        userSubject = 'Estás na Priority List! RSG Lisbon 2026';
+        userHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;">
+          <h2 style="color:#003F59;">Olá, ${name}!</h2>
+          <p style="font-size:16px;color:#3c4858;">Ficaste registado(a) na <strong>Priority List</strong> do RSG Lisbon 2026.</p>
+          <p style="font-size:16px;color:#3c4858;">Serás um dos primeiros a ser avisado(a) em caso de desistências ou novas vagas.</p>
+          <p style="font-size:14px;color:#888;">Dúvidas? Responde a este email.</p>
+        </div>`;
     } else {
-        // 1. Criar o ID do bilhete
-        const ticketId = `RSG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-        
-        try {
-            // 2. Tentar ler o TEU ficheiro oficial que tem os links do Canva e Agenda
-            const templatePath = path.join(process.cwd(), 'api', 'email-template.html');
-            const htmlTemplate = fs.readFileSync(templatePath, 'utf8');
-
-            // 3. Aplicar os teus dados ao teu layout completo
-            userHtml = htmlTemplate
-                .replace(/{{name}}/g, name)
-                .replace(/{{ticketId}}/g, ticketId);
-
-            console.log("[SUCCESS] Usando o layout completo da Marina!");
-        } catch (e) {
-            // Plano B caso o ficheiro falhe (usa a variável simples como segurança)
-            console.error("[ERROR] Falha ao ler ficheiro, usando fallback:", e);
-            userHtml = `<h1>Olá ${name}</h1><p>O teu lugar está confirmado!</p>`;
-        }
+        // Outros tipos de lead — email genérico sem bilhete
+        userSubject = 'Recebemos a tua mensagem – RSG Lisbon 2026';
+        userHtml = `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;">
+          <h2 style="color:#003F59;">Olá, ${name}!</h2>
+          <p style="font-size:16px;color:#3c4858;">Recebemos a tua mensagem e entraremos em contacto em breve.</p>
+        </div>`;
     }
 
     // 3. Enviar
