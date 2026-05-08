@@ -161,13 +161,9 @@ export const Speakers: React.FC = () => {
   </div>
 
   {/* 2. O Título: Com ícones para preencher o vazio horizontal */}
-  <div className="flex items-center justify-center gap-4 md:gap-6">
-    <Sparkles className="text-brand-orange w-6 h-6 md:w-10 md:h-10 animate-pulse" />
     <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue tracking-tighter uppercase">
-      Speakers 2026
-    </h2>
-    <Sparkles className="text-brand-orange w-6 h-6 md:w-10 md:h-10 animate-pulse" />
-  </div>
+    Speakers 2026
+  </h2>
 
   {/* 3. Subtítulo: Legível no fundo branco */}
   <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mt-6 font-medium">
