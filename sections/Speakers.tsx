@@ -1,7 +1,7 @@
 import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Linkedin, Sparkles, UserCircle2, ArrowRight } from 'lucide-react'; // Adicionei ArrowRight
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Adicionei Link
 
 interface SpeakerData {
   id: string;
@@ -146,7 +146,7 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-white py-24 border-t border-white/10">
+    <Section id="speakers" className="bg-brand-darkBlue py-24 border-t border-white/10">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Título da Secção */}
