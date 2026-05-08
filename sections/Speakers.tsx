@@ -146,7 +146,7 @@ export const Speakers: React.FC = () => {
   };
 
   return (
-    <Section id="speakers" className="bg-brand-darkBlue py-24 border-t border-white/10">
+    <Section id="speakers" className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Título da Secção */}
