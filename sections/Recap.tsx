@@ -85,11 +85,11 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
   };
 
   return (
-    <Section id="recap" className="bg-white text-brand-darkBlue overflow-hidden relative">
+    <Section id="recap" className="bg-brand-darkBlue text-white text-brand-darkBlue overflow-hidden relative">
 
       {/* --- CABEÇALHO --- */}
       <div className="text-center mb-20 relative z-10 flex flex-col items-center">
-        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight text-brand-darkBlue">
+        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight text-brand-white">
           Como foi o RSG Lisbon 2025?
         </h2>
         
