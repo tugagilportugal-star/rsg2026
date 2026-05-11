@@ -30,12 +30,12 @@
   button{font:inherit;color:inherit;cursor:pointer;}
 
   /* TOP BAR */
-  .top-bar{background:var(--green);padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .top-bar{background:var(--red);padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .top-bar img.logo-tugagil{height:26px;width:auto;object-fit:contain;}
   .top-bar img.logo-rsg{height:34px;width:auto;max-width:110px;object-fit:contain;}
   .lang-toggle{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.12);border-radius:8px;padding:3px;}
   .lang-toggle button{background:transparent;color:rgba(255,255,255,0.6);border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:var(--body);letter-spacing:0.06em;transition:all 0.15s;}
-  .lang-toggle button.active{background:white;color:var(--green);}
+  .lang-toggle button.active{background:white;color:var(--red);}
 
   /* HERO */
   .hero{position:relative;background:var(--red);color:var(--cream);padding:32px 20px 52px;overflow:hidden;}
@@ -208,10 +208,27 @@
   .nav-btn.active{background:var(--green);color:var(--cream);}
 
   @media(min-width:600px){
-    .wrap{max-width:520px;}
+    .wrap{max-width:560px;}
     .stats{grid-template-columns:repeat(4,1fr);}
     .team-grid{grid-template-columns:repeat(4,1fr);}
     .speakers-grid{grid-template-columns:repeat(4,1fr);}
+    .conduct-grid{grid-template-columns:1fr 1fr;}
+    .person-card .shifts{grid-template-columns:1fr 1fr 1fr;}
+  }
+  @media(min-width:860px){
+    body{max-width:900px;margin:0 auto;}
+    .top-bar{border-radius:0 0 14px 14px;}
+    .wrap{max-width:100%;padding:0 3rem;}
+    .hero{border-radius:0 0 28px 28px;padding:40px 3rem 60px;}
+    section.s{padding:60px 0 8px;}
+    .stats{grid-template-columns:repeat(4,1fr);}
+    .team-grid{grid-template-columns:repeat(5,1fr);}
+    .speakers-grid{grid-template-columns:repeat(5,1fr);}
+    .person-list{grid-template-columns:1fr 1fr;}
+    .conduct-grid{grid-template-columns:1fr 1fr;}
+    .contact-list{grid-template-columns:1fr 1fr;}
+    .hero-inner{max-width:580px;}
+    .dock-nav{bottom:28px;}
   }
 </style>
 </head>
