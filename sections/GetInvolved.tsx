@@ -4,74 +4,8 @@ import { FormType, SponsorFormData, SupporterFormData } from '../types';
 import { saveSubmission } from '../services/db';
 import { Handshake, Camera, FileText } from 'lucide-react';
 
-interface GetInvolvedProps {
-  setSponsorModalOpen: (v: boolean) => void;
-  setSupporterModalOpen: (v: boolean) => void;
-}
-
-export const GetInvolved: React.FC<GetInvolvedProps> = ({
-  setSponsorModalOpen,
-  setSupporterModalOpen,
-}) => {
-  return (
-    <Section id="get-involved" className="bg-gray-50">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-5xl font-black text-brand-darkBlue">
-          Envolve-te no evento
-        </h2>
-        <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600">
-          Junta-te ao RSG Lisbon 2026 como patrocinador ou apoiador e ajuda-nos
-          a criar uma experiência memorável para a comunidade ágil.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col">
-          <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-6">
-            <Handshake className="w-7 h-7 text-brand-orange" />
-          </div>
-
-          <h3 className="text-2xl font-black text-brand-darkBlue mb-4">
-            Patrocínios e Parcerias
-          </h3>
-
-          <p className="text-gray-600 mb-8 flex-1">
-            Conecte a sua marca a centenas de líderes e praticantes de agilidade
-            em Portugal.
-          </p>
-
-          <Button
-            onClick={() => setSponsorModalOpen(true)}
-            variant="secondary"
-            className="w-full text-lg font-bold"
-          >
-            Quero Patrocinar
-          </Button>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col">
-          <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6">
-            <Camera className="w-7 h-7 text-brand-blue" />
-          </div>
-
-          <h3 className="text-2xl font-black text-brand-darkBlue mb-4">
-            Apoiadores
-          </h3>
-
-          <p className="text-gray-600 mb-8 flex-1">
-            Trabalhas com fotografia, vídeo, som ou design e queres apoiar o evento?
-          </p>
-
-          <Button
-            onClick={() => setSupporterModalOpen(true)}
-            className="w-full text-lg font-bold bg-brand-blue text-white"
-          >
-            Quero Apoiar
-          </Button>
-        </div>
-      </div>
-    </Section>
-  );
+export const GetInvolved: React.FC = () => {
+  return null;
 };
 
 /* ========================= SPONSOR FORM COMPONENT ========================= */

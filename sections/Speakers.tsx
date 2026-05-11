@@ -139,29 +139,41 @@ export const Speakers: React.FC = () => {
             )}
           </div>
         </div>
-        <h4 className="font-bold text-lg text-white mb-1">{data.name}</h4>
+        <h4 className="font-bold text-lg text-brand-darkBlue mb-1">{data.name}</h4>
         <p className="text-xs font-medium text-brand-orange mb-1 leading-tight">{data.role}</p>
       </div>
     );
   };
 
   return (
-    <Section id="speakers" className="bg-brand-darkBlue py-24 border-t border-white/10">
+    <Section id="speakers" className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4">
 
-        {/* Título da Secção */}
-        <div className="text-center mb-20">
-          <span className="text-brand-orange font-bold tracking-[0.2em] uppercase text-xs block mb-3">Line-Up</span>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Speakers 2026</h2>
-          <p className="text-blue-100 text-lg max-w-2xl mx-auto leading-relaxed">
-            Grandes nomes da agilidade, inovação e inteligência artificial.
-            <br/> <span className="text-white font-semibold">Mais oradores serão anunciados em breve.</span>
-          </p>
-        </div>
+       {/* Título da Secção */}
+<div className="text-center mb-20">
+  {/* 1. O Detalhe do Line-Up: Com o "círculo" (badge) para destacar */}
+  <div className="inline-block relative mb-4">
+    <span className="relative z-10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-brand-orange border-2 border-brand-orange/30 rounded-full bg-brand-orange/5">
+      Line-Up
+    </span>
+    {/* Efeito de brilho sutil atrás do Line-Up */}
+    <div className="absolute inset-0 bg-brand-orange/20 blur-xl rounded-full -z-10"></div>
+  </div>
+
+  {/* 2. O Título: Com ícones para preencher o vazio horizontal */}
+    <h2 className="text-4xl md:text-6xl font-black text-brand-darkBlue tracking-tighter uppercase">
+    Speakers 2026
+  </h2>
+
+  {/* 3. Subtítulo: Legível no fundo branco */}
+  <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mt-6 font-medium">
+    Grandes nomes da agilidade, inovação e inteligência artificial.
+  </p>
+</div>
 
         {/* SECÇÃO KEYNOTES */}
         <div className="mb-24 w-full">
-          <h3 className="text-2xl font-black text-white mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 tracking-tighter">
+          <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left flex items-center justify-center md:justify-start gap-3 tracking-tighter">
             <Sparkles className="text-brand-orange w-6 h-6" /> Keynotes
           </h3>
           <div className="flex flex-wrap justify-center items-center gap-8 w-full">
@@ -173,7 +185,7 @@ export const Speakers: React.FC = () => {
 
         {/* SECÇÃO SPEAKERS */}
         <div>
-          <h3 className="text-2xl font-black text-white mb-10 text-center md:text-left tracking-tighter">
+          <h3 className="text-2xl font-black text-brand-darkBlue mb-10 text-center md:text-left tracking-tighter">
             Speakers
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">

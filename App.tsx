@@ -35,11 +35,6 @@ const HomePage: React.FC<{
     <Speakers />
     <Recap onOpenTicketModal={openTicket} />
     <Sponsors onOpenSponsorModal={() => setSponsorModalOpen(true)} />
-    {/* Incluímos o GetInvolved aqui para os formulários de Sponsor/Supporter funcionarem */}
-    <GetInvolved 
-      setSponsorModalOpen={setSponsorModalOpen} 
-      setSupporterModalOpen={setSupporterModalOpen} 
-    />
     <FAQ onOpenTicketModal={openTicket} />
     <Team />
   </main>

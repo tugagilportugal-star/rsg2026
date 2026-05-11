@@ -85,11 +85,12 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
   };
 
   return (
-    <Section id="recap" className="bg-white text-brand-darkBlue overflow-hidden relative">
+    /* Ajustado para bg-brand-darkBlue e removido text-brand-darkBlue global */
+    <Section id="recap" className="bg-brand-darkBlue text-white overflow-hidden relative">
 
       {/* --- CABEÇALHO --- */}
       <div className="text-center mb-20 relative z-10 flex flex-col items-center">
-        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight text-brand-darkBlue">
+        <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tight text-white">
           Como foi o RSG Lisbon 2025?
         </h2>
         
@@ -101,14 +102,16 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats - Números em Branco e Labels em Laranja */}
       <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-20 relative z-10">
         {stats.map((stat, idx) => (
           <div key={idx} className="flex flex-col items-center">
-            <div className="flex items-center text-5xl md:text-7xl font-black text-brand-darkBlue mb-3 shadow-sm tracking-tighter">
+            {/* Alterado de text-brand-darkBlue para text-white */}
+            <div className="flex items-center text-5xl md:text-7xl font-black text-white mb-3 tracking-tighter">
                 {stat.value}
             </div>
-            <div className="text-sm font-bold tracking-[0.2em] text-brand-blue uppercase">{stat.label}</div>
+            {/* Alterado de text-brand-blue para text-brand-orange */}
+            <div className="text-sm font-bold tracking-[0.2em] text-brand-orange uppercase">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -116,14 +119,15 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
       <div className="flex flex-col gap-12 relative z-10">
         {/* Video Player */}
         <div className="w-full max-w-5xl mx-auto mb-8">
-             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-gray-200 ring-4 ring-brand-orange/20">
+             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-white/10 ring-4 ring-brand-orange/20">
                 {getVideoContent(ASSETS.RECAP_VIDEO)}
             </div>
         </div>
 
         {/* Gallery */}
         <div className="w-full max-w-5xl mx-auto">
-            <h3 className="text-2xl font-bold mb-6 flex items-center justify-center gap-2 text-brand-darkBlue">
+            {/* Alterado text-brand-darkBlue para text-white */}
+            <h3 className="text-2xl font-bold mb-8 flex items-center justify-center gap-2 text-white">
                 <Star className="text-brand-orange w-6 h-6 fill-current" />
                 Melhores Momentos
             </h3>
@@ -132,7 +136,7 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
                 {galleryImages.map((img, idx) => (
                     <div 
                         key={idx} 
-                        className="relative rounded-xl overflow-hidden shadow-lg cursor-zoom-in group bg-gray-100 aspect-[4/3]"
+                        className="relative rounded-xl overflow-hidden shadow-lg cursor-zoom-in group bg-white/5 aspect-[4/3]"
                         onClick={() => openLightbox(idx)}
                     >
                         <img 
@@ -141,7 +145,7 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
                             className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" 
                             loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/20 transition-colors duration-300"></div>
+                        <div className="absolute inset-0 bg-brand-orange/0 group-hover:bg-brand-orange/10 transition-colors duration-300"></div>
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                              <ZoomIn className="text-white w-8 h-8 drop-shadow-md" />
                         </div>
@@ -151,9 +155,9 @@ export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicke
         </div>
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox - Mantido conforme original pois já era escuro */}
       {lightboxIndex !== null && (
-        <div className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in-up" onClick={closeLightbox}>
+        <div className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeLightbox}>
             <button className="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors z-[70]" onClick={closeLightbox}><X className="w-8 h-8" /></button>
             <button className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/70 hover:text-white bg-black/50 hover:bg-brand-orange rounded-full transition-all z-[70]" onClick={prevImage}><ChevronLeft className="w-8 h-8" /></button>
             <div className="relative max-w-7xl max-h-[90vh] w-full flex justify-center" onClick={(e) => e.stopPropagation()}>

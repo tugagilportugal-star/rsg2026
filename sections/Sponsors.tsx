@@ -39,7 +39,8 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
   const communitySupporters: Sponsor[] = [
     { name: "Geek Girls Portugal", logo: "/assets/Geek-Girls-Portugal.jpg", url: "https://geekgirlsportugal.pt/" },
     { name: "Agile Academy", logo: "/assets/Agile-Academy.png", url: "https://www.agile-academy.com/pt/", customClass: "h-11 md:h-14" },
-    { name: "Ladies that UX Lisbon", logo: "/assets/Ladies-that-UX-Lisbon.jpeg", url: "https://www.linkedin.com/company/ladies-that-ux-lisbon/" }
+    { name: "Ladies that UX Lisbon", logo: "/assets/Ladies-that-UX-Lisbon.jpeg", url: "https://www.linkedin.com/company/ladies-that-ux-lisbon/" },
+    { name: "GDG Lisbon", logo: "/assets/GDG.png", url: "https://www.linkedin.com/company/gdglisbon/" }
   ];
 
   return (
