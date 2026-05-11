@@ -150,7 +150,7 @@
   .speakers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
   .sp-card{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;box-shadow:var(--shadow-sm);}
   .sp-card.keynote{background:linear-gradient(180deg,#fff 0%,#FFF9D9 100%);border-color:rgba(255,233,0,0.45);}
-  .sp-photo{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-0.02em;color:#fff;box-shadow:0 4px 14px rgba(23,24,24,0.10);}
+  .sp-photo{width:60px;height:60px;border-radius:50%;object-fit:cover;object-position:center top;display:block;margin:0 auto 8px;box-shadow:0 4px 14px rgba(23,24,24,0.10);}
   .sp-card.keynote .sp-photo{box-shadow:0 0 0 3px var(--yellow),0 4px 14px rgba(23,24,24,0.10);}
   .sp-name{font-family:var(--display);font-weight:600;font-size:12px;line-height:1.3;color:var(--black);letter-spacing:-0.01em;}
   .sp-time{margin-top:3px;font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:0.06em;color:var(--red);}
@@ -406,17 +406,17 @@
   <h2 data-i18n="s07-h2">As vozes do <span class="it">RSG Lisboa 2026</span>.</h2>
   <p class="muted" style="font-size:13.5px;margin:-6px 0 0" data-i18n="s07-sub">Pela ordem em que sobem ao palco.</p>
   <div class="speakers-grid">
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#DA291C,#B41E13)">JS</div><div class="sp-name">Joana Silva</div><div class="sp-time">09:30</div></div>
-    <div class="sp-card keynote"><div class="sp-photo" style="background:linear-gradient(135deg,#046A38,#034E29)">LA</div><div class="sp-name">Lyssa Adkins</div><div class="sp-time">★ 10:00</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#002D72,#001E4D)">PA</div><div class="sp-name">Patrícia Alves</div><div class="sp-time">11:20</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#5A6B82,#3d4f62)">DA</div><div class="sp-name">David Anderson</div><div class="sp-time">14:30</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#DA291C,#B41E13)">RC</div><div class="sp-name">Ricardo Caldas</div><div class="sp-time">15:10</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#046A38,#034E29)">PC</div><div class="sp-name">Paulo Caroli</div><div class="sp-time">15:45</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#002D72,#001E4D)">MP</div><div class="sp-name">Manuel Pais</div><div class="sp-time">15:45</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#5A6B82,#3d4f62)">CR</div><div class="sp-name">César Ribeiro</div><div class="sp-time">16:50</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#DA291C,#B41E13)">CP</div><div class="sp-name">Carlos Paz</div><div class="sp-time">16:50</div></div>
-    <div class="sp-card"><div class="sp-photo" style="background:linear-gradient(135deg,#046A38,#034E29)">SC</div><div class="sp-name">Sara Cruz</div><div class="sp-time">17:25</div></div>
-    <div class="sp-card keynote"><div class="sp-photo" style="background:linear-gradient(135deg,#046A38,#034E29)">NM</div><div class="sp-name">Nadia Miranda</div><div class="sp-time">★ 18:05</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Joana-Silva.png" alt="Joana Silva"><div class="sp-name">Joana Silva</div><div class="sp-time">09:30</div></div>
+    <div class="sp-card keynote"><img class="sp-photo" src="/assets/Lyssa-Adkins.png" alt="Lyssa Adkins"><div class="sp-name">Lyssa Adkins</div><div class="sp-time">★ 10:00</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Patricia-Sousa.png" alt="Patrícia Alves"><div class="sp-name">Patrícia Alves</div><div class="sp-time">11:20</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/David-Anderson.png" alt="David Anderson"><div class="sp-name">David Anderson</div><div class="sp-time">14:30</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Ricardo-Caldas.png" alt="Ricardo Caldas"><div class="sp-name">Ricardo Caldas</div><div class="sp-time">15:10</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Paulo-Caroli.png" alt="Paulo Caroli"><div class="sp-name">Paulo Caroli</div><div class="sp-time">15:45</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Manuel-Pais.png" alt="Manuel Pais"><div class="sp-name">Manuel Pais</div><div class="sp-time">15:45</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Cesar-Ribeiro.png" alt="César Ribeiro"><div class="sp-name">César Ribeiro</div><div class="sp-time">16:50</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Carlos-Paz.png" alt="Carlos Paz"><div class="sp-name">Carlos Paz</div><div class="sp-time">16:50</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Sara-Cruz.png" alt="Sara Cruz"><div class="sp-name">Sara Cruz</div><div class="sp-time">17:25</div></div>
+    <div class="sp-card keynote"><img class="sp-photo" src="/assets/Nadia-Miranda.png" alt="Nadia Miranda"><div class="sp-name">Nadia Miranda</div><div class="sp-time">★ 18:05</div></div>
   </div>
 </section>
 
