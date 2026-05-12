@@ -5,16 +5,12 @@ import { Link } from 'react-router-dom';
 export const BenefitsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
-      {/* Botão Flutuante Estilo Agenda */}
-      <Link 
-        to="/" 
-        className="fixed top-6 left-6 z-50 bg-brand-darkBlue text-white p-3 rounded-full shadow-lg hover:bg-brand-orange transition-all flex items-center gap-2 group"
-      >
-        <ArrowLeft size={20} />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out font-bold uppercase text-xs">
-          Voltar para Home
-        </span>
-      </Link>
+      {/* Botão Flutuante */}
+      <Link to="/" className="fixed top-10 right-10 z-50 bg-brand-orange text-white py-3 px-6 rounded-full shadow-xl hover:bg-brand-darkBlue transition-all flex items-center gap-2 font-bold"
+>
+  <ArrowLeft size={20} />
+  <span>Voltar para Home</span>
+</Link>
 
       {/* Hero Section */}
       <section className="bg-brand-darkBlue py-24 text-white px-4 text-center">
@@ -41,7 +37,7 @@ export const BenefitsPage: React.FC = () => {
               <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Grátis</span>
             </div>
             <p className="text-gray-600 mb-6 flex-grow">
-              Um ano de acesso gratuito à suite premium de e-learning com masterclasses de Product Owner, Agile Leader e Scrum Master[cite: 2, 4].
+              Um ano de acesso gratuito à suite premium de e-learning com masterclasses de Product Owner, Agile Leader e Scrum Master.
             </p>
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
               <p className="font-bold text-gray-500 uppercase text-[10px] mb-1 tracking-wider">Como ativar:</p>
@@ -65,7 +61,7 @@ export const BenefitsPage: React.FC = () => {
             </p>
             <div className="bg-brand-orange/5 border border-brand-orange/20 p-4 rounded-xl mb-6">
               <p className="text-sm text-gray-800 font-medium text-center italic leading-relaxed">
-                "O código de acesso será anunciado durante o dia do evento."
+                "O código de acesso será anunciado durante o RSG Lisbon 2026."
               </p>
             </div>
             <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-orange text-brand-orange font-bold text-center hover:bg-brand-orange hover:text-white transition-all text-sm uppercase">
@@ -80,7 +76,7 @@ export const BenefitsPage: React.FC = () => {
             </div>
             <h3 className="text-2xl font-bold mb-4">Masterclass Pais & Caroli</h3>
             <p className="text-gray-600 mb-6 flex-grow">
-              10% de desconto acumulável na Masterclass focada em Team Topologies, OKRs e Lean Inception. A masterclass acontecerá em Lisboa, no dia seguinte ao RSG Lisbon, no dia 22 de Maio de 2026[cite: 15].
+              10% de desconto acumulável na Masterclass focada em Team Topologies, OKRs e Lean Inception. A masterclass acontecerá em Lisboa, no dia seguinte ao RSG Lisbon, no dia 22 de Maio de 2026.
             </p>
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
               <p className="font-bold text-gray-500 uppercase text-[10px] mb-1 tracking-wider">Como obter:</p>
