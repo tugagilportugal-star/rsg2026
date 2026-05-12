@@ -82,22 +82,24 @@ const App: React.FC = () => {
       <Router>
         <div className="relative min-h-screen bg-white">
           
-          {/* AQUI ESTAVA O ERRO: A NavBar tem de ser renderizada aqui! */}
-          <Navbar /> 
+          
+          {/* Remove o Navbar daqui de cima */}
 
-          <Routes>
-            <Route path="/" element={
-              <HomePage 
-                openTicket={openTicket} 
-                setSponsorModalOpen={setSponsorModalOpen}
-                setSupporterModalOpen={setSupporterModalOpen} 
-              />
-            } />
-            <Route path="/agenda" element={<AgendaPage />} />
-            <Route path="/beneficios-exclusivos" element={<BenefitsPage />} />
-          </Routes>          
+<Routes>
+  <Route path="/" element={
+    <>
+      <Navbar /> {/* O Navbar agora só existe na Home */}
+      <HomePage 
+        openTicket={openTicket} 
+        setSponsorModalOpen={setSponsorModalOpen}
+        setSupporterModalOpen={setSupporterModalOpen} 
+      />
+    </>
+  } />
 
-          <Footer />
+  <Route path="/agenda" element={<AgendaPage />} />
+  <Route path="/beneficios-exclusivos" element={<BenefitsPage />} />
+</Routes>
 
           {/* Botão Admin */}
           <div className="fixed bottom-6 right-6 z-40">
