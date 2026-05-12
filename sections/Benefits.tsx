@@ -42,7 +42,7 @@ export const BenefitsPage: React.FC = () => {
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
               <p className="font-bold text-gray-500 uppercase text-[10px] mb-1 tracking-wider">Como ativar:</p>
               <p className="text-gray-700 leading-tight">
-                Envia e-mail para <strong>team@agile-academy.com</strong> com o assunto "Agile Academy Gift + RSG Lisbon"[cite: 14] com o teu nome completo e e-mail.
+                Envia e-mail para <strong>team@agile-academy.com</strong> com o assunto "Agile Academy Gift + RSG Lisbon" com o teu nome completo e e-mail.
               </p>
             </div>
             <a href="https://www.agile-academy.com/pt/" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-blue text-brand-blue font-bold text-center hover:bg-brand-blue hover:text-white transition-all text-sm uppercase">
@@ -74,7 +74,7 @@ export const BenefitsPage: React.FC = () => {
             <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
               <Ticket className="text-purple-600 w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4">Masterclass Pais & Caroli</h3>
+            <h3 className="text-2xl font-bold mb-4">Masterclass Manuel Pais & Paulo Caroli</h3>
             <p className="text-gray-600 mb-6 flex-grow">
               10% de desconto acumulável na Masterclass focada em Team Topologies, OKRs e Lean Inception. A masterclass acontecerá em Lisboa, no dia seguinte ao RSG Lisbon, no dia 22 de Maio de 2026.
             </p>
