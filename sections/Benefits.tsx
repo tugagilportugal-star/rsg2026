@@ -49,25 +49,38 @@ export const BenefitsPage: React.FC = () => {
               Visitar Site
             </a>
           </div>
-
+          
           {/* CARD KANBAN+ */}
-          <div className="border-2 border-gray-100 rounded-3xl p-8 flex flex-col h-full hover:border-brand-orange transition-all group">
-            <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
-              <Database className="text-brand-orange w-8 h-8" />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">Kanban Plus</h3>
-            <p className="text-gray-600 mb-6 flex-grow mt-4">
-              Acesso a FlowMetrics, FlowBoards e modelos de maturidade para gestão de fluxo de trabalho.
-            </p>
-            <div className="bg-brand-orange/5 border border-brand-orange/20 p-4 rounded-xl mb-6">
-              <p className="text-sm text-gray-800 font-medium text-center italic leading-relaxed">
-                "O código de acesso será anunciado durante o RSG Lisbon 2026."
-              </p>
-            </div>
-            <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-orange text-brand-orange font-bold text-center hover:bg-brand-orange hover:text-white transition-all text-sm uppercase">
-              Saiba Mais
-            </a>
-          </div>
+<div className="border-2 border-gray-100 rounded-3xl p-8 flex flex-col h-full hover:border-brand-orange transition-all group">
+  <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
+    <Database className="text-brand-orange w-8 h-8" />
+  </div>
+  <h3 className="text-2xl font-bold mb-2">Kanban Plus</h3>
+  
+  <div className="flex items-center gap-2 mb-4">
+    <span className="bg-orange-100 text-brand-orange px-3 py-1 rounded-full text-xs font-bold uppercase">
+      Plano Enterprise
+    </span>
+  </div>
+
+  <p className="text-gray-600 mb-6 flex-grow">
+    Acesso gratuito à plataforma completa de <strong>Enterprise Transformation Management</strong>. Inclui FlowMetrics, FlowBoards e modelos de maturidade Evolve.
+  </p>
+
+  <div className="bg-brand-orange/5 border border-brand-orange/20 p-4 rounded-xl mb-6">
+    <p className="text-sm font-bold text-brand-orange uppercase text-[10px] mb-1 tracking-wider text-center">
+      Duração & Acesso:
+    </p>
+    <p className="text-sm text-gray-800 font-medium text-center italic leading-relaxed">
+      "1 mês de acesso total. O código de acesseo será anunciado durante o RSG Lisbon. "
+    </p>
+  </div>
+
+  <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-orange text-brand-orange font-bold text-center hover:bg-brand-orange hover:text-white transition-all text-sm uppercase"
+  >
+    Saiba Mais
+  </a>
+</div>
 
           {/* CARD MASTERCLASS */}
           <div className="border-2 border-gray-100 rounded-3xl p-8 flex flex-col h-full hover:border-brand-orange transition-all group">
