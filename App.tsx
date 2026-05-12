@@ -19,6 +19,7 @@ import { Settings, X } from 'lucide-react';
 import { TicketPurchaseModal } from './components/TicketPurchaseModal';
 import { TicketStatusProvider } from './hooks/useTicketStatus';
 import { AgendaPage } from './sections/Agenda';
+import { BenefitsPage } from './sections/Benefits';
 
 /* ========================= COMPONENTE HOME ========================= */
 const HomePage: React.FC<{ 
@@ -93,7 +94,8 @@ const App: React.FC = () => {
               />
             } />
             <Route path="/agenda" element={<AgendaPage />} />
-          </Routes>
+            <Route path="/beneficios-exclusivos" element={<BenefitsPage />} />
+          </Routes>          
 
           <Footer />
 
