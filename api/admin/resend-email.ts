@@ -99,12 +99,31 @@ function generateInvoiceEmail(d: { name: string; ticketName: string; invoiceId: 
 // ------------------------------------------------------------------
 // Fetch existing invoice PDF from provider
 // ------------------------------------------------------------------
+async function tryFinalizeInvoiceXpress(invoiceId: string): Promise<void> {
+  const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
+  const apiKey  = process.env.INVOICEXPRESS_API_KEY;
+  if (!account || !apiKey) return;
+  const url =
+    `https://${account}.app.invoicexpress.com/invoices/${encodeURIComponent(invoiceId)}/change-state.json` +
+    `?api_key=${encodeURIComponent(apiKey)}`;
+  try {
+    await fetch(url, {
+      method: 'PUT',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'finalized' }),
+    });
+  } catch { /* ignore — already finalized or error */ }
+}
+
 async function fetchInvoicePdf(invoiceId: string): Promise<Buffer | null> {
   // Try InvoiceXpress
   const account = process.env.INVOICEXPRESS_ACCOUNT_NAME;
   const apiKey  = process.env.INVOICEXPRESS_API_KEY;
 
   if (account && apiKey) {
+    // Ensure the invoice is finalized so the PDF endpoint returns a URL
+    await tryFinalizeInvoiceXpress(invoiceId);
+
     const endpoint =
       `https://${account}.app.invoicexpress.com/api/pdf/${encodeURIComponent(invoiceId)}.json` +
       `?second_copy=false&api_key=${encodeURIComponent(apiKey)}`;

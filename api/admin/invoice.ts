@@ -105,6 +105,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const invoiceResult = await issueInvoiceForOrder({
     isTest,
+    autoFinalize: !isTest,
     customerName: order.customer_name || 'Participante RSG',
     customerEmail: order.customer_email,
     countryIso,
