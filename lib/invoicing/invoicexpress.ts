@@ -47,6 +47,7 @@ async function createInvoiceXpressInvoiceInternal(params: {
   customerName: string;
   customerEmail: string;
   countryIso?: string;
+  customerNif?: string | null;
   description: string;
   amountEuro: number;
   taxName?: string;
@@ -72,6 +73,7 @@ async function createInvoiceXpressInvoiceInternal(params: {
         name: params.customerName || 'Participante RSG',
         email: params.customerEmail,
         country: countryName,
+        ...(params.customerNif ? { fiscal_id: params.customerNif } : {}),
       },
       items: [
         {
@@ -232,6 +234,7 @@ export async function createInvoiceWithInvoiceXpress(input: CreateInvoiceInput):
     customerName: input.customerName,
     customerEmail: input.customerEmail,
     countryIso: input.countryIso,
+    customerNif: input.customerNif,
     description,
     amountEuro: input.amountEuro,
     taxName: process.env.INVOICEXPRESS_TAX_NAME || 'IVA23',
