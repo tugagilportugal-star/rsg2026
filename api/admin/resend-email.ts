@@ -109,11 +109,31 @@ async function fetchInvoicePdf(invoiceId: string): Promise<Buffer | null> {
       `https://${account}.app.invoicexpress.com/api/pdf/${encodeURIComponent(invoiceId)}.json` +
       `?second_copy=false&api_key=${encodeURIComponent(apiKey)}`;
 
-    for (let attempt = 1; attempt <= 8; attempt++) {
+    for (let attempt = 1; attempt <= 12; attempt++) {
       try {
         const resp = await fetch(endpoint, { headers: { Accept: 'application/json' } });
-        const data: any = await resp.json().catch(() => ({}));
-        const signedUrl = data?.pdf?.url || data?.url || null;
+        const text = await resp.text();
+        let data: any = {};
+        try { data = JSON.parse(text); } catch { /* ignore */ }
+
+        const fromPdf = data?.pdf?.url || data?.url || null;
+
+        let fromOutput: string | null = null;
+        const output = data?.output;
+        if (typeof output === 'string') {
+          if (output.startsWith('http')) {
+            fromOutput = output;
+          } else {
+            try {
+              const parsed = JSON.parse(output);
+              fromOutput = parsed?.pdfUrl || parsed?.pdf?.url || parsed?.url || null;
+            } catch { /* ignore */ }
+          }
+        } else if (output && typeof output === 'object') {
+          fromOutput = (output as any)?.pdfUrl || (output as any)?.pdf?.url || (output as any)?.url || null;
+        }
+
+        const signedUrl = fromPdf || fromOutput;
 
         if (resp.ok && signedUrl) {
           const pdfResp = await fetch(signedUrl);
