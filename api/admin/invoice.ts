@@ -132,10 +132,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     invoiceUpdate.original_invoice_id = order.invoice_id;
     invoiceUpdate.original_invoice_number = order.invoice_number ?? order.invoice_id;
   }
-  const { error: saveError } = await supabase.from('orders').update(invoiceUpdate).eq('id', orderId);
-  if (saveError) {
+  console.log('💾 Saving invoice to DB:', { orderId, invoiceId: invoiceResult.invoiceId, invoiceNumber: invoiceResult.invoiceNumber });
+  const { data: savedRow, error: saveError } = await supabase
+    .from('orders')
+    .update(invoiceUpdate)
+    .eq('id', orderId)
+    .select('id, invoice_id, invoice_number')
+    .single();
+  console.log('💾 DB save result:', { savedRow, saveError: saveError?.message ?? null });
+  if (saveError || !savedRow) {
     console.error('❌ Falha ao guardar invoice_id na DB:', saveError);
-    return res.status(500).json({ message: `Fatura criada mas falhou a guardar na DB: ${saveError.message}` });
+    return res.status(500).json({ message: `Fatura criada mas falhou a guardar na DB: ${saveError?.message ?? 'nenhuma linha atualizada'}` });
   }
 
   await logAction(admin.email, 'gerar_fatura', 'order', orderId, { invoice_number: invoiceResult.invoiceNumber, invoice_id: invoiceResult.invoiceId, is_test: isTest });
