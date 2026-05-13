@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#DA291C">
+<title>Manual do Voluntário · RSG Lisboa 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:#046A38; --green-deep:#034E29; --red:#DA291C; --red-deep:#B41E13;
+    --yellow:#FFE900; --black:#171818; --ink:#171818;
+    --cream:#FAF6F0; --cream-2:#F2EBDF; --paper:#FFFFFF;
+    --muted:#5A6B82;
+    --shadow-sm:0 1px 2px rgba(11,31,58,.06),0 2px 8px rgba(11,31,58,.04);
+    --shadow-md:0 4px 14px rgba(11,31,58,.08),0 12px 32px rgba(11,31,58,.06);
+    --radius:18px; --radius-sm:12px;
+    --display:'Bricolage Grotesque','Sora',system-ui,sans-serif;
+    --body:'Sora',system-ui,-apple-system,sans-serif;
+    --safe-bottom:max(env(safe-area-inset-bottom),12px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:var(--body);background:var(--cream);color:var(--ink);font-size:16px;line-height:1.55;font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:calc(88px + var(--safe-bottom));}
+  ::selection{background:var(--red);color:#fff;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;color:inherit;cursor:pointer;}
+
+  /* TOP BAR */
+  .top-bar{background:var(--red);padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .top-bar img.logo-tugagil{height:26px;width:auto;object-fit:contain;}
+  .top-bar img.logo-rsg{height:34px;width:auto;max-width:110px;object-fit:contain;}
+  .lang-toggle{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.12);border-radius:8px;padding:3px;}
+  .lang-toggle button{background:transparent;color:rgba(255,255,255,0.6);border:none;border-radius:6px;padding:4px 10px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:var(--body);letter-spacing:0.06em;transition:all 0.15s;}
+  .lang-toggle button.active{background:white;color:var(--red);}
+
+  /* HERO */
+  .hero{position:relative;background:var(--red);color:var(--cream);padding:32px 20px 52px;overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:-30% -15% auto auto;width:320px;height:320px;background:radial-gradient(circle at center,rgba(0,0,0,0.18),transparent 62%);filter:blur(18px);pointer-events:none;}
+  .hero::after{content:"";position:absolute;inset:auto -25% -55% -25%;height:320px;background:radial-gradient(ellipse at center,rgba(255,255,255,0.10),transparent 65%);filter:blur(28px);pointer-events:none;}
+  .hero-inner{position:relative;z-index:1;max-width:480px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid rgba(250,246,240,0.40);border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(250,246,240,0.95);background:rgba(250,246,240,0.10);backdrop-filter:blur(4px);margin-bottom:20px;}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 4px rgba(255,233,0,0.30);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(255,233,0,0.30);}50%{box-shadow:0 0 0 8px rgba(255,233,0,0);}}
+  h1.hero-title{font-family:var(--display);font-weight:700;font-size:clamp(38px,10vw,54px);line-height:0.95;letter-spacing:-0.025em;margin:0 0 16px;color:var(--cream);}
+  h1.hero-title .accent{color:var(--yellow);font-style:italic;font-weight:600;}
+  .hero-sub{font-size:15px;line-height:1.55;color:rgba(250,246,240,0.80);max-width:38ch;margin:0 0 16px;}
+  .partners{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(250,246,240,0.50);margin-bottom:24px;}
+  .partners .sep{width:3px;height:3px;border-radius:50%;background:rgba(250,246,240,0.30);}
+
+  /* KEY CARD (hero info rows) */
+  .key-card{background:rgba(250,246,240,0.08);border:1px solid rgba(250,246,240,0.14);border-radius:var(--radius);padding:16px 16px 4px;backdrop-filter:blur(6px);}
+  .key-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(250,246,240,0.10);}
+  .key-row:last-child{border-bottom:none;}
+  .key-icon{flex:0 0 34px;width:34px;height:34px;border-radius:10px;background:rgba(250,246,240,0.12);color:var(--cream);display:grid;place-items:center;}
+  .key-icon svg{width:17px;height:17px;}
+  .key-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(250,246,240,0.50);margin-bottom:2px;}
+  .key-value{font-size:15px;font-weight:500;color:var(--cream);line-height:1.4;}
+  .key-value a{color:var(--cream);border-bottom:1px dashed rgba(250,246,240,0.4);}
+  .hero-cta{margin-top:22px;display:flex;gap:10px;}
+  .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 16px;border-radius:14px;font-size:14px;font-weight:600;border:none;transition:transform .15s ease;}
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--green);color:var(--cream);}
+  .btn-primary:hover{background:var(--green-deep);}
+  .btn-ghost{background:rgba(250,246,240,0.12);color:var(--cream);border:1px solid rgba(250,246,240,0.22);}
+  .btn svg{width:15px;height:15px;}
+
+  /* SECTIONS */
+  .wrap{max-width:100%;}
+  section.s{padding:52px 20px 8px;scroll-margin-top:12px;}
+  .s-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--red);}
+  .s-tag::before{content:"";width:18px;height:1.5px;background:var(--red);}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(26px,7vw,32px);line-height:1.05;letter-spacing:-0.02em;margin:10px 0 18px;color:var(--green);text-wrap:pretty;}
+  h2 .it{font-style:italic;font-weight:500;color:var(--red);}
+  p.lead{font-size:16px;line-height:1.55;color:var(--ink);margin:0 0 16px;}
+  p.muted{color:var(--muted);}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+  .stat{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow-sm);}
+  .stat-num{font-family:var(--display);font-weight:700;font-size:30px;line-height:1;color:var(--green);letter-spacing:-0.02em;}
+  .stat-num .plus{color:var(--red);}
+  .stat-label{margin-top:5px;font-size:12px;color:var(--muted);letter-spacing:0.03em;}
+
+  /* QUOTE STRIP */
+  .quote-strip{margin-top:16px;padding:14px 16px;background:linear-gradient(135deg,var(--black) 0%,#2a2c2c 100%);color:var(--yellow);border-radius:var(--radius-sm);font-family:var(--display);font-style:italic;font-size:17px;font-weight:500;line-height:1.3;}
+  .quote-strip small{display:block;font-family:var(--body);font-style:normal;font-size:11px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(250,246,240,0.50);margin-top:8px;}
+
+  /* CALLOUT */
+  .callout{margin:16px 0 0;background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius);padding:16px 16px 18px;box-shadow:var(--shadow-sm);}
+  .callout-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;color:var(--green);}
+  .callout-head svg{width:17px;height:17px;color:var(--red);}
+  .callout p{margin:0;font-size:14px;line-height:1.55;color:var(--ink);}
+  .conduct-list{list-style:none;padding:0;margin:0;}
+  .conduct-list li{padding:7px 0;border-bottom:1px solid rgba(23,24,24,0.07);font-size:14px;color:var(--muted);line-height:1.5;}
+  .conduct-list li:last-child{border-bottom:none;}
+  .conduct-list li strong{color:var(--ink);}
+
+  /* CHECKLIST */
+  .checklist{list-style:none;padding:0;margin:0;}
+  .check-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(23,24,24,0.08);}
+  .check-item:last-child{border-bottom:none;}
+  .check-bullet{flex:0 0 30px;width:30px;height:30px;border-radius:10px;background:var(--green);color:var(--cream);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:13px;}
+  .check-body strong{display:block;font-size:15px;font-weight:600;color:var(--black);margin-bottom:2px;}
+  .check-body span{font-size:13.5px;color:var(--muted);line-height:1.5;}
+
+  /* STEPS (benefits) */
+  .steps{list-style:none;padding:0;margin:0;counter-reset:step;}
+  .step{display:flex;gap:14px;padding:12px 0;counter-increment:step;align-items:flex-start;border-bottom:1px solid rgba(23,24,24,0.08);}
+  .step:last-child{border-bottom:none;}
+  .step::before{content:counter(step);flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--green);color:var(--cream);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px;}
+  .step-body strong{display:block;font-size:15px;font-weight:600;color:var(--black);margin-bottom:2px;}
+  .step-body span{font-size:13.5px;color:var(--muted);line-height:1.5;}
+
+  /* TIMELINE / CRONOGRAMA */
+  .timeline{list-style:none;padding:0;margin:0;}
+  .slot{display:grid;grid-template-columns:60px 1fr;gap:12px;padding:12px 0;}
+  .slot-time{font-family:var(--display);font-weight:600;font-size:16px;color:var(--green);letter-spacing:-0.01em;padding-top:12px;}
+  .slot-card{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+  .slot-card .kind{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);}
+  .slot-card.keynote .kind{color:var(--red);}
+  .slot-card.keynote::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red);}
+  .slot-card.keynote{background:linear-gradient(180deg,#fff 0%,#FFF9D9 100%);}
+  .slot-card .speaker{margin-top:3px;font-family:var(--display);font-weight:600;font-size:16px;line-height:1.2;color:var(--black);letter-spacing:-0.01em;}
+  .slot-card .talk{margin-top:3px;font-size:13px;line-height:1.4;color:var(--ink);}
+  .slot.break .slot-card{background:var(--cream-2);border-style:dashed;box-shadow:none;}
+  .slot.break .speaker{font-size:14px;color:var(--muted);}
+
+  /* DAY TABS */
+  .day-tabs{display:flex;gap:6px;margin:4px 0 16px;background:var(--cream-2);padding:4px;border-radius:12px;}
+  .day-tab{flex:1;height:38px;border-radius:9px;border:none;background:transparent;font-weight:600;font-size:13px;color:var(--muted);transition:all .2s;font-family:var(--body);}
+  .day-tab.active{background:var(--green);color:var(--cream);box-shadow:var(--shadow-sm);}
+
+  /* PERSON CARDS */
+  .person-list{display:grid;gap:10px;margin-bottom:16px;}
+  .person-card{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px 16px;}
+  .person-card .who-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
+  .person-card .who{font-family:var(--display);font-weight:600;font-size:16px;line-height:1.2;color:var(--black);letter-spacing:-0.01em;}
+  .vol-tag{padding:2px 8px;background:var(--red);color:#fff;border-radius:999px;font-family:var(--body);font-weight:600;font-size:9px;letter-spacing:0.10em;text-transform:uppercase;flex:0 0 auto;}
+  .person-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:center top;flex-shrink:0;border:2px solid var(--cream-2);}
+  .person-initial-sm{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
+  .person-card .role{font-size:13px;color:var(--green);font-weight:500;margin-bottom:10px;line-height:1.4;}
+  .person-card .shifts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+  .person-card .shift{background:var(--cream-2);border-radius:10px;padding:8px 10px;}
+  .shift-label{font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+  .shift-text{font-size:12.5px;line-height:1.4;color:var(--ink);}
+
+  /* SPEAKERS GRID */
+  .speakers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+  .sp-card{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;box-shadow:var(--shadow-sm);}
+  .sp-card.keynote{background:linear-gradient(180deg,#fff 0%,#FFF9D9 100%);border-color:rgba(255,233,0,0.45);}
+  .sp-photo{width:60px;height:60px;border-radius:50%;object-fit:cover;object-position:center top;display:block;margin:0 auto 8px;box-shadow:0 4px 14px rgba(23,24,24,0.10);}
+  .sp-card.keynote .sp-photo{box-shadow:0 0 0 3px var(--yellow),0 4px 14px rgba(23,24,24,0.10);}
+  .sp-name{font-family:var(--display);font-weight:600;font-size:12px;line-height:1.3;color:var(--black);letter-spacing:-0.01em;}
+  .sp-time{margin-top:3px;font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:0.06em;color:var(--red);}
+  .sp-card.keynote .sp-time{color:var(--green);}
+
+  /* CONDUCT GRID */
+  .conduct-grid{display:grid;gap:12px;margin-top:16px;}
+  .conduct-card{background:var(--paper);border-radius:var(--radius);border:1px solid rgba(23,24,24,0.09);overflow:hidden;box-shadow:var(--shadow-sm);}
+  .conduct-card h3{display:flex;align-items:center;gap:10px;padding:12px 16px;font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:0.04em;margin:0;border-bottom:1px solid rgba(23,24,24,0.08);}
+  .conduct-card.no h3{background:#fff5f5;color:var(--red);}
+  .conduct-card.yes h3{background:#f0fff6;color:var(--green);}
+  .badge{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;}
+  .conduct-card.no .badge{background:var(--red);color:#fff;}
+  .conduct-card.yes .badge{background:var(--green);color:#fff;}
+  .conduct-card .conduct-list li{padding:9px 16px;font-size:13.5px;}
+
+  /* TEAM GRID */
+  .team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+  .team-card{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;box-shadow:var(--shadow-sm);}
+  .avatar-photo{width:60px;height:60px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;border:2px solid var(--cream-2);}
+  .avatar-initial{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:20px;color:#fff;margin:0 auto 8px;}
+  .team-name{font-family:var(--display);font-weight:600;font-size:12px;line-height:1.3;color:var(--black);}
+
+  /* CONTACT LIST */
+  .contact-list{display:grid;gap:10px;margin-top:16px;}
+  .contact-row{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius);padding:14px 16px;text-decoration:none;color:var(--ink);box-shadow:var(--shadow-sm);}
+  .contact-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;}
+  .contact-icon.coral{background:var(--red);color:#fff;}
+  .contact-icon.green{background:var(--green);color:#fff;}
+  .contact-icon svg{width:20px;height:20px;}
+  .contact-text{flex:1;min-width:0;}
+  .contact-text .who{font-family:var(--display);font-weight:600;font-size:15px;color:var(--black);}
+  .contact-text .what{font-size:13px;color:var(--muted);margin-top:2px;}
+  .contact-arrow{color:var(--muted);}
+  .contact-arrow svg{width:16px;height:16px;}
+
+  /* THANKS CARD */
+  .thanks-card{background:var(--paper);border:1px solid rgba(23,24,24,0.09);border-radius:var(--radius);padding:28px 24px;text-align:center;box-shadow:var(--shadow-md);}
+  .thanks-mark{font-size:2.2rem;margin-bottom:12px;}
+  .thanks-card h2{margin:0 0 12px;color:var(--green);}
+  .thanks-card p{font-size:15px;line-height:1.6;color:var(--ink);margin:0;}
+  .thanks-card .sign{font-family:var(--display);font-style:italic;font-weight:500;font-size:17px;color:var(--red);margin-top:14px;}
+
+  /* FOOTER */
+  footer{margin-top:32px;background:var(--green);color:var(--cream);text-align:center;padding:32px 20px 28px;}
+  footer .foot-logo{height:40px;width:auto;margin:0 auto 12px;display:block;filter:brightness(0) invert(1);}
+  footer .brand{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:0.08em;margin-bottom:6px;}
+  footer .foot-sub{font-size:12px;color:rgba(250,246,240,0.55);line-height:1.6;}
+
+  /* DOCK NAV */
+  .dock-nav{position:fixed;bottom:calc(var(--safe-bottom) + 8px);left:50%;transform:translateX(-50%);display:flex;gap:3px;padding:5px;background:var(--black);border-radius:100px;box-shadow:0 8px 32px rgba(11,31,58,0.30),0 2px 8px rgba(11,31,58,0.12);z-index:200;white-space:nowrap;}
+  .nav-btn{height:42px;padding:0 14px;border:none;border-radius:80px;background:transparent;color:rgba(250,246,240,0.50);font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;transition:all .2s;cursor:pointer;font-family:var(--body);}
+  .nav-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .nav-btn:hover{color:var(--cream);}
+  .nav-btn.active{background:var(--green);color:var(--cream);}
+
+  @media(min-width:600px){
+    .stats{grid-template-columns:repeat(4,1fr);}
+    .team-grid{grid-template-columns:repeat(4,1fr);}
+    .speakers-grid{grid-template-columns:repeat(4,1fr);}
+    .conduct-grid{grid-template-columns:1fr 1fr;}
+    .person-card .shifts{grid-template-columns:1fr 1fr 1fr;}
+  }
+  @media(min-width:860px){
+    body{max-width:900px;margin:0 auto;}
+    .top-bar{border-radius:0 0 14px 14px;padding:0.75rem 3rem;}
+    .hero{border-radius:0 0 28px 28px;padding:40px 3rem 60px;}
+    section.s{padding:60px 3rem 8px;}
+    .stats{grid-template-columns:repeat(4,1fr);}
+    .team-grid{grid-template-columns:repeat(5,1fr);}
+    .speakers-grid{grid-template-columns:repeat(5,1fr);}
+    .person-list{grid-template-columns:1fr 1fr;}
+    .conduct-grid{grid-template-columns:1fr 1fr;}
+    .contact-list{grid-template-columns:1fr 1fr;}
+    .hero-inner{max-width:580px;}
+    .dock-nav{bottom:28px;}
+    footer{padding:32px 3rem 28px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <img class="logo-tugagil" src="/assets/Group-23.png" alt="TugÁgil">
+  <div class="lang-toggle">
+    <button id="btn-pt" class="active" onclick="setLang('pt')">PT</button>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+  <img class="logo-rsg" src="/assets/2026 RSG_Logo.png" alt="RSG Lisboa 2026">
+</div>
+
+<div class="wrap">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow"><span class="dot"></span><span data-i18n="eyebrow">Manual do Voluntário</span></div>
+    <h1 class="hero-title" data-i18n="hero-h1">Olá,<br><span class="accent">voluntário.</span></h1>
+    <p class="hero-sub" data-i18n="hero-sub">Estamos felizes por contar com o teu apoio. O teu trabalho é essencial para o sucesso do RSG Lisboa 2026 — juntos vamos criar um evento inesquecível para a comunidade Agile em Portugal.</p>
+    <div class="partners">
+      <span>Scrum Alliance</span><span class="sep"></span>
+      <span>TugÁgil</span><span class="sep"></span>
+      <span>21 Mai 2026</span>
+    </div>
+    <div class="key-card">
+      <div class="key-row">
+        <div class="key-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div class="key-text"><div class="key-label" data-i18n="k-date-label">Data</div><div class="key-value" data-i18n="k-date-val">21 de Maio de 2026 · Quinta-feira</div></div>
+      </div>
+      <div class="key-row">
+        <div class="key-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="key-text"><div class="key-label" data-i18n="k-venue-label">Local</div><div class="key-value"><a href="https://maps.google.com/?q=Auditório+Alto+dos+Moinhos+Lisboa" target="_blank" rel="noopener">Auditório Alto dos Moinhos<br><span style="font-size:12px;color:rgba(250,246,240,0.60);font-weight:400">R. João de Freitas Branco, 1500-359 Lisboa</span></a></div></div>
+      </div>
+      <div class="key-row">
+        <div class="key-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="key-text"><div class="key-label" data-i18n="k-metro-label">Metro</div><div class="key-value" data-i18n="k-metro-val">Linha Azul · Alto dos Moinhos <span style="color:rgba(250,246,240,0.50);font-weight:400">(à porta)</span></div></div>
+      </div>
+      <div class="key-row">
+        <div class="key-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="key-text"><div class="key-label" data-i18n="k-checkin-label">Check-in</div><div class="key-value" data-i18n="k-checkin-val">A partir das 8h30</div></div>
+      </div>
+    </div>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://maps.google.com/?q=Auditório+Alto+dos+Moinhos+Lisboa" target="_blank" rel="noopener" data-i18n="cta-map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        Como chegar
+      </a>
+      <a class="btn btn-ghost" href="https://rsglisbon.com" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        rsglisbon.com
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- 01 SOBRE -->
+<section class="s" id="sobre">
+  <div class="s-tag" data-i18n="s01-tag">01 · Sobre</div>
+  <h2 data-i18n="s01-h2">Uma celebração da <span class="it">agilidade</span> em Portugal.</h2>
+  <p class="lead" data-i18n="s01-lead">O RSG Lisboa 2026 fortalece a comunidade Agile em Portugal através da partilha de experiências, ideias e boas práticas. Um espaço de aprendizagem colaborativa, networking e inspiração — onde profissionais de diversas áreas se reúnem para impulsionar a agilidade nas organizações.</p>
+  <div class="quote-strip">
+    <span data-i18n="s01-quote">"Foi ÉPICO. Foi INTENSO."</span>
+    <small data-i18n="s01-quote-sub">Edição 2025 · Universidade Lusófona</small>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num"><span class="plus">+</span>170</div><div class="stat-label" data-i18n="stat-participants">Participantes</div></div>
+    <div class="stat"><div class="stat-num">14</div><div class="stat-label">Speakers</div></div>
+    <div class="stat"><div class="stat-num"><span class="plus">+</span>10</div><div class="stat-label" data-i18n="stat-sessions">Sessões</div></div>
+    <div class="stat"><div class="stat-num">20</div><div class="stat-label" data-i18n="stat-volunteers">Voluntários</div></div>
+  </div>
+  <div class="callout" style="margin-top:20px">
+    <div class="callout-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      Scrum Alliance &amp; TugÁgil
+    </div>
+    <p data-i18n="s01-callout">Desde 2001, a Scrum Alliance é o nome mais confiável em certificações ágeis — com +247 coaches, 320 provedores de treino e 1,6M de praticantes. O TugÁgil é uma comunidade voluntária que, desde 2022, fomenta a cultura ágil em Portugal: +60 eventos e workshops e +20 empresas parceiras, além de mentorias para profissionais.</p>
+  </div>
+</section>
+
+<!-- 02 RESPONSABILIDADES -->
+<section class="s" id="responsabilidades">
+  <div class="s-tag" data-i18n="s02-tag">02 · Papel &amp; Responsabilidades</div>
+  <h2 data-i18n="s02-h2">O que esperamos de <span class="it">ti</span>.</h2>
+  <ul class="checklist">
+    <li class="check-item"><div class="check-bullet">01</div><div class="check-body"><strong data-i18n="r01-title">Pontualidade</strong><span data-i18n="r01-desc">Sê pontual e cumpre os horários atribuídos. O briefing é às 7h30.</span></div></li>
+    <li class="check-item"><div class="check-bullet">02</div><div class="check-body"><strong data-i18n="r02-title">Segue as orientações</strong><span data-i18n="r02-desc">Respeita as orientações da equipa organizadora e da coordenação no terreno.</span></div></li>
+    <li class="check-item"><div class="check-bullet">03</div><div class="check-body"><strong data-i18n="r03-title">Credencial visível</strong><span data-i18n="r03-desc">Mantém-te sempre identificável com a credencial de Staff durante todo o evento.</span></div></li>
+    <li class="check-item"><div class="check-bullet">04</div><div class="check-body"><strong data-i18n="r04-title">Profissionalismo</strong><span data-i18n="r04-desc">Demonstra cordialidade e simpatia com participantes, palestrantes e restante equipa.</span></div></li>
+    <li class="check-item"><div class="check-bullet">05</div><div class="check-body"><strong data-i18n="r05-title">Comunica problemas</strong><span data-i18n="r05-desc">Relata imediatamente à coordenação qualquer problema ou situação inesperada.</span></div></li>
+  </ul>
+</section>
+
+<!-- 03 COMPORTAMENTO -->
+<section class="s" id="comportamento">
+  <div class="s-tag" data-i18n="s03-tag">03 · Comportamento esperado</div>
+  <h2 data-i18n="s03-h2">Como <span class="it">estar</span> no terreno.</h2>
+  <div class="callout">
+    <div class="callout-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span data-i18n="s03-callout-head">Lembra-te</span>
+    </div>
+    <ul class="conduct-list" style="margin-top:6px">
+      <li><span><strong data-i18n="b01-strong">Postura positiva</strong> <span data-i18n="b01-rest">e colaborativa.</span></span></li>
+      <li><span><strong data-i18n="b02-strong">Sê proativo</strong> <span data-i18n="b02-rest">e disposto a ajudar sempre que necessário.</span></span></li>
+      <li><span><strong data-i18n="b03-strong">Respeita todas as pessoas</strong><span data-i18n="b03-rest">, independentemente de cultura, género, religião ou opinião.</span></span></li>
+      <li><span><strong data-i18n="b04-strong">Evita o telemóvel</strong> <span data-i18n="b04-rest">e distrações enquanto estás a desempenhar funções.</span></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 04 BENEFÍCIOS -->
+<section class="s" id="beneficios">
+  <div class="s-tag" data-i18n="s04-tag">04 · Benefícios &amp; Reconhecimento</div>
+  <h2 data-i18n="s04-h2">O que ganhas <span class="it">connosco</span>.</h2>
+  <ol class="steps">
+    <li class="step"><div class="step-body"><strong data-i18n="ben01-title">Networking</strong><span data-i18n="ben01-desc">Convive com profissionais da área Agile em Portugal e internacionais.</span></div></li>
+    <li class="step"><div class="step-body"><strong data-i18n="ben02-title">Experiência prática</strong><span data-i18n="ben02-desc">Vives por dentro a organização de um evento internacional.</span></div></li>
+    <li class="step"><div class="step-body"><strong data-i18n="ben03-title">Acesso exclusivo</strong><span data-i18n="ben03-desc">Assiste às sessões, keynotes e palestras nos intervalos das tuas funções.</span></div></li>
+  </ol>
+</section>
+
+<!-- 05 CRONOGRAMA -->
+<section class="s" id="cronograma">
+  <div class="s-tag" data-i18n="s05-tag">05 · Cronograma do voluntário</div>
+  <h2 data-i18n="s05-h2">O <span class="it">teu dia</span>, hora a hora.</h2>
+  <ul class="timeline">
+    <li class="slot"><div class="slot-time">07:30</div><div class="slot-card keynote"><div class="kind" data-i18n="cr01-kind">★ Briefing</div><div class="speaker" data-i18n="cr01-speaker">Chegada dos voluntários</div><div class="talk" data-i18n="cr01-talk">Encontro no auditório e organização das funções.</div></div></li>
+    <li class="slot"><div class="slot-time">08:30</div><div class="slot-card"><div class="kind" data-i18n="cr02-kind">Receção</div><div class="speaker" data-i18n="cr02-speaker">Credenciamento do público</div><div class="talk" data-i18n="cr02-talk">Receção ativa dos participantes.</div></div></li>
+    <li class="slot break"><div class="slot-time">09:15</div><div class="slot-card"><div class="kind" data-i18n="cr03-kind">Abertura oficial</div><div class="speaker" data-i18n="cr03-speaker">Auditório principal</div></div></li>
+    <li class="slot"><div class="slot-time">09:00–19:00</div><div class="slot-card"><div class="kind" data-i18n="cr04-kind">Sessões</div><div class="speaker" data-i18n="cr04-speaker">Palestras &amp; Mesa Redonda</div><div class="talk" data-i18n="cr04-talk">Apoio contínuo no auditório principal. Pausas entre sessões.</div></div></li>
+    <li class="slot break"><div class="slot-time">13:00–14:00</div><div class="slot-card"><div class="kind" data-i18n="cr05-kind">Almoço</div><div class="speaker" data-i18n="cr05-speaker">🍽 Lanche do coffee break no espaço</div><div class="talk" data-i18n="cr05-talk">Caso algum voluntário opte por almoçar fora do espaço, avisar a coordenação.</div></div></li>
+    <li class="slot"><div class="slot-time">18:45</div><div class="slot-card keynote"><div class="kind" data-i18n="cr06-kind">★ Encerramento</div><div class="speaker" data-i18n="cr06-speaker">Auditório principal</div><div class="talk" data-i18n="cr06-talk">Coordenação + agradecimentos · Todos os voluntários no palco.</div></div></li>
+  </ul>
+</section>
+
+<!-- 06 FUNÇÕES -->
+<section class="s" id="funcoes">
+  <div class="s-tag" data-i18n="s06-tag">06 · Principais funções</div>
+  <h2 data-i18n="s06-h2">Áreas de <span class="it">atuação</span>.</h2>
+  <p class="muted" style="font-size:13.5px;margin:-6px 0 14px" data-i18n="s06-sub">Distribuição por pessoa. Cada linha mostra a função geral e o que cada um fará na manhã e na tarde.</p>
+  <div class="person-list">
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Raquel.png" alt="Raquel Bartz Alves"><div class="who">Raquel Bartz Alves</div></div></div><div class="role" data-i18n="p-raquel-role">Apresentação e Coordenação</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-raquel-am">Entrega das placas após palestra</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-raquel-pm">Entrega das placas após palestra</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Sylvia.png" alt="Sylvia Grec"><div class="who">Sylvia Grec</div></div></div><div class="role" data-i18n="p-sylvia-role">Apresentação e Coordenação</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-sylvia-am">Entrega das placas após palestra</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-sylvia-pm">Entrega das placas após palestra</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Fabio.png" alt="Fábio Castro"><div class="who">Fábio Castro</div></div></div><div class="role" data-i18n="p-fabio-role">Infra: Som, Equipamentos</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-fabio-am">Apoio técnico</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-fabio-pm">Apoio técnico</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Marina.png" alt="Marina Bittencourt"><div class="who">Marina Bittencourt</div></div></div><div class="role" data-i18n="p-marina-role">Salão — preparação do palco, água para palestrantes e aviso de 5 min</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-marina-am">Salão · acompanhamento speakers</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-marina-pm">Salão · acompanhamento speakers</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Cristiane.png" alt="Cristiane Alves"><div class="who">Cristiane Alves</div></div></div><div class="role" data-i18n="p-cristiane-role">Social Media</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-cristiane-am">Social Media · entrevistas speakers/público</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-cristiane-pm">Social Media · entrevistas speakers/público</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Alex.png" alt="Alex Seles"><div class="who">Alex Seles</div></div></div><div class="role" data-i18n="p-alex-role">Social Media</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-alex-am">Social Media</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-alex-pm">Social Media</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Matheus.png" alt="Matheus Haddad"><div class="who">Matheus Haddad</div></div></div><div class="role" data-i18n="p-matheus-role">Moderação Mesa Redonda e apoio salão</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-matheus-am">Apoio salão / moderação</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-matheus-pm">Apoio salão</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Natasha.png" alt="Natasha Doria"><div class="who">Natasha Doria</div></div><span class="vol-tag" data-i18n="vol-tag">Voluntária</span></div><div class="role" data-i18n="p-natasha-role">Check-in e apoio técnico</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-natasha-am">Check-in e apoio técnico</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-natasha-pm">Apoio técnico</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Karla.jpg" alt="Karla Costa"><div class="who">Karla Costa</div></div><span class="vol-tag" data-i18n="vol-tag">Voluntária</span></div><div class="role" data-i18n="p-karla-role">Responsável pelo check-in e coffee break</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-karla-am">Check-in e apoio coffee</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-karla-pm">Salão fundo / lateral · apoio coffee</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Daiana.jpg" alt="Daiana Haddad" style="object-position:center center"><div class="who">Daiana Haddad</div></div><span class="vol-tag" data-i18n="vol-tag">Voluntária</span></div><div class="role" data-i18n="p-daiana-role">Check-in / apoio salão</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-daiana-am">Check-in / apoio salão</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-daiana-pm">Salão fundo / lateral</div></div></div></div>
+    <div class="person-card"><div class="who-row"><div style="display:flex;align-items:center;gap:10px"><img class="person-photo" src="/assets/Laura.jpg" alt="Laura Andrade"><div class="who">Laura Andrade</div></div><span class="vol-tag" data-i18n="vol-tag">Voluntária</span></div><div class="role" data-i18n="p-laura-role">Check-in / apoio salão</div><div class="shifts"><div class="shift"><div class="shift-label" data-i18n="shift-am">Manhã</div><div class="shift-text" data-i18n="p-laura-am">Check-in</div></div><div class="shift"><div class="shift-label" data-i18n="shift-pm">Tarde</div><div class="shift-text" data-i18n="p-laura-pm">Salão fundo / lateral</div></div></div></div>
+  </div>
+  <div class="callout" style="margin-top:4px">
+    <div class="callout-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span data-i18n="notes-head">Notas importantes</span>
+    </div>
+    <ul class="conduct-list" style="margin-top:6px">
+      <li><span data-i18n="note01">Após coffee break da manhã, <strong>2 pessoas no check-in</strong> — Karla e Laura.</span></li>
+      <li><span data-i18n="note02"><strong>Natasha</strong> apoia o técnico assim que começar o evento, depois de ajudar no check-in.</span></li>
+      <li><span data-i18n="note03"><strong>Daiana</strong> apoia na entrada do salão para indicar lugares aos participantes que cheguem.</span></li>
+      <li><span data-i18n="note04"><strong>Matheus</strong> antes da mesa redonda apoia no salão.</span></li>
+      <li><span data-i18n="note05"><strong>Apoio salão:</strong> apoio à entrada e orientação dos participantes.</span></li>
+      <li><span data-i18n="note06"><strong>Briefing fotógrafo e vídeo</strong> — Raquel / Sylvia.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 07 PALESTRANTES -->
+<section class="s" id="palestrantes">
+  <div class="s-tag" data-i18n="s07-tag">07 · Conhece os nossos palestrantes</div>
+  <h2 data-i18n="s07-h2">As vozes do <span class="it">RSG Lisboa 2026</span>.</h2>
+  <p class="muted" style="font-size:13.5px;margin:-6px 0 0" data-i18n="s07-sub">Pela ordem em que sobem ao palco.</p>
+  <div class="speakers-grid">
+    <div class="sp-card"><img class="sp-photo" src="/assets/Joana-Silva.png" alt="Joana Silva"><div class="sp-name">Joana Silva</div><div class="sp-time">09:30</div></div>
+    <div class="sp-card keynote"><img class="sp-photo" src="/assets/Lyssa-Adkins.png" alt="Lyssa Adkins"><div class="sp-name">Lyssa Adkins</div><div class="sp-time">★ 10:00</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Patricia-Sousa.png" alt="Patrícia Alves"><div class="sp-name">Patrícia Alves</div><div class="sp-time">11:20</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/David-Anderson.png" alt="David Anderson"><div class="sp-name">David Anderson</div><div class="sp-time">14:30</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Ricardo-Caldas.png" alt="Ricardo Caldas"><div class="sp-name">Ricardo Caldas</div><div class="sp-time">15:10</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Paulo-Caroli.png" alt="Paulo Caroli"><div class="sp-name">Paulo Caroli</div><div class="sp-time">15:45</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Manuel-Pais.png" alt="Manuel Pais"><div class="sp-name">Manuel Pais</div><div class="sp-time">15:45</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Cesar-Ribeiro.png" alt="César Ribeiro"><div class="sp-name">César Ribeiro</div><div class="sp-time">16:50</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Carlos-Paz.png" alt="Carlos Paz"><div class="sp-name">Carlos Paz</div><div class="sp-time">16:50</div></div>
+    <div class="sp-card"><img class="sp-photo" src="/assets/Sara-Cruz.png" alt="Sara Cruz"><div class="sp-name">Sara Cruz</div><div class="sp-time">17:25</div></div>
+    <div class="sp-card keynote"><img class="sp-photo" src="/assets/Nadia-Miranda.png" alt="Nadia Miranda"><div class="sp-name">Nadia Miranda</div><div class="sp-time">★ 18:05</div></div>
+  </div>
+</section>
+
+<!-- 08 PROGRAMA -->
+<section class="s" id="programa">
+  <div class="s-tag" data-i18n="s08-tag">08 · Programa</div>
+  <h2 data-i18n="s08-h2">21 de Maio de <span class="it">2026</span>.</h2>
+  <p class="muted" style="font-size:13.5px;margin:-6px 0 14px" data-i18n="s08-sub">Acompanha a programação para informar os participantes.</p>
+  <div class="day-tabs" role="tablist">
+    <button class="day-tab active" data-day="manha" type="button" data-i18n="tab-am">☀ Manhã</button>
+    <button class="day-tab" data-day="tarde" type="button" data-i18n="tab-pm">🌤 Tarde</button>
+  </div>
+  <ul class="timeline" id="tl-manha">
+    <li class="slot break"><div class="slot-time">08:30</div><div class="slot-card"><div class="kind" data-i18n="ag-welcome">Welcome</div><div class="speaker" data-i18n="ag-checkin">Check-in &amp; Receção</div></div></li>
+    <li class="slot break"><div class="slot-time">09:15</div><div class="slot-card"><div class="kind" data-i18n="ag-opening">Abertura</div><div class="speaker">TugÁgil</div></div></li>
+    <li class="slot"><div class="slot-time">09:30</div><div class="slot-card"><div class="kind">Speaker · 30 min</div><div class="speaker">Joana Silva</div><div class="talk">QA na Era da IA: O Que Mudou e o Que Continua a Falhar</div></div></li>
+    <li class="slot"><div class="slot-time">10:00</div><div class="slot-card keynote"><div class="kind">★ Keynote · 45 min</div><div class="speaker">Lyssa Adkins</div><div class="talk">Agilists and Our World Work: What if we were made for this time?</div></div></li>
+    <li class="slot break"><div class="slot-time">10:55</div><div class="slot-card"><div class="kind" data-i18n="ag-break">Pausa · 25 min</div><div class="speaker">☕ Coffee Break</div></div></li>
+    <li class="slot"><div class="slot-time">11:20</div><div class="slot-card"><div class="kind">Speaker · 30 min</div><div class="speaker">Patrícia Alves</div><div class="talk">People &amp; Future: Redesenhar o trabalho em equipa fora do mundo "tech"</div></div></li>
+    <li class="slot"><div class="slot-time">12:00</div><div class="slot-card"><div class="kind" data-i18n="ag-roundtable">Mesa Redonda · 50 min</div><div class="speaker" data-i18n="ag-roundtable-title">A IA está a matar ou salvar a agilidade?</div></div></li>
+    <li class="slot break"><div class="slot-time">13:00</div><div class="slot-card"><div class="kind" data-i18n="ag-lunch">Pausa</div><div class="speaker">🍽 Almoço + Café com Networking</div></div></li>
+  </ul>
+  <ul class="timeline" id="tl-tarde" style="display:none">
+    <li class="slot"><div class="slot-time">14:30</div><div class="slot-card"><div class="kind">Speaker · 30 min</div><div class="speaker">David Anderson</div><div class="talk">Satisficing: How to Succeed at Scale</div></div></li>
+    <li class="slot"><div class="slot-time">15:10</div><div class="slot-card"><div class="kind">Speaker · 30 min</div><div class="speaker">Ricardo Caldas</div><div class="talk">Let IT Flow: Delivering More Features using Flight Levels Dependency Management</div></div></li>
+    <li class="slot"><div class="slot-time">15:45</div><div class="slot-card"><div class="kind">Speaker · 40 min</div><div class="speaker">Paulo Caroli + Manuel Pais</div><div class="talk">Direction, Flow, and Commitment: Strategy, Team Design, and Team Ownership Must Work as One System</div></div></li>
+    <li class="slot break"><div class="slot-time">16:25</div><div class="slot-card"><div class="kind" data-i18n="ag-break">Pausa · 25 min</div><div class="speaker">☕ Coffee Break</div></div></li>
+    <li class="slot"><div class="slot-time">16:50</div><div class="slot-card"><div class="kind">Speaker · 30 min</div><div class="speaker">César Ribeiro + Carlos Paz <span style="font-size:12px;color:var(--muted);font-weight:400">(CTT)</span></div><div class="talk">Transformar para Entregar: a evolução ágil nos CTT</div></div></li>
+    <li class="slot"><div class="slot-time">17:25</div><div class="slot-card"><div class="kind">Speaker · 30 min</div><div class="speaker">Sara Cruz</div><div class="talk">Real World Product Management</div></div></li>
+    <li class="slot"><div class="slot-time">18:05</div><div class="slot-card keynote"><div class="kind">★ Keynote · 40 min</div><div class="speaker">Nadia Miranda</div><div class="talk">Agilidade sem humanos? O futuro da liderança na era da IA</div></div></li>
+    <li class="slot break"><div class="slot-time">18:45</div><div class="slot-card"><div class="kind">5 min</div><div class="speaker" data-i18n="ag-closing">Encerramento</div></div></li>
+  </ul>
+</section>
+
+<!-- 09 CONDUTA -->
+<section class="s" id="conduta">
+  <div class="s-tag" data-i18n="s09-tag">09 · Código de conduta</div>
+  <h2 data-i18n="s09-h2">Comunidade <span class="it">respeitosa</span> &amp; livre de assédio.</h2>
+  <p class="lead muted" data-i18n="s09-lead">O RSG Lisboa 2026 dedica-se a promover uma comunidade respeitosa e livre de assédio para todos — palestrantes, participantes, voluntários e parceiros.</p>
+  <div class="conduct-grid">
+    <div class="conduct-card no">
+      <h3><span class="badge">✕</span><span data-i18n="conduct-no-head">Não toleramos</span></h3>
+      <ul class="conduct-list">
+        <li data-i18n="cn1"><strong>Comentários ofensivos</strong> — relacionados a sexo, género, orientação sexual, raça, etnia, religião, deficiência ou idade.</li>
+        <li data-i18n="cn2"><strong>Conteúdo inapropriado</strong> — imagens ou materiais sexuais, homofóbicos ou discriminatórios — inclusive em slides.</li>
+        <li data-i18n="cn3"><strong>Intimidação e bullying</strong> — perseguição, fotografias que gerem embaraço ou interrupções reiteradas.</li>
+        <li data-i18n="cn4"><strong>Contacto inadequado</strong> — contacto físico inadequado ou atenção sexual indesejada.</li>
+      </ul>
+    </div>
+    <div class="conduct-card yes">
+      <h3><span class="badge">✓</span><span data-i18n="conduct-yes-head">Esperamos de todos</span></h3>
+      <ul class="conduct-list">
+        <li data-i18n="cy1"><strong>Gentileza e profissionalismo</strong> com todos os participantes.</li>
+        <li data-i18n="cy2"><strong>Espaço seguro</strong> — ajuda a criar um ambiente acolhedor e inclusivo.</li>
+        <li data-i18n="cy3"><strong>Cumprimento imediato</strong> de qualquer pedido para interromper comportamento inadequado.</li>
+        <li data-i18n="cy4"><strong>Reporte de incidentes</strong> — todo incidente importa. Reporta à organização.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 10 EQUIPA -->
+<section class="s" id="equipa">
+  <div class="s-tag" data-i18n="s10-tag">10 · Equipa Organizadora</div>
+  <h2 data-i18n="s10-h2">Estamos aqui <span class="it">para te apoiar</span>.</h2>
+  <p class="muted" style="font-size:13.5px;margin:-6px 0 0" data-i18n="s10-sub">Aproveita para os conhecer no dia.</p>
+  <div class="team-grid">
+    <div class="team-card"><img class="avatar-photo" src="/assets/Raquel.png" alt="Raquel Bartz Alves"><div class="team-name">Raquel Bartz Alves</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Sylvia.png" alt="Sylvia Grec"><div class="team-name">Sylvia Grec</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Marina.png" alt="Marina Bittencourt"><div class="team-name">Marina Bittencourt</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Fabio.png" alt="Fábio Castro"><div class="team-name">Fábio Castro</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Cristiane.png" alt="Cristiane Alves"><div class="team-name">Cristiane Alves</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Alex.png" alt="Alex Seles"><div class="team-name">Alex Seles</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Matheus.png" alt="Matheus Haddad"><div class="team-name">Matheus Haddad</div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Karla.jpg" alt="Karla Costa"><div class="team-name">Karla Costa <span class="vol-tag" style="font-size:8px" data-i18n="vol-tag">Voluntária</span></div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Laura.jpg" alt="Laura Andrade"><div class="team-name">Laura Andrade <span class="vol-tag" style="font-size:8px" data-i18n="vol-tag">Voluntária</span></div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Natasha.png" alt="Natasha Doria"><div class="team-name">Natasha Doria <span class="vol-tag" style="font-size:8px" data-i18n="vol-tag">Voluntária</span></div></div>
+    <div class="team-card"><img class="avatar-photo" src="/assets/Daiana.jpg" alt="Daiana Haddad"><div class="team-name">Daiana Haddad <span class="vol-tag" style="font-size:8px" data-i18n="vol-tag">Voluntária</span></div></div>
+  </div>
+</section>
+
+<!-- 11 CONTACTOS -->
+<section class="s" id="contactos">
+  <div class="s-tag" data-i18n="s11-tag">11 · Contactos</div>
+  <h2 data-i18n="s11-h2">Liga ou escreve-nos a <span class="it">qualquer hora</span>.</h2>
+  <div class="contact-list">
+    <a class="contact-row" href="tel:+351936496090">
+      <div class="contact-icon coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="contact-text"><div class="who">Raquel Bartz Alves</div><div class="what">+351 936 496 090</div></div>
+      <div class="contact-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a class="contact-row" href="tel:+351964692989">
+      <div class="contact-icon coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="contact-text"><div class="who">Sylvia Grec</div><div class="what">+351 964 692 989</div></div>
+      <div class="contact-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a class="contact-row" href="mailto:tugagilportugal@gmail.com">
+      <div class="contact-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="contact-text"><div class="who" data-i18n="contact-email-label">Email geral</div><div class="what">tugagilportugal@gmail.com</div></div>
+      <div class="contact-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+    <a class="contact-row" href="https://rsglisbon.com" target="_blank" rel="noopener">
+      <div class="contact-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+      <div class="contact-text"><div class="who" data-i18n="contact-web-label">Site oficial</div><div class="what">rsglisbon.com</div></div>
+      <div class="contact-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </a>
+  </div>
+</section>
+
+<!-- OBRIGADO -->
+<section class="s" id="obrigado" style="padding-bottom:40px">
+  <div class="thanks-card">
+    <div class="thanks-mark">♥</div>
+    <h2 data-i18n="thanks-h2">Obrigado!</h2>
+    <p data-i18n="thanks-p">Agradecemos a tua colaboração e empenho para que o RSG Lisboa 2026 seja um evento <strong>inesquecível</strong> para todos os participantes!</p>
+    <div class="sign" data-i18n="thanks-sign">Contamos contigo! Até 21 de Maio.</div>
+  </div>
+</section>
+
+<footer>
+  <img class="foot-logo" src="/assets/Group-23.png" alt="TugÁgil">
+  <div class="brand">RSG Lisboa 2026</div>
+  <div class="foot-sub" data-i18n="footer-sub">Manual do Voluntário · TugÁgil &amp; Scrum Alliance</div>
+</footer>
+
+</div><!-- /wrap -->
+
+<!-- DOCK NAV -->
+<nav class="dock-nav" aria-label="Navegação">
+  <button class="nav-btn active" data-target="sobre">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <span data-i18n="nav-sobre">Sobre</span>
+  </button>
+  <button class="nav-btn" data-target="funcoes">
+    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span data-i18n="nav-funcoes">Funções</span>
+  </button>
+  <button class="nav-btn" data-target="programa">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span data-i18n="nav-programa">Programa</span>
+  </button>
+  <button class="nav-btn" data-target="conduta">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span data-i18n="nav-conduta">Conduta</span>
+  </button>
+  <button class="nav-btn" data-target="contactos">
+    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <span data-i18n="nav-contactos">Contactos</span>
+  </button>
+</nav>
+
+
+<script>
+var T={pt:{"eyebrow":"Manual do Voluntário","hero-h1":"Olá,<br><span class=\"accent\">voluntário.</span>","hero-sub":"Estamos felizes por contar com o teu apoio. O teu trabalho é essencial para o sucesso do RSG Lisboa 2026 — juntos vamos criar um evento inesquecível para a comunidade Agile em Portugal.","k-date-label":"Data","k-date-val":"21 de Maio de 2026 · Quinta-feira","k-venue-label":"Local","k-metro-label":"Metro","k-metro-val":"Linha Azul · Alto dos Moinhos <span style=\"color:rgba(250,246,240,0.50);font-weight:400\">(à porta)</span>","k-checkin-label":"Check-in","k-checkin-val":"A partir das 8h30","cta-map":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"width:15px;height:15px\"><polygon points=\"3 11 22 2 13 21 11 13 3 11\"/></svg> Como chegar","s01-tag":"01 · Sobre","s01-h2":"Uma celebração da <span class=\"it\">agilidade</span> em Portugal.","s01-lead":"O RSG Lisboa 2026 fortalece a comunidade Agile em Portugal através da partilha de experiências, ideias e boas práticas. Um espaço de aprendizagem colaborativa, networking e inspiração — onde profissionais de diversas áreas se reúnem para impulsionar a agilidade nas organizações.","s01-quote":"\"Foi ÉPICO. Foi INTENSO.\"","s01-quote-sub":"Edição 2025 · Universidade Lusófona","stat-participants":"Participantes","stat-sessions":"Sessões","stat-volunteers":"Voluntários","s01-callout":"Desde 2001, a Scrum Alliance é o nome mais confiável em certificações ágeis — com +247 coaches, 320 provedores de treino e 1,6M de praticantes. O TugÁgil é uma comunidade voluntária que, desde 2022, fomenta a cultura ágil em Portugal: +60 eventos e workshops e +20 empresas parceiras, além de mentorias para profissionais.","s02-tag":"02 · Papel &amp; Responsabilidades","s02-h2":"O que esperamos de <span class=\"it\">ti</span>.","r01-title":"Pontualidade","r01-desc":"Sê pontual e cumpre os horários atribuídos. O briefing é às 7h30.","r02-title":"Segue as orientações","r02-desc":"Respeita as orientações da equipa organizadora e da coordenação no terreno.","r03-title":"Credencial visível","r03-desc":"Mantém-te sempre identificável com a credencial de Staff durante todo o evento.","r04-title":"Profissionalismo","r04-desc":"Demonstra cordialidade e simpatia com participantes, palestrantes e restante equipa.","r05-title":"Comunica problemas","r05-desc":"Relata imediatamente à coordenação qualquer problema ou situação inesperada.","s03-tag":"03 · Comportamento esperado","s03-h2":"Como <span class=\"it\">estar</span> no terreno.","s03-callout-head":"Lembra-te","b01-strong":"Postura positiva","b01-rest":"e colaborativa.","b02-strong":"Sê proativo","b02-rest":"e disposto a ajudar sempre que necessário.","b03-strong":"Respeita todas as pessoas","b03-rest":", independentemente de cultura, género, religião ou opinião.","b04-strong":"Evita o telemóvel","b04-rest":"e distrações enquanto estás a desempenhar funções.","s04-tag":"04 · Benefícios &amp; Reconhecimento","s04-h2":"O que ganhas <span class=\"it\">connosco</span>.","ben01-title":"Networking","ben01-desc":"Convive com profissionais da área Agile em Portugal e internacionais.","ben02-title":"Experiência prática","ben02-desc":"Vives por dentro a organização de um evento internacional.","ben03-title":"Acesso exclusivo","ben03-desc":"Assiste às sessões, keynotes e palestras nos intervalos das tuas funções.","s05-tag":"05 · Cronograma do voluntário","s05-h2":"O <span class=\"it\">teu dia</span>, hora a hora.","cr01-kind":"★ Briefing","cr01-speaker":"Chegada dos voluntários","cr01-talk":"Encontro no auditório e organização das funções.","cr02-kind":"Receção","cr02-speaker":"Credenciamento do público","cr02-talk":"Receção ativa dos participantes.","cr03-kind":"Abertura oficial","cr03-speaker":"Auditório principal","cr04-kind":"Sessões","cr04-speaker":"Palestras &amp; Mesa Redonda","cr04-talk":"Apoio contínuo no auditório principal. Pausas entre sessões.","cr05-kind":"Almoço","cr05-speaker":"🍽 Lanche do coffee break no espaço","cr05-talk":"Caso algum voluntário opte por almoçar fora do espaço, avisar a coordenação.","cr06-kind":"★ Encerramento","cr06-speaker":"Auditório principal","cr06-talk":"Coordenação + agradecimentos · Todos os voluntários no palco.","s06-tag":"06 · Principais funções","s06-h2":"Áreas de <span class=\"it\">atuação</span>.","s06-sub":"Distribuição por pessoa. Cada linha mostra a função geral e o que cada um fará na manhã e na tarde.","shift-am":"Manhã","shift-pm":"Tarde","vol-tag":"Voluntária","p-raquel-role":"Apresentação e Coordenação","p-raquel-am":"Entrega das placas após palestra","p-raquel-pm":"Entrega das placas após palestra","p-sylvia-role":"Apresentação e Coordenação","p-sylvia-am":"Entrega das placas após palestra","p-sylvia-pm":"Entrega das placas após palestra","p-fabio-role":"Infra: Som, Equipamentos","p-fabio-am":"Apoio técnico","p-fabio-pm":"Apoio técnico","p-marina-role":"Salão — preparação do palco, água para palestrantes e aviso de 5 min","p-marina-am":"Salão · acompanhamento speakers","p-marina-pm":"Salão · acompanhamento speakers","p-cristiane-role":"Social Media","p-cristiane-am":"Social Media · entrevistas speakers/público","p-cristiane-pm":"Social Media · entrevistas speakers/público","p-alex-role":"Social Media","p-alex-am":"Social Media","p-alex-pm":"Social Media","p-matheus-role":"Moderação Mesa Redonda e apoio salão","p-matheus-am":"Apoio salão / moderação","p-matheus-pm":"Apoio salão","p-natasha-role":"Check-in e apoio técnico","p-natasha-am":"Check-in e apoio técnico","p-natasha-pm":"Apoio técnico","p-karla-role":"Responsável pelo check-in e coffee break","p-karla-am":"Check-in e apoio coffee","p-karla-pm":"Salão fundo / lateral · apoio coffee","p-daiana-role":"Check-in / apoio salão","p-daiana-am":"Check-in / apoio salão","p-daiana-pm":"Salão fundo / lateral","p-laura-role":"Check-in / apoio salão","p-laura-am":"Check-in","p-laura-pm":"Salão fundo / lateral","notes-head":"Notas importantes","note01":"Após coffee break da manhã, <strong>2 pessoas no check-in</strong> — Karla e Laura.","note02":"<strong>Natasha</strong> apoia o técnico assim que começar o evento, depois de ajudar no check-in.","note03":"<strong>Daiana</strong> apoia na entrada do salão para indicar lugares aos participantes que cheguem.","note04":"<strong>Matheus</strong> antes da mesa redonda apoia no salão.","note05":"<strong>Apoio salão:</strong> apoio à entrada e orientação dos participantes.","note06":"<strong>Briefing fotógrafo e vídeo</strong> — Raquel / Sylvia.","s07-tag":"07 · Conhece os nossos palestrantes","s07-h2":"As vozes do <span class=\"it\">RSG Lisboa 2026</span>.","s07-sub":"Pela ordem em que sobem ao palco.","s08-tag":"08 · Programa","s08-h2":"21 de Maio de <span class=\"it\">2026</span>.","s08-sub":"Acompanha a programação para informar os participantes.","tab-am":"☀ Manhã","tab-pm":"🌤 Tarde","ag-welcome":"Welcome","ag-checkin":"Check-in &amp; Receção","ag-opening":"Abertura","ag-break":"Pausa","ag-roundtable":"Mesa Redonda · 50 min","ag-roundtable-title":"A IA está a matar ou salvar a agilidade?","ag-lunch":"Pausa","ag-closing":"Encerramento","s09-tag":"09 · Código de conduta","s09-h2":"Comunidade <span class=\"it\">respeitosa</span> &amp; livre de assédio.","s09-lead":"O RSG Lisboa 2026 dedica-se a promover uma comunidade respeitosa e livre de assédio para todos — palestrantes, participantes, voluntários e parceiros.","conduct-no-head":"Não toleramos","cn1":"<strong>Comentários ofensivos</strong> — relacionados a sexo, género, orientação sexual, raça, etnia, religião, deficiência ou idade.","cn2":"<strong>Conteúdo inapropriado</strong> — imagens ou materiais sexuais, homofóbicos ou discriminatórios — inclusive em slides.","cn3":"<strong>Intimidação e bullying</strong> — perseguição, fotografias que gerem embaraço ou interrupções reiteradas.","cn4":"<strong>Contacto inadequado</strong> — contacto físico inadequado ou atenção sexual indesejada.","conduct-yes-head":"Esperamos de todos","cy1":"<strong>Gentileza e profissionalismo</strong> com todos os participantes.","cy2":"<strong>Espaço seguro</strong> — ajuda a criar um ambiente acolhedor e inclusivo.","cy3":"<strong>Cumprimento imediato</strong> de qualquer pedido para interromper comportamento inadequado.","cy4":"<strong>Reporte de incidentes</strong> — todo incidente importa. Reporta à organização.","s10-tag":"10 · Equipa Organizadora","s10-h2":"Estamos aqui <span class=\"it\">para te apoiar</span>.","s10-sub":"Aproveita para os conhecer no dia.","s11-tag":"11 · Contactos","s11-h2":"Liga ou escreve-nos a <span class=\"it\">qualquer hora</span>.","contact-email-label":"Email geral","contact-web-label":"Site oficial","thanks-h2":"Obrigado!","thanks-p":"Agradecemos a tua colaboração e empenho para que o RSG Lisboa 2026 seja um evento <strong>inesquecível</strong> para todos os participantes!","thanks-sign":"Contamos contigo! Até 21 de Maio.","footer-sub":"Manual do Voluntário · TugÁgil &amp; Scrum Alliance","nav-sobre":"Sobre","nav-funcoes":"Funções","nav-programa":"Programa","nav-conduta":"Conduta","nav-contactos":"Contactos"},en:{"eyebrow":"Volunteer Manual","hero-h1":"Hello,<br><span class=\"accent\">volunteer.</span>","hero-sub":"We are glad to have your support. Your work is essential to the success of RSG Lisbon 2026 — together we will create an unforgettable event for the Agile community in Portugal.","k-date-label":"Date","k-date-val":"21 May 2026 · Thursday","k-venue-label":"Venue","k-metro-label":"Subway","k-metro-val":"Blue Line · Alto dos Moinhos <span style=\"color:rgba(250,246,240,0.50);font-weight:400\">(at the door)</span>","k-checkin-label":"Check-in","k-checkin-val":"From 8:30 AM","cta-map":"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"width:15px;height:15px\"><polygon points=\"3 11 22 2 13 21 11 13 3 11\"/></svg> Directions","s01-tag":"01 · About","s01-h2":"A celebration of <span class=\"it\">agility</span> in Portugal.","s01-lead":"RSG Lisbon 2026 strengthens the Agile community in Portugal through the sharing of experiences, ideas and best practices. A space for collaborative learning, networking and inspiration — where professionals from various fields come together to drive agility in organisations.","s01-quote":"\"It was EPIC. It was INTENSE.\"","s01-quote-sub":"2025 Edition · Universidade Lusófona","stat-participants":"Participants","stat-sessions":"Sessions","stat-volunteers":"Volunteers","s01-callout":"Since 2001, Scrum Alliance has been the most trusted name in agile certifications — with +247 coaches, 320 training providers and 1.6M practitioners. TugÁgil is a volunteer community that, since 2022, fosters agile culture in Portugal: +60 events and workshops and +20 partner companies, plus mentoring for professionals.","s02-tag":"02 · Role &amp; Responsibilities","s02-h2":"What we expect <span class=\"it\">from you</span>.","r01-title":"Punctuality","r01-desc":"Be on time and respect your assigned schedule. Briefing is at 7:30 AM.","r02-title":"Follow instructions","r02-desc":"Respect the guidance of the organising team and on-site coordination.","r03-title":"Visible badge","r03-desc":"Always keep your Staff badge visible throughout the event.","r04-title":"Professionalism","r04-desc":"Show warmth and courtesy with attendees, speakers and the rest of the team.","r05-title":"Report issues","r05-desc":"Immediately report any problem or unexpected situation to coordination.","s03-tag":"03 · Expected behaviour","s03-h2":"How to <span class=\"it\">act</span> on the ground.","s03-callout-head":"Remember","b01-strong":"Positive attitude","b01-rest":"and collaborative.","b02-strong":"Be proactive","b02-rest":"and willing to help whenever needed.","b03-strong":"Respect everyone","b03-rest":", regardless of culture, gender, religion or opinion.","b04-strong":"Avoid your phone","b04-rest":"and distractions while on duty.","s04-tag":"04 · Benefits &amp; Recognition","s04-h2":"What you get <span class=\"it\">with us</span>.","ben01-title":"Networking","ben01-desc":"Meet Agile professionals from Portugal and internationally.","ben02-title":"Hands-on experience","ben02-desc":"Live the behind-the-scenes of an international event.","ben03-title":"Exclusive access","ben03-desc":"Attend sessions, keynotes and talks during your breaks.","s05-tag":"05 · Volunteer schedule","s05-h2":"Your <span class=\"it\">day</span>, hour by hour.","cr01-kind":"★ Briefing","cr01-speaker":"Volunteer arrival","cr01-talk":"Meet at the auditorium and organise roles.","cr02-kind":"Reception","cr02-speaker":"Attendee check-in","cr02-talk":"Active reception of participants.","cr03-kind":"Official opening","cr03-speaker":"Main auditorium","cr04-kind":"Sessions","cr04-speaker":"Talks &amp; Round Table","cr04-talk":"Continuous support in the main auditorium. Breaks between sessions.","cr05-kind":"Lunch","cr05-speaker":"🍽 Coffee break snacks on site","cr05-talk":"If a volunteer wishes to lunch outside, please inform coordination.","cr06-kind":"★ Closing","cr06-speaker":"Main auditorium","cr06-talk":"Coordination + acknowledgements · All volunteers on stage.","s06-tag":"06 · Main roles","s06-h2":"Areas of <span class=\"it\">action</span>.","s06-sub":"Assignment by person. Each row shows the general role and what each person will do in the morning and afternoon.","shift-am":"Morning","shift-pm":"Afternoon","vol-tag":"Volunteer","p-raquel-role":"Presentation and Coordination","p-raquel-am":"Hand out plaques after each talk","p-raquel-pm":"Hand out plaques after each talk","p-sylvia-role":"Presentation and Coordination","p-sylvia-am":"Hand out plaques after each talk","p-sylvia-pm":"Hand out plaques after each talk","p-fabio-role":"Infra: Sound, Equipment","p-fabio-am":"Technical support","p-fabio-pm":"Technical support","p-marina-role":"Hall — stage setup, water for speakers and 5-min warning","p-marina-am":"Hall · speaker support","p-marina-pm":"Hall · speaker support","p-cristiane-role":"Social Media","p-cristiane-am":"Social Media · speaker/audience interviews","p-cristiane-pm":"Social Media · speaker/audience interviews","p-alex-role":"Social Media","p-alex-am":"Social Media","p-alex-pm":"Social Media","p-matheus-role":"Round Table moderation and hall support","p-matheus-am":"Hall support / moderation","p-matheus-pm":"Hall support","p-natasha-role":"Check-in and technical support","p-natasha-am":"Check-in and technical support","p-natasha-pm":"Technical support","p-karla-role":"Responsible for check-in and coffee break","p-karla-am":"Check-in and coffee support","p-karla-pm":"Back/side of hall · coffee support","p-daiana-role":"Check-in / hall support","p-daiana-am":"Check-in / hall support","p-daiana-pm":"Back/side of hall","p-laura-role":"Check-in / hall support","p-laura-am":"Check-in","p-laura-pm":"Back/side of hall","notes-head":"Important notes","note01":"After the morning coffee break, <strong>2 people at check-in</strong> — Karla and Laura.","note02":"<strong>Natasha</strong> assists the technician once the event starts, after helping at check-in.","note03":"<strong>Daiana</strong> guides participants arriving at the hall entrance.","note04":"<strong>Matheus</strong> supports the hall before the round table.","note05":"<strong>Hall support:</strong> assist at the entrance and guide participants.","note06":"<strong>Photographer and video briefing</strong> — Raquel / Sylvia.","s07-tag":"07 · Meet our speakers","s07-h2":"The voices of <span class=\"it\">RSG Lisbon 2026</span>.","s07-sub":"In order of appearance on stage.","s08-tag":"08 · Programme","s08-h2":"21 May <span class=\"it\">2026</span>.","s08-sub":"Follow the programme to inform attendees.","tab-am":"☀ Morning","tab-pm":"🌤 Afternoon","ag-welcome":"Welcome","ag-checkin":"Check-in &amp; Reception","ag-opening":"Opening","ag-break":"Break","ag-roundtable":"Round Table · 50 min","ag-roundtable-title":"Is AI killing or saving agility?","ag-lunch":"Break","ag-closing":"Closing","s09-tag":"09 · Code of conduct","s09-h2":"<span class=\"it\">Respectful</span> community &amp; harassment-free.","s09-lead":"RSG Lisbon 2026 is dedicated to promoting a respectful and harassment-free community for all — speakers, participants, volunteers and partners.","conduct-no-head":"We do not tolerate","cn1":"<strong>Offensive comments</strong> — related to sex, gender, sexual orientation, race, ethnicity, religion, disability or age.","cn2":"<strong>Inappropriate content</strong> — sexual, homophobic or discriminatory images or materials — including in slides.","cn3":"<strong>Intimidation and bullying</strong> — stalking, photographs causing embarrassment or repeated interruptions.","cn4":"<strong>Inappropriate contact</strong> — unwanted physical contact or unwanted sexual attention.","conduct-yes-head":"We expect from everyone","cy1":"<strong>Kindness and professionalism</strong> with all participants.","cy2":"<strong>Safe space</strong> — help create a welcoming and inclusive environment.","cy3":"<strong>Immediate compliance</strong> with any request to stop inappropriate behaviour.","cy4":"<strong>Report incidents</strong> — every incident matters. Report to the organisation.","s10-tag":"10 · Organising Team","s10-h2":"We are here <span class=\"it\">to support you</span>.","s10-sub":"Take the opportunity to meet them on the day.","s11-tag":"11 · Contacts","s11-h2":"Call or write to us <span class=\"it\">any time</span>.","contact-email-label":"General email","contact-web-label":"Official website","thanks-h2":"Thank you!","thanks-p":"We appreciate your collaboration and dedication to making RSG Lisbon 2026 an <strong>unforgettable</strong> event for all attendees!","thanks-sign":"Counting on you! See you on 21 May.","footer-sub":"Volunteer Manual · TugÁgil &amp; Scrum Alliance","nav-sobre":"About","nav-funcoes":"Roles","nav-programa":"Programme","nav-conduta":"Conduct","nav-contactos":"Contacts"}};
+var lang=localStorage.getItem('volunteerLang')||'pt';
+
+function setLang(l){
+  lang=l;
+  localStorage.setItem('volunteerLang',l);
+  document.getElementById('btn-pt').classList.toggle('active',l==='pt');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.documentElement.lang=l;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.getAttribute('data-i18n');
+    if(T[l][k]!==undefined)el.innerHTML=T[l][k];
+  });
+}
+
+// Day tabs
+document.querySelectorAll('.day-tab').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.day-tab').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    var day=btn.dataset.day;
+    document.getElementById('tl-manha').style.display=day==='manha'?'':'none';
+    document.getElementById('tl-tarde').style.display=day==='tarde'?'':'none';
+  });
+});
+
+// Dock nav click-to-scroll
+var navBtns=document.querySelectorAll('.nav-btn');
+navBtns.forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var el=document.getElementById(btn.dataset.target);
+    if(el){
+      navBtns.forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  });
+});
+
+// Scroll-spy
+var sections=['sobre','responsabilidades','cronograma','funcoes','palestrantes','programa','conduta','equipa','contactos','obrigado'];
+var sectionEls=sections.map(function(id){return document.getElementById(id);}).filter(Boolean);
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      var id=e.target.id;
+      var navMap={'sobre':'sobre','responsabilidades':'funcoes','cronograma':'funcoes','funcoes':'funcoes','palestrantes':'programa','programa':'programa','conduta':'conduta','equipa':'conduta','contactos':'contactos','obrigado':'contactos'};
+      var target=navMap[id]||id;
+      navBtns.forEach(function(btn){btn.classList.toggle('active',btn.dataset.target===target);});
+    }
+  });
+},{rootMargin:'-35% 0px -60% 0px',threshold:0});
+sectionEls.forEach(function(el){obs.observe(el);});
+
+if(lang!=='pt')setLang(lang);
+</script>
+</body>
+</html>

@@ -13,6 +13,10 @@
       "destination": "/speakermanual.html"
     },
     {
+      "source": "/volunteermanual",
+      "destination": "/volunteermanual.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
