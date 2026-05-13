@@ -176,20 +176,23 @@ async function fetchInvoicePdf(invoiceId: string): Promise<Buffer | null> {
 
   // Try Bill.pt
   const billToken = (process.env.BILL_API_TOKEN || '').trim();
-  const billBase  = (process.env.BILL_BASE_URL || 'https://app.bill.pt').replace(/\/$/, '');
+  const isProd = (process.env.VERCEL_ENV || '').toLowerCase() === 'production';
+  const billBase = (isProd ? 'https://app.bill.pt' : 'https://dev.bill.pt').replace(/\/$/, '');
 
   if (billToken) {
     try {
-      const docResp = await fetch(`${billBase}/api/1.0/documentos/${encodeURIComponent(invoiceId)}`, {
-        headers: { Authorization: `Bearer ${billToken}`, Accept: 'application/json' },
-      });
+      const docUrl = `${billBase}/api/1.0/documentos/${encodeURIComponent(invoiceId)}?api_token=${encodeURIComponent(billToken)}`;
+      const docResp = await fetch(docUrl, { headers: { Accept: 'application/json' } });
+      console.log('🔎 Bill.pt fetchInvoicePdf get doc:', { status: docResp.status, ok: docResp.ok, invoiceId, billBase });
       if (docResp.ok) {
         const doc: any = await docResp.json();
         const tokenDownload = doc?.token_download || doc?.documento?.token_download || null;
+        console.log('🔎 Bill.pt token_download:', tokenDownload);
         if (tokenDownload) {
           const pdfResp = await fetch(
             `${billBase}/documentos/download/${encodeURIComponent(invoiceId)}/${encodeURIComponent(tokenDownload)}`
           );
+          console.log('🔎 Bill.pt PDF download:', { status: pdfResp.status, ok: pdfResp.ok });
           if (pdfResp.ok) return Buffer.from(await pdfResp.arrayBuffer());
         }
       }
