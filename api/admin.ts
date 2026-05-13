@@ -78,6 +78,8 @@ function normalizeTicketTypeInput(body: any, partial = false) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Cache-Control', 'no-store');
+
   const admin = await verifyAdminToken(req.headers.authorization || '');
   if (!admin) return res.status(401).json({ message: 'Unauthorized' });
 
