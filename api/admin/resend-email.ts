@@ -266,7 +266,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const pdfBytes = await fetchInvoicePdf(order.invoice_id);
 
-    const emailPayload: Parameters<typeof resend.emails.send>[0] = {
+    if (!pdfBytes) {
+      return res.status(502).json({ message: 'Não foi possível obter o PDF da fatura junto do provider. Email não enviado.' });
+    }
+
+    await resend.emails.send({
       from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
       to: order.customer_email,
       subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
@@ -277,19 +281,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         total: amountEuro.toFixed(2),
         isTest,
       }),
-      ...(pdfBytes ? {
-        attachments: [{
-          filename: `fatura-${invoiceLabel.replace(/[\s/]/g, '-')}.pdf`,
-          content: pdfBytes.toString('base64'),
-        }],
-      } : {}),
-    };
-
-    await resend.emails.send(emailPayload);
-
-    return res.status(200).json({
-      message: `Email de fatura reenviado para ${order.customer_email}${pdfBytes ? ' (com PDF anexo)' : ' (sem PDF — não foi possível obter o ficheiro do provider)'}`,
-      hasPdf: !!pdfBytes,
+      attachments: [{
+        filename: `fatura-${invoiceLabel.replace(/[\s/]/g, '-')}.pdf`,
+        content: pdfBytes.toString('base64'),
+      }],
     });
+
+    return res.status(200).json({ message: `Email enviado para ${order.customer_email}` });
   }
 }
