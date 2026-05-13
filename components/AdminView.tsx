@@ -177,6 +177,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
   const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
   const [sendingInvoiceEmail, setSendingInvoiceEmail] = useState<string | null>(null);
+  const [invoiceEmailMsg, setInvoiceEmailMsg] = useState<{ orderId: string; ok: boolean; text: string } | null>(null);
   const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
   const [invoiceModal, setInvoiceModal] = useState<{
     orderId: string;
@@ -579,7 +580,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   async function sendInvoiceEmail(orderId: string) {
     if (!authHeader) return;
     setSendingInvoiceEmail(orderId);
-    setInvoiceError(null);
+    setInvoiceEmailMsg(null);
     try {
       const res = await fetch('/api/admin/resend-email', {
         method: 'POST',
@@ -587,9 +588,13 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         body: JSON.stringify({ order_id: orderId, type: 'invoice' }),
       });
       const json = await res.json();
-      if (!res.ok) setInvoiceError({ orderId, msg: json.message || 'Erro desconhecido' });
+      if (!res.ok) {
+        setInvoiceEmailMsg({ orderId, ok: false, text: json.message || 'Erro desconhecido' });
+      } else {
+        setInvoiceEmailMsg({ orderId, ok: true, text: json.hasPdf ? 'Email enviado com PDF!' : 'Email enviado (sem PDF)' });
+      }
     } catch (e: any) {
-      setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
+      setInvoiceEmailMsg({ orderId, ok: false, text: e?.message || 'Erro de rede' });
     } finally {
       setSendingInvoiceEmail(null);
     }
@@ -1953,13 +1958,20 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                         <div className="text-xs text-orange-600 font-medium">NC: {order.credit_note_number || order.credit_note_id}</div>
                                       )}
                                       {isSuperAdmin && (
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); sendInvoiceEmail(order.id); }}
-                                          disabled={sendingInvoiceEmail === order.id}
-                                          className="text-xs px-2 py-0.5 rounded border border-sky-500 text-sky-600 hover:bg-sky-50 disabled:opacity-50"
-                                        >
-                                          {sendingInvoiceEmail === order.id ? 'A enviar…' : 'Enviar Email'}
-                                        </button>
+                                        <div>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); sendInvoiceEmail(order.id); }}
+                                            disabled={sendingInvoiceEmail === order.id}
+                                            className="text-xs px-2 py-0.5 rounded bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-50"
+                                          >
+                                            {sendingInvoiceEmail === order.id ? 'A enviar…' : 'Enviar Email'}
+                                          </button>
+                                          {invoiceEmailMsg?.orderId === order.id && (
+                                            <div className={`text-xs mt-0.5 ${invoiceEmailMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                                              {invoiceEmailMsg.text}
+                                            </div>
+                                          )}
+                                        </div>
                                       )}
                                     </>
                                   : isSuperAdmin

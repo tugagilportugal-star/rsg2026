@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-05-08T09:55:32.712Z",
+      "error_message": "Incorrect value in code",
+      "file": "public/speakermanual.html",
+      "root_cause": "Had 'Mesa Redonda · 50 min'",
+      "fix": "Changed to 'Mesa Redonda · 1h05'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-08T09:55:36.540Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-05-08T10:05:06.120Z",
+      "error_message": "Incorrect value in code",
+      "file": "public/speakermanual.html",
+      "root_cause": "Had 'Mesa Redonda · 1h05'",
+      "fix": "Changed to 'Mesa Redonda · 50 min'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-08T10:05:09.329Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-05-13T21:06:53.157Z",
+      "error_message": "Significant refactor of ",
+      "file": "api/admin/invoice.ts",
+      "root_cause": "40 lines replaced/restructured",
+      "fix": "Rewrote 50→9 lines (40 removed) | Also: // Send PDF email; if (invoiceResult.pdfBytes) {",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-05-13T21:07:03.087Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-05-13T21:07:15.476Z",
+      "error_message": "Incorrect value in code",
+      "file": "api/admin/resend-email.ts",
+      "root_cause": "Had '[Reenvio] A tua fatura – Regional Scrum Gathering",
+      "fix": "Changed to 'A tua fatura – Regional Scrum Gathering Lisbon 20",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-13T21:07:15.476Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-05-13T21:07:27.991Z",
+      "error_message": "Missing error handling in function",
+      "file": "components/AdminView.tsx",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-13T21:07:27.991Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-05-13T21:07:41.492Z",
+      "error_message": "Incorrect value in code",
+      "file": "components/AdminView.tsx",
+      "root_cause": "Had '🧾 Reenviar Fatura'",
+      "fix": "Changed to '🧾 Enviar Fatura'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-13T21:07:41.492Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-05-13T21:13:43.239Z",
+      "error_message": "Type error",
+      "file": "api/admin/resend-email.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-13T21:13:43.239Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-05-13T22:15:00.000Z",
+      "error_message": "Invoice email sent without PDF attached",
+      "file": "api/admin/resend-email.ts",
+      "root_cause": "fetchInvoicePdf only checked data.pdf.url and data.url but InvoiceXpress returns the signed URL in data.output (string or object). The full parsing from invoicexpress.ts was not replicated here.",
+      "fix": "Added output field parsing (string URL, JSON string, object) matching the logic in getInvoiceXpressSignedPdfUrl. Also increased retries from 8 to 12.",
+      "tags": ["invoice", "pdf", "resend-email", "invoicexpress"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-05-13T22:15:00.000Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-05-13T22:15:00.000Z",
+      "error_message": "No feedback shown after clicking Enviar Email",
+      "file": "components/AdminView.tsx",
+      "root_cause": "sendInvoiceEmail only set invoiceError on failure; no success state was set or displayed.",
+      "fix": "Added invoiceEmailMsg state (orderId, ok, text). Set on both success and error. Displayed below the button in the table row.",
+      "tags": ["admin", "ux", "feedback", "invoice-email"],
+      "related_bugs": ["bug-008"],
+      "occurrences": 1,
+      "last_seen": "2026-05-13T22:15:00.000Z"
+    }
+  ]
+}
