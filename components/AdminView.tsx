@@ -541,24 +541,10 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!invoiceModal || !authHeader) return;
     setSavingInvoiceModal(true);
     setInvoiceModalError(null);
+    const { orderId, form } = invoiceModal;
+    setInvoiceModal(null);
     try {
-      const patchRes = await fetch('/api/admin/invoice', {
-        method: 'PATCH',
-        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          order_id: invoiceModal.orderId,
-          customer_country: invoiceModal.form.country,
-          attendee_nif: invoiceModal.form.nif,
-        }),
-      });
-      if (!patchRes.ok) {
-        const json = await patchRes.json();
-        setInvoiceModalError(json.message || 'Erro ao guardar dados');
-        return;
-      }
-      const orderId = invoiceModal.orderId;
-      setInvoiceModal(null);
-      await generateInvoice(orderId);
+      await generateInvoice(orderId, { customer_country: form.country, attendee_nif: form.nif });
     } catch (e: any) {
       setInvoiceModalError(e?.message || 'Erro de rede');
     } finally {
@@ -566,7 +552,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
   }
 
-  async function generateInvoice(orderId: string) {
+  async function generateInvoice(orderId: string, overrides?: { customer_country?: string; attendee_nif?: string }) {
     if (!authHeader) return;
     setGeneratingInvoice(orderId);
     setInvoiceError(null);
@@ -574,7 +560,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const res = await fetch('/api/admin/invoice', {
         method: 'POST',
         headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId }),
+        body: JSON.stringify({ order_id: orderId, ...overrides }),
       });
       const json = await res.json();
       if (!res.ok) {

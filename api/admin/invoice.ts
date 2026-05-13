@@ -110,24 +110,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(409).json({ message: `Fatura já emitida: ${order.invoice_id}` });
   }
 
-  // Get ticket NIF
-  const { data: ticket } = await supabase
-    .from('tickets')
-    .select('attendee_nif')
-    .eq('order_id', orderId)
-    .maybeSingle();
+  // Apply and persist field overrides from modal (if provided)
+  const nifOverride = req.body?.attendee_nif !== undefined
+    ? (String(req.body.attendee_nif || '').trim() || null)
+    : undefined;
+  const countryOverride = req.body?.customer_country !== undefined
+    ? (String(req.body.customer_country).trim().toUpperCase().slice(0, 2) || null)
+    : undefined;
+
+  if (countryOverride !== undefined) {
+    await supabase.from('orders').update({ customer_country: countryOverride }).eq('id', orderId);
+  }
+  if (nifOverride !== undefined) {
+    await supabase.from('tickets').update({ attendee_nif: nifOverride }).eq('order_id', orderId);
+  }
+
+  // Get ticket NIF — use override directly if provided, else read from DB
+  let customerNif: string | null = null;
+  if (nifOverride !== undefined) {
+    customerNif = nifOverride;
+  } else {
+    const { data: ticket } = await supabase
+      .from('tickets')
+      .select('attendee_nif')
+      .eq('order_id', orderId)
+      .maybeSingle();
+    customerNif = ticket?.attendee_nif || null;
+  }
 
   const includeRecording = order.include_recording === true;
 
   const amountEuro = (order.total_amount || 0) / 100;
   const isTest = forceTestMode || (process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test_');
+  const countryIso = countryOverride !== undefined ? (countryOverride || 'PT') : (order.customer_country || 'PT');
 
   const invoiceResult = await issueInvoiceForOrder({
     isTest,
     customerName: order.customer_name || 'Participante RSG',
     customerEmail: order.customer_email,
-    countryIso: order.customer_country || 'PT',
-    customerNif: ticket?.attendee_nif || null,
+    countryIso,
+    customerNif,
     ticketName: 'RSG Lisbon 2026',
     includeRecording,
     amountEuro,
