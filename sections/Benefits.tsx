@@ -37,7 +37,7 @@ export const BenefitsPage: React.FC = () => {
               <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Grátis</span>
             </div>
             <p className="text-gray-600 mb-6 flex-grow">
-              Um ano de acesso gratuito à suite premium de e-learning com masterclasses de Product Owner, Agile Leader e Scrum Master.
+              1 ano de acesso gratuito à suite premium de e-learning com masterclasses de Product Owner, Agile Leader e Scrum Master.
             </p>
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
               <p className="font-bold text-gray-500 uppercase text-[10px] mb-1 tracking-wider">Como ativar:</p>
@@ -49,34 +49,33 @@ export const BenefitsPage: React.FC = () => {
               Visitar Site
             </a>
           </div>
-          
+
           {/* CARD KANBAN+ */}
 <div className="border-2 border-gray-100 rounded-3xl p-8 flex flex-col h-full hover:border-brand-orange transition-all group">
   <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
     <Database className="text-brand-orange w-8 h-8" />
   </div>
   <h3 className="text-2xl font-bold mb-2">Kanban Plus</h3>
-  
   <div className="flex items-center gap-2 mb-4">
-    <span className="bg-orange-100 text-brand-orange px-3 py-1 rounded-full text-xs font-bold uppercase">
-      Plano Enterprise
-    </span>
+    <span className="line-through text-gray-400 text-lg">€19,50</span>
+    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Grátis</span>
   </div>
 
   <p className="text-gray-600 mb-6 flex-grow">
-    Acesso gratuito à plataforma completa de <strong>Enterprise Transformation Management</strong>. Inclui FlowMetrics, FlowBoards e modelos de maturidade Evolve.
+    1 mês de acesso gratuito à plataforma Kanban+ no plano <strong>Enterprise Transformation</strong>. Inclui FlowMetrics, FlowBoards e modelos de maturidade Evolve.
   </p>
 
   <div className="bg-brand-orange/5 border border-brand-orange/20 p-4 rounded-xl mb-6">
-    <p className="text-sm font-bold text-brand-orange uppercase text-[10px] mb-1 tracking-wider text-center">
-      Duração & Acesso:
-    </p>
     <p className="text-sm text-gray-800 font-medium text-center italic leading-relaxed">
-      "1 mês de acesso total. O código de acesseo será anunciado durante o RSG Lisbon. "
+      "O código de acesso será informado durante o evento. Esteja atento(a)!"
     </p>
   </div>
 
-  <a href="https://kanban.plus/" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-orange text-brand-orange font-bold text-center hover:bg-brand-orange hover:text-white transition-all text-sm uppercase"
+  <a 
+    href="https://kanban.plus/" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="w-full py-3 rounded-full border-2 border-brand-orange text-brand-orange font-bold text-center hover:bg-brand-orange hover:text-white transition-all text-sm uppercase"
   >
     Saiba Mais
   </a>
@@ -88,14 +87,18 @@ export const BenefitsPage: React.FC = () => {
               <Ticket className="text-purple-600 w-8 h-8" />
             </div>
             <h3 className="text-2xl font-bold mb-4">Masterclass Manuel Pais & Paulo Caroli</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="line-through text-gray-400 text-lg">€182</span>
+    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">163,80€</span>
+  </div>
             <p className="text-gray-600 mb-6 flex-grow">
-              10% de desconto acumulável na Masterclass focada em Team Topologies, OKRs e Lean Inception. A masterclass acontecerá em Lisboa, no dia seguinte ao RSG Lisbon, no dia 22 de Maio de 2026.
+              10% de desconto acumulável na Masterclass Combining Team Topologies, Team OKRs & Lean Inception. O evento acontecerá em Lisboa, no dia seguinte ao RSG Lisbon 2026, no dia 22 de Maio de 2026.
             </p>
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
               <p className="font-bold text-gray-500 uppercase text-[10px] mb-1 tracking-wider">Como obter:</p>
-              <p className="text-gray-700 leading-tight">Apresenta o teu comprovativo de inscrição no RSG Lisbon 2026 aos autores.</p>
+              <p className="text-gray-700 leading-tight">Para garantir o teu desconto exclusivo, apresenta o teu comprovativo de inscrição do RSG Lisbon 2026 aos autores.</p>
             </div>
-            <a href="https://caroli.org/agenda" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-darkBlue text-brand-darkBlue font-bold text-center hover:bg-brand-darkBlue hover:text-white transition-all text-sm uppercase">
+            <a href="https://ti.to/manuel-filipe-nunes-pais/pais-caroli-masterclass-onsite-may-2026" target="_blank" rel="noopener noreferrer" className="w-full py-3 rounded-full border-2 border-brand-darkBlue text-brand-darkBlue font-bold text-center hover:bg-brand-darkBlue hover:text-white transition-all text-sm uppercase">
               Detalhes Masterclass
             </a>
           </div>
