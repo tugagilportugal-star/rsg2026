@@ -177,6 +177,14 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
   const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
   const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
+  const [invoiceModal, setInvoiceModal] = useState<{
+    orderId: string;
+    customerName: string;
+    customerEmail: string;
+    form: { country: string; nif: string };
+  } | null>(null);
+  const [savingInvoiceModal, setSavingInvoiceModal] = useState(false);
+  const [invoiceModalError, setInvoiceModalError] = useState<string | null>(null);
   const [resendingEmail, setResendingEmail] = useState<'ticket' | 'invoice' | null>(null);
   const [resendMsg, setResendMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -513,6 +521,48 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setResendMsg({ ok: false, text: e?.message || 'Erro de rede' });
     } finally {
       setResendingEmail(null);
+    }
+  }
+
+  function openInvoiceModal(order: OrderRow, ticket?: TicketRow | null) {
+    setInvoiceModal({
+      orderId: order.id,
+      customerName: order.customer_name || '',
+      customerEmail: order.customer_email || '',
+      form: {
+        country: order.customer_country || 'PT',
+        nif: ticket?.attendee_nif || '',
+      },
+    });
+    setInvoiceModalError(null);
+  }
+
+  async function confirmInvoiceModal() {
+    if (!invoiceModal || !authHeader) return;
+    setSavingInvoiceModal(true);
+    setInvoiceModalError(null);
+    try {
+      const patchRes = await fetch('/api/admin/invoice', {
+        method: 'PATCH',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: invoiceModal.orderId,
+          customer_country: invoiceModal.form.country,
+          attendee_nif: invoiceModal.form.nif,
+        }),
+      });
+      if (!patchRes.ok) {
+        const json = await patchRes.json();
+        setInvoiceModalError(json.message || 'Erro ao guardar dados');
+        return;
+      }
+      const orderId = invoiceModal.orderId;
+      setInvoiceModal(null);
+      await generateInvoice(orderId);
+    } catch (e: any) {
+      setInvoiceModalError(e?.message || 'Erro de rede');
+    } finally {
+      setSavingInvoiceModal(false);
     }
   }
 
@@ -1900,7 +1950,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                   : isSuperAdmin
                                     ? (
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); generateInvoice(order.id); }}
+                                        onClick={(e) => { e.stopPropagation(); openInvoiceModal(order, row); }}
                                         disabled={generatingInvoice === order.id}
                                         className="text-xs px-2 py-0.5 rounded bg-[#003F59] text-white hover:bg-[#005580] disabled:opacity-50"
                                       >
@@ -2332,7 +2382,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {isSuperAdmin && ticketOrder && (!ticketOrder.invoice_id || (ticketOrder.credit_note_id && !ticketOrder.original_invoice_id)) && (
                   <div className="mt-4">
                     <button
-                      onClick={async () => { await generateInvoice(ticketOrder.id); setSelectedTicket(null); }}
+                      onClick={() => { openInvoiceModal(ticketOrder, selectedTicket); setSelectedTicket(null); }}
                       disabled={generatingInvoice === ticketOrder.id}
                       className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
                     >
@@ -2469,6 +2519,65 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           );
         })()}
+
+        {invoiceModal && (
+          <div
+            className="fixed inset-0 z-[215] bg-black/40 flex items-center justify-center p-4"
+            onClick={() => { if (!savingInvoiceModal) setInvoiceModal(null); }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-1">
+                <h3 className="text-lg font-bold text-[#003F59]">Dados da Fatura</h3>
+                <button onClick={() => setInvoiceModal(null)} disabled={savingInvoiceModal} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              </div>
+              <p className="text-xs text-gray-400 mb-4">Verifica os dados antes de gerar. Nome e email não são editáveis.</p>
+              <div className="space-y-3 mb-5">
+                <div>
+                  <label className="text-xs font-medium text-gray-400 block mb-1">Nome do cliente</label>
+                  <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500 select-none">{invoiceModal.customerName || '—'}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-400 block mb-1">Email (destino da fatura)</label>
+                  <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500 select-none">{invoiceModal.customerEmail || '—'}</div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 block mb-1">País <span className="text-xs text-[#003F59] font-normal">(código ISO, ex: PT)</span></label>
+                  <input
+                    type="text"
+                    value={invoiceModal.form.country}
+                    onChange={(e) => setInvoiceModal(m => m ? { ...m, form: { ...m.form, country: e.target.value.toUpperCase().slice(0, 2) } } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003F59]"
+                    placeholder="PT"
+                    maxLength={2}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 block mb-1">NIF / Número Fiscal</label>
+                  <input
+                    type="text"
+                    value={invoiceModal.form.nif}
+                    onChange={(e) => setInvoiceModal(m => m ? { ...m, form: { ...m.form, nif: e.target.value } } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#003F59]"
+                    placeholder="NIF ou número fiscal"
+                  />
+                </div>
+              </div>
+              {invoiceModalError && (
+                <p className="text-red-600 text-xs mb-3 break-words">{invoiceModalError}</p>
+              )}
+              <button
+                onClick={confirmInvoiceModal}
+                disabled={savingInvoiceModal}
+                className="w-full py-2 rounded-lg bg-[#003F59] text-white text-sm font-medium hover:bg-[#005580] disabled:opacity-50"
+              >
+                {savingInvoiceModal ? 'A guardar e gerar…' : 'Confirmar e Gerar Fatura'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {creditNoteModal && (
           <div
