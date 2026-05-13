@@ -255,7 +255,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .from('orders')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(500);
+          .limit(2000);
         if (error) return res.status(500).json({ message: error.message });
         return res.status(200).json(data || []);
       }
