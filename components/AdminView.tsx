@@ -568,7 +568,11 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       if (!res.ok) {
         setInvoiceError({ orderId, msg: json.message || 'Erro desconhecido' });
       } else {
-        await fetchOrders();
+        setOrders(prev => prev.map(o =>
+          o.id === orderId
+            ? { ...o, invoice_id: json.invoiceId ?? null, invoice_number: json.invoiceNumber ?? null }
+            : o
+        ));
       }
     } catch (e: any) {
       setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
