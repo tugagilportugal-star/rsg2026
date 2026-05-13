@@ -54,6 +54,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!admin) return res.status(401).json({ message: 'Unauthorized' });
   if (admin.role !== 'superadmin') return res.status(403).json({ message: 'Apenas superadmin pode gerar faturas.' });
 
+  // PATCH — update invoice fields before generation (country + NIF only)
+  if (req.method === 'PATCH') {
+    const orderId = String(req.body?.order_id || '').trim();
+    if (!orderId) return res.status(400).json({ message: 'order_id é obrigatório.' });
+
+    const { customer_country, attendee_nif } = req.body;
+    const changes: Record<string, unknown> = {};
+
+    if (customer_country !== undefined) {
+      const { error } = await supabase
+        .from('orders')
+        .update({ customer_country: String(customer_country).trim().toUpperCase().slice(0, 2) || null })
+        .eq('id', orderId);
+      if (error) return res.status(500).json({ message: error.message });
+      changes.customer_country = customer_country;
+    }
+
+    if (attendee_nif !== undefined) {
+      const nif = String(attendee_nif || '').trim();
+      const { error } = await supabase
+        .from('tickets')
+        .update({ attendee_nif: nif || null })
+        .eq('order_id', orderId);
+      if (error) return res.status(500).json({ message: error.message });
+      changes.attendee_nif = nif || null;
+    }
+
+    await logAction(admin.email, 'atualizar_dados_fatura', 'order', orderId, changes);
+    return res.status(200).json({ ok: true });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
