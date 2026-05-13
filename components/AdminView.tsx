@@ -481,7 +481,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!authHeader) return;
     setLoadingOrders(true);
     try {
-      const res = await fetch('/api/admin/orders', {
+      const res = await fetch(`/api/admin/orders?_=${Date.now()}`, {
         headers: { Authorization: authHeader },
       });
 
@@ -694,7 +694,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (!authHeader) return;
     setLoadingTickets(true);
     try {
-      const res = await fetch('/api/admin/tickets', {
+      const res = await fetch(`/api/admin/tickets?_=${Date.now()}`, {
         headers: { Authorization: authHeader },
       });
 
