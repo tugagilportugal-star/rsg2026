@@ -135,6 +135,8 @@ async function fetchInvoicePdf(invoiceId: string): Promise<Buffer | null> {
         let data: any = {};
         try { data = JSON.parse(text); } catch { /* ignore */ }
 
+        console.log(`🔎 fetchInvoicePdf attempt ${attempt}:`, { status: resp.status, ok: resp.ok, body: text.slice(0, 300) });
+
         const fromPdf = data?.pdf?.url || data?.url || null;
 
         let fromOutput: string | null = null;
@@ -157,10 +159,17 @@ async function fetchInvoicePdf(invoiceId: string): Promise<Buffer | null> {
         if (resp.ok && signedUrl) {
           const pdfResp = await fetch(signedUrl);
           if (pdfResp.ok) return Buffer.from(await pdfResp.arrayBuffer());
+          console.error('❌ fetchInvoicePdf: PDF download failed', { pdfStatus: pdfResp.status });
           break;
         }
-        if (!resp.ok && resp.status !== 202) break;
-      } catch { break; }
+        if (!resp.ok && resp.status !== 202) {
+          console.error('❌ fetchInvoicePdf: non-retryable error', { status: resp.status, body: text.slice(0, 300) });
+          break;
+        }
+      } catch (e) {
+        console.error('❌ fetchInvoicePdf exception:', e);
+        break;
+      }
       await new Promise(r => setTimeout(r, 1500));
     }
   }
