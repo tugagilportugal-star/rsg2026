@@ -31,7 +31,7 @@ export const BenefitsPage: React.FC = () => {
             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
               <GraduationCap className="text-brand-blue w-8 h-8 group-hover:text-brand-orange" />
             </div>
-            <div className="min-h-[80px] flex flex-col justify-start">
+            <div className="min-h-[110px] flex flex-col justify-between mb-4">
             <h3 className="text-2xl font-bold mb-2">Agile Academy</h3>
             <div className="flex items-center gap-2 mb-4">
               <span className="line-through text-gray-400 text-lg">€249</span>
@@ -39,7 +39,7 @@ export const BenefitsPage: React.FC = () => {
             </div>
             </div>
 
-            <p className="text-gray-600 mb-6 flex-grow">
+            <p className="text-gray-600 mb-6 flex-grow leading-relaxed">
               1 ano de acesso gratuito à suite premium de e-learning com masterclasses de Product Owner, Agile Leader e Scrum Master.
             </p>
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
@@ -58,7 +58,7 @@ export const BenefitsPage: React.FC = () => {
   <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
     <Database className="text-brand-orange w-8 h-8" />
   </div>
-  <div className="min-h-[80px] flex flex-col justify-start">
+  <div className="min-h-[110px] flex flex-col justify-between mb-4">
   <h3 className="text-2xl font-bold mb-2">Kanban Plus</h3>
   <div className="flex items-center gap-2 mb-4">
     <span className="line-through text-gray-400 text-lg">€19,50</span>
@@ -66,7 +66,7 @@ export const BenefitsPage: React.FC = () => {
   </div>
   </div>
 
-  <p className="text-gray-600 mb-6 flex-grow">
+  <p className="text-gray-600 mb-6 flex-grow leading-relaxed">
     1 mês de acesso gratuito à plataforma Kanban+ no plano <strong>Enterprise Transformation</strong>. Inclui FlowMetrics, FlowBoards e modelos de maturidade Evolve.
   </p>
 
@@ -91,14 +91,14 @@ export const BenefitsPage: React.FC = () => {
             <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-brand-orange/10 transition-colors">
               <Ticket className="text-purple-600 w-8 h-8" />
             </div>
-            <div className="min-h-[80px] flex flex-col justify-start">
+            <div className="min-h-[110px] flex flex-col justify-between mb-4">
             <h3 className="text-2xl font-bold mb-4">Masterclass Manuel Pais & Paulo Caroli</h3>
             <div className="flex items-center gap-2 mb-4">
               <span className="line-through text-gray-400 text-lg">€182</span>
     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">163,80€</span>
   </div>
   </div>
-            <p className="text-gray-600 mb-6 flex-grow">
+            <p className="text-gray-600 mb-6 flex-grow leading-relaxed">
               10% de desconto acumulável na Masterclass Combining Team Topologies, Team OKRs & Lean Inception. O evento acontecerá em Lisboa, no dia seguinte ao RSG Lisbon 2026, no dia 22 de Maio de 2026.
             </p>
             <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
