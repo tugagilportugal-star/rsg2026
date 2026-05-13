@@ -591,7 +591,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       if (!res.ok) {
         setInvoiceEmailMsg({ orderId, ok: false, text: json.message || 'Erro desconhecido' });
       } else {
-        setInvoiceEmailMsg({ orderId, ok: true, text: json.hasPdf ? 'Email enviado com PDF!' : 'Email enviado (sem PDF)' });
+        setInvoiceEmailMsg({ orderId, ok: true, text: 'Email com fatura enviado!' });
       }
     } catch (e: any) {
       setInvoiceEmailMsg({ orderId, ok: false, text: e?.message || 'Erro de rede' });
