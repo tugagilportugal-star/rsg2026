@@ -176,6 +176,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
   const [generatingInvoice, setGeneratingInvoice] = useState<string | null>(null);
+  const [sendingInvoiceEmail, setSendingInvoiceEmail] = useState<string | null>(null);
   const [invoiceError, setInvoiceError] = useState<{ orderId: string; msg: string } | null>(null);
   const [invoiceModal, setInvoiceModal] = useState<{
     orderId: string;
@@ -572,6 +573,25 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
     } finally {
       setGeneratingInvoice(null);
+    }
+  }
+
+  async function sendInvoiceEmail(orderId: string) {
+    if (!authHeader) return;
+    setSendingInvoiceEmail(orderId);
+    setInvoiceError(null);
+    try {
+      const res = await fetch('/api/admin/resend-email', {
+        method: 'POST',
+        headers: { Authorization: authHeader, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, type: 'invoice' }),
+      });
+      const json = await res.json();
+      if (!res.ok) setInvoiceError({ orderId, msg: json.message || 'Erro desconhecido' });
+    } catch (e: any) {
+      setInvoiceError({ orderId, msg: e?.message || 'Erro de rede' });
+    } finally {
+      setSendingInvoiceEmail(null);
     }
   }
 
@@ -1932,6 +1952,15 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                       {order.credit_note_id && (
                                         <div className="text-xs text-orange-600 font-medium">NC: {order.credit_note_number || order.credit_note_id}</div>
                                       )}
+                                      {isSuperAdmin && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); sendInvoiceEmail(order.id); }}
+                                          disabled={sendingInvoiceEmail === order.id}
+                                          className="text-xs px-2 py-0.5 rounded border border-sky-500 text-sky-600 hover:bg-sky-50 disabled:opacity-50"
+                                        >
+                                          {sendingInvoiceEmail === order.id ? 'A enviar…' : 'Enviar Email'}
+                                        </button>
+                                      )}
                                     </>
                                   : isSuperAdmin
                                     ? (
@@ -2446,7 +2475,7 @@ export const AdminView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         disabled={resendingEmail !== null}
                         className="w-full py-2 rounded-lg border border-sky-400 text-sky-600 text-sm font-medium hover:bg-sky-50 disabled:opacity-50"
                       >
-                        {resendingEmail === 'invoice' ? 'A enviar…' : '🧾 Reenviar Fatura'}
+                        {resendingEmail === 'invoice' ? 'A enviar…' : '🧾 Enviar Fatura'}
                       </button>
                     )}
                     {resendMsg && (

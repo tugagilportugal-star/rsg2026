@@ -230,7 +230,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const emailPayload: Parameters<typeof resend.emails.send>[0] = {
       from: 'RSG Lisbon 2026 <rsg@rsglisbon.com>',
       to: order.customer_email,
-      subject: '[Reenvio] A tua fatura – Regional Scrum Gathering Lisbon 2026',
+      subject: 'A tua fatura – Regional Scrum Gathering Lisbon 2026',
       html: generateInvoiceEmail({
         name: order.customer_name || 'Participante',
         ticketName: ticketLabel,
