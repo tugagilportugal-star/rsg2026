@@ -17,6 +17,10 @@
       "destination": "/volunteermanual.html"
     },
     {
+      "source": "/restaurants",
+      "destination": "/restaurants.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
