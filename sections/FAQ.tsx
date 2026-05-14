@@ -34,8 +34,8 @@ export const FAQ: React.FC<{ onOpenTicketModal?: () => void }> = () => {
             question: "Existe restaurante no local do evento?",
             answer: (
                 <>
-                    No piso 0 do Auditório Alto dos Moinhos existe uma cafeteria com pratos do dia, ideal para uma refeição rápida sem sair do recinto.
-                    {' '}Para quem preferir explorar a zona, preparámos uma lista de restaurantes a menos de 15 minutos a pé do auditório —{' '}
+                    O Auditório Alto dos Moinhos não dispõe de restaurante ou cafetaria no local.
+                    {' '}Para ajudar no planeamento do almoço, preparámos uma lista de restaurantes a menos de 15 minutos a pé do auditório —{' '}
                     <a href="/restaurants" className="text-brand-orange font-semibold hover:underline">
                         ver guia de restaurantes →
                     </a>

@@ -113,9 +113,9 @@ export const About: React.FC = () => {
                          <Utensils className="w-6 h-6 text-brand-blue" />
                        </div>
                        <div>
-                         <h4 className="font-bold text-xl text-white mb-2">Refeições no Local e à Volta</h4>
+                         <h4 className="font-bold text-xl text-white mb-2">Restaurantes Perto do Evento</h4>
                          <p className="text-blue-100 leading-relaxed text-sm md:text-base">
-                           No piso 0 do auditório existe uma cafeteria com pratos do dia. Para quem quiser explorar a zona, preparámos um{' '}
+                           O auditório não dispõe de restaurante no local. Para ajudar no planeamento do almoço, preparámos um{' '}
                            <a href="/restaurants" className="text-brand-orange font-semibold hover:underline">
                              guia de restaurantes a menos de 15 min a pé →
                            </a>
