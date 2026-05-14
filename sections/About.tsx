@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Zap, Users, Globe, ExternalLink, MapPin, Train, Car } from 'lucide-react';
+import { Sun, Zap, Users, Globe, ExternalLink, MapPin, Train, Car, Utensils } from 'lucide-react';
 import { ASSETS } from '../config';
 
 export const About: React.FC = () => {
@@ -103,6 +103,22 @@ export const About: React.FC = () => {
                          <h4 className="font-bold text-xl text-white mb-2">Estacionamento Facilitado</h4>
                          <p className="text-blue-100 leading-relaxed text-sm md:text-base">
                            Para quem prefere conduzir, a zona envolvente conta com parques e múltiplas áreas de estacionamento de fácil acesso.
+                         </p>
+                       </div>
+                     </div>
+
+                     {/* Vantagem: Restauração */}
+                     <div className="flex items-start gap-5">
+                       <div className="bg-white/10 p-3 rounded-xl border border-white/20 flex-shrink-0 mt-1">
+                         <Utensils className="w-6 h-6 text-brand-blue" />
+                       </div>
+                       <div>
+                         <h4 className="font-bold text-xl text-white mb-2">Restaurantes Perto do Evento</h4>
+                         <p className="text-blue-100 leading-relaxed text-sm md:text-base">
+                           O auditório não dispõe de restaurante no local. Para ajudar no planeamento do almoço, preparámos um{' '}
+                           <a href="/restaurants" className="text-brand-orange font-semibold hover:underline">
+                             guia de restaurantes a menos de 15 min a pé →
+                           </a>
                          </p>
                        </div>
                      </div>

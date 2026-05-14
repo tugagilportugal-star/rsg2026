@@ -9,7 +9,7 @@ export const FAQ: React.FC<{ onOpenTicketModal?: () => void }> = () => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
-    const faqData =[
+    const faqData: { question: string; answer: React.ReactNode }[] =[
         {
             question: "Onde será o evento?",
             answer: "O evento terá lugar no Auditório Alto dos Moinhos, na vibrante cidade de Lisboa. Escolhemos este espaço para unir a energia de um dos maiores ecossistemas tecnológicos da Europa à máxima conveniência para os nossos participantes: tem a Linha Azul do metro literalmente à porta e facilidade de estacionamento nas imediações."
@@ -29,7 +29,19 @@ export const FAQ: React.FC<{ onOpenTicketModal?: () => void }> = () => {
         {
             question: "O evento dispõe de serviço de bengaleiro?",
             answer: "Para garantir a máxima agilidade e segurança de todos os participantes, o evento não dispõe de serviço de bengaleiro. Recomendamos que evite trazer volumes desnecessários ou de grandes dimensões, uma vez que a organização não se responsabiliza por objetos de caráter pessoal ou bens deixados nas áreas comuns do recinto."
-     }
+        },
+        {
+            question: "Existe restaurante no local do evento?",
+            answer: (
+                <>
+                    O Auditório Alto dos Moinhos não dispõe de restaurante ou cafetaria no local.
+                    {' '}Para ajudar no planeamento do almoço, preparámos uma lista de restaurantes a menos de 15 minutos a pé do auditório —{' '}
+                    <a href="/restaurants" className="text-brand-orange font-semibold hover:underline">
+                        ver guia de restaurantes →
+                    </a>
+                </>
+            )
+        }
     ];
 
     return (
