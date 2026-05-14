@@ -70,11 +70,12 @@ export const BenefitsPage: React.FC = () => {
     1 mês de acesso gratuito à plataforma Kanban+ no plano <strong>Enterprise Transformation</strong>. Inclui FlowMetrics, FlowBoards e modelos de maturidade Evolve.
   </p>
 
-  <div className="bg-brand-orange/5 border border-brand-orange/20 p-4 rounded-xl mb-6">
-    <p className="text-sm text-gray-800 font-medium text-center italic leading-relaxed">
-      "O código de acesso será informado durante o evento. Esteja atento(a)!"
+  <div className="bg-gray-50 p-4 rounded-xl mb-6 text-sm">
+    <p className="font-bold text-gray-500 uppercase text-[10px] mb-1 tracking-wider">Como ativar:</p>
+    <p className="text-gray-700 leading-tight">
+       Regista-te em <strong>kanban.plus</strong> clica em "Personal Account", depois em "Profile" e então em "Subscriptions". Utiliza o cupão <strong>LEADDIFFERENT30</strong> para ativar o teu mês gratuito. 
     </p>
-  </div>
+ </div>
 
   <a 
     href="https://kanban.plus/" 
