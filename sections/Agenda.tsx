@@ -39,6 +39,8 @@ interface AgendaSlot {
   keynoteType?: 'Opening' | 'Closing';
   language?: string;
   bios?: SpeakerBio[];
+  link?: string;
+  linkLabel?: string;
 }
 
 export const AgendaPage: React.FC = () => {
@@ -103,7 +105,7 @@ export const AgendaPage: React.FC = () => {
         { name: "Ricardo Fernandes", bio: "Leadership & Team Coach and Founder of Growing Centuries, helping organizations improve focus and decision-making in complex environments. With 15+ years of experience in companies like Nokia, Mercedes-Benz.io and Tekever, he focuses on execution and communication in technical teams." }
       ]
     },
-    { time: "13:00", endTime: "14:20", title: "🍴 Almoço", type: 'event' }, 
+    { time: "13:00", endTime: "14:20", title: "🍴 Almoço", type: 'event', link: '/restaurants', linkLabel: '🗺 Onde comer?' },
     { time: "14:20", endTime: "14:30", title: "☕ Coffee & Networking", type: 'event' },
     {
       time: "14:35", endTime: "15:05", title: "Satisficing: How to Succeed at Scale", 
@@ -218,6 +220,15 @@ export const AgendaPage: React.FC = () => {
                         <LanguageBadge language={slot.language} />
                       </div>
                       <h3 className="text-lg font-bold leading-tight mb-1">{slot.title}</h3>
+                      {slot.link && (
+                        <a
+                          href={slot.link}
+                          onClick={e => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-orange hover:underline mt-0.5"
+                        >
+                          {slot.linkLabel || slot.link} →
+                        </a>
+                      )}
                       {slot.speaker && (
                         <p className={`text-xs font-bold uppercase tracking-wider ${slot.type === 'talk' ? 'text-brand-orange' : 'text-gray-500'}`}>
                           {Array.isArray(slot.speaker) ? slot.speaker.join(' & ') : slot.speaker}
