@@ -39,9 +39,9 @@ export const Team: React.FC = () => {
       linkedin: "https://www.linkedin.com/in/cristiane-mendes-alves-pmp%C2%AE-psm-i-psk-i-okrcp-5a243b4/"
     },
     {
-      name: "Alex Seles",
-      image: "/assets/Alex.png",
-      linkedin: "https://www.linkedin.com/in/alex-seles/"
+      name: "Priscila Rodrigues",
+      image: "/assets/Priscila.jpg",
+      linkedin: "#"
     },
    {
       name: "Matheus Haddad",
