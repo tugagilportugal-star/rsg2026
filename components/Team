@@ -37,8 +37,8 @@ export const Team: React.FC = () => {
       linkedin: "#"
     },
     {
-      name: "Alex Seles",
-      image: "https://ui-avatars.com/api/?name=Alex+Seles&background=003F59&color=fff&size=400",
+      name: "Priscila Rodrigues",
+      image: "https://ui-avatars.com/api/?name=Priscila+Rodrigues&background=003F59&color=fff&size=400",
       linkedin: "#"
     }
   ];
