@@ -38,16 +38,16 @@ export const Team: React.FC = () => {
       image: "/assets/Cristiane.png",
       linkedin: "https://www.linkedin.com/in/cristiane-mendes-alves-pmp%C2%AE-psm-i-psk-i-okrcp-5a243b4/"
     },
+   {
+      name: "Matheus Haddad",
+      image: "/assets/Matheus.png",
+      linkedin: "https://www.linkedin.com/in/matheushaddad/"
+    },
     {
       name: "Priscila Rodrigues",
       image: "/assets/Priscila.jpg",
       linkedin: "https://www.linkedin.com/in/pritperes"
     },
-   {
-      name: "Matheus Haddad",
-      image: "/assets/Matheus.png",
-      linkedin: "https://www.linkedin.com/in/matheushaddad/"
-    }
   ];
 
   return (
