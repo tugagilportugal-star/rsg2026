@@ -8,7 +8,6 @@ import { Sponsors } from './sections/Sponsors';
 import { Speakers } from './sections/Speakers';
 import { GetInvolved } from './sections/GetInvolved';
 import { Recap } from './sections/Recap';
-import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
 import { NextEvent } from './sections/NextEvent';
@@ -29,7 +28,6 @@ const HomePage: React.FC = () => (
     <Recap />
     <Sponsors />
     <GetInvolved />
-    <FAQ />
     <Team />
   </main>
 );
