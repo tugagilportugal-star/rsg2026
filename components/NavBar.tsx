@@ -35,7 +35,6 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { label: 'O EVENTO', href: '/#about' },
-    { label: 'EXPERIÊNCIA', href: '/#features' },
     { label: 'PROGRAMA', href: '/#program' },
     { label: 'SPEAKERS', href: '/#speakers' },
     { label: 'AGENDA', href: '/agenda', isRoute: true },
