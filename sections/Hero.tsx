@@ -3,11 +3,7 @@ import { useCountdown } from '../hooks/useCountdown';
 import { MapPin, Calendar, ArrowDown } from 'lucide-react';
 import { ASSETS } from '../config';
 
-interface HeroProps {
-  onOpenTicketModal?: () => void;
-}
-
-export const Hero: React.FC<HeroProps> = ({ onOpenTicketModal }) => {
+export const Hero: React.FC = () => {
   const timeLeft = useCountdown('2026-05-21T08:30:00+01:00');
 
   const scrollToPriorityList = () => {

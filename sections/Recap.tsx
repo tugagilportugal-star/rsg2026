@@ -3,7 +3,7 @@ import { Section } from '../components/UIComponents';
 import { Star, Play, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import { ASSETS } from '../config';
 
-export const Recap: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
+export const Recap: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);

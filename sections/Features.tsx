@@ -2,7 +2,7 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { Globe2, Mic, Users, Coffee, Rocket, Heart, BrainCircuit } from 'lucide-react';
 
-export const Features: React.FC<{ onOpenTicketModal: () => void }> = ({ onOpenTicketModal }) => {
+export const Features: React.FC = () => {
   const features = [
     { 
         icon: <Globe2 className="w-8 h-8 text-white" />, 

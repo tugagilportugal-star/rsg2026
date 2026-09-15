@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Section } from '../components/UIComponents';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-export const FAQ: React.FC<{ onOpenTicketModal?: () => void }> = () => {
+export const FAQ: React.FC = () => {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const toggleAccordion = (index: number) => {
