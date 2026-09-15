@@ -6,10 +6,6 @@ import { ASSETS } from '../config';
 export const Hero: React.FC = () => {
   const timeLeft = useCountdown('2026-05-21T08:30:00+01:00');
 
-  const scrollToPriorityList = () => {
-    document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <section 
       id="hero" 
@@ -82,15 +78,12 @@ export const Hero: React.FC = () => {
           </div>
         </div>
 
-        {/* NOVO BOTÃO SOLD OUT - Estilo Vermelho Impactante */}
-        <button 
-          onClick={scrollToPriorityList}
-          className="px-10 py-5 bg-red-600 text-white font-black text-xl md:text-2xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(220,38,38,0.4)] hover:bg-red-700 hover:scale-105 active:scale-95 transition-all duration-300 border-4 border-white/20 mb-24 flex items-center gap-3"
-        >
-          <span>🎫</span>
-          SOLD OUT! Bilhetes Esgotados
-          <span className="hidden md:inline">🎫</span>
-        </button>
+        {/* SELO DE ENCERRAMENTO - Edição concluída com sucesso */}
+        <div className="px-10 py-5 bg-brand-orange text-white font-black text-xl md:text-2xl uppercase tracking-widest rounded-full shadow-[0_20px_40px_rgba(244,122,32,0.4)] border-4 border-white/20 mb-24 flex items-center gap-3">
+          <span>🎉</span>
+          Mais uma vez, foi ÉPICO! Missão cumprida.
+          <span className="hidden md:inline">🎉</span>
+        </div>
       </div>
       
       <div className="absolute bottom-10 animate-bounce text-white/30 hidden md:block">

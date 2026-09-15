@@ -1,7 +1,6 @@
 import React from 'react';
 import { Section } from '../components/UIComponents';
 import { ASSETS } from '../config';
-import { Download } from 'lucide-react';
 
 interface Sponsor {
   name: string;
@@ -13,8 +12,6 @@ interface Sponsor {
 }
 
 export const Sponsors: React.FC = () => {
-  const MEDIA_KIT_URL = "https://drive.google.com/file/d/162ktlhFkYjvE90nH3ZAiW_kLQGrdI04o/view?usp=sharing";
-
   // --- LISTAS DE PATROCINADORES ---
   const goldSponsors: Sponsor[] = [];
   const silverSponsors: Sponsor[] = [];
@@ -130,23 +127,6 @@ export const Sponsors: React.FC = () => {
                   />
                 </a>
               ))}
-            </div>
-        </div>
-
-        {/* SEPARADOR E OPORTUNIDADES */}
-        <div className="mb-16 relative">
-            <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-gray-200"></div></div>
-            <div className="relative flex justify-center"><span className="px-6 bg-white text-lg text-gray-500 font-medium">Oportunidades</span></div>
-        </div>
-
-        <div className="p-8 md:p-12 bg-gradient-to-br from-brand-darkBlue to-brand-blue rounded-3xl shadow-2xl text-white max-w-5xl mx-auto relative overflow-hidden">
-            <div className="relative z-10 flex flex-col items-center">
-                <h3 className="text-3xl md:text-4xl font-black mb-6 uppercase tracking-tighter text-center">Quer a sua empresa aqui?</h3>
-                <p className="text-xl md:text-2xl text-blue-100 mb-8 font-light max-w-3xl mx-auto text-center">Junte-se a nós e conecte a sua empresa a <span className="font-bold text-white">líderes e praticantes de agilidade</span> em Portugal.</p>
-                <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors border-b border-blue-200/30 hover:border-white pb-1 group">
-                    <Download className="w-5 h-5 group-hover:animate-bounce" />
-                    <span className="font-medium">Consulte o nosso Media Kit e descubra as vantagens de ser parceiro</span>
-                </a>
             </div>
         </div>
       </div>

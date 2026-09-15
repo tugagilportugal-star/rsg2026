@@ -3,9 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/NavBar';
 import { Hero } from './sections/Hero';
 import { About } from './sections/About';
-import { Features } from './sections/Features';
 import { Program } from './sections/Program';
-import { WhyAttend } from './sections/WhyAttend';
 import { Sponsors } from './sections/Sponsors';
 import { Speakers } from './sections/Speakers';
 import { GetInvolved } from './sections/GetInvolved';
@@ -13,6 +11,7 @@ import { Recap } from './sections/Recap';
 import { FAQ } from './sections/FAQ';
 import { Footer } from './sections/Footer';
 import { Team } from './sections/Team';
+import { NextEvent } from './sections/NextEvent';
 import { AdminView } from './components/AdminView';
 import { Settings } from 'lucide-react';
 import { TicketStatusProvider } from './hooks/useTicketStatus';
@@ -24,10 +23,9 @@ const HomePage: React.FC = () => (
   <main>
     <Hero />
     <About />
-    <Features />
     <Program />
-    <WhyAttend />
     <Speakers />
+    <NextEvent />
     <Recap />
     <Sponsors />
     <GetInvolved />
