@@ -3,10 +3,6 @@ import { Section } from '../components/UIComponents';
 import { ASSETS } from '../config';
 import { Download } from 'lucide-react';
 
-interface SponsorsProps {
-    onOpenSponsorModal?: () => void;
-}
-
 interface Sponsor {
   name: string;
   logo: string;
@@ -16,7 +12,7 @@ interface Sponsor {
   logoClass?: string; 
 }
 
-export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
+export const Sponsors: React.FC = () => {
   const MEDIA_KIT_URL = "https://drive.google.com/file/d/162ktlhFkYjvE90nH3ZAiW_kLQGrdI04o/view?usp=sharing";
 
   // --- LISTAS DE PATROCINADORES ---
@@ -147,15 +143,10 @@ export const Sponsors: React.FC<SponsorsProps> = ({ onOpenSponsorModal }) => {
             <div className="relative z-10 flex flex-col items-center">
                 <h3 className="text-3xl md:text-4xl font-black mb-6 uppercase tracking-tighter text-center">Quer a sua empresa aqui?</h3>
                 <p className="text-xl md:text-2xl text-blue-100 mb-8 font-light max-w-3xl mx-auto text-center">Junte-se a nós e conecte a sua empresa a <span className="font-bold text-white">líderes e praticantes de agilidade</span> em Portugal.</p>
-                <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors mb-10 border-b border-blue-200/30 hover:border-white pb-1 group">
+                <a href={MEDIA_KIT_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors border-b border-blue-200/30 hover:border-white pb-1 group">
                     <Download className="w-5 h-5 group-hover:animate-bounce" />
                     <span className="font-medium">Consulte o nosso Media Kit e descubra as vantagens de ser parceiro</span>
                 </a>
-                {onOpenSponsorModal && (
-                  <button onClick={onOpenSponsorModal} className="px-10 py-4 bg-brand-orange hover:bg-white hover:text-brand-orange text-white text-lg md:text-xl font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                      Torne-se um Patrocinador do RSG Lisbon 2026
-                  </button>
-                )}
             </div>
         </div>
       </div>
