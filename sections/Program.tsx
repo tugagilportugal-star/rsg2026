@@ -2,11 +2,7 @@ import React from 'react';
 import { Section } from '../components/UIComponents';
 import { ArrowRight } from 'lucide-react';
 
-interface ProgramProps {
-  onOpenTicketModal: () => void;
-}
-
-export const Program: React.FC<ProgramProps> = ({ onOpenTicketModal }) => {
+export const Program: React.FC = () => {
   const dimensions =[
     {
       id: "01",
