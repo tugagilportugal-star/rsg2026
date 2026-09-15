@@ -39,7 +39,6 @@ export const Navbar: React.FC = () => {
     { label: 'SPEAKERS', href: '/#speakers' },
     { label: 'AGENDA', href: '/agenda', isRoute: true },
     { label: 'RECAP 2025', href: '/#recap' },
-    { label: 'FAQ', href: '/#faq' },
   ];
 
   return (
