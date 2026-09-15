@@ -25,12 +25,12 @@ const HomePage: React.FC = () => (
     <About />
     <Program />
     <Speakers />
+    <NextEvent />
     <Recap />
     <Sponsors />
     <GetInvolved />
     <FAQ />
     <Team />
-    <NextEvent />
   </main>
 );
 
